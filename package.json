@@ -16,6 +16,7 @@
     "test:app": "vitest run"
   },
   "dependencies": {
+    "@anyfile/data-viewer": "*",
     "@anyfile/excel-viewer": "*",
     "@anyfile/pdf-viewer": "*",
     "@anyfile/viewer-protocol": "*",

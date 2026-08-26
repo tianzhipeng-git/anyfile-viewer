@@ -1,0 +1,4 @@
+id,name,department,active,joined_at
+1,Ada Lovelace,Research,true,1843-01-01
+2,Grace Hopper,Engineering,true,1944-07-01
+3,Edsger Dijkstra,Research,false,1959-06-01
