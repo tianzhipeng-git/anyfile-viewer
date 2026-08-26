@@ -128,6 +128,9 @@
     @apply bg-background text-foreground;
     letter-spacing: -0.01em;
   }
+  body:has(.viewer-page) > footer {
+    display: none;
+  }
   html {
     @apply font-sans;
     scroll-behavior: smooth;

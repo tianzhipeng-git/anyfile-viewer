@@ -1,3 +1,4 @@
+import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import {
@@ -6,6 +7,13 @@ import {
 } from "@anyfile/viewer-protocol";
 
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
+  {
+    manifest: codeManifest,
+    async load() {
+      const viewerPackage = await import("@anyfile/code-viewer");
+      return viewerPackage.codeViewer;
+    },
+  },
   {
     manifest: pdfManifest,
     async load() {

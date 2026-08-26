@@ -155,7 +155,7 @@ export function FileWorkspace() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-4">
       {error && (
         <Alert variant="destructive">
           <AlertCircleIcon />
@@ -164,7 +164,7 @@ export function FileWorkspace() {
         </Alert>
       )}
       <div
-        className="grid min-h-[680px] overflow-hidden rounded-2xl bg-background ring-1 ring-foreground/10 lg:grid-cols-[300px_1fr]"
+        className="grid min-h-0 flex-1 overflow-hidden bg-background lg:grid-cols-[300px_1fr]"
         onDragOver={(event) => event.preventDefault()}
         onDrop={(event) => {
           event.preventDefault();

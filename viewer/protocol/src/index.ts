@@ -3,6 +3,7 @@ export const VIEWER_PROTOCOL_VERSION = 1 as const;
 export interface SupportedFormat {
   readonly name: string;
   readonly extensions: readonly string[];
+  readonly fileNames?: readonly string[];
   readonly mimeTypes?: readonly string[];
 }
 
@@ -89,8 +90,13 @@ export function validateManifest(manifest: ViewerPluginManifest): void {
   }
 
   for (const format of manifest.formats) {
-    if (!format.name.trim() || format.extensions.length === 0) {
+    if (!format.name.trim() || (format.extensions.length === 0 && !format.fileNames?.length)) {
       throw new ViewerError("open-failed", `查看器 “${manifest.id}” 包含空格式声明。`);
+    }
+    for (const fileName of format.fileNames ?? []) {
+      if (!fileName.trim() || fileName.includes("/") || fileName.includes("\\")) {
+        throw new ViewerError("open-failed", `查看器 “${manifest.id}” 包含不合法的文件名声明。`);
+      }
     }
     for (const extension of format.extensions) {
       const invalidExtension = extension !== "*" && (
@@ -123,11 +129,10 @@ export function findViewerRegistrations(
   registrations: readonly ViewerPluginRegistration[],
 ): ViewerPluginRegistration[] {
   const normalizedName = fileName.toLowerCase();
-  return registrations.filter(({ manifest }) =>
-    manifest.formats.some(({ extensions }) =>
-      extensions.some((extension) => extension === "*" || normalizedName.endsWith(extension)),
-    ),
-  );
+  return registrations.filter(({ manifest }) => manifest.formats.some(({ extensions, fileNames }) =>
+    extensions.some((extension) => extension === "*" || normalizedName.endsWith(extension)) ||
+    fileNames?.some((fileName) => normalizedName === fileName.toLowerCase()),
+  ));
 }
 
 export function validateLoadedPlugin(

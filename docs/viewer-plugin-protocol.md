@@ -106,6 +106,7 @@ export interface ViewerPluginManifest {
 export interface SupportedFormat {
   readonly name: string
   readonly extensions: readonly string[]
+  readonly fileNames?: readonly string[]
   readonly mimeTypes?: readonly string[]
 }
 ```

@@ -1,0 +1,18 @@
+export type AceMode =
+  | "abap" | "assembly_x86" | "astro" | "autohotkey" | "basic" | "batchfile" | "c_cpp" | "clojure" | "coffee" | "csharp" | "css" | "csv" | "dart" | "diff" | "dockerfile" | "ejs" | "elm" | "elixir" | "erlang" | "fsharp" | "gherkin" | "gitignore" | "glsl" | "golang" | "graphqlschema" | "groovy" | "haml" | "handlebars" | "haskell" | "haxe" | "hjson" | "html" | "ini" | "java" | "javascript" | "json" | "json5" | "jsx" | "julia" | "kotlin" | "latex" | "less" | "liquid" | "lisp" | "logiql" | "lua" | "makefile" | "markdown" | "matlab" | "mysql" | "nginx" | "nim" | "nix" | "objectivec" | "ocaml" | "pascal" | "perl" | "php" | "plain_text" | "plsql" | "powershell" | "protobuf" | "python" | "r" | "raku" | "razor" | "ruby" | "rust" | "sass" | "scala" | "scheme" | "scss" | "sh" | "slim" | "sql" | "sqlserver" | "stylus" | "svg" | "swift" | "tcl" | "terraform" | "tex" | "textile" | "toml" | "tsv" | "tsx" | "typescript" | "twig" | "vbscript" | "velocity" | "verilog" | "vhdl" | "vue" | "xml" | "xquery" | "yaml" | "zig";
+
+const modeByExtension: Record<string, AceMode> = {
+  ".abap": "abap", ".asm": "assembly_x86", ".astro": "astro", ".au3": "autohotkey", ".awk": "sh", ".bas": "basic", ".bat": "batchfile", ".c": "c_cpp", ".cc": "c_cpp", ".clj": "clojure", ".coffee": "coffee", ".cpp": "c_cpp", ".cs": "csharp", ".css": "css", ".csv": "csv", ".dart": "dart", ".diff": "diff", ".dockerfile": "dockerfile", ".ejs": "ejs", ".elm": "elm", ".ex": "elixir", ".exs": "elixir", ".erl": "erlang", ".fs": "fsharp", ".fsx": "fsharp", ".gcode": "plain_text", ".gherkin": "gherkin", ".gitignore": "gitignore", ".glsl": "glsl", ".go": "golang", ".graphql": "graphqlschema", ".groovy": "groovy", ".h": "c_cpp", ".handlebars": "handlebars", ".hbs": "handlebars", ".hh": "c_cpp", ".hpp": "c_cpp", ".hs": "haskell", ".hxml": "haxe", ".htm": "html", ".html": "html", ".ini": "ini", ".ion": "ion" as AceMode, ".jade": "jade" as AceMode, ".java": "java", ".jl": "julia", ".js": "javascript", ".json": "json", ".json5": "json5", ".jsx": "jsx", ".kt": "kotlin", ".kts": "kotlin", ".less": "less", ".liquid": "liquid", ".lisp": "lisp", ".log": "logiql", ".lua": "lua", ".make": "makefile", ".mak": "makefile", ".md": "markdown", ".markdown": "markdown", ".m": "objectivec", ".mm": "objectivec", ".matlab": "matlab", ".mk": "makefile", ".nim": "nim", ".nix": "nix", ".php": "php", ".pl": "perl", ".pm": "perl", ".prisma": "plain_text", ".proto": "protobuf", ".ps1": "powershell", ".py": "python", ".r": "r", ".raku": "raku", ".rb": "ruby", ".rhtml": "rhtml" as AceMode, ".rs": "rust", ".sass": "sass", ".scala": "scala", ".scss": "scss", ".sh": "sh", ".sql": "sql", ".styl": "stylus", ".svg": "svg", ".swift": "swift", ".tcl": "tcl", ".tex": "tex", ".textile": "textile", ".toml": "toml", ".ts": "typescript", ".tsx": "tsx", ".twig": "twig", ".txt": "plain_text", ".v": "verilog", ".vbs": "vbscript", ".vhd": "vhdl", ".vhdl": "vhdl", ".vue": "vue", ".xml": "xml", ".xq": "xquery", ".xquery": "xquery", ".yaml": "yaml", ".yml": "yaml", ".zig": "zig",
+};
+
+const modeByFileName: Record<string, AceMode> = {
+  "dockerfile": "dockerfile", "makefile": "makefile", "gemfile": "ruby", "rakefile": "ruby", "vagrantfile": "ruby", "procfile": "sh", ".env": "ini", ".editorconfig": "ini", ".prettierrc": "json", ".eslintrc": "json", ".babelrc": "json",
+};
+
+export function modeForFileName(fileName: string): AceMode {
+  const normalized = fileName.toLowerCase();
+  const baseName = normalized.split(/[\\/]/).pop() ?? normalized;
+  if (modeByFileName[baseName]) return modeByFileName[baseName];
+  const extension = baseName.includes(".") ? `.${baseName.split(".").pop()}` : "";
+  return modeByExtension[extension] ?? "plain_text";
+}

@@ -4,8 +4,9 @@
 
 核心约定: 
 - 文件在当前浏览器标签页中读取与预览，不上传到服务器。速度更快, 隐私更好。
-- 只提供查看功能 不提供编辑。
-- 文件使用标准 `<input type="file">`，目录使用 `showDirectoryPicker()`，拖放使用 `getAsFileSystemHandle()`；目录和句柄能力要求兼容的 Chromium 浏览器与 HTTPS/localhost 安全上下文。
+- 只提供查看功能 不提供编辑, 要轻量、快、能打开大文件。
+
+先阅读 核心的["格式查看器插件协议"文档](docs/viewer-plugin-protocol.md)
 
 ## 开发
 
