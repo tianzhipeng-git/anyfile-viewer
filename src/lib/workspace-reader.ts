@@ -25,10 +25,11 @@ function joinPath(base: string, relativePath: string) {
 }
 
 export function createWorkspaceReader(
-  entries: readonly WorkspaceTreeEntry[],
+  rootDirectory: FileSystemDirectoryHandle | undefined,
   currentFile: WorkspaceTreeEntry | undefined,
 ): WorkspaceReader | undefined {
   if (
+    !rootDirectory ||
     currentFile?.kind !== "file" ||
     currentFile.relativePath === undefined ||
     !currentFile.handle
@@ -37,35 +38,54 @@ export function createWorkspaceReader(
   }
 
   const baseDirectory = parentPath(currentFile.relativePath);
-  const entriesByPath = new Map(
-    entries
-      .filter((entry) => entry.relativePath !== undefined)
-      .map((entry) => [entry.relativePath!, entry]),
-  );
+  async function resolveDirectory(path: string, signal?: AbortSignal) {
+    let directory = rootDirectory!;
+    for (const segment of path.split("/").filter(Boolean)) {
+      abortIfRequested(signal);
+      directory = await directory.getDirectoryHandle(segment);
+    }
+    return directory;
+  }
+
+  function isMissingEntry(error: unknown) {
+    return error instanceof DOMException && (error.name === "NotFoundError" || error.name === "TypeMismatchError");
+  }
 
   return {
     async open(relativePath, options) {
       abortIfRequested(options?.signal);
       validateRelativePath(relativePath, false);
-      const entry = entriesByPath.get(joinPath(baseDirectory, relativePath));
-      if (entry?.kind !== "file" || !entry.handle) return null;
-      const file = await entry.handle.getFile();
-      abortIfRequested(options?.signal);
-      return file;
+      const path = joinPath(baseDirectory, relativePath);
+      const segments = path.split("/");
+      const fileName = segments.pop()!;
+      try {
+        const directory = await resolveDirectory(segments.join("/"), options?.signal);
+        const file = await (await directory.getFileHandle(fileName)).getFile();
+        abortIfRequested(options?.signal);
+        return file;
+      } catch (error) {
+        if (isMissingEntry(error)) return null;
+        throw error;
+      }
     },
 
     async *list(relativeDirectory = "", options) {
       abortIfRequested(options?.signal);
       validateRelativePath(relativeDirectory, true);
-      const targetDirectory = joinPath(baseDirectory, relativeDirectory);
-
-      for (const entry of entries) {
+      let directory: FileSystemDirectoryHandle;
+      try {
+        directory = await resolveDirectory(joinPath(baseDirectory, relativeDirectory), options?.signal);
+      } catch (error) {
+        if (isMissingEntry(error)) return;
+        throw error;
+      }
+      for await (const [name, handle] of directory.entries()) {
         abortIfRequested(options?.signal);
-        if (entry.relativePath === undefined || parentPath(entry.relativePath) !== targetDirectory) continue;
-        const relativePath = baseDirectory
-          ? entry.relativePath.slice(baseDirectory.length + 1)
-          : entry.relativePath;
-        yield { name: entry.name, relativePath, kind: entry.kind };
+        yield {
+          name,
+          relativePath: relativeDirectory ? `${relativeDirectory}/${name}` : name,
+          kind: handle.kind,
+        };
       }
     },
   };

@@ -9,7 +9,7 @@ type WorkspaceTreeEntryBase = {
 export type WorkspaceTreeEntry = WorkspaceTreeEntryBase & (
   | { kind: "file"; handle: FileSystemFileHandle; file?: never }
   | { kind: "file"; file: File; handle?: never }
-  | { kind: "directory"; handle: FileSystemDirectoryHandle }
+  | { kind: "directory"; handle: FileSystemDirectoryHandle; childrenLoaded: boolean }
 );
 
 export function browserFileEntries(files: File[]): WorkspaceTreeEntry[] {
@@ -45,7 +45,7 @@ function isFileHandle(handle: FileSystemHandle): handle is FileSystemFileHandle 
 export async function directoryHandleEntries(
   root: FileSystemDirectoryHandle,
 ): Promise<WorkspaceTreeEntry[]> {
-  const result: WorkspaceTreeEntry[] = [{
+  const rootEntry: WorkspaceTreeEntry = {
     id: `directory:${root.name}`,
     name: root.name,
     displayPath: root.name,
@@ -53,22 +53,20 @@ export async function directoryHandleEntries(
     depth: 0,
     kind: "directory",
     handle: root,
-  }];
+    childrenLoaded: true,
+  };
 
-  await walkDirectory(root, root.name, "", 1, result);
-  return result;
+  return [rootEntry, ...await directoryHandleChildren(rootEntry)];
 }
 
-async function walkDirectory(
-  directory: FileSystemDirectoryHandle,
-  rootName: string,
-  parentPath: string,
-  depth: number,
-  result: WorkspaceTreeEntry[],
-) {
+export async function directoryHandleChildren(
+  directory: Extract<WorkspaceTreeEntry, { kind: "directory" }>,
+): Promise<WorkspaceTreeEntry[]> {
   const children: Array<[string, FileSystemHandle]> = [];
+  const result: WorkspaceTreeEntry[] = [];
+  const rootName = directory.displayPath.split("/")[0];
 
-  for await (const child of directory.entries()) {
+  for await (const child of directory.handle.entries()) {
     children.push(child);
   }
 
@@ -78,30 +76,32 @@ async function walkDirectory(
   });
 
   for (const [name, handle] of children) {
-    const relativePath = parentPath ? `${parentPath}/${name}` : name;
+    const relativePath = directory.relativePath ? `${directory.relativePath}/${name}` : name;
     if (isDirectoryHandle(handle)) {
       result.push({
         id: `directory:${rootName}/${relativePath}`,
         name,
         displayPath: `${rootName}/${relativePath}`,
         relativePath,
-        depth,
+        depth: directory.depth + 1,
         kind: "directory",
         handle,
+        childrenLoaded: false,
       });
-      await walkDirectory(handle, rootName, relativePath, depth + 1, result);
     } else if (isFileHandle(handle)) {
       result.push({
         id: `file:${rootName}/${relativePath}`,
         name,
         displayPath: `${rootName}/${relativePath}`,
         relativePath,
-        depth,
+        depth: directory.depth + 1,
         kind: "file",
         handle,
       });
     }
   }
+
+  return result;
 }
 
 export function isAbortError(error: unknown) {

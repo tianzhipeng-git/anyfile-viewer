@@ -16,28 +16,59 @@ function fileEntry(relativePath: string, contents: string): WorkspaceTreeEntry {
   };
 }
 
-function directoryEntry(relativePath: string): WorkspaceTreeEntry {
+type MockTree = { [name: string]: string | MockTree };
+
+function directoryHandle(name: string, tree: MockTree): FileSystemDirectoryHandle {
+  const children = new Map<string, FileSystemHandle>();
+  for (const [childName, child] of Object.entries(tree)) {
+    children.set(
+      childName,
+      typeof child === "string"
+        ? {
+            kind: "file",
+            name: childName,
+            getFile: vi.fn(async () => new File([child], childName)),
+          } as unknown as FileSystemFileHandle
+        : directoryHandle(childName, child),
+    );
+  }
+
+  function missing(): never {
+    throw new DOMException("Not found", "NotFoundError");
+  }
+
   return {
-    id: `directory:${relativePath}`,
-    name: relativePath.split("/").at(-1)!,
-    displayPath: relativePath,
-    relativePath,
-    depth: relativePath.split("/").length,
     kind: "directory",
-    handle: { kind: "directory", name: relativePath } as unknown as FileSystemDirectoryHandle,
-  };
+    name,
+    getDirectoryHandle: vi.fn(async (childName: string) => {
+      const child = children.get(childName);
+      return child?.kind === "directory" ? child as FileSystemDirectoryHandle : missing();
+    }),
+    getFileHandle: vi.fn(async (childName: string) => {
+      const child = children.get(childName);
+      return child?.kind === "file" ? child as FileSystemFileHandle : missing();
+    }),
+    async *entries() {
+      yield* children.entries();
+    },
+  } as unknown as FileSystemDirectoryHandle;
 }
 
 describe("workspace reader", () => {
   const current = fileEntry("models/car/model.obj", "model");
-  const material = fileEntry("models/car/model.mtl", "material");
-  const textures = directoryEntry("models/car/textures");
-  const texture = fileEntry("models/car/textures/base.png", "texture");
-  const outside = fileEntry("models/shared/secret.bin", "secret");
-  const entries = [current, material, textures, texture, outside];
+  const root = directoryHandle("workspace", {
+    models: {
+      car: {
+        "model.obj": "model",
+        "model.mtl": "material",
+        textures: { "base.png": "texture" },
+      },
+      shared: { "secret.bin": "secret" },
+    },
+  });
 
   it("opens files relative to the current file directory", async () => {
-    const reader = createWorkspaceReader(entries, current)!;
+    const reader = createWorkspaceReader(root, current)!;
 
     await expect(reader.open("model.mtl")).resolves.toMatchObject({ name: "model.mtl" });
     await expect(reader.open("textures/base.png")).resolves.toMatchObject({ name: "base.png" });
@@ -45,7 +76,7 @@ describe("workspace reader", () => {
   });
 
   it("rejects absolute paths, backslashes, and traversal", async () => {
-    const reader = createWorkspaceReader(entries, current)!;
+    const reader = createWorkspaceReader(root, current)!;
 
     await expect(reader.open("/etc/passwd")).rejects.toBeInstanceOf(TypeError);
     await expect(reader.open("../shared/secret.bin")).rejects.toBeInstanceOf(TypeError);
@@ -53,7 +84,7 @@ describe("workspace reader", () => {
   });
 
   it("lists direct entries lazily and respects cancellation", async () => {
-    const reader = createWorkspaceReader(entries, current)!;
+    const reader = createWorkspaceReader(root, current)!;
     const listed = [];
     for await (const entry of reader.list()) listed.push(entry);
 
@@ -71,6 +102,6 @@ describe("workspace reader", () => {
   });
 
   it("is unavailable for files not opened from a directory workspace", () => {
-    expect(createWorkspaceReader([current], { ...current, relativePath: undefined })).toBeUndefined();
+    expect(createWorkspaceReader(undefined, { ...current, relativePath: undefined })).toBeUndefined();
   });
 });

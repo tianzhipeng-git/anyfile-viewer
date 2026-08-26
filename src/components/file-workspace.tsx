@@ -25,6 +25,7 @@ import { FileTree } from "@/components/file-tree";
 import { ViewerHost } from "@/components/viewer-host";
 import {
   browserFileEntries,
+  directoryHandleChildren,
   directoryHandleEntries,
   fileHandleEntries,
   isAbortError,
@@ -43,14 +44,15 @@ export function FileWorkspace() {
   const readRequestId = useRef(0);
   const [entries, setEntries] = useState<WorkspaceTreeEntry[]>([]);
   const [workspaceName, setWorkspaceName] = useState("文件");
+  const [rootDirectory, setRootDirectory] = useState<FileSystemDirectoryHandle>();
   const [selectedEntry, setSelectedEntry] = useState<WorkspaceTreeEntry>();
   const [selectedFile, setSelectedFile] = useState<File>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const workspace = useMemo(
-    () => createWorkspaceReader(entries, selectedEntry),
-    [entries, selectedEntry],
+    () => createWorkspaceReader(rootDirectory, selectedEntry),
+    [rootDirectory, selectedEntry],
   );
 
   async function selectEntry(entry: WorkspaceTreeEntry) {
@@ -77,6 +79,7 @@ export function FileWorkspace() {
 
   async function loadFileHandles(handles: FileSystemFileHandle[]) {
     setError("");
+    setRootDirectory(undefined);
     const nextEntries = fileHandleEntries(handles);
     setEntries(nextEntries);
     setWorkspaceName(handles.length === 1 ? handles[0].name : `${handles.length} 个文件`);
@@ -85,6 +88,7 @@ export function FileWorkspace() {
 
   async function loadBrowserFiles(files: File[]) {
     setError("");
+    setRootDirectory(undefined);
     const nextEntries = browserFileEntries(files);
     setEntries(nextEntries);
     setWorkspaceName(files.length === 1 ? files[0].name : `${files.length} 个文件`);
@@ -92,10 +96,14 @@ export function FileWorkspace() {
   }
 
   async function loadDirectoryHandle(handle: FileSystemDirectoryHandle) {
+    readRequestId.current += 1;
+    setSelectedEntry(undefined);
+    setSelectedFile(undefined);
     setBusy(true);
     setError("");
     try {
       const nextEntries = await directoryHandleEntries(handle);
+      setRootDirectory(handle);
       setEntries(nextEntries);
       setWorkspaceName(handle.name);
       const firstFile = nextEntries.find((entry) => entry.kind === "file");
@@ -104,6 +112,27 @@ export function FileWorkspace() {
       setError(directoryError instanceof Error ? directoryError.message : "无法读取所选文件夹。请重新授权后再试。");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function expandDirectory(entry: Extract<WorkspaceTreeEntry, { kind: "directory" }>) {
+    try {
+      const children = await directoryHandleChildren(entry);
+      setEntries((currentEntries) => {
+        const directoryIndex = currentEntries.findIndex(
+          (current) => current.id === entry.id && current.kind === "directory" && current.handle === entry.handle,
+        );
+        if (directoryIndex === -1) return currentEntries;
+        const loadedDirectory = { ...entry, childrenLoaded: true };
+        return [
+          ...currentEntries.slice(0, directoryIndex),
+          loadedDirectory,
+          ...children,
+          ...currentEntries.slice(directoryIndex + 1),
+        ];
+      });
+    } catch (directoryError) {
+      setError(directoryError instanceof Error ? directoryError.message : "无法读取所选文件夹。请重新授权后再试。");
     }
   }
 
@@ -225,6 +254,7 @@ export function FileWorkspace() {
                 entries={entries}
                 selectedId={selectedEntry?.id}
                 onSelect={(entry) => void selectEntry(entry)}
+                onExpand={expandDirectory}
               />
             ) : (
               <Empty>

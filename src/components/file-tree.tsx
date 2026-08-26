@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronRightIcon, FileIcon, FolderIcon, FolderOpenIcon } from "lucide-react";
+import { ChevronRightIcon, FileIcon, FolderIcon, FolderOpenIcon, LoaderCircleIcon } from "lucide-react";
 
 import {
   Collapsible,
@@ -38,11 +38,13 @@ type TreeNodeProps = {
   node: FileTreeNode;
   selectedId?: string;
   onSelect: (entry: WorkspaceTreeEntry) => void;
+  onExpand: (entry: Extract<WorkspaceTreeEntry, { kind: "directory" }>) => Promise<void>;
 };
 
-function TreeNode({ node, selectedId, onSelect }: TreeNodeProps) {
+function TreeNode({ node, selectedId, onSelect, onExpand }: TreeNodeProps) {
   const { entry } = node;
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(entry.depth === 0);
+  const [loading, setLoading] = useState(false);
   const rowClassName = cn(
     "flex w-full items-center gap-2 rounded-lg py-2 pr-3 text-left text-sm transition-colors",
     selectedId === entry.id
@@ -68,17 +70,28 @@ function TreeNode({ node, selectedId, onSelect }: TreeNodeProps) {
   }
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
+    <Collapsible
+      open={open}
+      onOpenChange={(nextOpen) => {
+        setOpen(nextOpen);
+        if (!nextOpen || entry.childrenLoaded || loading) return;
+        setLoading(true);
+        void onExpand(entry).finally(() => setLoading(false));
+      }}
+    >
       <CollapsibleTrigger
         role="treeitem"
         aria-expanded={open}
+        disabled={loading}
         className={rowClassName}
         style={rowStyle}
       >
-        <ChevronRightIcon
-          className={cn("size-4 shrink-0 transition-transform", open && "rotate-90")}
-          aria-hidden="true"
-        />
+        {loading
+          ? <LoaderCircleIcon className="size-4 shrink-0 animate-spin" aria-hidden="true" />
+          : <ChevronRightIcon
+              className={cn("size-4 shrink-0 transition-transform", open && "rotate-90")}
+              aria-hidden="true"
+            />}
         {open
           ? <FolderOpenIcon className="size-4 shrink-0" aria-hidden="true" />
           : <FolderIcon className="size-4 shrink-0" aria-hidden="true" />}
@@ -91,6 +104,7 @@ function TreeNode({ node, selectedId, onSelect }: TreeNodeProps) {
             node={child}
             selectedId={selectedId}
             onSelect={onSelect}
+            onExpand={onExpand}
           />
         ))}
       </CollapsibleContent>
@@ -102,9 +116,10 @@ type FileTreeProps = {
   entries: WorkspaceTreeEntry[];
   selectedId?: string;
   onSelect: (entry: WorkspaceTreeEntry) => void;
+  onExpand: (entry: Extract<WorkspaceTreeEntry, { kind: "directory" }>) => Promise<void>;
 };
 
-export function FileTree({ entries, selectedId, onSelect }: FileTreeProps) {
+export function FileTree({ entries, selectedId, onSelect, onExpand }: FileTreeProps) {
   const nodes = useMemo(() => buildTree(entries), [entries]);
 
   return (
@@ -115,6 +130,7 @@ export function FileTree({ entries, selectedId, onSelect }: FileTreeProps) {
           node={node}
           selectedId={selectedId}
           onSelect={onSelect}
+          onExpand={onExpand}
         />
       ))}
     </div>

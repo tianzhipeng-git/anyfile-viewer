@@ -131,6 +131,13 @@
   body:has(.viewer-page) > footer {
     display: none;
   }
+  body:has(.viewer-page) {
+    height: 100%;
+    overflow: hidden;
+  }
+  body:has(.viewer-page) > main {
+    min-height: 0;
+  }
   html {
     @apply font-sans;
     scroll-behavior: smooth;
