@@ -160,7 +160,7 @@ export function ViewerHost({
                 </EmptyMedia>
                 <EmptyTitle>{visibleStatus === "loading" ? "正在打开文件" : visibleStatus === "error" ? "查看器打开失败" : file ? "没有匹配的查看器" : "选择本地文件"}</EmptyTitle>
                 <EmptyDescription>
-                  {visibleMessage || (file ? `当前没有支持 ${file.name.split(".").pop()?.toLowerCase() || "未知"} 格式的插件。` : "目前支持 PDF、XLSX 与 XLSM，内容只在浏览器本地处理。")}
+                  {visibleMessage || (file ? `当前没有支持 ${file.name.split(".").pop()?.toLowerCase() || "未知"} 格式的插件。` : "选择 PDF、表格、代码、文本或结构化数据文件，内容只在浏览器本地处理。")}
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

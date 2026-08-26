@@ -3,22 +3,12 @@ import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { RecordBatchReader, Table } from "apache-arrow";
 
 import { formatValue } from "./format-value";
+import { createDuckDBRuntime } from "./duckdb-runtime";
 import { findDataFileFormat, type DataFileKind } from "./formats";
 import type { DataPage, DataSession, DataSet } from "./types";
 
 const SOURCE_NAME = "source";
 const MAX_FILE_BYTES = 2 * 1024 * 1024 * 1024;
-
-const DUCKDB_BUNDLES: duckdb.DuckDBBundles = {
-  mvp: {
-    mainModule: new URL("@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm", import.meta.url).toString(),
-    mainWorker: new URL("@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js", import.meta.url).toString(),
-  },
-  eh: {
-    mainModule: new URL("@duckdb/duckdb-wasm/dist/duckdb-eh.wasm", import.meta.url).toString(),
-    mainWorker: new URL("@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js", import.meta.url).toString(),
-  },
-};
 
 type QuerySource = DataSet & { readonly sql: string };
 
@@ -104,14 +94,7 @@ export async function createDuckDBSession(file: File, signal: AbortSignal): Prom
 
   const match = findDataFileFormat(file.name);
   if (!match) throw new Error("Unsupported data file extension");
-  if (match.format.kind === "sqlite") {
-    const { createSQLiteSession } = await import("./sqlite-session");
-    return createSQLiteSession(file, signal);
-  }
-  const bundle = await duckdb.selectBundle(DUCKDB_BUNDLES);
-  if (!bundle.mainWorker) throw new Error("No compatible DuckDB worker bundle");
-  const worker = new Worker(bundle.mainWorker);
-  const database = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), worker);
+  const database = await createDuckDBRuntime(signal);
   let connection: AsyncDuckDBConnection | undefined;
   let disposed = false;
   const dispose = async () => {
@@ -125,7 +108,6 @@ export async function createDuckDBSession(file: File, signal: AbortSignal): Prom
   signal.addEventListener("abort", abort, { once: true });
 
   try {
-    await database.instantiate(bundle.mainModule, bundle.pthreadWorker);
     if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");
     const registeredName = `${SOURCE_NAME}${match.extension}`;
     await database.registerFileHandle(

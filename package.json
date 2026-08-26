@@ -9,16 +9,19 @@
   ],
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && npm run check:bundle",
+    "check:bundle": "node scripts/check-view-bundle.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "npm run test:app && npm test --workspaces --if-present",
     "test:app": "vitest run"
   },
   "dependencies": {
+    "@anyfile/code-viewer": "*",
     "@anyfile/data-viewer": "*",
     "@anyfile/excel-viewer": "*",
     "@anyfile/pdf-viewer": "*",
+    "@anyfile/sqlite-viewer": "*",
     "@anyfile/viewer-protocol": "*",
     "@base-ui/react": "^1.7.0",
     "class-variance-authority": "^0.7.1",

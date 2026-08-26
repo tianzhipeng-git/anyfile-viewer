@@ -65,7 +65,6 @@ describe("DuckDB data viewer", () => {
     ["record-batches.arrow", "arrow", ".arrow"],
     ["legacy.feather", "arrow", ".feather"],
     ["analytics.ddb", "database", ".ddb"],
-    ["application.sqlite3", "sqlite", ".sqlite3"],
   ])("routes %s to the %s reader", (fileName, kind, extension) => {
     expect(findDataFileFormat(fileName)).toMatchObject({ format: { kind }, extension });
   });

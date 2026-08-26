@@ -4,8 +4,7 @@ export type DataFileKind =
   | "json"
   | "parquet"
   | "arrow"
-  | "database"
-  | "sqlite";
+  | "database";
 
 export type DataFileFormat = {
   readonly kind: DataFileKind;
@@ -54,12 +53,6 @@ export const DATA_FILE_FORMATS: readonly DataFileFormat[] = [
     name: "DuckDB 数据库",
     extensions: [".duckdb", ".ddb"],
     mimeTypes: ["application/vnd.duckdb", "application/x-duckdb"],
-  },
-  {
-    kind: "sqlite",
-    name: "SQLite 数据库",
-    extensions: [".sqlite", ".sqlite3", ".db"],
-    mimeTypes: ["application/vnd.sqlite3", "application/x-sqlite3"],
   },
 ];
 

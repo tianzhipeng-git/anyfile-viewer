@@ -1,5 +1,5 @@
 {
-  "name": "@anyfile/data-viewer",
+  "name": "@anyfile/sqlite-viewer",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -12,11 +12,11 @@
   },
   "dependencies": {
     "@anyfile/viewer-protocol": "*",
-    "@duckdb/duckdb-wasm": "1.32.0",
-    "apache-arrow": "17.0.0"
+    "sql.js": "1.14.2"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "*",
+    "@types/sql.js": "1.4.11",
     "happy-dom": "20.11.6",
     "vitest": "4.1.11"
   }

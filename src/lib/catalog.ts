@@ -31,7 +31,7 @@ export const formats: FileFormat[] = [
   { extension: "parquet", name: "Parquet 数据", description: "按需读取列式数据，无需上传或转换。", category: "code-data", native: false },
   { extension: "arrow", name: "Arrow IPC 数据", description: "流式读取 Arrow IPC 与 Feather 列式数据。", category: "code-data", native: false },
   { extension: "duckdb", name: "DuckDB 数据库", description: "浏览数据库中的数据表、列类型与记录。", category: "code-data", native: false },
-  { extension: "sqlite", name: "SQLite 数据库", description: "通过随应用打包的 DuckDB SQLite 扩展浏览数据表。", category: "code-data", native: false },
+  { extension: "sqlite", name: "SQLite 数据库", description: "通过独立的 SQLite Wasm 查看器浏览数据表。", category: "code-data", native: false },
   { extension: "html", name: "HTML 文件", description: "查看网页源码与安全预览。", category: "code-data", native: true },
   { extension: "obj", name: "OBJ 模型", description: "通用三维网格与材质引用格式。", category: "3d", native: false },
   { extension: "gltf", name: "glTF 场景", description: "面向实时渲染的三维传输格式。", category: "3d", native: false },

@@ -1,0 +1,121 @@
+# 查看器加载、渲染与部署约定
+
+本文记录查看器插件在 SSG、SSR、依赖锁定、jsDelivr 和构建体积方面的约定。修改插件注册、依赖或部署配置时，应同时检查本文列出的边界。
+
+## 1. SSG 与 SSR 支持
+
+当前 `/view` 在生产构建中可以静态预渲染。以后即使页面因为读取请求数据、Cookie 等原因改为请求时 SSR，查看器架构也不需要改变。
+
+渲染边界如下：
+
+```text
+Next.js Server Component: src/app/view/page.tsx
+                │
+                ▼
+Client Component: FileWorkspace / ViewerHost
+                │
+                ├── 服务端预渲染时：只读取纯数据 manifest
+                │
+                └── 浏览器选择文件后：registration.load() 动态加载插件实现
+```
+
+必须保持以下规则：
+
+- `manifest.ts` 只能包含纯数据和类型，不得在模块顶层访问 `window`、`document`、`navigator`、`Worker` 或 `WebAssembly`。
+- 网站外壳只能静态导入插件的 `/manifest` 导出；插件实现必须通过注册项中的 `import()` 动态加载。
+- File System Access API、Worker、WASM 和 DOM 操作只能发生在事件处理、effect 或插件的 `open()` 中。
+- 不要从 Server Component、layout、page 或网站外壳静态导入插件根入口。
+- Server Component 传给 Client Component 的 props 必须可序列化；本地 `File` 和 `FileSystemHandle` 只能由浏览器取得并保留在客户端。
+
+遵守这些规则时：
+
+- SSG/SSR 只生成页面外壳，不读取用户文件。
+- 构建和服务端请求不会访问 jsDelivr，也不会初始化 Worker/WASM。
+- 搜索引擎可以索引静态格式页和查看页的基础内容；真实文件预览仍只在浏览器运行。
+
+## 2. 插件级按需加载
+
+`src/lib/viewer-registrations.ts` 是插件加载入口。每个插件由一个轻量 manifest 和一个动态实现组成。
+
+SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 DuckDB 或 Apache Arrow。DuckDB 数据插件处理 CSV、TSV、JSON、Parquet、Arrow 和 DuckDB 数据库，不包含 SQLite 路径。
+
+新增插件时必须：
+
+1. 为 manifest 和实现保留不同的导出路径。
+2. 在注册表中静态导入 manifest、动态导入实现。
+3. 运行 `npm run build`，确认首包体积检查通过。
+
+## 3. DuckDB 的 jsDelivr 与本地回退
+
+DuckDB JavaScript API 由应用自身打包。体积较大的 WASM 与 Worker 按以下顺序加载：
+
+1. 使用 `getJsDelivrBundles()` 取得与已安装包版本一致的官方 jsDelivr URL。
+2. 使用 `selectBundle()` 按浏览器能力选择 MVP 或 EH 版本。
+3. 如果 CDN Worker 获取或 DuckDB 初始化失败，清理失败实例并使用构建产物中的同版本本地资源重试。
+4. 如果本地初始化也失败，才向查看器上层返回错误。
+
+回退只处理引擎加载/初始化失败。文件损坏、格式不支持或查询失败不会触发 CDN 到本地的重复初始化。
+
+由于需要本地回退，部署产物仍会包含 DuckDB WASM 和 Worker。jsDelivr 减少正常流量对本站大文件分发的依赖，但不会缩小构建产物。
+
+项目的 local-first 含义保持不变：用户选择的文件不会上传到 jsDelivr 或应用服务器。jsDelivr 只收到公共 DuckDB 引擎资源的请求。
+
+### 部署头与网络策略
+
+如果部署 CSP，需要至少验证以下来源：
+
+```text
+connect-src 'self' https://cdn.jsdelivr.net
+worker-src 'self' blob:
+```
+
+具体 CSP 应与整站已有策略合并，并在目标浏览器上验证 Worker 和 WASM。完全离线或 CDN 被阻断时会使用本站资源，但应用自身的静态资源仍需可访问或由 Service Worker 缓存。
+
+当前本站回退提供 MVP/EH 单线程资源。如果以后启用 COOP/COEP 和 DuckDB 多线程 COI bundle，需要同步给本地回退增加 COI WASM、主 Worker 和 pthread Worker；SSG/SSR 本身不受这一变化影响。
+
+## 4. 依赖版本锁定
+
+查看器的关键运行时依赖在各插件 `package.json` 中使用精确版本：
+
+| 插件 | 关键依赖 | 版本 |
+|---|---|---:|
+| 代码查看器 | `ace-builds` | `1.44.0` |
+| DuckDB 数据查看器 | `@duckdb/duckdb-wasm` | `1.32.0` |
+| DuckDB 数据查看器 | `apache-arrow` | `17.0.0` |
+| Excel 查看器 | `read-excel-file` | `9.3.10` |
+| SQLite 查看器 | `sql.js` | `1.14.2` |
+
+`package-lock.json` 使用 lockfile v3，锁定其余直接依赖和全部传递依赖的实际版本、下载地址与完整性哈希。根项目中的 `^` 版本不会在 `npm ci` 时漂移。
+
+内部 `@anyfile/*` 依赖使用 `*`，但它们是 npm workspace 链接，解析到当前仓库目录，不会从 registry 获取任意版本。
+
+生产环境和 CI 必须使用：
+
+```bash
+npm ci
+npm test
+npm run build
+```
+
+不要删除或忽略 `package-lock.json`。升级关键依赖时应明确指定目标版本，提交对应 lockfile，并重新验证插件测试、CDN URL、本地回退和生产构建。
+
+## 5. 首包体积门禁
+
+`npm run build` 会在 Next.js 构建后执行 `scripts/check-view-bundle.mjs`：
+
+- 从 `/view` 的预渲染 HTML 读取真实初始脚本列表。
+- 分别计算传输时的 gzip 体积。
+- 当前上限为 225 KiB。
+- 检查 Ace、DuckDB、SQLite 和 Excel 实现标记没有进入初始 JavaScript。
+
+新增或升级插件不应通过提高上限来绕过失败。先检查是否误用了静态导入、顶层副作用或把实现代码放进了 manifest。
+
+## 6. 发布前检查清单
+
+- 使用 `npm ci` 从 lockfile 安装。
+- `npm test`、`npm run lint`、`npm run build` 全部通过。
+- `/view` 仍能完成 SSG 构建；若改为 SSR，服务端日志中没有 CDN、Worker 或 WASM 初始化。
+- 分别打开 SQLite 和 DuckDB 文件，确认只请求对应插件资源。
+- 在正常网络下确认 DuckDB 使用带精确版本号的 jsDelivr URL。
+- 阻断 `cdn.jsdelivr.net` 后确认 DuckDB 可以使用本站资源打开文件。
+- 部署 CSP 后，在 Chrome、Edge、Firefox 和 Safari 的目标版本验证 Worker/WASM。
