@@ -1,0 +1,23 @@
+{
+  "name": "@anyfile/excel-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anyfile/viewer-protocol": "*",
+    "read-excel-file": "9.3.10"
+  },
+  "devDependencies": {
+    "@anyfile/viewer-test": "*",
+    "fflate": "0.8.3",
+    "happy-dom": "20.11.6",
+    "vitest": "4.1.11"
+  }
+}

@@ -2,13 +2,23 @@
   "name": "anyfile-viewer",
   "version": "0.1.0",
   "private": true,
+  "workspaces": [
+    "viewer/protocol",
+    "viewer/testing",
+    "viewer/plugins/*"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "npm run test:app && npm test --workspaces --if-present",
+    "test:app": "vitest run"
   },
   "dependencies": {
+    "@anyfile/excel-viewer": "*",
+    "@anyfile/pdf-viewer": "*",
+    "@anyfile/viewer-protocol": "*",
     "@base-ui/react": "^1.7.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -27,7 +37,9 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
+    "happy-dom": "20.11.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "4.1.11"
   }
 }

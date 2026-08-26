@@ -1,11 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   AlertCircleIcon,
   FileIcon,
-  FileImageIcon,
-  FileTextIcon,
   FolderIcon,
   FolderOpenIcon,
   LockKeyholeIcon,
@@ -16,31 +14,22 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
-  EmptyContent,
   EmptyDescription,
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
+import { ViewerHost } from "@/components/viewer-host";
 import {
+  browserFileEntries,
   directoryHandleEntries,
   fileHandleEntries,
   isAbortError,
   type WorkspaceTreeEntry,
 } from "@/lib/file-system-access";
 import { cn } from "@/lib/utils";
-
-const TEXT_PREVIEW_BYTES = 200_000;
-const textExtensions = new Set(["txt", "md", "json", "csv", "xml", "yaml", "yml", "html", "css", "js", "ts", "tsx", "log"]);
-
-function extensionOf(file: File) {
-  return file.name.split(".").pop()?.toLowerCase() ?? "";
-}
-
-function isTextFile(file: File) {
-  return file.type.startsWith("text/") || textExtensions.has(extensionOf(file));
-}
+import { createWorkspaceReader } from "@/lib/workspace-reader";
 
 function formatBytes(bytes: number) {
   if (bytes < 1024) return `${bytes} B`;
@@ -49,43 +38,32 @@ function formatBytes(bytes: number) {
 }
 
 export function FileWorkspace() {
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const readRequestId = useRef(0);
   const [entries, setEntries] = useState<WorkspaceTreeEntry[]>([]);
   const [workspaceName, setWorkspaceName] = useState("文件");
   const [selectedEntry, setSelectedEntry] = useState<WorkspaceTreeEntry>();
   const [selectedFile, setSelectedFile] = useState<File>();
-  const [textPreview, setTextPreview] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-
-  const previewUrl = useMemo(
-    () => (selectedFile ? URL.createObjectURL(selectedFile) : ""),
-    [selectedFile],
+  const workspace = useMemo(
+    () => createWorkspaceReader(entries, selectedEntry),
+    [entries, selectedEntry],
   );
-
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
 
   async function selectEntry(entry: WorkspaceTreeEntry) {
     if (entry.kind !== "file") return;
     const requestId = ++readRequestId.current;
     setSelectedEntry(entry);
     setSelectedFile(undefined);
-    setTextPreview("");
     setError("");
     setBusy(true);
 
     try {
-      const file = await entry.handle.getFile();
+      const file = entry.file ?? await entry.handle.getFile();
       if (requestId !== readRequestId.current) return;
       setSelectedFile(file);
 
-      if (isTextFile(file)) {
-        const preview = await file.slice(0, TEXT_PREVIEW_BYTES).text();
-        if (requestId !== readRequestId.current) return;
-        setTextPreview(preview);
-      }
     } catch (readError) {
       if (requestId === readRequestId.current) {
         setError(readError instanceof Error ? readError.message : "无法读取所选文件。请重新授权后再试。");
@@ -96,9 +74,18 @@ export function FileWorkspace() {
   }
 
   async function loadFileHandles(handles: FileSystemFileHandle[]) {
+    setError("");
     const nextEntries = fileHandleEntries(handles);
     setEntries(nextEntries);
     setWorkspaceName(handles.length === 1 ? handles[0].name : `${handles.length} 个文件`);
+    if (nextEntries[0]) await selectEntry(nextEntries[0]);
+  }
+
+  async function loadBrowserFiles(files: File[]) {
+    setError("");
+    const nextEntries = browserFileEntries(files);
+    setEntries(nextEntries);
+    setWorkspaceName(files.length === 1 ? files[0].name : `${files.length} 个文件`);
     if (nextEntries[0]) await selectEntry(nextEntries[0]);
   }
 
@@ -127,17 +114,7 @@ export function FileWorkspace() {
   }
 
   async function openFiles() {
-    if (!checkSecureContext()) return;
-    if (typeof window.showOpenFilePicker !== "function") {
-      setError("当前浏览器不支持 showOpenFilePicker()。请使用最新版 Chrome、Edge 或其他兼容的 Chromium 浏览器。");
-      return;
-    }
-    try {
-      const handles = await window.showOpenFilePicker({ id: "anyfile-files", multiple: true });
-      await loadFileHandles(handles);
-    } catch (pickerError) {
-      if (!isAbortError(pickerError)) setError(pickerError instanceof Error ? pickerError.message : "无法打开文件选择器。");
-    }
+    fileInputRef.current?.click();
   }
 
   async function openDirectory() {
@@ -155,12 +132,14 @@ export function FileWorkspace() {
   }
 
   async function acceptDroppedHandles(items: DataTransferItemList) {
-    if (!checkSecureContext()) return;
     const itemList = Array.from(items).filter((item) => item.kind === "file");
     if (!itemList.every((item) => typeof item.getAsFileSystemHandle === "function")) {
-      setError("当前浏览器无法从拖放内容取得 FileSystemHandle，请使用上方的打开按钮。");
+      const files = itemList.map((item) => item.getAsFile()).filter((file): file is File => Boolean(file));
+      if (files.length) await loadBrowserFiles(files);
+      else setError("拖放内容中没有可读取的文件。");
       return;
     }
+    if (!checkSecureContext()) return;
 
     const handles = (await Promise.all(itemList.map((item) => item.getAsFileSystemHandle?.()))).filter(
       (handle): handle is FileSystemHandle => Boolean(handle),
@@ -170,7 +149,9 @@ export function FileWorkspace() {
       await loadDirectoryHandle(directory);
       return;
     }
-    await loadFileHandles(handles.filter((handle): handle is FileSystemFileHandle => handle.kind === "file"));
+    const files = handles.filter((handle): handle is FileSystemFileHandle => handle.kind === "file");
+    if (files.length) await loadFileHandles(files);
+    else setError("拖放内容中没有可读取的文件。");
   }
 
   return (
@@ -200,6 +181,18 @@ export function FileWorkspace() {
           </div>
           <Separator />
           <div className="flex flex-wrap gap-2 p-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              className="sr-only"
+              aria-label="选择本地文件"
+              onChange={(event) => {
+                const files = Array.from(event.currentTarget.files ?? []);
+                event.currentTarget.value = "";
+                if (files.length) void loadBrowserFiles(files);
+              }}
+            />
             <Button size="sm" disabled={busy} onClick={() => void openFiles()}>
               <FileIcon data-icon="inline-start" />
               打开文件
@@ -245,48 +238,14 @@ export function FileWorkspace() {
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <LockKeyholeIcon className="size-4" aria-hidden="true" />
-              FileSystemHandle · 仅读
+              {selectedEntry?.kind === "file" && selectedEntry.handle ? "FileSystemHandle" : "本地文件"} · 仅读
             </div>
           </div>
-          <div className="flex flex-1 items-center justify-center overflow-auto bg-muted/30 p-5 sm:p-8">
-            <Preview file={selectedFile} url={previewUrl} text={textPreview} busy={busy} onOpen={openFiles} />
+          <div className="relative flex flex-1 items-stretch overflow-hidden bg-muted/30">
+            <ViewerHost file={selectedFile} relativePath={selectedEntry?.relativePath} workspace={workspace} />
           </div>
         </section>
       </div>
     </div>
-  );
-}
-
-function Preview({ file, url, text, busy, onOpen }: { file?: File; url: string; text: string; busy: boolean; onOpen: () => Promise<void> }) {
-  if (!file) {
-    return (
-      <Empty>
-        <EmptyHeader>
-          <EmptyMedia variant="icon"><FileImageIcon /></EmptyMedia>
-          <EmptyTitle>{busy ? "正在读取文件句柄…" : "打开本地文件"}</EmptyTitle>
-          <EmptyDescription>通过 File System Access API 授权文件。图片、视频、PDF 和文本可直接预览。</EmptyDescription>
-        </EmptyHeader>
-        <EmptyContent><Button disabled={busy} onClick={() => void onOpen()}>打开文件</Button></EmptyContent>
-      </Empty>
-    );
-  }
-
-  if (file.type.startsWith("image/")) {
-    // The URL references the File snapshot returned by FileSystemFileHandle.getFile().
-    // eslint-disable-next-line @next/next/no-img-element
-    return <img src={url} alt={file.name} className="max-h-[560px] max-w-full object-contain" />;
-  }
-  if (file.type.startsWith("video/")) return <video src={url} controls className="max-h-[560px] max-w-full" />;
-  if (file.type === "application/pdf" || extensionOf(file) === "pdf") return <iframe src={url} title={file.name} className="h-[560px] w-full rounded-lg bg-background" />;
-  if (isTextFile(file)) return <pre className="min-h-full w-full overflow-auto rounded-lg bg-foreground p-5 font-mono text-xs leading-6 text-background">{text || "正在分片读取…"}</pre>;
-
-  return (
-    <Empty>
-      <EmptyHeader>
-        <EmptyMedia variant="icon"><FileTextIcon /></EmptyMedia>
-        <EmptyTitle>已取得只读文件句柄</EmptyTitle>
-        <EmptyDescription>当前尚未接入 .{extensionOf(file) || "未知"} 专用查看器插件，文件内容没有上传。</EmptyDescription>
-      </EmptyHeader>
-    </Empty>
   );
 }

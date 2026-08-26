@@ -7,9 +7,21 @@ type WorkspaceTreeEntryBase = {
 };
 
 export type WorkspaceTreeEntry = WorkspaceTreeEntryBase & (
-  | { kind: "file"; handle: FileSystemFileHandle }
+  | { kind: "file"; handle: FileSystemFileHandle; file?: never }
+  | { kind: "file"; file: File; handle?: never }
   | { kind: "directory"; handle: FileSystemDirectoryHandle }
 );
+
+export function browserFileEntries(files: File[]): WorkspaceTreeEntry[] {
+  return files.map((file, index) => ({
+    id: `browser-file:${index}:${file.name}`,
+    name: file.name,
+    displayPath: file.name,
+    depth: 0,
+    kind: "file",
+    file,
+  }));
+}
 
 export function fileHandleEntries(handles: FileSystemFileHandle[]): WorkspaceTreeEntry[] {
   return handles.map((handle, index) => ({
