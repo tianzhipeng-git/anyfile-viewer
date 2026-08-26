@@ -239,27 +239,31 @@ export function FileWorkspace() {
         </aside>
 
         <section className="flex min-w-0 flex-col">
-          <div className="flex min-h-14 items-center border-b px-4 sm:px-6">
-            <div className="flex min-w-0 items-center gap-2">
-              {!sidebarOpen && (
-                <Button
-                  size="icon-sm"
-                  variant="ghost"
-                  aria-label="展开文件栏"
-                  title="展开文件栏"
-                  onClick={() => setSidebarOpen(true)}
-                >
-                  <PanelLeftOpenIcon />
-                </Button>
-              )}
-              <div className="min-w-0">
-                <p className="truncate text-sm font-semibold">{selectedEntry?.displayPath ?? "预览区"}</p>
-                {selectedFile && <p className="text-xs text-muted-foreground">{formatBytes(selectedFile.size)} · {selectedFile.type || "未知类型"}</p>}
-              </div>
-            </div>
-          </div>
           <div className="relative flex flex-1 items-stretch overflow-hidden bg-muted/30">
-            <ViewerHost file={selectedFile} relativePath={selectedEntry?.relativePath} workspace={workspace} />
+            <ViewerHost
+              file={selectedFile}
+              relativePath={selectedEntry?.relativePath}
+              workspace={workspace}
+              header={(
+                <div className="flex min-w-0 items-center gap-2">
+                  {!sidebarOpen && (
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      aria-label="展开文件栏"
+                      title="展开文件栏"
+                      onClick={() => setSidebarOpen(true)}
+                    >
+                      <PanelLeftOpenIcon />
+                    </Button>
+                  )}
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold">{selectedEntry?.displayPath ?? "预览区"}</p>
+                    {selectedFile && <p className="text-xs text-muted-foreground">{formatBytes(selectedFile.size)} · {selectedFile.type || "未知类型"}</p>}
+                  </div>
+                </div>
+              )}
+            />
           </div>
         </section>
       </div>

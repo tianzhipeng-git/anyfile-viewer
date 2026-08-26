@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { AlertCircleIcon, FileSearchIcon, LoaderCircleIcon } from "lucide-react";
 import {
   ViewerError,
@@ -20,10 +20,12 @@ type ViewerStatus = "idle" | "loading" | "active" | "error";
 
 export function ViewerHost({
   file,
+  header,
   relativePath,
   workspace,
 }: {
   file?: File;
+  header: ReactNode;
   relativePath?: string;
   workspace?: WorkspaceReader;
 }) {
@@ -120,8 +122,9 @@ export function ViewerHost({
 
   return (
     <div className="flex min-h-0 w-full flex-col">
-      {candidates.length > 1 && (
-        <div className="flex items-center justify-end border-b bg-background px-3 py-2">
+      <div className="flex min-h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6">
+        {header}
+        {candidates.length > 1 && (
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
             查看器
             <select
@@ -134,34 +137,36 @@ export function ViewerHost({
               ))}
             </select>
           </label>
-        </div>
-      )}
-      <div
-        ref={containerRef}
-        className="viewer-container min-h-0 flex-1 overflow-auto"
-        style={{
-          "--viewer-background": "var(--background)",
-          "--viewer-foreground": "var(--foreground)",
-          "--viewer-border": "var(--border)",
-          "--viewer-accent": "var(--primary)",
-          "--viewer-font-family": "var(--font-system)",
-        } as React.CSSProperties}
-      />
-      {visibleStatus !== "active" && (
-        <div className="absolute inset-0 grid place-items-center p-6">
-          <Empty>
-            <EmptyHeader>
-              <EmptyMedia variant="icon">
-                {visibleStatus === "loading" ? <LoaderCircleIcon className="animate-spin" /> : visibleStatus === "error" ? <AlertCircleIcon /> : <FileSearchIcon />}
-              </EmptyMedia>
-              <EmptyTitle>{visibleStatus === "loading" ? "正在打开文件" : visibleStatus === "error" ? "查看器打开失败" : file ? "没有匹配的查看器" : "选择本地文件"}</EmptyTitle>
-              <EmptyDescription>
-                {visibleMessage || (file ? `当前没有支持 ${file.name.split(".").pop()?.toLowerCase() || "未知"} 格式的插件。` : "目前支持 PDF、XLSX 与 XLSM，内容只在浏览器本地处理。")}
-              </EmptyDescription>
-            </EmptyHeader>
-          </Empty>
-        </div>
-      )}
+        )}
+      </div>
+      <div className="relative flex min-h-0 flex-1 flex-col">
+        <div
+          ref={containerRef}
+          className="viewer-container min-h-0 flex-1 overflow-auto"
+          style={{
+            "--viewer-background": "var(--background)",
+            "--viewer-foreground": "var(--foreground)",
+            "--viewer-border": "var(--border)",
+            "--viewer-accent": "var(--primary)",
+            "--viewer-font-family": "var(--font-system)",
+          } as React.CSSProperties}
+        />
+        {visibleStatus !== "active" && (
+          <div className="absolute inset-0 grid place-items-center p-6">
+            <Empty>
+              <EmptyHeader>
+                <EmptyMedia variant="icon">
+                  {visibleStatus === "loading" ? <LoaderCircleIcon className="animate-spin" /> : visibleStatus === "error" ? <AlertCircleIcon /> : <FileSearchIcon />}
+                </EmptyMedia>
+                <EmptyTitle>{visibleStatus === "loading" ? "正在打开文件" : visibleStatus === "error" ? "查看器打开失败" : file ? "没有匹配的查看器" : "选择本地文件"}</EmptyTitle>
+                <EmptyDescription>
+                  {visibleMessage || (file ? `当前没有支持 ${file.name.split(".").pop()?.toLowerCase() || "未知"} 格式的插件。` : "目前支持 PDF、XLSX 与 XLSM，内容只在浏览器本地处理。")}
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
