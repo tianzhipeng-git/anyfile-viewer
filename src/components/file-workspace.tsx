@@ -6,7 +6,8 @@ import {
   FileIcon,
   FolderIcon,
   FolderOpenIcon,
-  LockKeyholeIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
 } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -20,6 +21,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
+import { FileTree } from "@/components/file-tree";
 import { ViewerHost } from "@/components/viewer-host";
 import {
   browserFileEntries,
@@ -28,7 +30,6 @@ import {
   isAbortError,
   type WorkspaceTreeEntry,
 } from "@/lib/file-system-access";
-import { cn } from "@/lib/utils";
 import { createWorkspaceReader } from "@/lib/workspace-reader";
 
 function formatBytes(bytes: number) {
@@ -46,6 +47,7 @@ export function FileWorkspace() {
   const [selectedFile, setSelectedFile] = useState<File>();
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const workspace = useMemo(
     () => createWorkspaceReader(entries, selectedEntry),
     [entries, selectedEntry],
@@ -164,20 +166,35 @@ export function FileWorkspace() {
         </Alert>
       )}
       <div
-        className="grid min-h-0 flex-1 overflow-hidden bg-background lg:grid-cols-[300px_1fr]"
+        className={sidebarOpen
+          ? "grid min-h-0 flex-1 overflow-hidden bg-background transition-[grid-template-columns] lg:grid-cols-[300px_minmax(0,1fr)]"
+          : "grid min-h-0 flex-1 overflow-hidden bg-background transition-[grid-template-columns] lg:grid-cols-[0px_minmax(0,1fr)]"}
         onDragOver={(event) => event.preventDefault()}
         onDrop={(event) => {
           event.preventDefault();
           void acceptDroppedHandles(event.dataTransfer.items);
         }}
       >
-        <aside className="flex flex-col bg-muted/70 lg:border-r">
+        <aside className={sidebarOpen
+          ? "flex min-h-0 flex-col overflow-hidden bg-muted/70 lg:border-r"
+          : "hidden min-h-0 flex-col overflow-hidden bg-muted/70 lg:flex"}>
           <div className="flex items-center justify-between gap-3 p-4">
             <div className="flex min-w-0 items-center gap-2 text-sm font-semibold">
               <FolderIcon className="size-4 shrink-0" aria-hidden="true" />
               <span className="truncate">{workspaceName}</span>
             </div>
-            <Badge variant="secondary">{entries.filter((entry) => entry.kind === "file").length}</Badge>
+            <div className="flex shrink-0 items-center gap-1">
+              <Badge variant="secondary">{entries.filter((entry) => entry.kind === "file").length}</Badge>
+              <Button
+                size="icon-sm"
+                variant="ghost"
+                aria-label="收起文件栏"
+                title="收起文件栏"
+                onClick={() => setSidebarOpen(false)}
+              >
+                <PanelLeftCloseIcon />
+              </Button>
+            </div>
           </div>
           <Separator />
           <div className="flex flex-wrap gap-2 p-3">
@@ -202,23 +219,14 @@ export function FileWorkspace() {
               打开文件夹
             </Button>
           </div>
-          <div className="flex flex-1 flex-col gap-1 overflow-auto px-2 pb-3">
-            {entries.length ? entries.map((entry) => (
-              <button
-                key={entry.id}
-                type="button"
-                disabled={entry.kind === "directory"}
-                className={cn(
-                  "flex items-center gap-2 rounded-lg py-2 pr-3 text-left text-sm transition-colors disabled:cursor-default",
-                  selectedEntry?.id === entry.id ? "bg-background text-foreground" : "text-muted-foreground enabled:hover:bg-background/60 enabled:hover:text-foreground",
-                )}
-                style={{ paddingLeft: `${12 + entry.depth * 16}px` }}
-                onClick={() => void selectEntry(entry)}
-              >
-                {entry.kind === "directory" ? <FolderIcon className="size-4 shrink-0" aria-hidden="true" /> : <FileIcon className="size-4 shrink-0" aria-hidden="true" />}
-                <span className="truncate" title={entry.displayPath}>{entry.name}</span>
-              </button>
-            )) : (
+          <div className="min-h-0 flex-1 overflow-auto px-2 pb-3">
+            {entries.length ? (
+              <FileTree
+                entries={entries}
+                selectedId={selectedEntry?.id}
+                onSelect={(entry) => void selectEntry(entry)}
+              />
+            ) : (
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant="icon"><FolderOpenIcon /></EmptyMedia>
@@ -231,14 +239,23 @@ export function FileWorkspace() {
         </aside>
 
         <section className="flex min-w-0 flex-col">
-          <div className="flex min-h-14 items-center justify-between gap-4 border-b px-4 sm:px-6">
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold">{selectedEntry?.displayPath ?? "预览区"}</p>
-              {selectedFile && <p className="text-xs text-muted-foreground">{formatBytes(selectedFile.size)} · {selectedFile.type || "未知类型"}</p>}
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <LockKeyholeIcon className="size-4" aria-hidden="true" />
-              {selectedEntry?.kind === "file" && selectedEntry.handle ? "FileSystemHandle" : "本地文件"} · 仅读
+          <div className="flex min-h-14 items-center border-b px-4 sm:px-6">
+            <div className="flex min-w-0 items-center gap-2">
+              {!sidebarOpen && (
+                <Button
+                  size="icon-sm"
+                  variant="ghost"
+                  aria-label="展开文件栏"
+                  title="展开文件栏"
+                  onClick={() => setSidebarOpen(true)}
+                >
+                  <PanelLeftOpenIcon />
+                </Button>
+              )}
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold">{selectedEntry?.displayPath ?? "预览区"}</p>
+                {selectedFile && <p className="text-xs text-muted-foreground">{formatBytes(selectedFile.size)} · {selectedFile.type || "未知类型"}</p>}
+              </div>
             </div>
           </div>
           <div className="relative flex flex-1 items-stretch overflow-hidden bg-muted/30">
