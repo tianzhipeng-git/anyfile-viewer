@@ -124,15 +124,82 @@ export function validateRegistrations(registrations: readonly ViewerPluginRegist
   }
 }
 
+type ViewerRegistrationIndex = {
+  readonly extensions: Map<string, number[]>;
+  readonly fileNames: Map<string, number[]>;
+  readonly wildcards: number[];
+};
+
+const registrationIndexes = new WeakMap<
+  readonly ViewerPluginRegistration[],
+  ViewerRegistrationIndex
+>();
+
+function addToIndex(index: Map<string, number[]>, key: string, registrationIndex: number): void {
+  const registrations = index.get(key);
+  if (registrations) {
+    registrations.push(registrationIndex);
+  } else {
+    index.set(key, [registrationIndex]);
+  }
+}
+
+function getRegistrationIndex(
+  registrations: readonly ViewerPluginRegistration[],
+): ViewerRegistrationIndex {
+  const cached = registrationIndexes.get(registrations);
+  if (cached) return cached;
+
+  const index: ViewerRegistrationIndex = {
+    extensions: new Map(),
+    fileNames: new Map(),
+    wildcards: [],
+  };
+
+  registrations.forEach(({ manifest }, registrationIndex) => {
+    for (const format of manifest.formats) {
+      for (const extension of format.extensions) {
+        if (extension === "*") {
+          index.wildcards.push(registrationIndex);
+        } else {
+          addToIndex(index.extensions, extension, registrationIndex);
+        }
+      }
+      for (const fileName of format.fileNames ?? []) {
+        addToIndex(index.fileNames, fileName.toLowerCase(), registrationIndex);
+      }
+    }
+  });
+
+  registrationIndexes.set(registrations, index);
+  return index;
+}
+
 export function findViewerRegistrations(
   fileName: string,
   registrations: readonly ViewerPluginRegistration[],
 ): ViewerPluginRegistration[] {
   const normalizedName = fileName.toLowerCase();
-  return registrations.filter(({ manifest }) => manifest.formats.some(({ extensions, fileNames }) =>
-    extensions.some((extension) => extension === "*" || normalizedName.endsWith(extension)) ||
-    fileNames?.some((fileName) => normalizedName === fileName.toLowerCase()),
-  ));
+  const index = getRegistrationIndex(registrations);
+  const matches = new Set(index.wildcards);
+
+  for (const registrationIndex of index.fileNames.get(normalizedName) ?? []) {
+    matches.add(registrationIndex);
+  }
+  for (
+    let dotIndex = normalizedName.indexOf(".");
+    dotIndex !== -1;
+    dotIndex = normalizedName.indexOf(".", dotIndex + 1)
+  ) {
+    const extension = normalizedName.slice(dotIndex);
+    for (const registrationIndex of index.extensions.get(extension) ?? []) {
+      matches.add(registrationIndex);
+    }
+  }
+
+  return [...matches]
+    .sort((left, right) => left - right)
+    .map((registrationIndex) => registrations[registrationIndex]);
 }
 
 export function validateLoadedPlugin(

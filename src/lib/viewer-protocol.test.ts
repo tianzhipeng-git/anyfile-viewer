@@ -12,18 +12,26 @@ import {
   type ViewerPluginRegistration,
 } from "@anyfile/viewer-protocol";
 
-function manifest(id: string, extensions: readonly string[]): ViewerPluginManifest {
+function manifest(
+  id: string,
+  extensions: readonly string[],
+  fileNames?: readonly string[],
+): ViewerPluginManifest {
   return {
     protocolVersion: VIEWER_PROTOCOL_VERSION,
     id,
     name: id,
-    formats: [{ name: id, extensions }],
+    formats: [{ name: id, extensions, fileNames }],
     workspaceAccess: "none",
   };
 }
 
-function registration(id: string, extensions: readonly string[]): ViewerPluginRegistration {
-  const pluginManifest = manifest(id, extensions);
+function registration(
+  id: string,
+  extensions: readonly string[],
+  fileNames?: readonly string[],
+): ViewerPluginRegistration {
+  const pluginManifest = manifest(id, extensions, fileNames);
   return {
     manifest: pluginManifest,
     async load() {
@@ -49,13 +57,23 @@ describe("viewer protocol", () => {
 
   it("matches compound extensions, wildcard viewers, and preserves registration order", () => {
     const registrations = [
-      registration("archive", [".tar.gz"]),
+      registration("archive", [".tar.gz", ".gz"]),
       registration("fallback", ["*"]),
       registration("gzip", [".gz"]),
     ];
 
     expect(findViewerRegistrations("BACKUP.TAR.GZ", registrations).map(({ manifest: item }) => item.id))
       .toEqual(["archive", "fallback", "gzip"]);
+  });
+
+  it("matches exact file names through the registration index", () => {
+    const registrations = [
+      registration("code", [], ["Dockerfile"]),
+      registration("fallback", ["*"]),
+    ];
+
+    expect(findViewerRegistrations("DOCKERFILE", registrations).map(({ manifest: item }) => item.id))
+      .toEqual(["code", "fallback"]);
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {
