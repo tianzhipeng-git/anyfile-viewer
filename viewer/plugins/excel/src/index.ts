@@ -5,10 +5,10 @@ import {
   type OpenViewerContext,
   type ViewerController,
 } from "@anyfile/viewer-protocol";
+import { createPagedTableViewer, type TableViewerPage } from "@anyfile/viewer-ui";
 
 import { excelManifest } from "./manifest";
 import { abortError, readBlob } from "./read-blob";
-import { excelViewerStyles } from "./styles";
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 const MAX_PARSED_CELLS = 1_000_000;
@@ -154,158 +154,65 @@ function parseWorkbook(bytes: ArrayBuffer, resourceMessage: string): Sheet[] {
   });
 }
 
-function renderWorkbook(
-  root: HTMLElement,
+function createWorkbookViewer(
+  fileName: string,
   sheets: Sheet[],
   signal: AbortSignal,
   locale: string,
   copy: ExcelCopy,
 ) {
-  const sheetSelect = root.querySelector<HTMLSelectElement>("[data-sheet]")!;
-  const previousButton = root.querySelector<HTMLButtonElement>("[data-previous]")!;
-  const nextButton = root.querySelector<HTMLButtonElement>("[data-next]")!;
-  const meta = root.querySelector<HTMLElement>("[data-meta]")!;
-  const viewport = root.querySelector<HTMLElement>("[data-viewport]")!;
-  let page = 0;
-
-  sheets.forEach((sheet, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = sheet.sheet;
-    sheetSelect.append(option);
-  });
-
-  const currentSheet = () => sheets[Number(sheetSelect.value)];
-
-  const renderPage = () => {
-    if (signal.aborted) return;
-    const sheet = currentSheet();
-    viewport.replaceChildren();
-    if (!sheet) {
-      const empty = document.createElement("div");
-      empty.className = "anyfile-excel-viewer__empty";
-      empty.textContent = copy.emptyWorkbook;
-      viewport.append(empty);
-      meta.textContent = "0 个工作表";
-      previousButton.disabled = true;
-      nextButton.disabled = true;
-      return;
-    }
-
-    const rowCount = sheet.data.length;
-    const actualColumnCount = sheet.data.reduce((maximum, row) => Math.max(maximum, row.length), 0);
-    const columnCount = Math.min(actualColumnCount, MAX_COLUMNS);
-    const pageCount = Math.max(1, Math.ceil(rowCount / PAGE_SIZE));
-    page = Math.min(page, pageCount - 1);
-    const firstRow = page * PAGE_SIZE + 1;
-    const lastRow = Math.min(rowCount, firstRow + PAGE_SIZE - 1);
-    previousButton.disabled = page === 0;
-    nextButton.disabled = page >= pageCount - 1;
-    meta.textContent = rowCount === 0
-      ? copy.emptySheetMeta(sheet.sheet)
-      : copy.sheetRows(firstRow, lastRow, rowCount, actualColumnCount > MAX_COLUMNS);
-
-    if (rowCount === 0 || columnCount === 0) {
-      const empty = document.createElement("div");
-      empty.className = "anyfile-excel-viewer__empty";
-      empty.textContent = copy.emptySheet;
-      viewport.append(empty);
-      return;
-    }
-
-    const table = document.createElement("table");
-    const head = document.createElement("thead");
-    const headRow = document.createElement("tr");
-    const corner = document.createElement("th");
-    corner.className = "anyfile-excel-viewer__row-number";
-    corner.scope = "col";
-    headRow.append(corner);
-    for (let column = 1; column <= columnCount; column += 1) {
-      const header = document.createElement("th");
-      header.scope = "col";
-      header.textContent = columnLabel(column);
-      headRow.append(header);
-    }
-    head.append(headRow);
-    table.append(head);
-
-    const body = document.createElement("tbody");
-    for (let rowNumber = firstRow; rowNumber <= lastRow; rowNumber += 1) {
-      const rowElement = document.createElement("tr");
-      const rowHeader = document.createElement("th");
-      rowHeader.className = "anyfile-excel-viewer__row-number";
-      rowHeader.scope = "row";
-      rowHeader.textContent = String(rowNumber);
-      rowElement.append(rowHeader);
-      const row = sheet.data[rowNumber - 1];
-      for (let column = 1; column <= columnCount; column += 1) {
-        const cellElement = document.createElement("td");
-        const text = formatCellValue(row[column - 1], locale);
-        cellElement.textContent = text;
-        cellElement.title = text;
-        rowElement.append(cellElement);
+  return createPagedTableViewer({
+    className: "anyfile-excel-viewer",
+    fileName,
+    options: sheets.map((sheet, index) => ({ id: String(index), label: sheet.sheet })),
+    selectorLabel: copy.chooseSheet,
+    selectorDataAttribute: "sheet",
+    previousLabel: copy.previous,
+    nextLabel: copy.next,
+    queryFailedMessage: copy.openFailed,
+    signal,
+    loadPage(sheetId, requestedPage): TableViewerPage {
+      const sheet = sheets[Number(sheetId)];
+      if (!sheet) {
+        return {
+          columns: [],
+          rows: [],
+          rowOffset: 0,
+          hasMore: false,
+          meta: "0",
+          emptyMessage: copy.emptyWorkbook,
+        };
       }
-      body.append(rowElement);
-    }
-    table.append(body);
-    viewport.append(table);
-  };
 
-  const changeSheet = () => {
-    page = 0;
-    renderPage();
-  };
-  const previousPage = () => {
-    page -= 1;
-    renderPage();
-  };
-  const nextPage = () => {
-    page += 1;
-    renderPage();
-  };
-  sheetSelect.addEventListener("change", changeSheet);
-  previousButton.addEventListener("click", previousPage);
-  nextButton.addEventListener("click", nextPage);
-  renderPage();
-
-  return () => {
-    sheetSelect.removeEventListener("change", changeSheet);
-    previousButton.removeEventListener("click", previousPage);
-    nextButton.removeEventListener("click", nextPage);
-  };
-}
-
-function createViewerRoot(fileName: string, copy: ExcelCopy) {
-  const root = document.createElement("div");
-  root.className = "anyfile-excel-viewer";
-  const style = document.createElement("style");
-  style.textContent = excelViewerStyles;
-  const toolbar = document.createElement("div");
-  toolbar.className = "anyfile-excel-viewer__toolbar";
-  const name = document.createElement("strong");
-  name.className = "anyfile-excel-viewer__name";
-  name.textContent = fileName;
-  name.title = fileName;
-  const select = document.createElement("select");
-  select.dataset.sheet = "";
-  select.setAttribute("aria-label", copy.chooseSheet);
-  const previous = document.createElement("button");
-  previous.type = "button";
-  previous.dataset.previous = "";
-  previous.textContent = copy.previous;
-  const next = document.createElement("button");
-  next.type = "button";
-  next.dataset.next = "";
-  next.textContent = copy.next;
-  const meta = document.createElement("span");
-  meta.className = "anyfile-excel-viewer__meta";
-  meta.dataset.meta = "";
-  const viewport = document.createElement("div");
-  viewport.className = "anyfile-excel-viewer__viewport";
-  viewport.dataset.viewport = "";
-  toolbar.append(name, select, previous, next, meta);
-  root.append(style, toolbar, viewport);
-  return root;
+      const rowCount = sheet.data.length;
+      const actualColumnCount = sheet.data.reduce(
+        (maximum, row) => Math.max(maximum, row.length),
+        0,
+      );
+      const columnCount = Math.min(actualColumnCount, MAX_COLUMNS);
+      const pageCount = Math.max(1, Math.ceil(rowCount / PAGE_SIZE));
+      const pageIndex = Math.min(requestedPage, pageCount - 1);
+      const rowOffset = pageIndex * PAGE_SIZE;
+      const rows = sheet.data.slice(rowOffset, rowOffset + PAGE_SIZE).map((row) =>
+        Array.from({ length: columnCount }, (_, index) => formatCellValue(row[index], locale))
+      );
+      return {
+        columns: Array.from({ length: columnCount }, (_, index) => ({ label: columnLabel(index + 1) })),
+        rows,
+        rowOffset,
+        hasMore: rowOffset + rows.length < rowCount,
+        meta: rowCount === 0
+          ? copy.emptySheetMeta(sheet.sheet)
+          : copy.sheetRows(
+              rowOffset + 1,
+              rowOffset + rows.length,
+              rowCount,
+              actualColumnCount > MAX_COLUMNS,
+            ),
+        emptyMessage: copy.emptySheet,
+      };
+    },
+  });
 }
 
 async function openExcel(context: OpenViewerContext): Promise<ViewerController> {
@@ -313,14 +220,12 @@ async function openExcel(context: OpenViewerContext): Promise<ViewerController> 
   const copy = getCopy(context.locale);
   let disposed = false;
   let parsed = false;
-  let removeListeners: (() => void) | undefined;
-  const root = createViewerRoot(file.name, copy);
+  let view: Awaited<ReturnType<typeof createWorkbookViewer>> | undefined;
   const dispose = () => {
     if (disposed) return;
     disposed = true;
     signal.removeEventListener("abort", dispose);
-    removeListeners?.();
-    root.remove();
+    view?.dispose();
   };
 
   try {
@@ -338,8 +243,9 @@ async function openExcel(context: OpenViewerContext): Promise<ViewerController> 
     const sheets = parseWorkbook(bytes, copy.tooLarge);
     if (signal.aborted) throw abortError();
     parsed = true;
-    container.append(root);
-    removeListeners = renderWorkbook(root, sheets, signal, context.locale, copy);
+    view = await createWorkbookViewer(file.name, sheets, signal, context.locale, copy);
+    if (signal.aborted) throw abortError();
+    container.append(view.root);
     signal.addEventListener("abort", dispose, { once: true });
     reportProgress({ stage: "ready", message: copy.ready });
     return { dispose };

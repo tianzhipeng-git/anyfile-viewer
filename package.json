@@ -5,6 +5,7 @@
   "workspaces": [
     "viewer/protocol",
     "viewer/testing",
+    "viewer/ui",
     "viewer/plugins/*"
   ],
   "scripts": {

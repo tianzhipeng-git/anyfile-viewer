@@ -608,6 +608,10 @@ container.innerHTML = untrustedFileContent
 
 Lit、PDF.js、Three.js 等插件专属库不进入公共协议包。
 
+跨插件复用的无框架 UI 放在独立的 `@anyfile/viewer-ui` workspace 包中，而不是放进协议包。当前表格查看器由它统一负责 DOM、分页交互、空态、局部错误、样式和事件清理；各格式插件只负责解析文件并返回列、行和分页元数据。
+
+`viewer-ui` 保持无运行时框架依赖。表格交互的状态量很小，原生 DOM 可以直接满足需求；如果以后出现复杂组件状态、嵌套视图和大量增量更新，再针对该组件评估 Lit，不把 Lit 强制变成所有插件的基础依赖。
+
 ## 18. 协议版本
 
 ```ts

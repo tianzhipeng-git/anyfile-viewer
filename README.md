@@ -35,6 +35,8 @@ npm run dev
 - CSV、JSON、Parquet、Arrow 与 DuckDB
 - 独立的 SQLite（SQLite/SQLite3/DB）插件
 
+`viewer/ui` 是插件共享 UI 层。Excel、DuckDB 数据和 SQLite 查看器复用其中的分页表格渲染器；协议类型仍独立保留在 `viewer/protocol`。
+
 DuckDB 的 WASM 与 Worker 优先从官方 jsDelivr 固定版本资源加载；CDN 初始化失败时自动回退到构建产物中的同版本本地资源。其他格式可按 `viewer-plugin-protocol.md` 继续接入。
 
 ## 验证

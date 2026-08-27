@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@anyfile/viewer-protocol": "*",
+    "@anyfile/viewer-ui": "*",
     "sql.js": "1.14.2"
   },
   "devDependencies": {

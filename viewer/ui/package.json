@@ -1,0 +1,16 @@
+{
+  "name": "@anyfile/viewer-ui",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "happy-dom": "20.11.6",
+    "vitest": "4.1.11"
+  }
+}
