@@ -1,8 +1,4 @@
-import readExcelFile, {
-  InvalidInputError,
-  InvalidSpreadsheetError,
-  type Sheet,
-} from "read-excel-file/browser";
+import { read, utils, type WorkBook, type WorkSheet } from "xlsx";
 import {
   ViewerError,
   type FileViewerPlugin,
@@ -19,6 +15,27 @@ const MAX_PARSED_CELLS = 1_000_000;
 const MAX_WORKSHEETS = 100;
 const MAX_COLUMNS = 200;
 const PAGE_SIZE = 100;
+const ZIP_BASED_EXTENSIONS = [".xlsx", ".xlsm", ".xlsb", ".ods", ".numbers"];
+
+type Sheet = {
+  sheet: string;
+  data: unknown[][];
+};
+
+function hasZipSignature(bytes: ArrayBuffer) {
+  if (bytes.byteLength < 4) return false;
+  const signature = new Uint8Array(bytes, 0, 4);
+  return signature[0] === 0x50 && signature[1] === 0x4b && (
+    (signature[2] === 0x03 && signature[3] === 0x04) ||
+    (signature[2] === 0x05 && signature[3] === 0x06) ||
+    (signature[2] === 0x07 && signature[3] === 0x08)
+  );
+}
+
+function requiresZipContainer(fileName: string) {
+  const normalizedName = fileName.toLowerCase();
+  return ZIP_BASED_EXTENSIONS.some((extension) => normalizedName.endsWith(extension));
+}
 
 type ExcelCopy = {
   chooseSheet: string;
@@ -88,6 +105,53 @@ function formatCellValue(value: unknown, locale: string) {
   if (value === null || value === undefined) return "";
   if (value instanceof Date) return value.toLocaleString(locale);
   return String(value);
+}
+
+function parseSheet(sheet: WorkSheet, name: string, remainingCells: number, resourceMessage: string): Sheet {
+  if (!sheet["!ref"]) return { sheet: name, data: [] };
+  const sourceRange = utils.decode_range(sheet["!ref"]);
+  const lastColumn = Math.min(sourceRange.e.c, MAX_COLUMNS - 1);
+  const rowCount = sourceRange.e.r + 1;
+  const columnCount = lastColumn + 1;
+  if (rowCount * columnCount > remainingCells) {
+    throw new ViewerError("resource-limit", resourceMessage);
+  }
+
+  const data = utils.sheet_to_json<unknown[]>(sheet, {
+    header: 1,
+    raw: false,
+    defval: null,
+    blankrows: true,
+    range: { s: { r: 0, c: 0 }, e: { r: sourceRange.e.r, c: lastColumn } },
+  });
+  return { sheet: name, data };
+}
+
+function parseWorkbook(bytes: ArrayBuffer, resourceMessage: string): Sheet[] {
+  const workbook: WorkBook = read(bytes, {
+    type: "array",
+    dense: true,
+    cellFormula: false,
+    cellHTML: false,
+    cellStyles: false,
+    cellText: true,
+    sheetRows: MAX_PARSED_CELLS + 1,
+  });
+  if (workbook.SheetNames.length > MAX_WORKSHEETS) {
+    throw new ViewerError("resource-limit", resourceMessage);
+  }
+
+  let parsedCells = 0;
+  return workbook.SheetNames.map((name) => {
+    const sheet = parseSheet(
+      workbook.Sheets[name],
+      name,
+      MAX_PARSED_CELLS - parsedCells,
+      resourceMessage,
+    );
+    parsedCells += sheet.data.reduce((total, row) => total + row.length, 0);
+    return sheet;
+  });
 }
 
 function renderWorkbook(
@@ -248,6 +312,7 @@ async function openExcel(context: OpenViewerContext): Promise<ViewerController> 
   const { container, file, reportProgress, signal } = context;
   const copy = getCopy(context.locale);
   let disposed = false;
+  let parsed = false;
   let removeListeners: (() => void) | undefined;
   const root = createViewerRoot(file.name, copy);
   const dispose = () => {
@@ -266,20 +331,13 @@ async function openExcel(context: OpenViewerContext): Promise<ViewerController> 
     reportProgress({ stage: "reading", message: copy.reading, loaded: 0, total: file.size });
     const bytes = await readBlob(file.slice(0, file.size), signal);
     if (signal.aborted) throw abortError();
-    if (bytes.byteLength < 4 || new Uint8Array(bytes, 0, 2).join(",") !== "80,75") {
+    if (requiresZipContainer(file.name) && !hasZipSignature(bytes)) {
       throw new ViewerError("invalid-file", copy.invalid);
     }
-
     reportProgress({ stage: "parsing", message: copy.parsing, loaded: file.size, total: file.size });
-    const sheets = await readExcelFile(bytes);
+    const sheets = parseWorkbook(bytes, copy.tooLarge);
     if (signal.aborted) throw abortError();
-    const parsedCells = sheets.reduce(
-      (total, sheet) => total + sheet.data.reduce((sheetTotal, row) => sheetTotal + row.length, 0),
-      0,
-    );
-    if (sheets.length > MAX_WORKSHEETS || parsedCells > MAX_PARSED_CELLS) {
-      throw new ViewerError("resource-limit", copy.tooLarge);
-    }
+    parsed = true;
     container.append(root);
     removeListeners = renderWorkbook(root, sheets, signal, context.locale, copy);
     signal.addEventListener("abort", dispose, { once: true });
@@ -288,10 +346,9 @@ async function openExcel(context: OpenViewerContext): Promise<ViewerController> 
   } catch (error) {
     dispose();
     if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;
-    if (error instanceof InvalidInputError || error instanceof InvalidSpreadsheetError) {
-      throw new ViewerError("invalid-file", copy.damaged, { cause: error });
-    }
-    throw new ViewerError("open-failed", copy.openFailed, { cause: error });
+    throw new ViewerError(parsed ? "open-failed" : "invalid-file", parsed ? copy.openFailed : copy.damaged, {
+      cause: error,
+    });
   }
 }
 

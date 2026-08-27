@@ -23,6 +23,10 @@ export const formats: FileFormat[] = [
   { extension: "pdf", name: "PDF 文档", description: "查看版式固定的文档与电子资料。", category: "documents", native: true },
   { extension: "docx", name: "Word 文档", description: "预览 Office Open XML 文字文档。", category: "documents", native: false },
   { extension: "xlsx", name: "Excel 表格", description: "查看工作表、数据与基础格式。", category: "documents", native: false },
+  { extension: "xls", name: "Excel 97–2003 表格", description: "查看旧版二进制 Excel 工作簿。", category: "documents", native: false },
+  { extension: "xlsb", name: "Excel 二进制表格", description: "查看 Excel 二进制工作簿的数据。", category: "documents", native: false },
+  { extension: "ods", name: "OpenDocument 表格", description: "查看开放文档电子表格。", category: "documents", native: false },
+  { extension: "pptx", name: "PowerPoint 演示文稿", description: "本地渲染 Office Open XML 幻灯片。", category: "documents", native: false },
   { extension: "md", name: "Markdown", description: "阅读纯文本标记与渲染结果。", category: "code-data", native: true },
   { extension: "json", name: "JSON 数据", description: "以数据表方式分页浏览 JSON 记录。", category: "code-data", native: false },
   { extension: "jsonl", name: "JSON Lines", description: "逐行解析并分页浏览 JSON 记录流。", category: "code-data", native: false },
@@ -43,7 +47,7 @@ export const formats: FileFormat[] = [
 
 export const categories: FileCategory[] = [
   { slug: "images-video", name: "图片与视频", eyebrow: "看见每个细节", description: "直接调用浏览器的图像解码、媒体播放与 WebCodecs 能力。", extensions: ["png", "jpg", "svg", "mp4", "webm"] },
-  { slug: "documents", name: "文档", eyebrow: "阅读，不必等待", description: "在本地打开文档、表格与演示资料，不经过上传队列。", extensions: ["pdf", "docx", "xlsx"] },
+  { slug: "documents", name: "文档", eyebrow: "阅读，不必等待", description: "在本地打开文档、表格与演示资料，不经过上传队列。", extensions: ["pdf", "docx", "xlsx", "xls", "xlsb", "ods", "pptx"] },
   { slug: "code-data", name: "代码与数据", eyebrow: "让结构清晰可见", description: "检查文本、代码和结构化数据，适合快速排错与校验。", extensions: ["md", "json", "jsonl", "csv", "tsv", "parquet", "arrow", "duckdb", "sqlite", "html"] },
   { slug: "3d", name: "3D", eyebrow: "在浏览器里转动模型", description: "以 WebGL 与 WebGPU 为基础，浏览网格、材质和场景。", extensions: ["obj", "gltf", "stl"] },
   { slug: "design", name: "设计文件", eyebrow: "创意文件，也能本地打开", description: "查看常见设计格式的画布、图层与元信息。", extensions: ["psd", "ai", "fig"] },

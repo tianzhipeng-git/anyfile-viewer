@@ -2,7 +2,9 @@ import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
+import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
+import { wordManifest } from "@anyfile/word-viewer/manifest";
 import {
   validateRegistrations,
   type ViewerPluginRegistration,
@@ -31,10 +33,24 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     },
   },
   {
+    manifest: wordManifest,
+    async load() {
+      const viewerPackage = await import("@anyfile/word-viewer");
+      return viewerPackage.wordViewer;
+    },
+  },
+  {
     manifest: excelManifest,
     async load() {
       const viewerPackage = await import("@anyfile/excel-viewer");
       return viewerPackage.excelViewer;
+    },
+  },
+  {
+    manifest: powerpointManifest,
+    async load() {
+      const viewerPackage = await import("@anyfile/powerpoint-viewer");
+      return viewerPackage.powerpointViewer;
     },
   },
   {

@@ -1,5 +1,5 @@
 {
-  "name": "@anyfile/excel-viewer",
+  "name": "@anyfile/powerpoint-viewer",
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -11,12 +11,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@anyfile/viewer-protocol": "*",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "@aiden0z/pptx-renderer": "1.2.4",
+    "@anyfile/viewer-protocol": "*"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "*",
-    "fflate": "0.8.3",
     "happy-dom": "20.11.6",
     "vitest": "4.1.11"
   }

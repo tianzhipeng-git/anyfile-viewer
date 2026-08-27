@@ -5,11 +5,20 @@ export const excelManifest = {
   id: "excel-workbook",
   name: "Excel 查看器",
   formats: [{
-    name: "Excel 工作簿",
-    extensions: [".xlsx", ".xlsm"],
+    name: "电子表格",
+    extensions: [
+      ".xlsx", ".xlsm", ".xlsb", ".xls", ".xlw", ".xml",
+      ".ods", ".fods", ".numbers", ".et", ".csv", ".tsv", ".txt",
+      ".dbf", ".dif", ".slk", ".prn", ".wk1", ".wk2", ".wk3",
+      ".wk4", ".wks", ".123", ".wq1", ".wq2", ".wb1", ".wb2",
+      ".wb3", ".qpw", ".xlr",
+    ],
     mimeTypes: [
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "application/vnd.ms-excel.sheet.macroEnabled.12",
+      "application/vnd.ms-excel",
+      "application/vnd.oasis.opendocument.spreadsheet",
+      "text/csv",
     ],
   }],
   workspaceAccess: "none",

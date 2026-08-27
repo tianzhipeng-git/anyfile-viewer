@@ -27,7 +27,10 @@ npm run dev
 
 当前查看器通过 `viewer/` 下的统一协议按文件格式动态加载：
 
-- PDF 与 Excel（XLSX/XLSM）
+- PDF
+- Word（DOCX）
+- Excel 与电子表格（XLSX、XLSM、XLSB、XLS、ODS、Numbers 等）
+- PowerPoint（PPTX）
 - 代码与文本
 - CSV、JSON、Parquet、Arrow 与 DuckDB
 - 独立的 SQLite（SQLite/SQLite3/DB）插件
@@ -48,5 +51,7 @@ npm run build
 
 ```bash
 npm test -w @anyfile/pdf-viewer
+npm test -w @anyfile/word-viewer
 npm test -w @anyfile/excel-viewer
+npm test -w @anyfile/powerpoint-viewer
 ```

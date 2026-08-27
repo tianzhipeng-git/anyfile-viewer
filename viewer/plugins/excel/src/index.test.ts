@@ -61,7 +61,17 @@ afterEach(() => {
 describe("Excel viewer protocol compliance", () => {
   it("publishes a valid v1 manifest", () => {
     expect(() => validateManifest(excelManifest)).not.toThrow();
-    expect(excelManifest.formats.flatMap((format) => format.extensions)).toEqual([".xlsx", ".xlsm"]);
+    const extensions = excelManifest.formats.flatMap((format) => format.extensions);
+    expect(extensions).toEqual(expect.arrayContaining([".xlsx", ".xlsm", ".xlsb", ".xls", ".ods", ".numbers"]));
+  });
+
+  it("opens a CSV workbook through the same spreadsheet plugin", async () => {
+    const context = testContext(new File(["name,score\nAda,98"], "scores.csv", { type: "text/csv" }));
+    const controller = await excelViewer.open(context.context);
+
+    expect(context.container.textContent).toContain("Ada");
+    expect(context.container.textContent).toContain("98");
+    await controller.dispose();
   });
 
   it("opens a real workbook, paginates, switches sheets, and disposes repeatedly", async () => {

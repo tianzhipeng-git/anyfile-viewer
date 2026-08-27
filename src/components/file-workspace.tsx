@@ -268,7 +268,7 @@ export function FileWorkspace() {
           </div>
         </aside>
 
-        <section className="flex min-w-0 flex-col">
+        <section className="flex min-h-0 min-w-0 flex-col">
           <div className="relative flex flex-1 items-stretch overflow-hidden bg-muted/30">
             <ViewerHost
               file={selectedFile}

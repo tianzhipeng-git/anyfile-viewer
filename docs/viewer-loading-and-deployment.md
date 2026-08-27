@@ -45,7 +45,7 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 2. 在注册表中静态导入 manifest、动态导入实现。
 3. 运行 `npm run build`，确认首包体积检查通过。
 
-## 3. DuckDB 的 jsDelivr 与本地回退
+## 3. 体积较大的WASM 的 jsDelivr 与本地回退
 
 DuckDB JavaScript API 由应用自身打包。体积较大的 WASM 与 Worker 按以下顺序加载：
 
@@ -82,7 +82,9 @@ worker-src 'self' blob:
 | 代码查看器 | `ace-builds` | `1.44.0` |
 | DuckDB 数据查看器 | `@duckdb/duckdb-wasm` | `1.32.0` |
 | DuckDB 数据查看器 | `apache-arrow` | `17.0.0` |
-| Excel 查看器 | `read-excel-file` | `9.3.10` |
+| Word 查看器 | `docx-preview` | `0.4.0` |
+| Excel 查看器 | `xlsx` | `0.20.3` |
+| PowerPoint 查看器 | `@aiden0z/pptx-renderer` | `1.2.4` |
 | SQLite 查看器 | `sql.js` | `1.14.2` |
 
 `package-lock.json` 使用 lockfile v3，锁定其余直接依赖和全部传递依赖的实际版本、下载地址与完整性哈希。根项目中的 `^` 版本不会在 `npm ci` 时漂移。
@@ -106,7 +108,7 @@ npm run build
 - 从 `/view` 的预渲染 HTML 读取真实初始脚本列表。
 - 分别计算传输时的 gzip 体积。
 - 当前上限为 225 KiB。
-- 检查 Ace、DuckDB、SQLite 和 Excel 实现标记没有进入初始 JavaScript。
+- 检查 Ace、DuckDB、SQLite、Word、Excel 和 PowerPoint 实现标记没有进入初始 JavaScript。
 
 新增或升级插件不应通过提高上限来绕过失败。先检查是否误用了静态导入、顶层副作用或把实现代码放进了 manifest。
 

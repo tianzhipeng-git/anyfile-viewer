@@ -121,7 +121,7 @@ export function ViewerHost({
   const visibleMessage = visibleStatus === "idle" ? "" : message;
 
   return (
-    <div className="flex min-h-0 w-full flex-col">
+    <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
       <div className="flex min-h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6">
         {header}
         {candidates.length > 1 && (

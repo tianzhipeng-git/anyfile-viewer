@@ -29,7 +29,9 @@ const deferredImplementationMarkers = [
   "ace-builds",
   "Starting DuckDB",
   "Starting SQLite",
-  "InvalidSpreadsheetError",
+  "正在读取 Word 文档",
+  "正在读取 Excel 工作簿",
+  "正在读取 PowerPoint 演示文稿",
 ];
 const bundledMarker = deferredImplementationMarkers.find((marker) => initialCode.includes(marker));
 if (bundledMarker) {
