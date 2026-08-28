@@ -45,8 +45,7 @@ export function encryptedEntryZipFixture(): Uint8Array {
   return bytes;
 }
 
-export function cp437ZipFixture(): Uint8Array {
-  const filename = Uint8Array.of(0x82, 0x2e, 0x74, 0x78, 0x74);
+function rawFilenameZipFixture(filename: Uint8Array): Uint8Array {
   const local = new Uint8Array(30 + filename.length);
   const localView = new DataView(local.buffer);
   localView.setUint32(0, 0x04034b50, true);
@@ -68,6 +67,14 @@ export function cp437ZipFixture(): Uint8Array {
   eocdView.setUint32(12, central.length, true);
   eocdView.setUint32(16, local.length, true);
   return concatenate(local, central, eocd);
+}
+
+export function cp437ZipFixture(): Uint8Array {
+  return rawFilenameZipFixture(Uint8Array.of(0x82, 0x2e, 0x74, 0x78, 0x74));
+}
+
+export function unflaggedUtf8ZipFixture(): Uint8Array {
+  return rawFilenameZipFixture(new TextEncoder().encode("小照片/说明.txt"));
 }
 
 export function zipPayloadRanges(bytes: Uint8Array): readonly { start: number; end: number }[] {

@@ -18,6 +18,7 @@ const MAX_COMMENT_LENGTH = 0xffff;
 const MAX_RECORDS = 100_000;
 const MAX_PATH_BYTES = 16 * 1024;
 const MAX_TOTAL_PATH_BYTES = 32 * 1024 * 1024;
+const utf8Decoder = new TextDecoder("utf-8", { fatal: true });
 
 type Region = {
   readonly start: number;
@@ -145,6 +146,15 @@ const METHODS: Readonly<Record<number, string>> = {
   12: "Bzip2", 14: "LZMA", 93: "Zstandard", 95: "XZ", 98: "PPMd", 99: "AES",
 };
 
+function decodeZipText(value: Uint8Array, encoding: string): string | undefined {
+  if (encoding.toLowerCase() !== "cp437") return undefined;
+  try {
+    return utf8Decoder.decode(value);
+  } catch {
+    return undefined;
+  }
+}
+
 function mapEntry(entry: Entry): ArchiveEntry {
   const pathBytes = new TextEncoder().encode(entry.filename).byteLength;
   if (!entry.filename || pathBytes > MAX_PATH_BYTES) {
@@ -195,6 +205,7 @@ export async function parseZip(
     useWebWorkers: false,
     useCompressionStream: false,
     strictness: "balanced",
+    decodeText: decodeZipText,
   });
   try {
     const rawEntries: Entry[] = [];

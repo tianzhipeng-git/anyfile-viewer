@@ -17,6 +17,7 @@ import {
   invalidSizeTarFixture,
   negativeMtimeTarFixture,
   tarFixture,
+  unflaggedUtf8ZipFixture,
   wrapperFixtures,
   zip64Fixture,
   zipFixture,
@@ -183,6 +184,14 @@ describe("archive metadata viewer", () => {
     const encryptedController = await archiveMetadataViewer.open(encrypted.context);
     expect(encrypted.container.textContent).toContain("已加密");
     await encryptedController.dispose();
+  });
+
+  it("decodes UTF-8 ZIP paths when the language encoding flag is missing", async () => {
+    const test = contextFor(unflaggedUtf8ZipFixture(), "macos.zip");
+    const controller = await archiveMetadataViewer.open(test.context);
+
+    expect(test.container.textContent).toContain("小照片/说明.txt");
+    await controller.dispose();
   });
 
   it("reads TAR headers and PAX metadata while skipping ordinary payload", async () => {
