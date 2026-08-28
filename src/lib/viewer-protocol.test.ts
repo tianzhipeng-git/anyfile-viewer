@@ -4,6 +4,7 @@ import {
   ViewerError,
   findViewerRegistrations,
   normalizeViewerError,
+  resolveViewerRegistrations,
   validateLoadedPlugin,
   validateManifest,
   validateRegistrations,
@@ -75,6 +76,105 @@ describe("viewer protocol", () => {
 
     expect(findViewerRegistrations("DOCKERFILE", registrations).map(({ manifest: item }) => item.id))
       .toEqual(["code", "fallback"]);
+  });
+
+  it("probes candidates concurrently and sorts by support level then registration order", async () => {
+    const first: ViewerPluginRegistration = {
+      ...registration("first", [".sample"]),
+      async probe() {
+        await new Promise((resolve) => setTimeout(resolve, 10));
+        return 4;
+      },
+    };
+    const second: ViewerPluginRegistration = {
+      ...registration("second", [".sample"]),
+      async probe() { return 4; },
+    };
+    const fallback = registration("fallback", ["*"]);
+    const broken: ViewerPluginRegistration = {
+      ...registration("broken", [".sample"]),
+      async probe() { throw new Error("probe failed"); },
+    };
+    const unsupported: ViewerPluginRegistration = {
+      ...registration("unsupported", [".sample"]),
+      async probe() { return 0; },
+    };
+
+    const resolved = await resolveViewerRegistrations(
+      new File(["header"], "file.sample"),
+      [first, fallback, second, broken, unsupported],
+      { signal: new AbortController().signal },
+    );
+
+    expect(resolved.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["first", 4], ["second", 4], ["fallback", 1]]);
+  });
+
+  it("filters workspace-required candidates before probing and rejects invalid probe results", async () => {
+    let requiredProbeCalled = false;
+    const requiredRegistration = registration("required", [".sample"]);
+    const required: ViewerPluginRegistration = {
+      ...requiredRegistration,
+      manifest: { ...requiredRegistration.manifest, workspaceAccess: "required" },
+      async probe() {
+        requiredProbeCalled = true;
+        return 5;
+      },
+    };
+    const invalid: ViewerPluginRegistration = {
+      ...registration("invalid", [".sample"]),
+      async probe() { return 6 as never; },
+    };
+
+    const resolved = await resolveViewerRegistrations(
+      new File([], "file.sample"),
+      [required, invalid],
+      { signal: new AbortController().signal },
+    );
+
+    expect(requiredProbeCalled).toBe(false);
+    expect(resolved).toEqual([]);
+  });
+
+  it("propagates probe cancellation", async () => {
+    const controller = new AbortController();
+    const cancellable: ViewerPluginRegistration = {
+      ...registration("cancellable", [".sample"]),
+      probe: ({ signal }) => new Promise((_resolve, reject) => {
+        signal.addEventListener("abort", () => {
+          reject(new DOMException("aborted", "AbortError"));
+        }, { once: true });
+      }),
+    };
+
+    const resolution = resolveViewerRegistrations(
+      new File([], "file.sample"),
+      [cancellable],
+      { signal: controller.signal },
+    );
+    controller.abort();
+
+    await expect(resolution).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("uses the PDF and SQLite probes in the production registry", async () => {
+    expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
+      .toEqual(["pdfjs-pdf", "sqlite-database"]);
+
+    const invalidPdf = await resolveViewerRegistrations(
+      new File(["not a pdf"], "document.pdf"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(invalidPdf.map(({ registration: item }) => item.manifest.id)).toEqual(["hex-viewer"]);
+
+    const sqlite = await resolveViewerRegistrations(
+      new File(["SQLite format 3\0payload"], "database.db"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(sqlite.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["sqlite-database", 5], ["hex-viewer", 1]]);
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {

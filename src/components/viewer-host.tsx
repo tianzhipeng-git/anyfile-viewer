@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AlertCircleIcon, AlertTriangleIcon, FileSearchIcon, LoaderCircleIcon } from "lucide-react";
 import {
   ViewerError,
-  findViewerRegistrations,
   isViewerAbortError,
   normalizeViewerError,
+  resolveViewerRegistrations,
   validateLoadedPlugin,
+  type ResolvedViewerRegistration,
   type ViewerController,
   type WorkspaceReader,
 } from "@anyfile/viewer-protocol";
@@ -18,6 +19,12 @@ import { viewerRegistrations } from "@/lib/viewer-registrations";
 
 type ViewerSession = { stop(): Promise<void> };
 type ViewerStatus = "idle" | "loading" | "active" | "error";
+type ViewerRoutingResult = {
+  readonly file: File;
+  readonly workspace?: WorkspaceReader;
+  readonly candidates: ResolvedViewerRegistration[];
+  readonly error?: string;
+};
 
 export function ViewerHost({
   file,
@@ -35,12 +42,36 @@ export function ViewerHost({
   const [registrationId, setRegistrationId] = useState("");
   const [status, setStatus] = useState<ViewerStatus>("idle");
   const [message, setMessage] = useState("");
-  const candidates = useMemo(
-    () => file ? findViewerRegistrations(file.name, viewerRegistrations) : [],
-    [file],
-  );
+  const [routingResult, setRoutingResult] = useState<ViewerRoutingResult>();
+  const currentRoutingResult = routingResult && routingResult.file === file && routingResult.workspace === workspace
+    ? routingResult
+    : undefined;
+  const isRouting = Boolean(file && !currentRoutingResult);
+  const candidates = currentRoutingResult?.candidates.map(({ registration }) => registration) ?? [];
   const registration = candidates.find(({ manifest }) => manifest.id === registrationId) ?? candidates[0];
   const usesFallbackHexViewer = candidates.length === 1 && registration?.manifest.id === "hex-viewer";
+
+  useEffect(() => {
+    if (!file) return;
+
+    const abortController = new AbortController();
+
+    void resolveViewerRegistrations(file, viewerRegistrations, {
+      signal: abortController.signal,
+      workspace,
+    }).then((resolvedCandidates) => {
+      if (abortController.signal.aborted) return;
+      setRoutingResult({ file, workspace, candidates: resolvedCandidates });
+      setStatus(resolvedCandidates.length > 0 ? "loading" : "idle");
+      setMessage(resolvedCandidates.length > 0 ? "正在加载查看器…" : "");
+    }).catch((error: unknown) => {
+      if (abortController.signal.aborted || isViewerAbortError(error)) return;
+      const viewerError = normalizeViewerError(error, "无法检测这个文件的格式。");
+      setRoutingResult({ file, workspace, candidates: [], error: viewerError.message });
+    });
+
+    return () => abortController.abort();
+  }, [file, workspace]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -120,8 +151,20 @@ export function ViewerHost({
     };
   }, [file, registration, relativePath, workspace]);
 
-  const visibleStatus = !file || !registration ? "idle" : status;
-  const visibleMessage = visibleStatus === "idle" ? "" : message;
+  const visibleStatus = !file
+    ? "idle"
+    : isRouting
+      ? "loading"
+      : currentRoutingResult?.error
+        ? "error"
+        : registration
+          ? status
+          : "idle";
+  const visibleMessage = visibleStatus === "idle"
+    ? ""
+    : isRouting
+      ? "正在检测文件格式并选择查看器…"
+      : currentRoutingResult?.error ?? message;
 
   return (
     <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">

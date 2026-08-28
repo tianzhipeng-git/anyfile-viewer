@@ -15,6 +15,10 @@ import {
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
   {
     manifest: pdfManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/pdf-viewer/probe");
+      return probePackage.probePdf(context);
+    },
     async load() {
       const viewerPackage = await import("@anyfile/pdf-viewer");
       return viewerPackage.pdfViewer;
@@ -50,6 +54,10 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
   },
   {
     manifest: sqliteManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/sqlite-viewer/probe");
+      return probePackage.probeSQLite(context);
+    },
     async load() {
       const viewerPackage = await import("@anyfile/sqlite-viewer");
       return viewerPackage.sqliteViewer;

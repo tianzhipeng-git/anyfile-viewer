@@ -9,9 +9,8 @@ import { PasswordResponses, type PDFDocumentLoadingTask } from "pdfjs-dist";
 import { loadPdfDocument } from "./pdf-engine";
 import { createPdfView, destroyPdfTask } from "./pdf-view";
 import { pdfManifest } from "./manifest";
-import { abortError, readBlob } from "./read-blob";
-
-const PDF_HEADER_BYTES = 1_024;
+import { probePdf } from "./probe";
+import { abortError } from "./read-blob";
 
 function getCopy(locale: string) {
   return locale.toLowerCase().startsWith("zh") ? {
@@ -84,10 +83,9 @@ async function openPdf(context: OpenViewerContext): Promise<ViewerController> {
   try {
     if (signal.aborted) throw abortError();
     reportProgress({ stage: "validating", message: copy.checking });
-    const header = new TextDecoder("latin1").decode(
-      await readBlob(file.slice(0, PDF_HEADER_BYTES), signal),
-    );
-    if (!header.includes("%PDF-")) throw new ViewerError("invalid-file", copy.invalid);
+    if (await probePdf({ file, signal }) === 0) {
+      throw new ViewerError("invalid-file", copy.invalid);
+    }
 
     objectUrl = URL.createObjectURL(file);
     container.append(view.root);

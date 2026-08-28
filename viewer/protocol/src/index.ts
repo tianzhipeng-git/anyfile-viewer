@@ -52,9 +52,22 @@ export interface FileViewerPlugin {
   open(context: OpenViewerContext): Promise<ViewerController>;
 }
 
+export type ViewerSupportLevel = 0 | 1 | 2 | 3 | 4 | 5;
+
+export interface ProbeViewerContext {
+  readonly file: File;
+  readonly signal: AbortSignal;
+}
+
 export interface ViewerPluginRegistration {
   readonly manifest: ViewerPluginManifest;
+  probe?(context: ProbeViewerContext): Promise<ViewerSupportLevel>;
   load(): Promise<FileViewerPlugin>;
+}
+
+export interface ResolvedViewerRegistration {
+  readonly registration: ViewerPluginRegistration;
+  readonly supportLevel: Exclude<ViewerSupportLevel, 0>;
 }
 
 export type ViewerErrorCode =
@@ -200,6 +213,54 @@ export function findViewerRegistrations(
   return [...matches]
     .sort((left, right) => left - right)
     .map((registrationIndex) => registrations[registrationIndex]);
+}
+
+function isViewerSupportLevel(value: unknown): value is ViewerSupportLevel {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 5;
+}
+
+export async function resolveViewerRegistrations(
+  file: File,
+  registrations: readonly ViewerPluginRegistration[],
+  options: {
+    readonly signal: AbortSignal;
+    readonly workspace?: WorkspaceReader;
+  },
+): Promise<ResolvedViewerRegistration[]> {
+  const { signal, workspace } = options;
+  if (signal.aborted) throw new DOMException("The operation was aborted.", "AbortError");
+
+  const candidates = findViewerRegistrations(file.name, registrations)
+    .filter(({ manifest }) => manifest.workspaceAccess !== "required" || Boolean(workspace));
+  const resolved = await Promise.all(candidates.map(async (registration, registrationIndex) => {
+    let supportLevel: ViewerSupportLevel = 1;
+
+    if (registration.probe) {
+      try {
+        const result = await registration.probe({ file, signal });
+        if (signal.aborted) throw new DOMException("The operation was aborted.", "AbortError");
+        supportLevel = isViewerSupportLevel(result) ? result : 0;
+      } catch (error: unknown) {
+        if (signal.aborted || isViewerAbortError(error)) {
+          throw new DOMException("The operation was aborted.", "AbortError");
+        }
+        supportLevel = 0;
+      }
+    }
+
+    return { registration, registrationIndex, supportLevel };
+  }));
+
+  if (signal.aborted) throw new DOMException("The operation was aborted.", "AbortError");
+
+  return resolved
+    .filter((candidate): candidate is typeof candidate & { supportLevel: Exclude<ViewerSupportLevel, 0> } => (
+      candidate.supportLevel > 0
+    ))
+    .sort((left, right) => (
+      right.supportLevel - left.supportLevel || left.registrationIndex - right.registrationIndex
+    ))
+    .map(({ registration, supportLevel }) => ({ registration, supportLevel }));
 }
 
 export function validateLoadedPlugin(
