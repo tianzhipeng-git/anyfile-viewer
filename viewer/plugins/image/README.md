@@ -1,13 +1,13 @@
 # Browser image viewer
 
-阶段 1 的浏览器原生栅格插件，支持 JPEG、PNG/APNG、GIF、WebP 和 AVIF。实现使用 `<img>` 与 Object URL，浏览器负责动画、EXIF orientation 和可用的色彩管理；插件不创建 Canvas 像素副本。
+浏览器原生栅格插件，完整支持 JPEG、PNG/APNG、GIF、WebP 和单帧 AVIF，并以浏览器实际解码能力近似支持 AVIF sequence、BMP/DIB 与 ICO/CUR。JPEG 的常见历史扩展名也会进入同一插件。实现使用 `<img>` 与 Object URL，浏览器负责动画、EXIF orientation 和可用的色彩管理；插件不创建 Canvas 像素副本。
 
 ## 读取与资源策略
 
 - 原生 `<img>` 路径不设置固定的文件大小、像素、帧数或估算内存上限，实际可解码容量由当前浏览器和设备决定。
 - 插件只读取前 1 MiB 用于格式和基础元数据识别，再把原始 `File` 的 Object URL 交给浏览器；不会在 JavaScript 中复制完整编码文件或创建 RGBA 像素副本。
 - 超过头部读取范围的动画不展示可能不完整的帧数统计。
-- AVIF 图像序列不在阶段 1 的声明范围内，因此 probe 仍拒绝 `avis`。
+- BMP/DIB、ICO/CUR 和 AVIF sequence 的浏览器实现存在变体差异，probe 返回等级 3；`open()` 以当前浏览器的真实解码结果为准。
 
 ## 验收约定
 

@@ -11,6 +11,8 @@ export async function probeBrowserImage(
   const header = await readBlob(file.slice(0, IMAGE_HEADER_BYTES), signal);
   const info = inspectImageFile(header);
   if (!info) return 0;
-  if (info.format === "AVIF" && info.animated) return 0;
+  if (info.format === "BMP" || info.format === "ICO" || info.format === "CUR" || info.animated && info.format === "AVIF") {
+    return 3;
+  }
   return 4;
 }

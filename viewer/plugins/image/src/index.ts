@@ -18,13 +18,11 @@ function copyFor(locale: string) {
     decoding: "正在使用浏览器解码图片…",
     ready: "图片已打开",
     invalid: "文件内容不是有效或完整的受支持图片。",
-    avifSequence: "当前阶段尚未支持 AVIF 图像序列。",
   } : {
     reading: "Inspecting image…",
     decoding: "Decoding image in the browser…",
     ready: "Image opened",
     invalid: "The file is not a valid, complete supported image.",
-    avifSequence: "AVIF image sequences are not supported in this stage.",
   };
 }
 
@@ -57,9 +55,6 @@ async function openBrowserImage(context: OpenViewerContext): Promise<ViewerContr
     const header = await readBlob(file.slice(0, IMAGE_HEADER_BYTES), signal);
     const parsedInfo = inspectImageFile(header);
     if (!parsedInfo) throw new ViewerError("invalid-file", copy.invalid);
-    if (parsedInfo.format === "AVIF" && parsedInfo.animated) {
-      throw new ViewerError("open-failed", copy.avifSequence);
-    }
     const info = file.size <= IMAGE_HEADER_BYTES
       ? parsedInfo
       : { ...parsedInfo, frameCount: undefined };

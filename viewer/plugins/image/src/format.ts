@@ -1,4 +1,4 @@
-export type BrowserImageFormat = "JPEG" | "PNG" | "APNG" | "GIF" | "WebP" | "AVIF";
+export type BrowserImageFormat = "JPEG" | "PNG" | "APNG" | "GIF" | "WebP" | "AVIF" | "BMP" | "ICO" | "CUR";
 
 export interface ImageFileInfo {
   readonly format: BrowserImageFormat;
@@ -24,6 +24,10 @@ function u32be(bytes: Uint8Array, offset: number) {
 
 function u24le(bytes: Uint8Array, offset: number) {
   return bytes[offset] | (bytes[offset + 1] << 8) | (bytes[offset + 2] << 16);
+}
+
+function u16le(bytes: Uint8Array, offset: number) {
+  return bytes[offset] | (bytes[offset + 1] << 8);
 }
 
 function u32le(bytes: Uint8Array, offset: number) {
@@ -252,10 +256,59 @@ function inspectAvif(bytes: Uint8Array, complete: boolean): ImageFileInfo | unde
   return { format: "AVIF", animated: brands.includes("avis") };
 }
 
+function inspectBmp(bytes: Uint8Array, complete: boolean): ImageFileInfo | undefined {
+  if (bytes.length < 26 || ascii(bytes, 0, 2) !== "BM") return undefined;
+  const declaredLength = u32le(bytes, 2);
+  const pixelOffset = u32le(bytes, 10);
+  const dibLength = u32le(bytes, 14);
+  if (declaredLength < 26 || pixelOffset < 14 + dibLength || pixelOffset > declaredLength) return undefined;
+  if (complete && declaredLength > bytes.length) return undefined;
+
+  let width: number;
+  let height: number;
+  let hasAlpha = false;
+  if (dibLength === 12) {
+    width = u16le(bytes, 18);
+    height = u16le(bytes, 20);
+  } else if (dibLength >= 40 && bytes.length >= 54) {
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    width = Math.abs(view.getInt32(18, true));
+    height = Math.abs(view.getInt32(22, true));
+    hasAlpha = view.getUint16(28, true) === 32;
+  } else return undefined;
+  if (!width || !height) return undefined;
+  return { format: "BMP", width, height, animated: false, hasAlpha };
+}
+
+function inspectIcon(bytes: Uint8Array, complete: boolean): ImageFileInfo | undefined {
+  if (bytes.length < 22 || u16le(bytes, 0) !== 0) return undefined;
+  const type = u16le(bytes, 2);
+  const count = u16le(bytes, 4);
+  if ((type !== 1 && type !== 2) || count === 0 || bytes.length < 6 + count * 16) return undefined;
+
+  let width = 0;
+  let height = 0;
+  for (let index = 0; index < count; index += 1) {
+    const entry = 6 + index * 16;
+    const entryWidth = bytes[entry] || 256;
+    const entryHeight = bytes[entry + 1] || 256;
+    const length = u32le(bytes, entry + 8);
+    const offset = u32le(bytes, entry + 12);
+    if (!length || offset < 6 + count * 16 || (complete && offset + length > bytes.length)) return undefined;
+    if (entryWidth * entryHeight > width * height) {
+      width = entryWidth;
+      height = entryHeight;
+    }
+  }
+  return { format: type === 1 ? "ICO" : "CUR", width, height, animated: false, hasAlpha: true };
+}
+
 export function inspectImageFile(bytes: Uint8Array, complete = false): ImageFileInfo | undefined {
   return inspectJpeg(bytes, complete)
     ?? inspectPng(bytes, complete)
     ?? inspectGif(bytes, complete)
     ?? inspectWebp(bytes, complete)
-    ?? inspectAvif(bytes, complete);
+    ?? inspectAvif(bytes, complete)
+    ?? inspectBmp(bytes, complete)
+    ?? inspectIcon(bytes, complete);
 }

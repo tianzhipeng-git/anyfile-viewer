@@ -24,6 +24,14 @@ describe("browser image probe", () => {
     },
   );
 
+  it.each(["animated.avif", "sample.bmp", "sample.ico", "sample.cur"])(
+    "returns level 3 for browser-dependent support of %s",
+    async (fileName) => {
+      await expect(probeBrowserImage({ file: fixture(fileName), signal: new AbortController().signal }))
+        .resolves.toBe(3);
+    },
+  );
+
   it("returns level 0 for a mismatched file without decoding it", async () => {
     await expect(probeBrowserImage({
       file: new File(["plain text"], "fake.png"),

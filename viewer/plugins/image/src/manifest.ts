@@ -10,8 +10,15 @@ export const browserImageManifest: ViewerPluginManifest = {
   formats: [
     {
       name: "浏览器原生图片",
-      extensions: [".jpg", ".jpeg", ".jfif", ".png", ".apng", ".gif", ".webp", ".avif"],
-      mimeTypes: ["image/jpeg", "image/png", "image/apng", "image/gif", "image/webp", "image/avif"],
+      extensions: [
+        ".jpg", ".jpeg", ".jpe", ".jfif", ".jif", ".jfi", ".pjpeg", ".pjp",
+        ".png", ".apng", ".gif", ".webp", ".avif", ".heif", ".heifs", ".hif",
+        ".bmp", ".dib", ".ico", ".cur",
+      ],
+      mimeTypes: [
+        "image/jpeg", "image/png", "image/apng", "image/gif", "image/webp", "image/avif",
+        "image/bmp", "image/vnd.microsoft.icon", "image/x-icon",
+      ],
     },
   ],
   workspaceAccess: "none",

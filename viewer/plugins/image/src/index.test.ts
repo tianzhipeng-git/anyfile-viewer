@@ -40,7 +40,9 @@ describe("browser image viewer protocol compliance", () => {
   it("publishes the stage 1 formats in a valid manifest", () => {
     expect(() => validateManifest(browserImageManifest)).not.toThrow();
     expect(browserImageManifest.formats.flatMap(({ extensions }) => extensions)).toEqual([
-      ".jpg", ".jpeg", ".jfif", ".png", ".apng", ".gif", ".webp", ".avif",
+      ".jpg", ".jpeg", ".jpe", ".jfif", ".jif", ".jfi", ".pjpeg", ".pjp",
+      ".png", ".apng", ".gif", ".webp", ".avif", ".heif", ".heifs", ".hif",
+      ".bmp", ".dib", ".ico", ".cur",
     ]);
   });
 
