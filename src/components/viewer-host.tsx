@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { AlertCircleIcon, FileSearchIcon, LoaderCircleIcon } from "lucide-react";
+import { AlertCircleIcon, AlertTriangleIcon, FileSearchIcon, LoaderCircleIcon } from "lucide-react";
 import {
   ViewerError,
   findViewerRegistrations,
@@ -13,6 +13,7 @@ import {
 } from "@anyfile/viewer-protocol";
 
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { viewerRegistrations } from "@/lib/viewer-registrations";
 
 type ViewerSession = { stop(): Promise<void> };
@@ -39,6 +40,7 @@ export function ViewerHost({
     [file],
   );
   const registration = candidates.find(({ manifest }) => manifest.id === registrationId) ?? candidates[0];
+  const usesFallbackHexViewer = candidates.length === 1 && registration?.manifest.id === "hex-viewer";
 
   useEffect(() => {
     const container = containerRef.current;
@@ -140,6 +142,15 @@ export function ViewerHost({
         )}
       </div>
       <div className="relative flex min-h-0 flex-1 flex-col">
+        {usesFallbackHexViewer && visibleStatus === "active" && (
+          <div className="flex-none p-3 sm:px-4">
+            <Alert>
+              <AlertTriangleIcon />
+              <AlertTitle>暂不支持此文件类型的专用预览</AlertTitle>
+              <AlertDescription>当前以十六进制展示文件的原始内容。</AlertDescription>
+            </Alert>
+          </div>
+        )}
         <div
           ref={containerRef}
           className="viewer-container min-h-0 flex-1 overflow-auto"

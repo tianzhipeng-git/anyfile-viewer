@@ -2,6 +2,7 @@ import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manife
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
+import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
@@ -66,6 +67,13 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/archive-metadata-viewer");
       return viewerPackage.archiveMetadataViewer;
+    },
+  },
+  {
+    manifest: hexManifest,
+    async load() {
+      const viewerPackage = await import("@anyfile/hex-viewer");
+      return viewerPackage.hexViewer;
     },
   },
 ];

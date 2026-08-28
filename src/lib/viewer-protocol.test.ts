@@ -98,14 +98,16 @@ describe("viewer protocol", () => {
 
   it("keeps specialized ZIP-derived viewers ahead of archive metadata", () => {
     expect(findViewerRegistrations("report.docx", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["word-document", "archive-metadata-viewer"]);
+      .toEqual(["word-document", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("slides.pptx", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["powerpoint-presentation", "archive-metadata-viewer"]);
+      .toEqual(["powerpoint-presentation", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("book.xlsx", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["excel-workbook", "archive-metadata-viewer"]);
+      .toEqual(["excel-workbook", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("rows.csv.gz", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["duckdb-data", "archive-metadata-viewer"]);
+      .toEqual(["duckdb-data", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("backup.tar.gz", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["archive-metadata-viewer"]);
+      .toEqual(["archive-metadata-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("unknown.binary", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["hex-viewer"]);
   });
 });

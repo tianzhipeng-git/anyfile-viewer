@@ -33,6 +33,7 @@ const deferredImplementationMarkers = [
   "正在读取 Excel 工作簿",
   "正在读取 PowerPoint 演示文稿",
   "__anyfile_archive_metadata_viewer_v1__",
+  "anyfile-hex-viewer__viewport",
 ];
 const bundledMarker = deferredImplementationMarkers.find((marker) => initialCode.includes(marker));
 if (bundledMarker) {

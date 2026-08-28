@@ -22,6 +22,7 @@
     "@anyfile/code-viewer": "*",
     "@anyfile/data-viewer": "*",
     "@anyfile/excel-viewer": "*",
+    "@anyfile/hex-viewer": "*",
     "@anyfile/pdf-viewer": "*",
     "@anyfile/powerpoint-viewer": "*",
     "@anyfile/sqlite-viewer": "*",
