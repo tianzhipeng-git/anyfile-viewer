@@ -1,10 +1,20 @@
-# Camera RAW viewer
+# 相机 RAW 查看器
 
-Stage 3 viewer for DNG, CR2, CR3, NEF, ARW and RAF.
+## 基本介绍
 
-- `libraw-wasm@1.6.0` runs locally and provides metadata, embedded preview extraction and basic 8-bit sRGB development.
-- The output uses camera white balance, camera matrix and file orientation. It is a basic preview, not color-managed editor output.
-- Input is limited to 256 MiB and decoded output to 64 Mi pixels.
-- Full development requires `/view` to be cross-origin isolated because the pinned LibRaw build uses pthread WebAssembly.
-- The wrapper is ISC-licensed. Its compiled dependencies retain their own notices, including LibRaw's CDDL-1.0/LGPL-2.1 dual license.
-- Probe level 3 is reserved for camera models backed by committed, redistributable real-camera fixtures; the verified list is intentionally empty until such fixtures are added.
+支持 DNG、CR2、CR3、NEF、ARW 和 RAF，可查看相机信息、内嵌预览，并在浏览器本地生成基础显影结果。
+
+## 实现原理
+
+插件先读取最多 1 MiB 文件头识别格式，再把完整文件交给 LibRaw WASM。优先显示内嵌缩略图，同时异步执行 8-bit sRGB 基础显影；显影使用相机白平衡、相机矩阵和文件方向。结果通过 Canvas 视口显示，并支持缩放、旋转和适应窗口。
+
+## 依赖
+
+`libraw-wasm@1.6.0` 负责本地 RAW 解析、元数据提取、缩略图提取和基础显影，其 pthread WASM 要求 `/view` 启用跨源隔离；内部依赖 `@anyfile/viewer-protocol` 和 `@anyfile/viewer-rendering`。
+
+## 已知限制
+
+- 输入最大 256 MiB，解码后最大 64 Mi 像素；完整文件会读入内存，解码初始化最多等待 60 秒。
+- 输出仅用于预览，不等同于具备完整色彩管理、镜头校正和编辑能力的专业 RAW 软件。
+- 当前没有可再分发的真实相机样例进入已验证型号清单，因此 probe 对识别出的文件保守返回代表性预览等级 2。
+- `libraw-wasm` 包装层采用 ISC 许可证；编译依赖仍保留各自许可证，包括 LibRaw 的 CDDL-1.0/LGPL-2.1 双许可证。

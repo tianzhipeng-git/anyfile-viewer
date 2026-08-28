@@ -1,17 +1,20 @@
-# Browser image viewer
+# 浏览器原生图片查看器
 
-浏览器原生栅格插件，完整支持 JPEG、PNG/APNG、GIF、WebP 和单帧 AVIF，并以浏览器实际解码能力近似支持 AVIF sequence、BMP/DIB 与 ICO/CUR。JPEG 的常见历史扩展名也会进入同一插件。实现使用 `<img>` 与 Object URL，浏览器负责动画、EXIF orientation 和可用的色彩管理；插件不创建 Canvas 像素副本。
+## 基本介绍
 
-## 读取与资源策略
+支持 JPEG、PNG/APNG、GIF、WebP、AVIF、BMP/DIB 和 ICO/CUR，并提供缩放、旋转、适应窗口及动画查看。
 
-- 原生 `<img>` 路径不设置固定的文件大小、像素、帧数或估算内存上限，实际可解码容量由当前浏览器和设备决定。
-- 插件只读取前 1 MiB 用于格式和基础元数据识别，再把原始 `File` 的 Object URL 交给浏览器；不会在 JavaScript 中复制完整编码文件或创建 RGBA 像素副本。
-- 超过头部读取范围的动画不展示可能不完整的帧数统计。
-- BMP/DIB、ICO/CUR 和 AVIF sequence 的浏览器实现存在变体差异，probe 返回等级 3；`open()` 以当前浏览器的真实解码结果为准。
+## 实现原理
 
-## 验收约定
+插件最多读取前 1 MiB 文件头识别格式和基础元数据，再为原始 `File` 创建 Object URL，交给浏览器 `<img>` 解码。浏览器负责动画、EXIF 方向和可用的色彩管理；插件不复制完整编码文件，也不创建 RGBA 像素副本。
 
-- `probe` 只做有界格式识别，不创建 Object URL，也不执行完整文件解码或导入完整查看器。
-- `open()` 重新检查有界文件头，并通过真实 `<img>` decode smoke test 后才挂载 UI。
-- 协议测试覆盖 opening abort、active abort、重复 dispose、容器 DOM 所有权和 Object URL 释放。
-- `examples/` 中的样例由仓库脚本生成，不包含第三方素材。
+## 依赖
+
+- 仅依赖浏览器原生图片解码能力，以及 `@anyfile/viewer-protocol`、`@anyfile/viewer-rendering`；没有第三方解码器或运行时网络请求。
+
+## 已知限制
+
+- 不设置固定的输入大小、像素或帧数上限，实际可解码容量取决于浏览器和设备。
+- BMP/DIB、ICO/CUR 和 AVIF sequence 的支持存在浏览器差异，probe 对这些格式保守返回主要内容等级 3。
+- 文件超过 1 MiB 时只检查头部范围，位于范围外的动画信息可能不会显示完整帧数；最终仍以 `<img>` 的实际解码结果为准。
+- 不提供逐帧控制、像素级检查或独立于浏览器的统一色彩输出。
