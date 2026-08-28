@@ -37,6 +37,10 @@ const deferredImplementationMarkers = [
   "anyfile-hex-viewer__viewport",
   "anyfile-image-viewer__viewport",
   "anyfile-general-raster-viewer__canvas",
+  "anyfile-modern-raster-viewer__canvas",
+  "anyfile-camera-raw-viewer__canvas",
+  "jxl-oxide-wasm",
+  "LibRaw disposed",
   "Unknown compression method identifier:",
 ];
 const bundledMarker = deferredImplementationMarkers.find((marker) => initialCode.includes(marker));
@@ -91,6 +95,14 @@ for (const asset of pdfSupportAssets) {
   const content = await readFile(join(pdfSupportRoot, asset)).catch(() => undefined);
   if (!content?.byteLength) throw new Error(`PDF.js support asset is missing: ${asset}`);
 }
+const librawPackage = JSON.parse(
+  await readFile(join(projectRoot, "node_modules/libraw-wasm/package.json"), "utf8"),
+);
+const librawSupportRoot = join(projectRoot, "public/vendor/libraw", librawPackage.version);
+for (const asset of ["index.js", "worker.js", "libraw.js", "libraw.wasm"]) {
+  const content = await readFile(join(librawSupportRoot, asset)).catch(() => undefined);
+  if (!content?.byteLength) throw new Error(`LibRaw runtime asset is missing: ${asset}`);
+}
 const forbiddenZipAsset = staticMedia
   .filter((entry) => entry.isFile())
   .map((entry) => entry.name)
@@ -105,3 +117,4 @@ console.log(
 console.log(
   `PDF.js Worker: ${pdfWorkerAsset}; support assets prepared for ${pdfjsPackage.version}; viewer implementation remains deferred`,
 );
+console.log(`LibRaw ${librawPackage.version}: same-origin Worker, pthread and WASM assets prepared; runtime remains deferred`);

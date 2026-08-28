@@ -51,9 +51,9 @@
 | BigTIFF | `.tf8` `.btf` `.btiff` `.tif` `.tiff` | general raster | 3 | implemented | 4 | 64-bit IFD probe 与解码路径已实现；缺少可再分发真实样例，暂不声明等级 4 |
 | pyramidal TIFF | `.ptif` `.ptiff` | general raster | 3–4 | implemented | 4 | 作为 tiled/multi-page TIFF 打开；能查看像素和页面，但不承诺厂商私有金字塔语义 |
 | OME-TIFF | `.ome.tif` `.ome.tiff` `.ome.tf2` `.ome.tf8` `.ome.btf` | general raster | 3 | implemented | 5 | 可查看 TIFF 像素和页面；暂不解释 OME-XML 的 Z/C/T 维度语义 |
-| HEVC HEIF/HEIC | `.heif` `.heic` | general raster | 0 | deferred | 3 | browser image probe 会拒绝非 AVIF brand；完整支持仍需评估 codec、许可、WASM 和运行时能力 |
-| JPEG XL | `.jxl` | general raster | 0 | deferred | 4 | 评估原生解码或自带 decoder 的可行性 |
-| 相机 RAW | `.dng` `.cr2` `.cr3` `.nef` `.arw` `.raf` | camera RAW | 0 | deferred | 2 | 首期倾向内嵌预览，完整显影另立目标 |
+| HEVC HEIF/HEIC | `.heif` `.heifs` `.hif` `.heic` | modern raster | 0 或 3 | implemented | 3 | 仅在原生 ImageDecoder 支持时进入候选；显示 primary image，不提供辅助项或序列导航 |
+| JPEG XL | `.jxl` | modern raster | 4 | implemented | 4 | 原生 ImageDecoder 优先，`jxl-oxide-wasm@0.12.6` Worker 回退；固定样例覆盖有损、无损 alpha 与动画 |
+| 相机 RAW | `.dng` `.cr2` `.cr3` `.nef` `.arw` `.raf` | camera RAW | 2 | implemented | 3 | 内嵌预览与 LibRaw 基础显影已实现；尚无满足门禁的真实相机验证型号，因此不返回等级 3 |
 | PSD/PSB | `.psd` `.psb` | layered document | 0 | deferred | 3 | 先合成预览与图层元数据 |
 | ORA/KRA | `.ora` `.kra` | layered document | 0 | deferred | 3 | 利用规范中的合成预览，不承诺编辑语义 |
 | DDS | `.dds` | GPU texture | 0 | deferred | 5 | mip、array、cubemap 和 BC family |

@@ -21,6 +21,14 @@ export const formats: FileFormat[] = [
   { extension: "gif", name: "GIF 动画图片", description: "支持调色板、透明索引与浏览器原生动画。", category: "images-video", native: true },
   { extension: "webp", name: "WebP 图片", description: "支持有损、无损、透明通道与动画。", category: "images-video", native: true },
   { extension: "avif", name: "AVIF 图片", description: "由当前浏览器原生解码的现代高压缩图片格式。", category: "images-video", native: true },
+  { extension: "jxl", name: "JPEG XL 图片", description: "通过浏览器原生能力或本地 WASM 查看单帧与动画图片。", category: "images-video", native: false },
+  { extension: "heic", name: "HEIC 图片", description: "在当前浏览器具备原生 HEIC 解码能力时查看主图像。", category: "images-video", native: true },
+  { extension: "dng", name: "DNG 相机 RAW", description: "查看内嵌预览并在本地执行基础 RAW 显影。", category: "images-video", native: false },
+  { extension: "cr2", name: "Canon CR2 RAW", description: "查看 Canon RAW 内嵌预览与基础显影。", category: "images-video", native: false },
+  { extension: "cr3", name: "Canon CR3 RAW", description: "查看 Canon CR3 主预览与基础显影。", category: "images-video", native: false },
+  { extension: "nef", name: "Nikon NEF RAW", description: "查看 Nikon RAW 内嵌预览与基础显影。", category: "images-video", native: false },
+  { extension: "arw", name: "Sony ARW RAW", description: "查看 Sony RAW 内嵌预览与基础显影。", category: "images-video", native: false },
+  { extension: "raf", name: "Fujifilm RAF RAW", description: "查看 Fujifilm RAW 内嵌预览与基础显影。", category: "images-video", native: false },
   { extension: "tga", name: "TGA 图片", description: "本地解码未压缩与 RLE 的传统栅格图片。", category: "images-video", native: false },
   { extension: "pnm", name: "Netpbm 图片", description: "查看 PBM、PGM、PPM 与 PAM 栅格图片。", category: "images-video", native: false },
   { extension: "tiff", name: "TIFF 图片", description: "分片读取常见压缩、分块与多页 TIFF。", category: "images-video", native: false },
@@ -53,7 +61,7 @@ export const formats: FileFormat[] = [
 ];
 
 export const categories: FileCategory[] = [
-  { slug: "images-video", name: "图片与视频", eyebrow: "看见每个细节", description: "通过浏览器原生能力或本地 Worker 解码查看图片与媒体。", extensions: ["png", "apng", "jpg", "gif", "webp", "avif", "tga", "pnm", "tiff", "svg", "mp4", "webm"] },
+  { slug: "images-video", name: "图片与视频", eyebrow: "看见每个细节", description: "通过浏览器原生能力或本地 Worker 解码查看图片与媒体。", extensions: ["png", "apng", "jpg", "gif", "webp", "avif", "jxl", "heic", "dng", "cr2", "cr3", "nef", "arw", "raf", "tga", "pnm", "tiff", "svg", "mp4", "webm"] },
   { slug: "documents", name: "文档", eyebrow: "阅读，不必等待", description: "在本地打开文档、表格与演示资料，不经过上传队列。", extensions: ["pdf", "docx", "xlsx", "xls", "xlsb", "ods", "pptx"] },
   { slug: "code-data", name: "代码与数据", eyebrow: "让结构清晰可见", description: "检查文本、代码和结构化数据，适合快速排错与校验。", extensions: ["md", "json", "jsonl", "csv", "tsv", "parquet", "arrow", "duckdb", "sqlite", "html"] },
   { slug: "3d", name: "3D", eyebrow: "在浏览器里转动模型", description: "以 WebGL 与 WebGPU 为基础，浏览网格、材质和场景。", extensions: ["obj", "gltf", "stl"] },

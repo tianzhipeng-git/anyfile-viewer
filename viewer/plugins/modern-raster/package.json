@@ -1,0 +1,22 @@
+{
+  "name": "@anyfile/modern-raster-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts",
+    "./probe": "./src/probe.ts"
+  },
+  "scripts": { "test": "vitest run", "generate:examples": "node scripts/generate-examples.mjs" },
+  "dependencies": {
+    "@anyfile/viewer-protocol": "*",
+    "@anyfile/viewer-rendering": "*",
+    "jxl-oxide-wasm": "0.12.6"
+  },
+  "devDependencies": {
+    "@anyfile/viewer-test": "*",
+    "happy-dom": "20.11.6",
+    "vitest": "4.1.11"
+  }
+}

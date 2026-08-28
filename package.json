@@ -4,6 +4,7 @@
   "private": true,
   "workspaces": [
     "viewer/protocol",
+    "viewer/rendering",
     "viewer/testing",
     "viewer/ui",
     "viewer/plugins/*"
@@ -11,7 +12,7 @@
   "scripts": {
     "prepare:pdfjs": "node scripts/prepare-pdfjs-assets.mjs",
     "dev": "npm run prepare:pdfjs && next dev",
-    "build": "npm run prepare:pdfjs && next build && npm run check:bundle",
+    "build": "npm run prepare:pdfjs && next build --webpack && npm run check:bundle",
     "check:bundle": "node scripts/check-view-bundle.mjs",
     "start": "next start",
     "lint": "eslint",
@@ -26,9 +27,12 @@
     "@anyfile/general-raster-viewer": "*",
     "@anyfile/hex-viewer": "*",
     "@anyfile/browser-image-viewer": "*",
+    "@anyfile/camera-raw-viewer": "*",
+    "@anyfile/modern-raster-viewer": "*",
     "@anyfile/pdf-viewer": "*",
     "@anyfile/powerpoint-viewer": "*",
     "@anyfile/sqlite-viewer": "*",
+    "@anyfile/viewer-rendering": "*",
     "@anyfile/viewer-protocol": "*",
     "@anyfile/word-viewer": "*",
     "@base-ui/react": "^1.7.0",

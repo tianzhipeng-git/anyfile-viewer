@@ -23,3 +23,11 @@ for (const fileName of [
 ]) {
   await cp(join(pdfjsRoot, "wasm", fileName), join(wasmTarget, fileName));
 }
+
+const librawRoot = join(projectRoot, "node_modules/libraw-wasm");
+const librawPackage = JSON.parse(await readFile(join(librawRoot, "package.json"), "utf8"));
+const librawTarget = join(projectRoot, "public/vendor/libraw", librawPackage.version);
+await mkdir(librawTarget, { recursive: true });
+for (const fileName of ["index.js", "worker.js", "libraw.js", "libraw.wasm"]) {
+  await cp(join(librawRoot, "dist", fileName), join(librawTarget, fileName));
+}

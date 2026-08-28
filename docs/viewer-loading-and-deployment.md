@@ -120,6 +120,8 @@ worker-src 'self' blob:
 | PowerPoint 查看器 | `@aiden0z/pptx-renderer` | `1.2.4` |
 | SQLite 查看器 | `sql.js` | `1.14.2` |
 | 通用栅格查看器 | `geotiff` | `3.0.5` |
+| 现代栅格查看器 | `jxl-oxide-wasm` | `0.12.6` |
+| 相机 RAW 查看器 | `libraw-wasm` | `1.6.0` |
 
 `package-lock.json` 使用 lockfile v3，锁定其余直接依赖和全部传递依赖的实际版本、下载地址与完整性哈希。根项目中的 `^` 版本不会在 `npm ci` 时漂移。
 
@@ -145,6 +147,20 @@ npm run build
 - 检查 Ace、DuckDB、SQLite、PDF、Word、Excel 和 PowerPoint 实现标记没有进入初始 JavaScript。
 - 检查新增 probe 及其解析依赖没有进入初始 JavaScript；probe chunk 也不能静态带入完整插件实现。
 - 检查 PDF.js Worker 已产出，且版本化 CMap、标准字体、ICC、WASM 和 JavaScript 解码回退齐全。
+- 检查 JXL 与 RAW 的 Worker/WASM 没有进入 `/view` 初始 JavaScript，并且只在对应插件完整入口加载。
+
+### 相机 RAW 的跨源隔离
+
+`libraw-wasm@1.6.0` 的 pthread 构建要求 `crossOriginIsolated`。`/view` 单独返回：
+
+```text
+Cross-Origin-Opener-Policy: same-origin
+Cross-Origin-Embedder-Policy: require-corp
+```
+
+部署层不得丢弃这两个响应头。启用或调整 CSP 时还需要允许同源 Worker 和 WebAssembly；同时回归 DuckDB 的 jsDelivr 与本地回退资源能在 COEP 下加载。
+
+生产构建显式使用 Next.js 支持的 `next build --webpack`。`libraw-wasm` 的 Emscripten pthread runtime 在当前 Next.js 16.3.3 Turbopack 生产构建中会停留在 chunk 生成阶段。构建前将其官方 `dist` 中的入口、Worker、pthread 脚本和 WASM 原样复制到版本化同源目录，RAW 插件打开文件时才通过 URL 动态导入。生产构建使用 Webpack，开发服务仍保留 Next.js 默认的 Turbopack。
 
 新增或升级插件不应通过提高上限来绕过失败。先检查是否误用了静态导入、顶层副作用或把实现代码放进了 manifest。
 

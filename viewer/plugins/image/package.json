@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@anyfile/viewer-rendering": "*",
     "@anyfile/viewer-protocol": "*"
   },
   "devDependencies": {

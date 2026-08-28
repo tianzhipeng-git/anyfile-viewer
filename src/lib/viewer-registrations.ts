@@ -1,10 +1,12 @@
 import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
+import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
+import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
@@ -24,6 +26,28 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/browser-image-viewer");
       return viewerPackage.browserImageViewer;
+    },
+  },
+  {
+    manifest: modernRasterManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/modern-raster-viewer/probe");
+      return probePackage.probeModernRaster(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/modern-raster-viewer");
+      return viewerPackage.modernRasterViewer;
+    },
+  },
+  {
+    manifest: cameraRawManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/camera-raw-viewer/probe");
+      return probePackage.probeCameraRaw(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/camera-raw-viewer");
+      return viewerPackage.cameraRawViewer;
     },
   },
   {

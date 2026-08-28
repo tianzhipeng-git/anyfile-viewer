@@ -79,6 +79,7 @@ File / WorkspaceReader
 | browser image | JPEG、PNG、GIF/APNG、WebP、AVIF | `<img>` 和浏览器原生解码 |
 | safe vector image | SVG、SVGZ | 主动内容隔离后的浏览器渲染 |
 | general raster | TIFF、TGA、PNM、PCX、ICO/ICNS | JS/WASM decoder + Canvas |
+| modern raster | JPEG XL、HEVC HEIF/HEIC | 原生 ImageDecoder 或格式专属 WASM + Canvas |
 | camera RAW | DNG、CR2/CR3、NEF、ARW、RAF | 内嵌预览或 RAW pipeline |
 | layered document | PSD/PSB、ORA、KRA、XCF | 合成预览、图层模型和增量合成 |
 | GPU texture | DDS、KTX/KTX2、Basis | 转码、mip/face 选择和 GPU renderer |
@@ -157,7 +158,7 @@ File / WorkspaceReader
 
 当前 `@anyfile/viewer-ui` 是原生 DOM、零运行时依赖的实现。Lit 是否适合未来复杂组件需要单独评估，不是图片查看器的前置条件。
 
-`viewer-rendering` 当前仍是提案。第一款图片插件可以在插件内部保留最小实现；出现第二个真实 Canvas 调用方并确认重复后，再提取公共代码。
+`@anyfile/viewer-rendering` 已在阶段 3 按真实重复提取 viewport、输入绑定、Canvas DPR surface、帧调度和资源清理。格式像素契约、工具栏 DOM 和 decoder 生命周期仍留在插件内部，不扩展为万能图片中间表示。
 
 ## 9. 色彩和领域变换
 
@@ -220,4 +221,4 @@ HDR：high-range color → profile/transfer handling
 - 科学/医学 IO：[ITK-Wasm](https://docs.itk.org/projects/wasm/en/latest/)
 - GPU texture：[KTX-Software](https://github.com/KhronosGroup/KTX-Software)
 
-采用任何候选项之前都要验证许可证、维护状态、所需运行时能力、包体积、Worker/WASM 部署和 dispose 能力。
+采用任何候选项之前都要验证维护状态、所需运行时能力、包体积、Worker/WASM 部署和 dispose 能力。
