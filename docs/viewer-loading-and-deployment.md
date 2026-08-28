@@ -16,14 +16,16 @@ Client Component: FileWorkspace / ViewerHost
                 │
                 ├── 服务端预渲染时：只读取纯数据 manifest
                 │
-                └── 浏览器选择文件后：registration.load() 动态加载插件实现
+                └── 浏览器选择文件后
+                    ├── 候选 registration.probe()：按需加载轻量 probe
+                    └── registration.load()：按需加载选中的完整插件
 ```
 
 必须保持以下规则：
 
 - `manifest.ts` 只能包含纯数据和类型，不得在模块顶层访问 `window`、`document`、`navigator`、`Worker` 或 `WebAssembly`。
-- 网站外壳只能静态导入插件的 `/manifest` 导出；插件实现必须通过注册项中的 `import()` 动态加载。
-- File System Access API、Worker、WASM 和 DOM 操作只能发生在事件处理、effect 或插件的 `open()` 中。
+- 网站外壳只能静态导入插件的 `/manifest` 导出；probe 和完整插件实现必须通过注册项中的 `import()` 动态加载。
+- File System Access API、文件 probe、Worker、WASM 和 DOM 操作只能发生在浏览器事件处理、effect、注册项 `probe()` 或插件 `open()` 中。
 - 不要从 Server Component、layout、page 或网站外壳静态导入插件根入口。
 - Server Component 传给 Client Component 的 props 必须可序列化；本地 `File` 和 `FileSystemHandle` 只能由浏览器取得并保留在客户端。
 
@@ -35,15 +37,30 @@ Client Component: FileWorkspace / ViewerHost
 
 ## 2. 插件级按需加载
 
-`src/lib/viewer-registrations.ts` 是插件加载入口。每个插件由一个轻量 manifest 和一个动态实现组成。
+`src/lib/viewer-registrations.ts` 是插件加载入口。每个插件由一个轻量 manifest、一个可选的动态 probe 和一个动态完整实现组成。
+
+```text
+manifest
+└── 启动时静态加载，只含纯数据
+
+probe（可选）
+└── 扩展名成为候选后动态加载，只计算当前文件的支持等级
+
+完整插件
+└── 成为默认项或被用户选择后动态加载，负责 open() 和渲染
+```
+
+Probe 必须保持轻量。它可以分片读取必要文件头或容器结构，但不能为了路由初始化完整 renderer、重型 Worker/WASM 或执行完整文件解析。确实需要某个小型解析依赖才能判断支持等级时，该依赖只能进入 probe chunk 和对应插件 chunk，不能进入网站首包或无关插件。
 
 SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 DuckDB 或 Apache Arrow。DuckDB 数据插件处理 CSV、TSV、JSON、Parquet、Arrow 和 DuckDB 数据库，不包含 SQLite 路径。
 
 新增插件时必须：
 
-1. 为 manifest 和实现保留不同的导出路径。
-2. 在注册表中静态导入 manifest、动态导入实现；注册顺序遵循「专用在上、通用在下」。
-3. 运行 `npm run build`，确认首包体积检查通过。
+1. 为 manifest 和完整实现保留不同的导出路径；需要 probe 时再增加独立 `/probe` 导出。
+2. 在注册表中静态导入 manifest，通过 `import()` 动态导入 probe 和完整实现。
+3. 不需要精确路由的插件省略 probe，以默认支持等级 1 参与排序。
+4. 注册顺序只作为同支持等级候选的稳定 tie-break；通用兜底插件仍放在末尾。
+5. 运行 `npm run build`，确认首包体积检查通过。
 
 ### PDF.js 支持资源
 
@@ -125,6 +142,7 @@ npm run build
 - 分别计算传输时的 gzip 体积。
 - 当前上限为 225 KiB。
 - 检查 Ace、DuckDB、SQLite、PDF、Word、Excel 和 PowerPoint 实现标记没有进入初始 JavaScript。
+- 检查新增 probe 及其解析依赖没有进入初始 JavaScript；probe chunk 也不能静态带入完整插件实现。
 - 检查 PDF.js Worker 已产出，且版本化 CMap、标准字体、ICC、WASM 和 JavaScript 解码回退齐全。
 
 新增或升级插件不应通过提高上限来绕过失败。先检查是否误用了静态导入、顶层副作用或把实现代码放进了 manifest。
@@ -134,6 +152,8 @@ npm run build
 - 使用 `npm ci` 从 lockfile 安装。
 - `npm test`、`npm run lint`、`npm run build` 全部通过。
 - `/view` 仍能完成 SSG 构建；若改为 SSR，服务端日志中没有 CDN、Worker 或 WASM 初始化。
+- 候选插件的 probe 只在用户选择文件后加载，完成顺序不影响支持等级排序。
+- 不带 probe 的插件不会产生额外请求，并以默认支持等级 1 排序。
 - 分别打开 SQLite 和 DuckDB 文件，确认只请求对应插件资源。
 - 打开包含扫描图、复合字体、ICC 配置和密码保护的 PDF，确认支持资源按需加载且密码界面可用。
 - 在正常网络下确认 DuckDB 使用带精确版本号的 jsDelivr URL。

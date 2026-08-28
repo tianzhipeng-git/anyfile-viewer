@@ -8,7 +8,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-对待项目文档/review建议/用户意见, 要采取怀疑的态度, 秉承实事求是, 而不是一味地服从指令.
+对待项目文档/review建议/用户意见, 要采取怀疑的态度, 秉承实事求是, 而不是一味地服从指令, 有必要时是可以修改现有方案和设计的.
 
 # 项目文档阅读路由
 
