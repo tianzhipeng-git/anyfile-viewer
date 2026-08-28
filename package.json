@@ -23,6 +23,7 @@
     "@anyfile/code-viewer": "*",
     "@anyfile/data-viewer": "*",
     "@anyfile/excel-viewer": "*",
+    "@anyfile/general-raster-viewer": "*",
     "@anyfile/hex-viewer": "*",
     "@anyfile/browser-image-viewer": "*",
     "@anyfile/pdf-viewer": "*",

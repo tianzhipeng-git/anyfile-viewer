@@ -2,6 +2,7 @@ import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manife
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
+import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
@@ -23,6 +24,17 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/browser-image-viewer");
       return viewerPackage.browserImageViewer;
+    },
+  },
+  {
+    manifest: generalRasterManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/general-raster-viewer/probe");
+      return probePackage.probeGeneralRaster(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/general-raster-viewer");
+      return viewerPackage.generalRasterViewer;
     },
   },
   {

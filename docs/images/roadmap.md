@@ -1,6 +1,6 @@
 # 图片查看实施路线图
 
-- 状态：阶段 0、阶段 1 已完成；阶段 2 待产品优先级确认
+- 状态：阶段 0、阶段 1、阶段 2已完成验收
 - 原则：每阶段产生一个可验证的用户能力，不以创建抽象层作为完成目标
 
 ## 1. 排序方法
@@ -75,6 +75,16 @@ SVG 不自动包含在此阶段，因为它有独立的主动内容和外部资�
 - 支持矩阵更新为实际验证结果。
 
 ## 4. 阶段 2：自定义栅格解码试点
+
+### 实施结果（2026-08-28）
+
+- 新增独立 `general-raster` 插件，覆盖 TGA、P1–P7 Netpbm 和已验证 classic TIFF 子集，并让相同底层结构的 TGA 别名、BigTIFF、pyramidal TIFF、GeoTIFF 与 OME-TIFF 进入候选；不完整的领域语义通过动态 probe 降级，而不是从 Manifest 排除。BigTIFF 因缺少可再分发真实样例暂按等级 3。
+- TGA/Netpbm 使用插件内 decoder；TIFF 使用锁定的 `geotiff@3.0.5`（MIT）。完整 decoder、Worker、Canvas UI 与 TIFF 依赖均不进入 manifest 或 probe chunk。
+- 解码在专用 Worker 中执行，宿主取消时终止 Worker；RGBA8 非预乘缓冲通过 transferable 返回主线程。
+- Canvas 视口实现 DPR、ResizeObserver、`requestAnimationFrame` 合并重绘、fit/actual、缩放、平移、旋转和幂等资源释放；第一款 Canvas 插件仍保留局部实现，未提前提取公共包。
+- TIFF 使用 Blob 分片读取，支持 strip/tile、多页及固定样例覆盖的 None、LZW、Deflate、PackBits、JPEG 压缩；ICC 只识别不转换的文件动态降为等级 3 并明确提示。
+- 应用层边界为 TGA/Netpbm 输入 256 MiB、单页 64 Mi 像素、TIFF 1024 页、Canvas 单边 8192 物理像素；所有像素分配前检查安全整数和边界。
+- 固定真实样例、损坏/截断样例、协议生命周期、生产构建和首包门禁均通过。当前自动化浏览器无法访问本机服务，因此窄/矮窗口、高 DPR、真实 Worker 与多页交互的手工 Chromium 验收仍需在可连接环境补跑，不据此标记为 `verified`。
 
 ### 建议顺序
 

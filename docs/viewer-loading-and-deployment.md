@@ -119,6 +119,7 @@ worker-src 'self' blob:
 | Excel 查看器 | `xlsx` | `0.20.3` |
 | PowerPoint 查看器 | `@aiden0z/pptx-renderer` | `1.2.4` |
 | SQLite 查看器 | `sql.js` | `1.14.2` |
+| 通用栅格查看器 | `geotiff` | `3.0.5` |
 
 `package-lock.json` 使用 lockfile v3，锁定其余直接依赖和全部传递依赖的实际版本、下载地址与完整性哈希。根项目中的 `^` 版本不会在 `npm ci` 时漂移。
 

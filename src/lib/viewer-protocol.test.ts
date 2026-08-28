@@ -159,7 +159,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-image", "pdfjs-pdf", "sqlite-database"]);
+      .toEqual(["browser-image", "general-raster", "pdfjs-pdf", "sqlite-database"]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -199,6 +199,16 @@ describe("viewer protocol", () => {
   it("keeps specialized viewers ahead of archive metadata and hex fallback", () => {
     expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "hex-viewer"]);
+    expect(findViewerRegistrations("scan.tiff", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["general-raster", "hex-viewer"]);
+    expect(findViewerRegistrations("scan.tf8", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["general-raster", "hex-viewer"]);
+    expect(findViewerRegistrations("slide.ome.tiff", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["general-raster", "hex-viewer"]);
+    expect(findViewerRegistrations("map.geotiff", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["general-raster", "hex-viewer"]);
+    expect(findViewerRegistrations("texture.vst", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["general-raster", "hex-viewer"]);
     expect(findViewerRegistrations("report.docx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["word-document", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("slides.pptx", viewerRegistrations).map(({ manifest: item }) => item.id))

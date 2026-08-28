@@ -36,6 +36,8 @@ const deferredImplementationMarkers = [
   "__anyfile_archive_metadata_viewer_v1__",
   "anyfile-hex-viewer__viewport",
   "anyfile-image-viewer__viewport",
+  "anyfile-general-raster-viewer__canvas",
+  "Unknown compression method identifier:",
 ];
 const bundledMarker = deferredImplementationMarkers.find((marker) => initialCode.includes(marker));
 if (bundledMarker) {

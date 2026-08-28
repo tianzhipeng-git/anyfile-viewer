@@ -21,6 +21,9 @@ export const formats: FileFormat[] = [
   { extension: "gif", name: "GIF 动画图片", description: "支持调色板、透明索引与浏览器原生动画。", category: "images-video", native: true },
   { extension: "webp", name: "WebP 图片", description: "支持有损、无损、透明通道与动画。", category: "images-video", native: true },
   { extension: "avif", name: "AVIF 图片", description: "由当前浏览器原生解码的现代高压缩图片格式。", category: "images-video", native: true },
+  { extension: "tga", name: "TGA 图片", description: "本地解码未压缩与 RLE 的传统栅格图片。", category: "images-video", native: false },
+  { extension: "pnm", name: "Netpbm 图片", description: "查看 PBM、PGM、PPM 与 PAM 栅格图片。", category: "images-video", native: false },
+  { extension: "tiff", name: "TIFF 图片", description: "分片读取常见压缩、分块与多页 TIFF。", category: "images-video", native: false },
   { extension: "svg", name: "SVG 矢量图", description: "可缩放、可检查源码的矢量图形。", category: "images-video", native: true },
   { extension: "mp4", name: "MP4 视频", description: "浏览器广泛支持的视频容器格式。", category: "images-video", native: true },
   { extension: "webm", name: "WebM 视频", description: "面向 Web 的开放视频格式。", category: "images-video", native: true },
@@ -50,7 +53,7 @@ export const formats: FileFormat[] = [
 ];
 
 export const categories: FileCategory[] = [
-  { slug: "images-video", name: "图片与视频", eyebrow: "看见每个细节", description: "直接调用浏览器的图像解码、媒体播放与 WebCodecs 能力。", extensions: ["png", "apng", "jpg", "gif", "webp", "avif", "svg", "mp4", "webm"] },
+  { slug: "images-video", name: "图片与视频", eyebrow: "看见每个细节", description: "通过浏览器原生能力或本地 Worker 解码查看图片与媒体。", extensions: ["png", "apng", "jpg", "gif", "webp", "avif", "tga", "pnm", "tiff", "svg", "mp4", "webm"] },
   { slug: "documents", name: "文档", eyebrow: "阅读，不必等待", description: "在本地打开文档、表格与演示资料，不经过上传队列。", extensions: ["pdf", "docx", "xlsx", "xls", "xlsb", "ods", "pptx"] },
   { slug: "code-data", name: "代码与数据", eyebrow: "让结构清晰可见", description: "检查文本、代码和结构化数据，适合快速排错与校验。", extensions: ["md", "json", "jsonl", "csv", "tsv", "parquet", "arrow", "duckdb", "sqlite", "html"] },
   { slug: "3d", name: "3D", eyebrow: "在浏览器里转动模型", description: "以 WebGL 与 WebGPU 为基础，浏览网格、材质和场景。", extensions: ["obj", "gltf", "stl"] },
