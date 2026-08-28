@@ -32,6 +32,7 @@ const deferredImplementationMarkers = [
   "正在读取 Word 文档",
   "正在读取 Excel 工作簿",
   "正在读取 PowerPoint 演示文稿",
+  "anyfile-pdf-viewer__viewport",
   "__anyfile_archive_metadata_viewer_v1__",
   "anyfile-hex-viewer__viewport",
 ];
@@ -62,6 +63,31 @@ if (archiveChunks.length === 0) {
 }
 
 const staticMedia = await readdir(join(projectRoot, ".next/static/media"), { withFileTypes: true }).catch(() => []);
+const pdfWorkerAsset = staticMedia
+  .filter((entry) => entry.isFile())
+  .map((entry) => entry.name)
+  .find((fileName) => /^pdf\.worker\.min\..+\.mjs$/i.test(fileName));
+if (!pdfWorkerAsset) {
+  throw new Error("PDF.js Worker asset was not emitted");
+}
+const pdfjsPackage = JSON.parse(
+  await readFile(join(projectRoot, "node_modules/pdfjs-dist/package.json"), "utf8"),
+);
+const pdfSupportRoot = join(projectRoot, "public/vendor/pdfjs", pdfjsPackage.version);
+const pdfSupportAssets = [
+  "cmaps/Adobe-CNS1-UCS2.bcmap",
+  "standard_fonts/LiberationSans-Regular.ttf",
+  "iccs/CGATS001Compat-v2-micro.icc",
+  "wasm/jbig2.wasm",
+  "wasm/jbig2_nowasm_fallback.js",
+  "wasm/openjpeg.wasm",
+  "wasm/openjpeg_nowasm_fallback.js",
+  "wasm/qcms_bg.wasm",
+];
+for (const asset of pdfSupportAssets) {
+  const content = await readFile(join(pdfSupportRoot, asset)).catch(() => undefined);
+  if (!content?.byteLength) throw new Error(`PDF.js support asset is missing: ${asset}`);
+}
 const forbiddenZipAsset = staticMedia
   .filter((entry) => entry.isFile())
   .map((entry) => entry.name)
@@ -72,4 +98,7 @@ if (forbiddenZipAsset) {
 
 console.log(
   `Archive viewer implementation: ${(archiveGzipBytes / 1024).toFixed(1)} KiB gzip across ${archiveChunks.length} deferred chunks; no zip.js Worker/WASM assets`,
+);
+console.log(
+  `PDF.js Worker: ${pdfWorkerAsset}; support assets prepared for ${pdfjsPackage.version}; viewer implementation remains deferred`,
 );

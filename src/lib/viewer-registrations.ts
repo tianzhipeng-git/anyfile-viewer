@@ -14,20 +14,6 @@ import {
 
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
   {
-    manifest: dataManifest,
-    async load() {
-      const viewerPackage = await import("@anyfile/data-viewer");
-      return viewerPackage.dataViewer;
-    },
-  },
-  {
-    manifest: codeManifest,
-    async load() {
-      const viewerPackage = await import("@anyfile/code-viewer");
-      return viewerPackage.codeViewer;
-    },
-  },
-  {
     manifest: pdfManifest,
     async load() {
       const viewerPackage = await import("@anyfile/pdf-viewer");
@@ -56,10 +42,24 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     },
   },
   {
+    manifest: codeManifest,
+    async load() {
+      const viewerPackage = await import("@anyfile/code-viewer");
+      return viewerPackage.codeViewer;
+    },
+  },
+  {
     manifest: sqliteManifest,
     async load() {
       const viewerPackage = await import("@anyfile/sqlite-viewer");
       return viewerPackage.sqliteViewer;
+    },
+  },
+  {
+    manifest: dataManifest,
+    async load() {
+      const viewerPackage = await import("@anyfile/data-viewer");
+      return viewerPackage.dataViewer;
     },
   },
   {

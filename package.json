@@ -9,8 +9,9 @@
     "viewer/plugins/*"
   ],
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && npm run check:bundle",
+    "prepare:pdfjs": "node scripts/prepare-pdfjs-assets.mjs",
+    "dev": "npm run prepare:pdfjs && next dev",
+    "build": "npm run prepare:pdfjs && next build && npm run check:bundle",
     "check:bundle": "node scripts/check-view-bundle.mjs",
     "start": "next start",
     "lint": "eslint",

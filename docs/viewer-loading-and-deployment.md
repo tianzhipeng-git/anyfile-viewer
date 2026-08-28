@@ -42,8 +42,23 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 新增插件时必须：
 
 1. 为 manifest 和实现保留不同的导出路径。
-2. 在注册表中静态导入 manifest、动态导入实现。
+2. 在注册表中静态导入 manifest、动态导入实现；注册顺序遵循「专用在上、通用在下」。
 3. 运行 `npm run build`，确认首包体积检查通过。
+
+### PDF.js 支持资源
+
+PDF 插件实现保持动态加载。`npm run dev` 和 `npm run build` 会先运行
+`scripts/prepare-pdfjs-assets.mjs`，把已锁定版本 `pdfjs-dist` 的以下官方资源复制到
+`public/vendor/pdfjs/<version>/`：
+
+- `cmaps/`：复合字体的字符映射；
+- `standard_fonts/`：PDF 标准字体的本地字体数据；
+- `iccs/`：ICC 色彩配置；
+- `wasm/`：JBIG2、OpenJPEG、QCMS 以及 PDF.js 官方 JavaScript 解码回退。
+
+这些资源保持 PDF.js 发布包中的目录与文件名，浏览器只在具体 PDF 用到相应能力时按需请求。
+资源与用户文件都走同源，不依赖 CDN；版本目录避免依赖升级后缓存混用。该目录是生成产物，
+不提交仓库，但生产构建必须包含准备步骤。
 
 ## 3. 体积较大的WASM 的 jsDelivr 与本地回退
 
@@ -79,6 +94,7 @@ worker-src 'self' blob:
 
 | 插件 | 关键依赖 | 版本 |
 |---|---|---:|
+| PDF 查看器 | `pdfjs-dist` | `6.2.108` |
 | 代码查看器 | `ace-builds` | `1.44.0` |
 | DuckDB 数据查看器 | `@duckdb/duckdb-wasm` | `1.32.0` |
 | DuckDB 数据查看器 | `apache-arrow` | `17.0.0` |
@@ -108,7 +124,8 @@ npm run build
 - 从 `/view` 的预渲染 HTML 读取真实初始脚本列表。
 - 分别计算传输时的 gzip 体积。
 - 当前上限为 225 KiB。
-- 检查 Ace、DuckDB、SQLite、Word、Excel 和 PowerPoint 实现标记没有进入初始 JavaScript。
+- 检查 Ace、DuckDB、SQLite、PDF、Word、Excel 和 PowerPoint 实现标记没有进入初始 JavaScript。
+- 检查 PDF.js Worker 已产出，且版本化 CMap、标准字体、ICC、WASM 和 JavaScript 解码回退齐全。
 
 新增或升级插件不应通过提高上限来绕过失败。先检查是否误用了静态导入、顶层副作用或把实现代码放进了 manifest。
 
@@ -118,6 +135,7 @@ npm run build
 - `npm test`、`npm run lint`、`npm run build` 全部通过。
 - `/view` 仍能完成 SSG 构建；若改为 SSR，服务端日志中没有 CDN、Worker 或 WASM 初始化。
 - 分别打开 SQLite 和 DuckDB 文件，确认只请求对应插件资源。
+- 打开包含扫描图、复合字体、ICC 配置和密码保护的 PDF，确认支持资源按需加载且密码界面可用。
 - 在正常网络下确认 DuckDB 使用带精确版本号的 jsDelivr URL。
 - 阻断 `cdn.jsdelivr.net` 后确认 DuckDB 可以使用本站资源打开文件。
 - 部署 CSP 后，在 Chrome、Edge、Firefox 和 Safari 的目标版本验证 Worker/WASM。
