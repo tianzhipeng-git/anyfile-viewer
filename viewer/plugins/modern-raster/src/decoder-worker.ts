@@ -1,7 +1,7 @@
 /// <reference lib="webworker" />
 
 import { ViewerError } from "@anyfile/viewer-protocol";
-import { MAX_JXL_FRAMES, MAX_JXL_SOURCE_BYTES, checkDimensions } from "./limits";
+import { MAX_JXL_FRAMES, MAX_MODERN_RASTER_SOURCE_BYTES, checkDimensions } from "./limits";
 import type { JxlWorkerRequest, JxlWorkerResponse } from "./types";
 
 const worker = self as unknown as DedicatedWorkerGlobalScope;
@@ -22,7 +22,7 @@ function renderFrame(frameIndex: number) {
 }
 
 async function openJxl(file: File) {
-  if (file.size > MAX_JXL_SOURCE_BYTES) throw new ViewerError("resource-limit", "JPEG XL 文件超过 256 MiB 输入上限。");
+  if (file.size > MAX_MODERN_RASTER_SOURCE_BYTES) throw new ViewerError("resource-limit", "JPEG XL 文件超过 256 MiB 输入上限。");
   const jxlPackage = await import("jxl-oxide-wasm");
   await jxlPackage.default();
   image?.free();

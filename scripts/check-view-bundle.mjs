@@ -98,6 +98,14 @@ for (const asset of pdfSupportAssets) {
 const librawPackage = JSON.parse(
   await readFile(join(projectRoot, "node_modules/libraw-wasm/package.json"), "utf8"),
 );
+const librawDecoderSource = await readFile(
+  join(projectRoot, "viewer/plugins/camera-raw/src/raw-decoder.ts"),
+  "utf8",
+);
+const librawRuntimeVersion = librawDecoderSource.match(/\/vendor\/libraw\/([^/"']+)\/index\.js/)?.[1];
+if (librawRuntimeVersion !== librawPackage.version) {
+  throw new Error(`LibRaw runtime URL version ${librawRuntimeVersion ?? "is missing"}; installed version is ${librawPackage.version}`);
+}
 const librawSupportRoot = join(projectRoot, "public/vendor/libraw", librawPackage.version);
 for (const asset of ["index.js", "worker.js", "libraw.js", "libraw.wasm"]) {
   const content = await readFile(join(librawSupportRoot, asset)).catch(() => undefined);

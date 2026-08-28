@@ -93,6 +93,7 @@
 
 ## 7. 阶段 3 验证证据
 
+- modern-raster 的 JPEG XL 与 HEIC 输入上限为 256 MiB，解码后上限为 64 Mi 像素；JPEG XL 另外限制为 4096 个关键帧。
 - 真实浏览器手工验收（2026-08-29）：`viewer/plugins/modern-raster/examples/` 中全部正常、损坏和截断样例均通过，覆盖 HEVC HEIC primary image，以及 JPEG XL 有损、无损 alpha 和两帧动画。
 - 桌面真实文件手工验收（2026-08-29）：`raw_images/` 中 16 个文件全部通过；其中 13 个相机 RAW 文件覆盖 DNG、CR2、CRW、NEF、ARW、RWL、RAW、RW2，另外覆盖 PGM、PAM 和 JPEG XL。该结果确认 RAW 当前等级 2，不构成型号级回归语料，也不将 RAW 提升为等级 3。
 

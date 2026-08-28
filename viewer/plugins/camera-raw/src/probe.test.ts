@@ -30,4 +30,12 @@ describe("camera RAW probe", () => {
   it("rejects extensions with the wrong container", async () => {
     expect(await probeCameraRaw({ file: new File(["bad"], "fake.nef"), signal: new AbortController().signal })).toBe(0);
   });
+
+  it("ignores oversized TIFF camera strings without breaking format detection", () => {
+    const bytes = new Uint8Array(200_064); const view = new DataView(bytes.buffer);
+    bytes.set([73, 73]); view.setUint16(2, 42, true); view.setUint32(4, 8, true); view.setUint16(8, 2, true);
+    view.setUint16(10, 271, true); view.setUint16(12, 2, true); view.setUint32(14, 200_000, true); view.setUint32(18, 40, true);
+    view.setUint16(22, 50706, true); view.setUint16(24, 1, true); view.setUint32(26, 4, true); bytes.set([1, 6, 0, 0], 30);
+    expect(inspectRawHeader(bytes, "oversized-make.dng")).toMatchObject({ format: "DNG", make: undefined });
+  });
 });

@@ -1,5 +1,5 @@
 import { ViewerError, type FileViewerPlugin, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
-import { checkDimensions, MAX_JXL_FRAMES } from "./limits";
+import { checkDimensions, MAX_JXL_FRAMES, MAX_MODERN_RASTER_SOURCE_BYTES } from "./limits";
 import { modernRasterManifest } from "./manifest";
 import { NativeImageSequence } from "./native";
 import { inspectModernHeader } from "./probe-format";
@@ -63,6 +63,7 @@ async function openModernRaster(context: OpenViewerContext): Promise<ViewerContr
 
   try {
     if (signal.aborted) throw abortError();
+    if (file.size > MAX_MODERN_RASTER_SOURCE_BYTES) throw new ViewerError("resource-limit", "图片文件超过 256 MiB 输入上限。");
     reportProgress({ stage: "reading", message: copy.reading });
     const format = inspectModernHeader(await readBlob(file.slice(0, PROBE_BYTES), signal));
     if (!format) throw new ViewerError("invalid-file", copy.invalid);
@@ -74,7 +75,7 @@ async function openModernRaster(context: OpenViewerContext): Promise<ViewerContr
 
     let info: ModernRasterInfo;
     if (format === "HEIC") {
-      native = await NativeImageSequence.open(file, ["image/heic", "image/heif"]);
+      native = await NativeImageSequence.open(file, ["image/heic", "image/heif"], false);
       if (!native) throw new ViewerError("unsupported-environment", copy.unsupported);
       const frame = await native.render(0);
       checkDimensions(frame.bitmap.width, frame.bitmap.height);

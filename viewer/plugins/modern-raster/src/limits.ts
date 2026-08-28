@@ -1,7 +1,7 @@
 import { ViewerError } from "@anyfile/viewer-protocol";
 
 export const PROBE_BYTES = 1024 * 1024;
-export const MAX_JXL_SOURCE_BYTES = 256 * 1024 * 1024;
+export const MAX_MODERN_RASTER_SOURCE_BYTES = 256 * 1024 * 1024;
 export const MAX_DECODED_PIXELS = 64 * 1024 * 1024;
 export const MAX_JXL_FRAMES = 4096;
 

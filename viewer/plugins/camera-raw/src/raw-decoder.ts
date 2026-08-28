@@ -1,4 +1,6 @@
 import { ViewerError } from "@anyfile/viewer-protocol";
+import type LibRaw from "libraw-wasm";
+import type { Metadata } from "libraw-wasm";
 import { checkRawDimensions } from "./limits";
 import { abortError } from "./read-blob";
 
@@ -10,30 +12,34 @@ export interface RawMetadataSummary {
   readonly iso?: number;
 }
 
-interface LibRawDecoder {
-  open(bytes: Uint8Array, options: Record<string, boolean | number>): Promise<void>;
-  metadata(includeExif: boolean): Promise<Record<string, unknown>>;
-  thumbnailData(): Promise<{ format: string; data: Uint8Array; width: number; height: number }>;
-  imageData(): Promise<{ bits: number; colors: number; data: Uint8Array; width: number; height: number }>;
-  dispose(): void;
+interface LibRawPackage {
+  default: typeof LibRaw;
 }
 
-interface LibRawPackage {
-  default: new () => LibRawDecoder;
+type RawMetadataSource = Pick<Metadata, "camera_make" | "camera_model" | "width" | "height" | "iso_speed">;
+
+export function summarizeRawMetadata(metadata: RawMetadataSource): RawMetadataSummary {
+  return {
+    make: typeof metadata.camera_make === "string" ? metadata.camera_make.trim() : undefined,
+    model: typeof metadata.camera_model === "string" ? metadata.camera_model.trim() : undefined,
+    width: typeof metadata.width === "number" ? metadata.width : undefined,
+    height: typeof metadata.height === "number" ? metadata.height : undefined,
+    iso: typeof metadata.iso_speed === "number" ? metadata.iso_speed : undefined,
+  };
 }
 
 const LIBRAW_MODULE_URL = "/vendor/libraw/1.6.0/index.js";
 const RAW_OPEN_TIMEOUT_MS = 60_000;
 
 export class CameraRawDecoder {
-  private decoder?: LibRawDecoder;
+  private decoder?: LibRaw;
   private disposed = false;
 
   constructor(private readonly signal: AbortSignal) {
     signal.addEventListener("abort", this.dispose, { once: true });
   }
 
-  async open(bytes: Uint8Array) {
+  async open(bytes: Uint8Array<ArrayBuffer>) {
     if (this.disposed || this.signal.aborted) throw abortError();
     const libRawPackage = await import(/* webpackIgnore: true */ LIBRAW_MODULE_URL) as LibRawPackage;
     if (this.disposed || this.signal.aborted) throw abortError();
@@ -65,13 +71,7 @@ export class CameraRawDecoder {
   async metadata(): Promise<RawMetadataSummary> {
     const metadata = await this.decoder?.metadata(false);
     if (!metadata) return {};
-    return {
-      make: typeof metadata.make === "string" ? metadata.make.trim() : undefined,
-      model: typeof metadata.model === "string" ? metadata.model.trim() : undefined,
-      width: typeof metadata.width === "number" ? metadata.width : undefined,
-      height: typeof metadata.height === "number" ? metadata.height : undefined,
-      iso: typeof metadata.iso_speed === "number" ? metadata.iso_speed : undefined,
-    };
+    return summarizeRawMetadata(metadata);
   }
 
   async thumbnail() {

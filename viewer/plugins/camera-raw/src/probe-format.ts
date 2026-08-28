@@ -3,6 +3,7 @@ export interface RawInspection { readonly format: RawFormat; readonly make?: str
 
 const ascii = (bytes: Uint8Array, offset: number, length: number) => String.fromCharCode(...bytes.subarray(offset, offset + length));
 const u32be = (bytes: Uint8Array, offset: number) => (((bytes[offset] << 24) >>> 0) + (bytes[offset + 1] << 16) + (bytes[offset + 2] << 8) + bytes[offset + 3]) >>> 0;
+const MAX_TIFF_CAMERA_TEXT_BYTES = 1024;
 
 function extension(fileName: string) { return fileName.slice(fileName.lastIndexOf(".")).toLowerCase(); }
 
@@ -22,7 +23,7 @@ function inspectTiff(bytes: Uint8Array, acceptedMagic = 42) {
     const entry = directory + 2 + index * 12;
     if (entry + 12 > bytes.length) return undefined;
     const tag = read16(entry); const type = read16(entry + 2); const values = read32(entry + 4); const valueOffset = values <= 4 ? entry + 8 : read32(entry + 8);
-    if ((tag === 271 || tag === 272) && type === 2 && values > 0 && valueOffset + values <= bytes.length) {
+    if ((tag === 271 || tag === 272) && type === 2 && values > 0 && values <= MAX_TIFF_CAMERA_TEXT_BYTES && valueOffset + values <= bytes.length) {
       const value = ascii(bytes, valueOffset, values).replace(/\0.*$/, "").trim();
       if (tag === 271) make = value; else model = value;
     } else if (tag === 50706) dng = true;

@@ -36,13 +36,9 @@ async function decodeHeicCapabilitySample() {
           decoder.close();
         }
       }
-    } catch { /* Try the browser image element path below. */ }
+    } catch { return false; }
   }
-  const image = await loadImage(blob);
-  if (!image) return false;
-  URL.revokeObjectURL(image.url);
-  image.element.src = "";
-  return true;
+  return false;
 }
 
 function loadImage(blob: Blob): Promise<{ element: HTMLImageElement; url: string } | undefined> {
@@ -64,7 +60,7 @@ export class NativeImageSequence {
     private readonly staticImage?: { element: HTMLImageElement; url: string },
   ) {}
 
-  static async open(file: File, mimeTypes: readonly string[]) {
+  static async open(file: File, mimeTypes: readonly string[], allowImageFallback = true) {
     const Decoder = decoderConstructor();
     if (Decoder) {
       let type: string | undefined;
@@ -84,6 +80,7 @@ export class NativeImageSequence {
         }
       }
     }
+    if (!allowImageFallback) return undefined;
     const staticImage = await loadImage(file);
     return staticImage ? new NativeImageSequence(undefined, 1, 0, staticImage) : undefined;
   }
