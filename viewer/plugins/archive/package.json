@@ -1,0 +1,23 @@
+{
+  "name": "@anyfile/archive-metadata-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anyfile/viewer-protocol": "*",
+    "@zip.js/zip.js": "2.8.60"
+  },
+  "devDependencies": {
+    "@anyfile/viewer-test": "*",
+    "fflate": "0.8.3",
+    "happy-dom": "20.11.6",
+    "vitest": "4.1.11"
+  }
+}

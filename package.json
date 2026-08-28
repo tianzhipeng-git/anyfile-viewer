@@ -18,6 +18,7 @@
     "test:app": "vitest run"
   },
   "dependencies": {
+    "@anyfile/archive-metadata-viewer": "*",
     "@anyfile/code-viewer": "*",
     "@anyfile/data-viewer": "*",
     "@anyfile/excel-viewer": "*",

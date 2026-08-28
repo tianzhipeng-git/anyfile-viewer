@@ -1,3 +1,4 @@
+import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
@@ -58,6 +59,13 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/sqlite-viewer");
       return viewerPackage.sqliteViewer;
+    },
+  },
+  {
+    manifest: archiveMetadataManifest,
+    async load() {
+      const viewerPackage = await import("@anyfile/archive-metadata-viewer");
+      return viewerPackage.archiveMetadataViewer;
     },
   },
 ];

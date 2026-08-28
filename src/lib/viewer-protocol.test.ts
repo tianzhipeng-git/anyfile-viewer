@@ -11,6 +11,7 @@ import {
   type ViewerPluginManifest,
   type ViewerPluginRegistration,
 } from "@anyfile/viewer-protocol";
+import { viewerRegistrations } from "./viewer-registrations";
 
 function manifest(
   id: string,
@@ -93,5 +94,18 @@ describe("viewer protocol", () => {
     const normalized = normalizeViewerError(new Error("internal path leaked"));
     expect(normalized).toMatchObject({ code: "open-failed", message: "无法打开这个文件。" });
     expect(normalized.cause).toBeInstanceOf(Error);
+  });
+
+  it("keeps specialized ZIP-derived viewers ahead of archive metadata", () => {
+    expect(findViewerRegistrations("report.docx", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["word-document", "archive-metadata-viewer"]);
+    expect(findViewerRegistrations("slides.pptx", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["powerpoint-presentation", "archive-metadata-viewer"]);
+    expect(findViewerRegistrations("book.xlsx", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["excel-workbook", "archive-metadata-viewer"]);
+    expect(findViewerRegistrations("rows.csv.gz", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["duckdb-data", "archive-metadata-viewer"]);
+    expect(findViewerRegistrations("backup.tar.gz", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["archive-metadata-viewer"]);
   });
 });
