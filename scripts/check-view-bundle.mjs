@@ -35,6 +35,7 @@ const deferredImplementationMarkers = [
   "anyfile-pdf-viewer__viewport",
   "__anyfile_archive_metadata_viewer_v1__",
   "anyfile-hex-viewer__viewport",
+  "anyfile-image-viewer__viewport",
 ];
 const bundledMarker = deferredImplementationMarkers.find((marker) => initialCode.includes(marker));
 if (bundledMarker) {

@@ -24,6 +24,7 @@
     "@anyfile/data-viewer": "*",
     "@anyfile/excel-viewer": "*",
     "@anyfile/hex-viewer": "*",
+    "@anyfile/browser-image-viewer": "*",
     "@anyfile/pdf-viewer": "*",
     "@anyfile/powerpoint-viewer": "*",
     "@anyfile/sqlite-viewer": "*",

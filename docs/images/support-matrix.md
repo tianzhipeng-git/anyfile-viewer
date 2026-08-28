@@ -1,6 +1,6 @@
 # 图片格式支持矩阵
 
-- 状态：实施前模板
+- 状态：阶段 0、阶段 1 已完成验收
 - 事实来源：真实渲染验证、固定测试样例和锁定依赖
 
 ## 1. 支持等级
@@ -29,15 +29,16 @@
 
 ## 3. 当前基线
 
-仓库目前没有专用图片插件。网站 catalog 中出现扩展名不等于查看器已经支持该格式，因此本表不把 catalog 声明记作实现。
+仓库已包含按需加载的 `browser-image` 插件。下表只记录固定样例、自动测试和真实浏览器 smoke test 覆盖到的能力；catalog 中的其他扩展名不因此自动获得支持。
 
 | 格式族 | 扩展名示例 | 目标插件族 | 当前等级 | 状态 | 近期目标 | 说明 |
 |---|---|---|---:|---|---:|---|
-| JPEG | `.jpg` `.jpeg` `.jfif` | browser image | 0 | planned | 4 | 验证 EXIF orientation、ICC 和大尺寸限制 |
-| PNG/APNG | `.png` `.apng` | browser image | 0 | planned | 4 | APNG 与普通 PNG 共享扩展名 |
-| GIF | `.gif` | browser image | 0 | planned | 4 | 包含动画、循环和帧时序 |
-| WebP | `.webp` | browser image | 0 | planned | 4 | 覆盖有损、无损、alpha 和动画 |
-| AVIF | `.avif` | browser image | 0 | planned | 4 | 运行时验证原生解码能力 |
+| JPEG | `.jpg` `.jpeg` `.jfif` | browser image | 4 | verified | 4 | 原生 `<img>`；浏览器负责 EXIF orientation 与 ICC，固定样例覆盖 baseline JPEG |
+| PNG | `.png` | browser image | 4 | verified | 4 | 原生 `<img>`；固定样例覆盖 RGBA PNG |
+| APNG | `.png` `.apng` | browser image | 4 | verified | 4 | 原生动画；容器检查声明帧数，固定样例覆盖循环动画 |
+| GIF | `.gif` | browser image | 4 | verified | 4 | 原生动画；解析帧与透明索引，固定样例覆盖循环动画 |
+| WebP | `.webp` | browser image | 4 | verified | 4 | 固定样例覆盖有损、无损 alpha 与循环动画 |
+| AVIF | `.avif` | browser image | 4 | verified | 4 | 当前只声明单帧 AVIF；`avis` 图像序列返回 0 |
 | SVG | `.svg` `.svgz` | safe vector image | 0 | planned | 3 | 安全策略未决，不与普通栅格同时上线 |
 | TGA/PNM | `.tga` `.pnm` `.pbm` `.pgm` `.ppm` `.pam` | general raster | 0 | planned | 4 | 用于验证自定义像素链路 |
 | TIFF/BigTIFF | `.tif` `.tiff` `.btf` | general raster | 0 | planned | 4 | 多压缩、多页、tile 和 ICC 需逐项声明 |
@@ -53,7 +54,23 @@
 | NIfTI/NRRD | `.nii` `.nii.gz` `.nrrd` | volume/scientific | 0 | deferred | 5 | 需要体数据和方向语义 |
 | FITS | `.fits` `.fit` `.fts` | volume/scientific | 0 | deferred | 5 | 需要数值窗口和 colormap |
 
-## 4. 每个格式必须记录的维度
+## 4. 阶段 1 读取与资源策略
+
+- 原生 `<img>` 路径不设置固定的输入大小、像素、帧数或估算内存上限；这些阈值缺少跨浏览器、跨设备的可靠依据。
+- probe 与 `open()` 最多读取前 1 MiB 做格式和基础元数据识别；只有 `open()` 会通过原始 `File` 的 Object URL 让当前浏览器尝试解码。
+- 插件不在 JavaScript 中复制完整编码文件，也不创建 RGBA Canvas 像素副本。实际解码容量由浏览器和设备资源决定。
+- 对超过头部范围的动画不展示可能不完整的帧数统计。AVIF sequence 仍因阶段范围而拒绝，而非因帧数阈值拒绝。
+- 后续 JS/WASM/Canvas 解码器如果自行分配内存，应根据其真实分配、缓存和并发模型设置针对性边界。
+
+## 5. 阶段 1 验证证据
+
+- 自生成正常样例：baseline JPEG、RGBA PNG、循环 APNG、循环 GIF、有损/无损 alpha/循环 WebP、单帧 AVIF。
+- 异常样例：每个格式族至少包含损坏或截断文件；样例清单位于 `viewer/plugins/image/examples/README.md`。
+- 自动测试：格式容器解析、probe 0/4、协议 Manifest、完整打开、opening abort、active abort、重复 dispose、Object URL 释放、容器 DOM 所有权和中英文错误。
+- 部署检查：`browser-image` manifest 静态加载；probe 与完整插件使用不同动态入口；`anyfile-image-viewer__viewport` 不得出现在 `/view` 初始 bundle。
+- 真实浏览器 smoke（2026-08-28，Chromium）：六种样例均经完整插件入口解码为 96×64；APNG/GIF/WebP 截图帧发生变化；缩放、旋转、连续切换、360×640 窄窗口与 900×320 矮窗口通过。原生 `<img>` 不创建需要单独同步 DPR 的 Canvas 像素面。
+
+## 6. 每个格式必须记录的维度
 
 实施后，每个格式或子格式增加独立条目，至少包含：
 
@@ -72,12 +89,10 @@
 - ICC、色彩空间、HDR 和 tone mapping；
 - 元数据、缩略图和关联文件。
 
-### 资源限制
+### 资源行为
 
-- 最大输入文件；
-- 最大 width、height、depth、总像素/体素；
-- 最大帧、页、图层、tile 或 mip 数；
-- 解码后内存与缓存预算；
+- 是否设置应用层输入、尺寸或元素数量边界，以及设置或不设置的依据；
+- 解码后内存、缓存和并发由浏览器还是插件负责；
 - 是否支持区域、分片、流式或按需解码。
 
 ### 实现与部署

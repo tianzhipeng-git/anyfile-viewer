@@ -157,9 +157,9 @@ describe("viewer protocol", () => {
     await expect(resolution).rejects.toMatchObject({ name: "AbortError" });
   });
 
-  it("uses the PDF and SQLite probes in the production registry", async () => {
+  it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["pdfjs-pdf", "sqlite-database"]);
+      .toEqual(["browser-image", "pdfjs-pdf", "sqlite-database"]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -197,6 +197,8 @@ describe("viewer protocol", () => {
   });
 
   it("keeps specialized viewers ahead of archive metadata and hex fallback", () => {
+    expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["browser-image", "hex-viewer"]);
     expect(findViewerRegistrations("report.docx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["word-document", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("slides.pptx", viewerRegistrations).map(({ manifest: item }) => item.id))

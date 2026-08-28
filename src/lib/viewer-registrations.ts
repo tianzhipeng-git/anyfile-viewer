@@ -3,6 +3,7 @@ import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { hexManifest } from "@anyfile/hex-viewer/manifest";
+import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
@@ -13,6 +14,17 @@ import {
 } from "@anyfile/viewer-protocol";
 
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
+  {
+    manifest: browserImageManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/browser-image-viewer/probe");
+      return probePackage.probeBrowserImage(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/browser-image-viewer");
+      return viewerPackage.browserImageViewer;
+    },
+  },
   {
     manifest: pdfManifest,
     async probe(context) {
