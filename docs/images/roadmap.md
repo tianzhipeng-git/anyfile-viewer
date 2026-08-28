@@ -125,6 +125,8 @@ SVG 不自动包含在此阶段，因为它有独立的主动内容和外部资�
 - `@anyfile/viewer-rendering` 已从两款既有图片插件的真实重复中提取 viewport、输入、Canvas DPR surface、帧调度和资源清理；没有同时引入 Lit、d3-zoom 或 scene model。
 - 尚未取得六个 RAW 扩展各两个具有明确再分发依据的真实相机样例，因此验证型号清单保持为空，阶段 3 不声明任何 RAW 文件达到等级 3。完成该语料门禁后才能把对应型号加入清单并完成阶段验收。
 
+HEVC HEIF/HEIC 的跨浏览器本地解码回退另见 [HEIC / HEIF 跨浏览器支持方案](heic-heif-support-plan.md)。该方案在依赖安全、LGPL 分发义务和 HEVC 专利风险评审通过前不进入实现。
+
 ### 候选范围
 
 - HEIF/HEIC；
