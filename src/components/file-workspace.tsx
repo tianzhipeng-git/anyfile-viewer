@@ -151,7 +151,7 @@ export function FileWorkspace() {
   async function openDirectory() {
     if (!checkSecureContext()) return;
     if (typeof window.showDirectoryPicker !== "function") {
-      setError("当前浏览器不支持 showDirectoryPicker()。请使用最新版 Chrome、Edge 或其他兼容的 Chromium 浏览器。");
+      setError("当前浏览器不支持打开文件夹, 仅可打开单个文件。请使用最新版 Chrome 或其他兼容浏览器。");
       return;
     }
     try {

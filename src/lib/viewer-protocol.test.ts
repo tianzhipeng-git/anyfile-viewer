@@ -207,6 +207,8 @@ describe("viewer protocol", () => {
       .toEqual(["browser-image", "modern-raster", "hex-viewer"]);
     expect(findViewerRegistrations("photo.dng", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["camera-raw", "hex-viewer"]);
+    expect(findViewerRegistrations("photo.rw2", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["camera-raw", "hex-viewer"]);
     expect(findViewerRegistrations("scan.tiff", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["general-raster", "hex-viewer"]);
     expect(findViewerRegistrations("scan.tf8", viewerRegistrations).map(({ manifest: item }) => item.id))

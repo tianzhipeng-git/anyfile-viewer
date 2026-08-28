@@ -53,7 +53,7 @@
 | OME-TIFF | `.ome.tif` `.ome.tiff` `.ome.tf2` `.ome.tf8` `.ome.btf` | general raster | 3 | implemented | 5 | 可查看 TIFF 像素和页面；暂不解释 OME-XML 的 Z/C/T 维度语义 |
 | HEVC HEIF/HEIC | `.heif` `.heifs` `.hif` `.heic` | modern raster | 0 或 3 | implemented | 3 | 仅在原生 ImageDecoder 支持时进入候选；显示 primary image，不提供辅助项或序列导航 |
 | JPEG XL | `.jxl` | modern raster | 4 | implemented | 4 | 原生 ImageDecoder 优先，`jxl-oxide-wasm@0.12.6` Worker 回退；固定样例覆盖有损、无损 alpha 与动画 |
-| 相机 RAW | `.dng` `.cr2` `.cr3` `.nef` `.arw` `.raf` | camera RAW | 2 | implemented | 3 | 内嵌预览与 LibRaw 基础显影已实现；尚无满足门禁的真实相机验证型号，因此不返回等级 3 |
+| 相机 RAW | `.dng` `.cr2` `.cr3` `.crw` `.nef` `.arw` `.raf` `.rwl` `.raw` `.rw2` | camera RAW | 2 | implemented | 3 | 内嵌预览与 LibRaw 基础显影已实现；CRW CIFF 与 Panasonic/Leica TIFF-like RAW 已经真实文件容器验证；尚无满足门禁的型号级回归语料，因此不返回等级 3 |
 | PSD/PSB | `.psd` `.psb` | layered document | 0 | deferred | 3 | 先合成预览与图层元数据 |
 | ORA/KRA | `.ora` `.kra` | layered document | 0 | deferred | 3 | 利用规范中的合成预览，不承诺编辑语义 |
 | DDS | `.dds` | GPU texture | 0 | deferred | 5 | mip、array、cubemap 和 BC family |

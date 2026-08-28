@@ -1,4 +1,4 @@
-export type RawFormat = "DNG" | "CR2" | "CR3" | "NEF" | "ARW" | "RAF";
+export type RawFormat = "DNG" | "CR2" | "CR3" | "CRW" | "NEF" | "ARW" | "RAF" | "RWL" | "RAW" | "RW2";
 export interface RawInspection { readonly format: RawFormat; readonly make?: string; readonly model?: string; readonly hasPreview: boolean }
 
 const ascii = (bytes: Uint8Array, offset: number, length: number) => String.fromCharCode(...bytes.subarray(offset, offset + length));
@@ -6,14 +6,14 @@ const u32be = (bytes: Uint8Array, offset: number) => (((bytes[offset] << 24) >>>
 
 function extension(fileName: string) { return fileName.slice(fileName.lastIndexOf(".")).toLowerCase(); }
 
-function inspectTiff(bytes: Uint8Array) {
+function inspectTiff(bytes: Uint8Array, acceptedMagic = 42) {
   if (bytes.length < 16) return undefined;
   const little = ascii(bytes, 0, 2) === "II";
   if (!little && ascii(bytes, 0, 2) !== "MM") return undefined;
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const read16 = (offset: number) => view.getUint16(offset, little);
   const read32 = (offset: number) => view.getUint32(offset, little);
-  if (read16(2) !== 42) return undefined;
+  if (read16(2) !== acceptedMagic) return undefined;
   const directory = read32(4);
   if (directory + 2 > bytes.length) return undefined;
   const count = read16(directory);
@@ -34,6 +34,10 @@ function inspectTiff(bytes: Uint8Array) {
 
 export function inspectRawHeader(bytes: Uint8Array, fileName: string): RawInspection | undefined {
   const ext = extension(fileName);
+  if (ext === ".crw") {
+    if (bytes.length < 14 || ascii(bytes, 0, 2) !== "II" || ascii(bytes, 6, 8) !== "HEAPCCDR") return undefined;
+    return { format: "CRW", make: "Canon", hasPreview: true };
+  }
   if (ext === ".raf") {
     if (bytes.length < 92 || ascii(bytes, 0, 16) !== "FUJIFILMCCD-RAW ") return undefined;
     return { format: "RAF", make: "FUJIFILM", hasPreview: u32be(bytes, 84) > 0 && u32be(bytes, 88) > 0 };
@@ -43,6 +47,12 @@ export function inspectRawHeader(bytes: Uint8Array, fileName: string): RawInspec
     const length = u32be(bytes, 0); if (length < 16 || length > bytes.length) return undefined;
     const brands = [ascii(bytes, 8, 4)]; for (let offset = 16; offset + 4 <= length; offset += 4) brands.push(ascii(bytes, offset, 4));
     return brands.includes("crx ") ? { format: "CR3", make: "Canon", hasPreview: true } : undefined;
+  }
+  if (ext === ".rwl" || ext === ".raw" || ext === ".rw2") {
+    const panasonic = inspectTiff(bytes, 85);
+    if (!panasonic) return undefined;
+    const format = ext === ".rwl" ? "RWL" : ext === ".rw2" ? "RW2" : "RAW";
+    return { format, ...panasonic };
   }
   const tiff = inspectTiff(bytes); if (!tiff) return undefined;
   if (ext === ".cr2") {

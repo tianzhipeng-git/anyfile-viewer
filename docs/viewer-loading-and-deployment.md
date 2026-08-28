@@ -151,14 +151,23 @@ npm run build
 
 ### 相机 RAW 的跨源隔离
 
-`libraw-wasm@1.6.0` 的 pthread 构建要求 `crossOriginIsolated`。`/view` 单独返回：
+`libraw-wasm@1.6.0` 的 pthread 构建要求 `crossOriginIsolated`。`/view` 返回：
 
 ```text
 Cross-Origin-Opener-Policy: same-origin
 Cross-Origin-Embedder-Policy: require-corp
 ```
 
-部署层不得丢弃这两个响应头。启用或调整 CSP 时还需要允许同源 Worker 和 WebAssembly；同时回归 DuckDB 的 jsDelivr 与本地回退资源能在 COEP 下加载。
+同时 `/vendor/libraw/:path*` 下的模块 Worker、pthread Worker 和 WASM 响应返回：
+
+```text
+Cross-Origin-Embedder-Policy: require-corp
+Cross-Origin-Resource-Policy: same-origin
+```
+
+部署层不得丢弃这些响应头。Worker 是独立执行上下文，仅给 `/view` 加 COEP 不足以启动 LibRaw pthread。启用或调整 CSP 时还需要允许同源 Worker 和 WebAssembly；同时回归 DuckDB 的 jsDelivr 与本地回退资源能在 COEP 下加载。
+
+JXL 的打包 Worker 和 WASM 位于 `/_next/static/:path*`，该路径同样返回上述 COEP/CORP 头。如果未来用 `assetPrefix` 将 Next 静态资源迁移到独立 CDN，CDN 必须保留等价响应头，否则 JXL Worker 会在加载前被浏览器拦截。
 
 生产构建显式使用 Next.js 支持的 `next build --webpack`。`libraw-wasm` 的 Emscripten pthread runtime 在当前 Next.js 16.3.3 Turbopack 生产构建中会停留在 chunk 生成阶段。构建前将其官方 `dist` 中的入口、Worker、pthread 脚本和 WASM 原样复制到版本化同源目录，RAW 插件打开文件时才通过 URL 动态导入。生产构建使用 Webpack，开发服务仍保留 Next.js 默认的 Turbopack。
 

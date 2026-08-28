@@ -18,6 +18,15 @@ describe("camera RAW probe", () => {
     const raf = new Uint8Array(92); raf.set(new TextEncoder().encode("FUJIFILMCCD-RAW ")); expect(inspectRawHeader(raf, "sample.raf")?.format).toBe("RAF");
   });
 
+  it("recognizes Canon CIFF and Panasonic/Leica RAW containers", () => {
+    const crw = new Uint8Array(16); crw.set(new TextEncoder().encode("II")); crw.set(new TextEncoder().encode("HEAPCCDR"), 6);
+    expect(inspectRawHeader(crw, "sample.crw")?.format).toBe("CRW");
+    for (const [name, format] of [["sample.rwl", "RWL"], ["sample.raw", "RAW"], ["sample.rw2", "RW2"]] as const) {
+      const bytes = new Uint8Array(16); const view = new DataView(bytes.buffer); bytes.set([73, 73]); view.setUint16(2, 85, true); view.setUint32(4, 8, true); view.setUint16(8, 0, true);
+      expect(inspectRawHeader(bytes, name)?.format).toBe(format);
+    }
+  });
+
   it("rejects extensions with the wrong container", async () => {
     expect(await probeCameraRaw({ file: new File(["bad"], "fake.nef"), signal: new AbortController().signal })).toBe(0);
   });

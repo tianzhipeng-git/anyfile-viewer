@@ -36,7 +36,10 @@ export class JxlDecoderWorker {
         this.signal.removeEventListener("abort", onAbort);
       };
       const onAbort = () => { cleanup(); reject(abortError()); };
-      const onError = () => { cleanup(); reject(new ViewerError("invalid-file", "JPEG XL Worker 失败。")); };
+      const onError = (event: ErrorEvent) => {
+        cleanup();
+        reject(new ViewerError("invalid-file", event.message ? `JPEG XL Worker 失败：${event.message}` : "JPEG XL Worker 失败。"));
+      };
       const onMessage = (event: MessageEvent<JxlWorkerResponse>) => {
         if (event.data.id !== request.id) return;
         cleanup();
