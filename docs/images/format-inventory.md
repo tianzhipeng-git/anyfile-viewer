@@ -22,7 +22,7 @@
 | Web 常见 | PNG/APNG | 单帧或帧序列 | APNG 常与 PNG 共用 `.png` |
 | Web 常见 | GIF87a/GIF89a | 单帧或帧序列 | palette、透明索引、帧处置 |
 | Web 常见 | WebP | 单帧或帧序列 | 有损、无损、alpha、动画 |
-| Web 常见 | AVIF | 单帧或帧序列 | 高 bit-depth、HDR 能力依浏览器而异 |
+| Web 常见 | AVIF | 单帧或帧序列 | 高 bit-depth、HDR 能力需要运行时验证 |
 | Windows | BMP/DIB | 单帧栅格 | 多 header 版本、palette、bitfield、RLE |
 | 传统栅格 | TGA/TARGA | 单帧栅格 | raw/RLE、palette、origin |
 | 传统栅格 | PCX/DCX | 单帧或多页 | DCX 是多页 PCX 容器 |
@@ -52,7 +52,7 @@ TIFF 是容器家族，不是“实现一个 LZW decoder 就完成支持”。�
 | JPEG-LS | 单帧/医学像素数据 | 常见于特定专业场景 |
 | JPEG 2000 / J2K/J2C/JP2 | 单帧、tile | codestream 与 JP2 family 容器需区分 |
 | JPEG XR/JXR/WDP | 单帧栅格 | 旧式高 bit-depth 格式 |
-| JPEG XL/JXL | 单帧或动画 | 浏览器能力与 WASM 回退需单独评估 |
+| JPEG XL/JXL | 单帧或动画 | 原生解码与 WASM 回退需单独评估 |
 | JPEG XS | 专业低延迟编码 | 不属于近期普通图片预览目标 |
 
 “JPEG 家族”不是一个共享 decoder 的同义词。

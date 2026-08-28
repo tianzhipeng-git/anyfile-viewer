@@ -224,4 +224,4 @@ HDR：high-range color → profile/transfer handling
 - 科学/医学 IO：[ITK-Wasm](https://docs.itk.org/projects/wasm/en/latest/)
 - GPU texture：[KTX-Software](https://github.com/KhronosGroup/KTX-Software)
 
-采用任何候选项之前都要验证许可证、维护状态、浏览器兼容性、包体积、Worker/WASM 部署和 dispose 能力。
+采用任何候选项之前都要验证许可证、维护状态、所需运行时能力、包体积、Worker/WASM 部署和 dispose 能力。

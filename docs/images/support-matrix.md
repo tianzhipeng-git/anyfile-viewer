@@ -1,7 +1,7 @@
 # 图片格式支持矩阵
 
 - 状态：实施前模板
-- 事实来源：真实浏览器验证、固定测试样例和锁定依赖
+- 事实来源：真实渲染验证、固定测试样例和锁定依赖
 
 ## 1. 支持等级
 
@@ -37,12 +37,12 @@
 | PNG/APNG | `.png` `.apng` | browser image | 0 | planned | 4 | APNG 与普通 PNG 共享扩展名 |
 | GIF | `.gif` | browser image | 0 | planned | 4 | 包含动画、循环和帧时序 |
 | WebP | `.webp` | browser image | 0 | planned | 4 | 覆盖有损、无损、alpha 和动画 |
-| AVIF | `.avif` | browser image | 0 | planned | 4 | 运行时验证目标浏览器能力 |
+| AVIF | `.avif` | browser image | 0 | planned | 4 | 运行时验证原生解码能力 |
 | SVG | `.svg` `.svgz` | safe vector image | 0 | planned | 3 | 安全策略未决，不与普通栅格同时上线 |
 | TGA/PNM | `.tga` `.pnm` `.pbm` `.pgm` `.ppm` `.pam` | general raster | 0 | planned | 4 | 用于验证自定义像素链路 |
 | TIFF/BigTIFF | `.tif` `.tiff` `.btf` | general raster | 0 | planned | 4 | 多压缩、多页、tile 和 ICC 需逐项声明 |
-| HEIF/HEIC | `.heif` `.heic` | general raster | 0 | deferred | 3 | 先评估 codec、许可、WASM 和浏览器差异 |
-| JPEG XL | `.jxl` | general raster | 0 | deferred | 4 | 不依赖单一浏览器的临时支持状态 |
+| HEIF/HEIC | `.heif` `.heic` | general raster | 0 | deferred | 3 | 先评估 codec、许可、WASM 和运行时能力 |
+| JPEG XL | `.jxl` | general raster | 0 | deferred | 4 | 评估原生解码或自带 decoder 的可行性 |
 | 相机 RAW | `.dng` `.cr2` `.cr3` `.nef` `.arw` `.raf` | camera RAW | 0 | deferred | 2 | 首期倾向内嵌预览，完整显影另立目标 |
 | PSD/PSB | `.psd` `.psb` | layered document | 0 | deferred | 3 | 先合成预览与图层元数据 |
 | ORA/KRA | `.ora` `.kra` | layered document | 0 | deferred | 3 | 利用规范中的合成预览，不承诺编辑语义 |
@@ -86,7 +86,7 @@
 - 依赖名、精确版本、许可证和上游地址；
 - 首次加载和 gzip 体积；
 - Worker/WASM 等静态资产；
-- 支持浏览器与运行时能力检测；
+- 所需运行时能力检测；
 - 是否能够 abort，以及 dispose 释放哪些资源。
 
 ### 验证证据
@@ -96,4 +96,4 @@
 - 损坏、截断和极端尺寸样例；
 - 自动测试名称；
 - 桌面窄窗口、矮窗口和高 DPR 手工结果；
-- 跨浏览器显示差异和已知缺失。
+- 已知渲染缺失。
