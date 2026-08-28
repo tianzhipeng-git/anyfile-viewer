@@ -107,7 +107,7 @@ function createHeader(locale: string) {
   const address = document.createElement("span");
   address.textContent = chinese ? "位置" : "OFFSET";
   const hex = document.createElement("span");
-  hex.textContent = `${Array.from({ length: 8 }, (_, index) => index.toString(16).toUpperCase().padStart(2, "0")).join(" ")}  ${Array.from({ length: 8 }, (_, index) => (index + 8).toString(16).toUpperCase()).join(" ")}`;
+  hex.textContent = `${Array.from({ length: 8 }, (_, index) => index.toString(16).toUpperCase().padStart(2, "0")).join(" ")}  ${Array.from({ length: 8 }, (_, index) => (index + 8).toString(16).toUpperCase().padStart(2, "0")).join(" ")}`;
   const text = document.createElement("span");
   text.textContent = chinese ? "文本" : "TEXT";
   header.append(address, hex, text);

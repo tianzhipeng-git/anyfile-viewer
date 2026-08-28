@@ -42,6 +42,8 @@ describe("hex viewer", () => {
     expect(row.querySelector(".anyfile-hex-viewer__text")?.textContent).toBe("· A~··");
     expect(context.container.textContent).toContain("位置");
     expect(context.container.textContent).toContain("文本");
+    expect(context.container.querySelector(".anyfile-hex-viewer__header > span:nth-child(2)")?.textContent)
+      .toBe("00 01 02 03 04 05 06 07  08 09 0A 0B 0C 0D 0E 0F");
     expect(directRead).not.toHaveBeenCalled();
     expect(slicedRead).toHaveBeenCalledOnce();
     expect(context.progress.at(-1)?.stage).toBe("ready");
