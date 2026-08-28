@@ -52,6 +52,7 @@ export const formats: FileFormat[] = [
   { extension: "duckdb", name: "DuckDB 数据库", description: "浏览数据库中的数据表、列类型与记录。", category: "code-data", native: false },
   { extension: "sqlite", name: "SQLite 数据库", description: "通过独立的 SQLite Wasm 查看器浏览数据表。", category: "code-data", native: false },
   { extension: "html", name: "HTML 文件", description: "查看网页源码与安全预览。", category: "code-data", native: true },
+  { extension: "har", name: "HTTP Archive", description: "检查网络请求、响应头、传输大小与耗时明细。", category: "code-data", native: true },
   { extension: "obj", name: "OBJ 模型", description: "通用三维网格与材质引用格式。", category: "3d", native: false },
   { extension: "gltf", name: "glTF 场景", description: "面向实时渲染的三维传输格式。", category: "3d", native: false },
   { extension: "stl", name: "STL 模型", description: "常用于 3D 打印的三角网格格式。", category: "3d", native: false },
@@ -63,7 +64,7 @@ export const formats: FileFormat[] = [
 export const categories: FileCategory[] = [
   { slug: "images-video", name: "图片与视频", eyebrow: "看见每个细节", description: "通过浏览器原生能力或本地 Worker 解码查看图片与媒体。", extensions: ["png", "apng", "jpg", "gif", "webp", "avif", "jxl", "heic", "dng", "cr2", "cr3", "nef", "arw", "raf", "tga", "pnm", "tiff", "svg", "mp4", "webm"] },
   { slug: "documents", name: "文档", eyebrow: "阅读，不必等待", description: "在本地打开文档、表格与演示资料，不经过上传队列。", extensions: ["pdf", "docx", "xlsx", "xls", "xlsb", "ods", "pptx"] },
-  { slug: "code-data", name: "代码与数据", eyebrow: "让结构清晰可见", description: "检查文本、代码和结构化数据，适合快速排错与校验。", extensions: ["md", "json", "jsonl", "csv", "tsv", "parquet", "arrow", "duckdb", "sqlite", "html"] },
+  { slug: "code-data", name: "代码与数据", eyebrow: "让结构清晰可见", description: "检查文本、代码和结构化数据，适合快速排错与校验。", extensions: ["md", "json", "jsonl", "csv", "tsv", "parquet", "arrow", "duckdb", "sqlite", "html", "har"] },
   { slug: "3d", name: "3D", eyebrow: "在浏览器里转动模型", description: "以 WebGL 与 WebGPU 为基础，浏览网格、材质和场景。", extensions: ["obj", "gltf", "stl"] },
   { slug: "design", name: "设计文件", eyebrow: "创意文件，也能本地打开", description: "查看常见设计格式的画布、图层与元信息。", extensions: ["psd", "ai", "fig"] },
 ];

@@ -25,6 +25,7 @@
     "@anyfile/data-viewer": "*",
     "@anyfile/excel-viewer": "*",
     "@anyfile/general-raster-viewer": "*",
+    "@anyfile/har-viewer": "*",
     "@anyfile/hex-viewer": "*",
     "@anyfile/browser-image-viewer": "*",
     "@anyfile/camera-raw-viewer": "*",

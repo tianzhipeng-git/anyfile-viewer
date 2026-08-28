@@ -4,6 +4,7 @@ import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
+import { harManifest } from "@anyfile/har-viewer/manifest";
 import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
@@ -91,6 +92,13 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/powerpoint-viewer");
       return viewerPackage.powerpointViewer;
+    },
+  },
+  {
+    manifest: harManifest,
+    async load() {
+      const viewerPackage = await import("@anyfile/har-viewer");
+      return viewerPackage.harViewer;
     },
   },
   {

@@ -225,6 +225,8 @@ describe("viewer protocol", () => {
       .toEqual(["excel-workbook", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("rows.csv.gz", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["duckdb-data", "archive-metadata-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("network.har", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["http-archive", "hex-viewer"]);
     expect(findViewerRegistrations("backup.tar.gz", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("backup.rar", viewerRegistrations).map(({ manifest: item }) => item.id))
