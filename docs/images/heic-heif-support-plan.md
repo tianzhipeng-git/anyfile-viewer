@@ -1,6 +1,6 @@
 # HEIC / HEIF 跨浏览器支持方案
 
-- 状态：待实施；依赖安全与合规评审未完成
+- 状态：待实施；依赖安全与 LGPL 分发材料待完成，HEVC 分发风险已由项目方确认可接受
 - 日期：2026-08-29
 - 范围：浏览器本地查看 HEVC 编码的 HEIF/HEIC 主图像
 - 不包含：编辑、转换、写回、服务端转码、完整序列或全部辅助图像导航
@@ -14,9 +14,11 @@
 实施前有两个硬门禁：
 
 1. 依赖必须至少包含 `libheif v1.23.2` 的安全修复，并建立持续安全升级流程；
-2. 分发 HEVC decoder 前必须完成 LGPL 分发义务和 HEVC 专利许可风险评审。
+2. 完成 libheif/libde265 的 LGPL 分发材料与可重新构建安排。
 
 任一门禁未通过时，继续维持当前原生能力路径，不分发 WASM decoder。
+
+项目方已于 2026-08-29 评审 HEVC 许可材料并确认当前分发风险可接受；该决策需要保留在第三方声明中，但不再作为本方案的待定门禁。
 
 ## 2. 当前基线与真实缺口
 
@@ -125,10 +127,19 @@ Probe 仍只负责路由。完整 Worker 必须重新解析并校验整个文件
 
 ## 7. Decoder 产物与部署
 
-建议建立版本化同源资产：
+本依赖遵守项目通用的 [源码构建型第三方依赖规范](../viewer-source-built-dependencies.md)，使用可重复构建配方、提交审核产物、部署时生成静态资源的三层结构：
 
 ```text
-public/vendor/libheif/<libheif-version>/
+tools/heif-wasm-build/                        构建配方、adapter 与验证
+        ↓
+third_party/heif-wasm/<artifact-version>/     提交 Git 的审核产物
+        ↓ prepare
+public/vendor/libheif/<artifact-version>/     不提交的部署资源
+```
+
+审核产物和部署目录中的分发文件至少包括：
+
+```text
 ├── heif-decoder.js
 ├── heif-decoder.wasm
 ├── LICENSE.libheif
@@ -146,7 +157,8 @@ public/vendor/libheif/<libheif-version>/
 - 默认保留 libheif security limits，并由 adapter 进一步收紧；
 - 禁止 unsafe-eval 构建；
 - 记录完整构建参数、上游 commit/tag、产物哈希和许可证；
-- 通过项目准备脚本生成/复制资产，不由插件在运行时下载；
+- 普通应用构建不编译 libheif；只从 `third_party` 的精确产物版本校验并复制到 `public/vendor`；
+- 不由插件在运行时下载构建资产；
 - CSP/部署验证允许同源 Worker 和 WebAssembly，不新增 CDN 来源。
 
 不建议把 WASM base64 内联进 JavaScript。独立 `.wasm` 更利于缓存、体积审计、安全替换，也更容易满足 LGPL 下替换/重新链接的合规设计；最终合规方式仍由法律评审确认。
@@ -196,14 +208,14 @@ WASM 和 Worker 能减少主线程影响，但不是可信文件沙箱；安全�
 
 `libheif` 和 `libde265` 上游均声明 LGPL-3.0；项目需要保留通知、许可证、对应源码/修改和允许替换链接库的分发安排。npm 包自身显示为 Apache-2.0 或其他宽松许可证，不能覆盖其内嵌二进制的许可证义务。
 
-HEVC 还存在独立于开源许可证的标准必要专利问题。Access Advance 的公开材料明确把软件和云端可用的 HEVC decoder 纳入其许可讨论范围。是否收费、由谁取得许可、适用地区和产品形态需要法律判断，本方案不作“开源 decoder 等于免专利许可”的假设。
+HEVC 还存在独立于开源许可证的标准必要专利问题。Access Advance 的公开材料明确把软件和云端可用的 HEVC decoder 纳入其许可讨论范围。项目方已于 2026-08-29 评审该材料并确认当前分发风险可接受；该结论不改变 LGPL 工程义务，也不能被泛化为其他 codec 或分发模式的默认结论。
 
 合规验收输出至少包括：
 
 - 第三方组件、版本、源码地址、许可证和修改清单；
 - 可获取的对应源码与可复现构建说明；
 - WASM 替换/重新链接方式；
-- 面向目标分发地区和商业模式的 HEVC 专利评审结论；
+- 已确认的 HEVC 风险决策及其适用分发范围；
 - 不通过时关闭 WASM 回退、保留原生路径的产品开关策略。
 
 ## 11. 实施拆分
@@ -214,9 +226,9 @@ HEVC 还存在独立于开源许可证的标准必要专利问题。Access Advan
 - 在独立 Worker 解码当前 `sample.heic` 和真实手机样例；
 - 记录 raw/gzip 体积、初始化时间、12MP/48MP 峰值内存与耗时；
 - 验证 alpha、orientation、10-bit、grid、NCLX/ICC 和取消；
-- 完成 LGPL 与 HEVC 专利初审。
+- 完成 LGPL 分发材料，并把已确认的 HEVC 风险决策写入第三方声明。
 
-完成标准：没有已知 critical/high 安全缺口；像素行为和资源模型可解释；合规评审允许继续。否则停止。
+完成标准：没有已知 critical/high 安全缺口；像素行为和资源模型可解释；LGPL 分发材料和可重新构建安排完整。否则停止。
 
 ### 阶段 B：插件接入
 
@@ -264,7 +276,7 @@ HEVC 还存在独立于开源许可证的标准必要专利问题。Access Advan
 
 ## 13. 主要风险与停止条件
 
-- 合规结论不允许分发 HEVC decoder；
+- 无法满足 LGPL 分发或可重新构建要求；
 - 最新安全版无法稳定构建为符合 CSP 的 WASM；
 - 真实手机样例存在不可解释的方向、alpha 或严重色差；
 - 12MP 常见照片峰值内存不可控，或取消不能及时终止；

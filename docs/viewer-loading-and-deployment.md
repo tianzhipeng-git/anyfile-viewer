@@ -1,6 +1,6 @@
 # 查看器加载、渲染与部署约定
 
-本文记录查看器插件在 SSG、SSR、依赖锁定、jsDelivr 和构建体积方面的约定。修改插件注册、依赖或部署配置时，应同时检查本文列出的边界。
+本文记录查看器插件在 SSG、SSR、依赖锁定、jsDelivr 和构建体积方面的约定。修改插件注册、依赖或部署配置时，应同时检查本文列出的边界。需要从 C/C++/Rust 等上游源码自行生成 WASM、Worker 或 JavaScript glue 时，还必须遵守 [源码构建型第三方依赖规范](viewer-source-built-dependencies.md)。
 
 ## 1. SSG 与 SSR 支持
 
@@ -136,6 +136,20 @@ npm run build
 ```
 
 不要删除或忽略 `package-lock.json`。升级关键依赖时应明确指定目标版本，提交对应 lockfile，并重新验证插件测试、CDN URL、本地回退和生产构建。
+
+### 源码构建型依赖
+
+当没有满足安全、许可、CSP 或功能裁剪要求的上游包，项目可以在有明确方案评审后自行构建第三方依赖。此类依赖不进入普通 npm 构建时的 native 编译流程，而采用：
+
+```text
+tools/<dependency>-build/                 可重复构建配方
+        ↓
+third_party/<dependency>/<version>/       提交 Git 的审核产物
+        ↓ prepare
+public/vendor/<dependency>/<version>/     不提交的部署资源
+```
+
+具体进入条件、版本、升级、patch、独立仓库门槛、安全与许可证要求见 [源码构建型第三方依赖规范](viewer-source-built-dependencies.md)。能够由锁定的 npm 上游包恢复的 PDF.js、LibRaw 等现有资产继续直接从 `node_modules` 准备，不重复 vendoring。
 
 ## 5. 首包体积门禁
 
