@@ -1,6 +1,6 @@
 # General raster viewer
 
-阶段 2 的自定义栅格插件，支持 TGA、Netpbm（PBM/PGM/PPM/PAM）和已验证子集的 TIFF/BigTIFF。解码在专用 Worker 中执行，RGBA8 非预乘缓冲通过 transferable 交给主线程，并由响应 DPR/resize 的 Canvas 2D 视口显示。
+自定义栅格插件，支持 TGA、Netpbm（PBM/PGM/PPM/PAM）和已验证子集的 TIFF/BigTIFF。解码在专用 Worker 中执行，RGBA8 非预乘缓冲通过 transferable 交给主线程，并由响应 DPR/resize 的 Canvas 2D 视口显示。
 
 ## 声明范围
 

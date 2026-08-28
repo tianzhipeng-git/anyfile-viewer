@@ -39,21 +39,21 @@
 | GIF | `.gif` | browser image | 4 | verified | 4 | 原生动画；解析帧与透明索引，固定样例覆盖循环动画 |
 | WebP | `.webp` | browser image | 4 | verified | 4 | 固定样例覆盖有损、无损 alpha 与循环动画 |
 | AVIF（单帧） | `.avif` | browser image | 4 | verified | 4 | 原生 `<img>`；固定样例覆盖单帧 AVIF |
-| AVIF sequence | `.avif` | browser image | 3 | implemented | 3 | 浏览器动画支持存在差异；以实际 decode 结果为准 |
+| AVIF sequence | `.avif` | browser image | 3 | verified | 3 | 浏览器动画支持存在差异；以实际 decode 结果为准 |
 | AVIF 的 HEIF 扩展名 | `.heif` `.heifs` `.hif` | browser image | 3–4 | implemented | 4 | IANA 为 `image/avif` 登记的扩展名；仅接受 `avif`/`avis` brand，不把 HEVC HEIF 误报为 AVIF |
-| BMP/DIB | `.bmp` `.dib` | browser image | 3 | implemented | 3 | 常见 BMP 可原生查看，较少见的压缩与内部表示可能无法解码 |
-| ICO/CUR | `.ico` `.cur` | browser image | 3 | implemented | 3 | 可查看浏览器选取的图标/光标画面，不提供容器内多尺寸导航 |
+| BMP/DIB | `.bmp` `.dib` | browser image | 3 | verified | 3 | 常见 BMP 可原生查看，较少见的压缩与内部表示可能无法解码 |
+| ICO/CUR | `.ico` `.cur` | browser image | 3 | verified | 3 | 可查看浏览器选取的图标/光标画面，不提供容器内多尺寸导航 |
 | SVG | `.svg` `.svgz` | safe vector image | 0 | planned | 3 | 安全策略未决，不与普通栅格同时上线 |
-| TGA | `.tga` `.icb` `.vda` `.vst` | general raster | 4 | implemented | 4 | raw/RLE；灰度、真彩色、调色板；15/16/24/32 bit；应用四种 origin；后三者按相同 TGA 结构 probe |
-| Netpbm | `.pnm` `.pbm` `.pgm` `.ppm` `.pam` | general raster | 4 | implemented | 4 | P1–P7；文本/二进制；1/8/16 bit；PAM 灰度、RGB 与 alpha tuple |
-| classic TIFF（无 ICC） | `.tif` `.tiff` | general raster | 4 | implemented | 4 | unsigned 1–16 bit、alpha、orientation；strip/tile、多页；固定样例覆盖 None、LZW、Deflate、PackBits、JPEG |
+| TGA | `.tga` `.icb` `.vda` `.vst` | general raster | 4 | verified | 4 | raw/RLE；灰度、真彩色、调色板；15/16/24/32 bit；应用四种 origin；后三者按相同 TGA 结构 probe |
+| Netpbm | `.pnm` `.pbm` `.pgm` `.ppm` `.pam` | general raster | 4 | verified | 4 | P1–P7；文本/二进制；1/8/16 bit；PAM 灰度、RGB 与 alpha tuple |
+| classic TIFF（无 ICC） | `.tif` `.tiff` | general raster | 4 | verified | 4 | unsigned 1–16 bit、alpha、orientation；strip/tile、多页；固定样例覆盖 None、LZW、Deflate、PackBits、JPEG |
 | classic TIFF（带 ICC） | `.tif` `.tiff` | general raster | 3 | implemented | 3 | profile 可识别但未转换，UI 明确标注 `ICC 未应用` |
 | BigTIFF | `.tf8` `.btf` `.btiff` `.tif` `.tiff` | general raster | 3 | implemented | 4 | 64-bit IFD probe 与解码路径已实现；缺少可再分发真实样例，暂不声明等级 4 |
 | pyramidal TIFF | `.ptif` `.ptiff` | general raster | 3–4 | implemented | 4 | 作为 tiled/multi-page TIFF 打开；能查看像素和页面，但不承诺厂商私有金字塔语义 |
 | OME-TIFF | `.ome.tif` `.ome.tiff` `.ome.tf2` `.ome.tf8` `.ome.btf` | general raster | 3 | implemented | 5 | 可查看 TIFF 像素和页面；暂不解释 OME-XML 的 Z/C/T 维度语义 |
-| HEVC HEIF/HEIC | `.heif` `.heifs` `.hif` `.heic` | modern raster | 0 或 3 | implemented | 3 | 仅在原生 ImageDecoder 支持时进入候选；显示 primary image，不提供辅助项或序列导航 |
-| JPEG XL | `.jxl` | modern raster | 4 | implemented | 4 | 原生 ImageDecoder 优先，`jxl-oxide-wasm@0.12.6` Worker 回退；固定样例覆盖有损、无损 alpha 与动画 |
-| 相机 RAW | `.dng` `.cr2` `.cr3` `.crw` `.nef` `.arw` `.raf` `.rwl` `.raw` `.rw2` | camera RAW | 2 | implemented | 3 | 内嵌预览与 LibRaw 基础显影已实现；CRW CIFF 与 Panasonic/Leica TIFF-like RAW 已经真实文件容器验证；尚无满足门禁的型号级回归语料，因此不返回等级 3 |
+| HEVC HEIF/HEIC | `.heif` `.heifs` `.hif` `.heic` | modern raster | 0 或 3 | verified | 3 | 仅在原生 ImageDecoder 支持时进入候选；显示 primary image，不提供辅助项或序列导航 |
+| JPEG XL | `.jxl` | modern raster | 4 | verified | 4 | 原生 ImageDecoder 优先，`jxl-oxide-wasm@0.12.6` Worker 回退；固定样例覆盖有损、无损 alpha 与动画 |
+| 相机 RAW | `.dng` `.cr2` `.cr3` `.crw` `.nef` `.arw` `.raf` `.rwl` `.raw` `.rw2` | camera RAW | 2 | verified | 3 | 内嵌预览与 LibRaw 基础显影已实现；桌面真实文件已手工验证当前等级 2；尚无满足门禁的型号级回归语料，因此不返回等级 3 |
 | PSD/PSB | `.psd` `.psb` | layered document | 0 | deferred | 3 | 先合成预览与图层元数据 |
 | ORA/KRA | `.ora` `.kra` | layered document | 0 | deferred | 3 | 利用规范中的合成预览，不承诺编辑语义 |
 | DDS | `.dds` | GPU texture | 0 | deferred | 5 | mip、array、cubemap 和 BC family |
@@ -79,6 +79,7 @@
 - 部署检查：`browser-image` manifest 静态加载；probe 与完整插件使用不同动态入口；`anyfile-image-viewer__viewport` 不得出现在 `/view` 初始 bundle。
 - 真实浏览器 smoke（2026-08-28，Chromium）：六种样例均经完整插件入口解码为 96×64；APNG/GIF/WebP 截图帧发生变化；缩放、旋转、连续切换、360×640 窄窗口与 900×320 矮窗口通过。原生 `<img>` 不创建需要单独同步 DPR 的 Canvas 像素面。
 - 扩展格式 smoke（2026-08-28，Chromium）：BMP 解码为 96×64，ICO/CUR 解码为 96×96，2 帧 AVIF sequence 解码为 96×64；其他目标浏览器仍以运行时 decode 结果为准，因此维持等级 3。
+- 真实浏览器手工验收（2026-08-29）：`viewer/plugins/image/examples/` 中全部正常、损坏和截断样例均通过。
 
 ## 6. 阶段 2 读取、资源与验证证据
 
@@ -88,9 +89,14 @@
 - Worker 终止承担 opening/active abort；成功结果的 RGBA8 非预乘缓冲通过 transferable 返回；ImageBitmap、ResizeObserver、animation frame、事件与 Worker 由幂等 `dispose()` 释放。
 - 自动测试覆盖真实样例解码、probe 0/3/4、扩展名候选、损坏/截断、极端尺寸、alpha、orientation、opening/active abort、重复 dispose 与 DOM 所有权。
 - `npm test`、`npm run lint`、`npm run build` 通过；`/view` 初始 JavaScript 为 200.8 KiB gzip，未包含 Canvas UI 或 TIFF decoder 标记。完整插件入口约 5.6 KiB gzip，Worker 核心约 14.8 KiB gzip，压缩 decoder 继续按需拆分。
-- 真实浏览器手工验收尚未计入 `verified`：内置浏览器无法访问本机服务，本机 Chrome 的自动化表面未暴露网页内容。需补跑 360×640、900×320、高 DPR、多页切换和连续切换。
+- 真实浏览器手工验收（2026-08-29）：`viewer/plugins/general-raster/examples/` 中全部正常、损坏和截断样例均通过；已覆盖 TGA raw/RLE、Netpbm P1–P7，以及 TIFF strip/tile、多页、8/16 bit、alpha、orientation 和 None/LZW/Deflate/PackBits/JPEG 压缩。
 
-## 7. 每个格式必须记录的维度
+## 7. 阶段 3 验证证据
+
+- 真实浏览器手工验收（2026-08-29）：`viewer/plugins/modern-raster/examples/` 中全部正常、损坏和截断样例均通过，覆盖 HEVC HEIC primary image，以及 JPEG XL 有损、无损 alpha 和两帧动画。
+- 桌面真实文件手工验收（2026-08-29）：`raw_images/` 中 16 个文件全部通过；其中 13 个相机 RAW 文件覆盖 DNG、CR2、CRW、NEF、ARW、RWL、RAW、RW2，另外覆盖 PGM、PAM 和 JPEG XL。该结果确认 RAW 当前等级 2，不构成型号级回归语料，也不将 RAW 提升为等级 3。
+
+## 8. 每个格式必须记录的维度
 
 实施后，每个格式或子格式增加独立条目，至少包含：
 
