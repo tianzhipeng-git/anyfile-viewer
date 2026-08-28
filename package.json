@@ -11,8 +11,10 @@
   ],
   "scripts": {
     "prepare:pdfjs": "node scripts/prepare-pdfjs-assets.mjs",
-    "dev": "npm run prepare:pdfjs && next dev",
-    "build": "npm run prepare:pdfjs && next build --webpack && npm run check:bundle",
+    "prepare:heif": "node scripts/prepare-heif-assets.mjs",
+    "prepare:assets": "npm run prepare:pdfjs && npm run prepare:heif",
+    "dev": "npm run prepare:assets && next dev",
+    "build": "npm run prepare:assets && next build --webpack && npm run check:bundle",
     "check:bundle": "node scripts/check-view-bundle.mjs",
     "start": "next start",
     "lint": "eslint",

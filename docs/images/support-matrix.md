@@ -51,7 +51,7 @@
 | BigTIFF | `.tf8` `.btf` `.btiff` `.tif` `.tiff` | general raster | 3 | implemented | 4 | 64-bit IFD probe 与解码路径已实现；缺少可再分发真实样例，暂不声明等级 4 |
 | pyramidal TIFF | `.ptif` `.ptiff` | general raster | 3–4 | implemented | 4 | 作为 tiled/multi-page TIFF 打开；能查看像素和页面，但不承诺厂商私有金字塔语义 |
 | OME-TIFF | `.ome.tif` `.ome.tiff` `.ome.tf2` `.ome.tf8` `.ome.btf` | general raster | 3 | implemented | 5 | 可查看 TIFF 像素和页面；暂不解释 OME-XML 的 Z/C/T 维度语义 |
-| HEVC HEIF/HEIC | `.heif` `.heifs` `.hif` `.heic` | modern raster | 0 或 3 | verified | 3 | 仅在原生 ImageDecoder 支持时进入候选；显示 primary image，不提供辅助项或序列导航 |
+| HEVC HEIF/HEIC | `.heif` `.heifs` `.hif` `.heic` | modern raster | 3 | implemented | 3 | 原生实际解码优先，失败后使用同源 `libheif 1.23.2 + libde265 1.1.1` Worker/WASM；显示 primary image，不提供辅助项或序列导航 |
 | JPEG XL | `.jxl` | modern raster | 4 | verified | 4 | 原生 ImageDecoder 优先，`jxl-oxide-wasm@0.12.6` Worker 回退；固定样例覆盖有损、无损 alpha 与动画 |
 | 相机 RAW | `.dng` `.cr2` `.cr3` `.crw` `.nef` `.arw` `.raf` `.rwl` `.raw` `.rw2` | camera RAW | 2 | verified | 3 | 内嵌预览与 LibRaw 基础显影已实现；桌面真实文件已手工验证当前等级 2；尚无满足门禁的型号级回归语料，因此不返回等级 3 |
 | PSD/PSB | `.psd` `.psb` | layered document | 0 | deferred | 3 | 先合成预览与图层元数据 |
@@ -93,8 +93,9 @@
 
 ## 7. 阶段 3 验证证据
 
-- modern-raster 的 JPEG XL 与 HEIC 输入上限为 256 MiB，解码后上限为 64 Mi 像素；JPEG XL 另外限制为 4096 个关键帧。
+- modern-raster 的 JPEG XL 输入上限为 256 MiB；HEIC 原生路径沿用 256 MiB 通用上限，WASM 回退输入上限为 128 MiB；两者解码后均不得超过 64 Mi 像素，JPEG XL 另外限制为 4096 个关键帧。
 - 真实浏览器手工验收（2026-08-29）：`viewer/plugins/modern-raster/examples/` 中全部正常、损坏和截断样例均通过，覆盖 HEVC HEIC primary image，以及 JPEG XL 有损、无损 alpha 和两帧动画。
+- HEIC fallback 自动验收（2026-08-29）：独立 Worker 中的 `1.23.2-anyfile.1` 产物把固定样例解码为 96×64 straight-alpha RGBA8；自动测试覆盖无原生能力时的打开、opening/active abort、重复 dispose、DOM 所有权和资源释放。NCLX/ICC、方向、alpha、10-bit、grid 与真实手机大图仍需随扩展语料持续回归，因此状态保持 `implemented`、等级保持 3。
 - 桌面真实文件手工验收（2026-08-29）：`raw_images/` 中 16 个文件全部通过；其中 13 个相机 RAW 文件覆盖 DNG、CR2、CRW、NEF、ARW、RWL、RAW、RW2，另外覆盖 PGM、PAM 和 JPEG XL。该结果确认 RAW 当前等级 2，不构成型号级回归语料，也不将 RAW 提升为等级 3。
 
 ## 8. 每个格式必须记录的维度

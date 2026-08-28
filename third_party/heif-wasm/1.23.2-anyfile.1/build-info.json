@@ -1,0 +1,75 @@
+{
+  "artifactVersion": "1.23.2-anyfile.1",
+  "upstream": {
+    "libheif": {
+      "version": "1.23.2",
+      "tag": "v1.23.2",
+      "commit": "ac1cb05c39008f01525c991ff8b88f84ddf70fd2",
+      "url": "https://github.com/strukturag/libheif/archive/refs/tags/v1.23.2.tar.gz",
+      "sha256": "1405ed070421459b569ff49deab109b7f1a30a447e72a9b20a4154f774634a44"
+    },
+    "libde265": {
+      "version": "1.1.1",
+      "tag": "v1.1.1",
+      "commit": "4dd701fffac01632ffd5cabc5ef10deb56accba1",
+      "url": "https://github.com/strukturag/libde265/archive/refs/tags/v1.1.1.tar.gz",
+      "sha256": "5b4fac677018e6074196e8f9889f3e4a5310e46afbf22a893f620d4e24d3510e"
+    }
+  },
+  "toolchain": {
+    "image": "emscripten/emsdk:4.0.10",
+    "digest": "sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7"
+  },
+  "flags": [
+    "-O3",
+    "-flto",
+    "-fexceptions",
+    "-std=c++20",
+    "--no-entry",
+    "-sMODULARIZE=1",
+    "-sEXPORT_ES6=1",
+    "-sENVIRONMENT=worker",
+    "-sFILESYSTEM=0",
+    "-sDYNAMIC_EXECUTION=0",
+    "-sALLOW_MEMORY_GROWTH=1",
+    "-sMAXIMUM_MEMORY=536870912",
+    "-sASSERTIONS=0"
+  ],
+  "features": {
+    "decodeOnly": true,
+    "hevc": true,
+    "encoders": false,
+    "otherCodecs": false,
+    "dynamicPlugins": false,
+    "threads": false,
+    "unsafeEval": false
+  },
+  "adapterSha256": "f07cd2b30b0df62cab2e8f89f068a5880ee2b64a91e235c8b53c561ec79ba9f3",
+  "recipeSha256": "441642697882d713412a0bac76bc5ed2977a22c2d4d311c2bbafb523300d1ac4",
+  "artifacts": {
+    "heif-decoder.js": {
+      "bytes": 40823,
+      "sha256": "8bcd42c9aba314b8491b9ef2d24002b35afcb1fa9e86a14529f925dff8941edd"
+    },
+    "heif-decoder.wasm": {
+      "bytes": 1197289,
+      "sha256": "4934170b8ce588cb030bf023a78d8c1ae89dbfa65b4fab2c253af9f9426d54e9"
+    },
+    "LICENSE.libheif": {
+      "bytes": 44366,
+      "sha256": "fa81ce652315b013359d6e8e4744335f31a50c7c192907176d3632f78a3b4596"
+    },
+    "LICENSE.libde265": {
+      "bytes": 44339,
+      "sha256": "02cc1585a20677992e0ba578fa692635dc193735f2691dc81de924b51c4e8020"
+    },
+    "THIRD_PARTY_NOTICES.md": {
+      "bytes": 794,
+      "sha256": "77e51c084b0cabf95af3c04bc0dfef75ab0a0c7db442b140986d08c53dd26d5d"
+    },
+    "SOURCE.md": {
+      "bytes": 756,
+      "sha256": "0b9000615454de5e969d24ea7c494de33d094e2c871522fc68f245e9d3943719"
+    }
+  }
+}

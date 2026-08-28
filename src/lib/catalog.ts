@@ -22,7 +22,7 @@ export const formats: FileFormat[] = [
   { extension: "webp", name: "WebP 图片", description: "支持有损、无损、透明通道与动画。", category: "images-video", native: true },
   { extension: "avif", name: "AVIF 图片", description: "由当前浏览器原生解码的现代高压缩图片格式。", category: "images-video", native: true },
   { extension: "jxl", name: "JPEG XL 图片", description: "通过浏览器原生能力或本地 WASM 查看单帧与动画图片。", category: "images-video", native: false },
-  { extension: "heic", name: "HEIC 图片", description: "在当前浏览器具备原生 HEIC 解码能力时查看主图像。", category: "images-video", native: true },
+  { extension: "heic", name: "HEIC 图片", description: "通过浏览器原生能力或本地 HEVC WASM 查看主图像。", category: "images-video", native: false },
   { extension: "dng", name: "DNG 相机 RAW", description: "查看内嵌预览并在本地执行基础 RAW 显影。", category: "images-video", native: false },
   { extension: "cr2", name: "Canon CR2 RAW", description: "查看 Canon RAW 内嵌预览与基础显影。", category: "images-video", native: false },
   { extension: "cr3", name: "Canon CR3 RAW", description: "查看 Canon CR3 主预览与基础显影。", category: "images-video", native: false },

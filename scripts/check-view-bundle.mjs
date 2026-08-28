@@ -1,4 +1,5 @@
 import { readdir, readFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -40,6 +41,7 @@ const deferredImplementationMarkers = [
   "anyfile-modern-raster-viewer__canvas",
   "anyfile-camera-raw-viewer__canvas",
   "jxl-oxide-wasm",
+  "heif-decoder.wasm",
   "LibRaw disposed",
   "Unknown compression method identifier:",
 ];
@@ -57,6 +59,26 @@ const archiveChunkContents = await Promise.all(staticChunks.map(async (fileName)
   fileName,
   content: await readFile(join(staticChunkDirectory, fileName)),
 })));
+const heifRuntimeSource = await readFile(join(projectRoot, "viewer/plugins/modern-raster/src/heif-runtime.ts"), "utf8");
+const heifRuntimeVersion = heifRuntimeSource.match(/HEIF_ARTIFACT_VERSION = "([^"]+)"/)?.[1];
+if (!heifRuntimeVersion) throw new Error("HEIF runtime artifact version is missing");
+const heifSourceRoot = join(projectRoot, "third_party/heif-wasm", heifRuntimeVersion);
+const heifBuildInfo = JSON.parse(await readFile(join(heifSourceRoot, "build-info.json"), "utf8"));
+const heifSupportRoot = join(projectRoot, "public/vendor/libheif", heifRuntimeVersion);
+for (const [asset, expected] of Object.entries(heifBuildInfo.artifacts)) {
+  const content = await readFile(join(heifSupportRoot, asset)).catch(() => undefined);
+  const sha256 = content && createHash("sha256").update(content).digest("hex");
+  if (!content?.byteLength || content.byteLength !== expected.bytes || sha256 !== expected.sha256) {
+    throw new Error(`HEIF runtime asset is missing or failed its integrity check: ${asset}`);
+  }
+}
+const jxlChunks = archiveChunkContents.filter(({ content }) => content.includes("JxlImage"));
+if (jxlChunks.length === 0) {
+  throw new Error("Unable to locate the deferred JPEG XL runtime chunk");
+}
+if (jxlChunks.some(({ content }) => content.includes("heif-decoder.wasm"))) {
+  throw new Error("HEIF runtime URL was bundled into a JPEG XL decoder chunk");
+}
 const archiveChunks = archiveChunkContents.filter(({ content }) => {
   const code = content.toString("utf8");
   return code.includes("__anyfile_archive_metadata_viewer_v1__") || code.includes("Unsafe filename");
@@ -126,3 +148,4 @@ console.log(
   `PDF.js Worker: ${pdfWorkerAsset}; support assets prepared for ${pdfjsPackage.version}; viewer implementation remains deferred`,
 );
 console.log(`LibRaw ${librawPackage.version}: same-origin Worker, pthread and WASM assets prepared; runtime remains deferred`);
+console.log(`libheif ${heifRuntimeVersion}: verified same-origin JS/WASM and license assets; runtime remains deferred`);

@@ -10,8 +10,7 @@ describe("HEIC native decoding", () => {
     const ImageElement = vi.fn(() => { throw new Error("image fallback must not run"); });
     vi.stubGlobal("ImageDecoder", undefined);
     vi.stubGlobal("Image", ImageElement);
-    const { canDecodeNativeHeic, NativeImageSequence } = await import("./native");
-    expect(await canDecodeNativeHeic()).toBe(false);
+    const { NativeImageSequence } = await import("./native");
     expect(await NativeImageSequence.open(new File(["heic"], "image.heic"), ["image/heic", "image/heif"], false)).toBeUndefined();
     expect(ImageElement).not.toHaveBeenCalled();
   });

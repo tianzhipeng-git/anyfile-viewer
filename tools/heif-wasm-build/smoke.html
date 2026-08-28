@@ -1,0 +1,17 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Anyfile HEIF WASM smoke test</title>
+<pre id="result">running</pre>
+<script type="module">
+  const result = document.querySelector("#result");
+  const worker = new Worker("./smoke-worker.js", { type: "module" });
+  worker.onmessage = ({ data }) => {
+    result.textContent = JSON.stringify(data);
+    document.title = data.ok ? "PASS" : "FAIL";
+    worker.terminate();
+  };
+  worker.onerror = ({ message }) => {
+    result.textContent = JSON.stringify({ ok: false, message });
+    document.title = "FAIL";
+  };
+</script>

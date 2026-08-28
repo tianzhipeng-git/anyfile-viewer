@@ -118,14 +118,14 @@ SVG 不自动包含在此阶段，因为它有独立的主动内容和外部资�
 ### 实施结果（2026-08-28）
 
 - 新增 `modern-raster` 插件。JPEG XL 先使用原生 `ImageDecoder`，否则在专用 Worker 中按需加载 `jxl-oxide-wasm@0.12.6`；固定生成样例覆盖有损、无损 alpha、两帧动画、损坏和截断文件，真实 WASM 测试验证 96×64 两帧循环动画。
-- HEVC HEIF/HEIC 只在当前浏览器原生 `ImageDecoder` 明确支持 `image/heic` 或 `image/heif` 时进入候选，不随应用分发 HEVC decoder；当前只显示 primary image，因此动态等级为 0 或 3。
+- HEVC HEIF/HEIC 使用有界 BMFF probe，原生实际解码失败后按需加载独立的同源 `libheif 1.23.2 + libde265 1.1.1` Worker/WASM；当前只显示 primary image，因此动态等级为 3。
 - 新增 `camera-raw` 插件，注册 DNG、CR2、CR3、NEF、ARW 和 RAF。轻量 probe 校验 TIFF、Canon CR2/CR3 与 RAF 容器；未被真实语料验证的相机型号只返回等级 2。
 - RAW 完整插件锁定 `libraw-wasm@1.6.0`，提取内嵌预览后在后台执行相机白平衡、相机矩阵、8-bit sRGB 和文件方向的基础显影，并允许在内嵌预览与显影结果之间切换。输入上限为 256 MiB，输出上限为 64 Mi 像素。
 - `/view` 使用 COOP/COEP 响应头满足 pthread WASM；环境不是 `crossOriginIsolated` 时返回 `unsupported-environment`。JXL、RAW Worker/WASM 均保持在插件动态入口之后。
 - `@anyfile/viewer-rendering` 已从两款既有图片插件的真实重复中提取 viewport、输入、Canvas DPR surface、帧调度和资源清理；没有同时引入 Lit、d3-zoom 或 scene model。
 - 尚未取得六个 RAW 扩展各两个具有明确再分发依据的真实相机样例，因此验证型号清单保持为空，阶段 3 不声明任何 RAW 文件达到等级 3。完成该语料门禁后才能把对应型号加入清单并完成阶段验收。
 
-HEVC HEIF/HEIC 的跨浏览器本地解码回退另见 [HEIC / HEIF 跨浏览器支持方案](heic-heif-support-plan.md)。该方案在依赖安全、LGPL 分发义务和 HEVC 专利风险评审通过前不进入实现。
+HEVC HEIF/HEIC 的跨浏览器本地解码回退已按 [HEIC / HEIF 跨浏览器支持方案](heic-heif-support-plan.md) 实施；审核产物、对应源码/替换说明和许可证材料随分发提供。
 
 ### 候选范围
 

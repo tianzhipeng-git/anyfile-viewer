@@ -121,6 +121,7 @@ worker-src 'self' blob:
 | SQLite 查看器 | `sql.js` | `1.14.2` |
 | 通用栅格查看器 | `geotiff` | `3.0.5` |
 | 现代栅格查看器 | `jxl-oxide-wasm` | `0.12.6` |
+| HEIF 回退 | `libheif + libde265` 自建产物 | `1.23.2-anyfile.1`（`libde265 1.1.1`） |
 | 相机 RAW 查看器 | `libraw-wasm` | `1.6.0` |
 
 `package-lock.json` 使用 lockfile v3，锁定其余直接依赖和全部传递依赖的实际版本、下载地址与完整性哈希。根项目中的 `^` 版本不会在 `npm ci` 时漂移。
@@ -186,6 +187,12 @@ JXL 的打包 Worker 和 WASM 位于 `/_next/static/:path*`，该路径同样返
 生产构建显式使用 Next.js 支持的 `next build --webpack`。`libraw-wasm` 的 Emscripten pthread runtime 在当前 Next.js 16.3.3 Turbopack 生产构建中会停留在 chunk 生成阶段。构建前将其官方 `dist` 中的入口、Worker、pthread 脚本和 WASM 原样复制到版本化同源目录，RAW 插件打开文件时才通过 URL 动态导入。生产构建使用 Webpack，开发服务仍保留 Next.js 默认的 Turbopack。
 
 新增或升级插件不应通过提高上限来绕过失败。先检查是否误用了静态导入、顶层副作用或把实现代码放进了 manifest。
+
+### HEIF 的同源源码构建产物
+
+`npm run prepare:heif` 校验 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json` 中的文件大小和 SHA-256，再把 decoder、WASM、许可证与对应源码说明复制到 `/vendor/libheif/1.23.2-anyfile.1/`。运行时 URL 与产物版本由构建门禁交叉校验。
+
+HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实际解码失败后，独立 Worker 才动态导入同源 glue 并加载 WASM。`/vendor/libheif/:path*` 返回与其他本地 Worker/WASM 一致的 COEP/CORP 头；CSP 只需允许同源 Worker 和 WebAssembly，不新增 CDN 来源。
 
 ## 6. 发布前检查清单
 

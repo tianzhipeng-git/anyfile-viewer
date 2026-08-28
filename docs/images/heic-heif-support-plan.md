@@ -1,6 +1,6 @@
 # HEIC / HEIF 跨浏览器支持方案
 
-- 状态：待实施；依赖安全与 LGPL 分发材料待完成，HEVC 分发风险已由项目方确认可接受
+- 状态：已实施（2026-08-29）；浏览器/真实设备扩展语料仍按本文矩阵持续回归
 - 日期：2026-08-29
 - 范围：浏览器本地查看 HEVC 编码的 HEIF/HEIC 主图像
 - 不包含：编辑、转换、写回、服务端转码、完整序列或全部辅助图像导航
@@ -294,3 +294,13 @@ HEVC 还存在独立于开源许可证的标准必要专利问题。Access Advan
 - [libheif-js 1.19.8 包信息](https://www.npmjs.com/package/libheif-js)
 - [jSquash HEIC 构建锁定 libheif v1.19.7](https://github.com/discourse/jSquash/blob/main/packages/heic/codec/Makefile)
 - [Access Advance HEVC Program Overview](https://accessadvance.com/wp-content/uploads/2021/06/HEVC-Advance-Program-Overview-July-2025.pdf)
+
+## 15. 实施记录
+
+- 审核产物：`libheif 1.23.2 + libde265 1.1.1`，产物版本 `1.23.2-anyfile.1`；源码、commit、归档 SHA-256、Emscripten 镜像 digest、功能开关和产物哈希记录在 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json`。
+- 分发材料：两份 LGPL 正文、第三方声明、对应源码/替换说明随部署资产公开；HEVC 风险决定限定在本地浏览器 decoder 分发范围。
+- 加载边界：probe 只做前 1 MiB 内的有界 BMFF/item/derived 引用检查；原生实际解码失败后才创建独立 HEIF Worker，Worker 再完整解析文件并动态加载同源 WASM。
+- 输出契约：应用容器变换后的 RGBA8、straight alpha、transferable `ArrayBuffer`；NCLX/无 profile 转 sRGB，ICC 明示未应用，>8-bit 明示 SDR 预览。
+- 发布阈值：HEIF 原生路径沿用 256 MiB 通用输入上限，WASM 回退输入 128 MiB、输出 64 Mi 像素、256 items、4096 tiles、384 MiB libheif 总内存预算；Worker 终止负责取消和资源回收。
+- 自动验收：probe 的真实样例/损坏结构、fallback 生命周期与 DOM 所有权测试；本地浏览器 smoke 在 Worker 中把固定 HEIC 解码为 96×64、24,576 字节 RGBA。
+- 产物体积：JavaScript 33,783 字节；WASM 1,166,264 字节。普通 `npm` 构建只校验并复制审核产物，不编译 native 依赖。

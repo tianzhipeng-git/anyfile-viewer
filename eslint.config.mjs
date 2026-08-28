@@ -13,6 +13,8 @@ const eslintConfig = defineConfig([
     "build/**",
     "public/vendor/pdfjs/**",
     "public/vendor/libraw/**",
+    "public/vendor/libheif/**",
+    "third_party/heif-wasm/**",
     "next-env.d.ts",
   ]),
 ]);

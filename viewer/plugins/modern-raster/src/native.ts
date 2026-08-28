@@ -9,36 +9,8 @@ type ImageDecoderConstructor = {
   new(options: { data: ReadableStream<Uint8Array>; type: string }): DecoderInstance;
 };
 
-let heicSupport: Promise<boolean> | undefined;
-
 function decoderConstructor() {
   return (globalThis as typeof globalThis & { ImageDecoder?: ImageDecoderConstructor }).ImageDecoder;
-}
-
-export function canDecodeNativeHeic() {
-  return heicSupport ??= decodeHeicCapabilitySample();
-}
-
-async function decodeHeicCapabilitySample() {
-  const bytes = Uint8Array.from(atob(HEIC_CAPABILITY_SAMPLE), (value) => value.charCodeAt(0));
-  const blob = new Blob([bytes], { type: "image/heic" });
-  const Decoder = decoderConstructor();
-  if (Decoder) {
-    try {
-      if (await Decoder.isTypeSupported("image/heic")) {
-        const decoder = new Decoder({ data: blob.stream(), type: "image/heic" });
-        try {
-          await decoder.tracks.ready;
-          const frame = await decoder.decode({ frameIndex: 0, completeFramesOnly: true });
-          frame.image.close();
-          return true;
-        } finally {
-          decoder.close();
-        }
-      }
-    } catch { return false; }
-  }
-  return false;
 }
 
 function loadImage(blob: Blob): Promise<{ element: HTMLImageElement; url: string } | undefined> {
@@ -101,4 +73,3 @@ export class NativeImageSequence {
     if (this.staticImage) { URL.revokeObjectURL(this.staticImage.url); this.staticImage.element.src = ""; }
   }
 }
-import { HEIC_CAPABILITY_SAMPLE } from "./heic-capability-sample";
