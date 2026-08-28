@@ -8,6 +8,7 @@ import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer
 import { crc32 } from "./binary";
 import { archiveMetadataViewer, RangeReader } from "./index";
 import { archiveMetadataManifest } from "./manifest";
+import { encryptedHeadersRar5Fixture, rar4Fixture, rar5Fixture } from "./rar-test-fixtures";
 import {
   cp437ZipFixture,
   duplicateZipFixture,
@@ -61,8 +62,64 @@ describe("archive metadata viewer", () => {
     expect(() => validateManifest(archiveMetadataManifest)).not.toThrow();
     const extensions = archiveMetadataManifest.formats.flatMap((format) => format.extensions);
     expect(extensions).toEqual(expect.arrayContaining([
-      ".zip", ".jar", ".docx", ".tar", ".tar.gz", ".xz", ".zst", ".bz2", ".lz4", ".zlib", ".deflate", ".br",
+      ".zip", ".jar", ".docx", ".rar", ".tar", ".tar.gz", ".xz", ".zst", ".bz2", ".lz4", ".zlib", ".deflate", ".br",
     ]));
+  });
+
+  it("reads RAR5 headers without touching compressed payloads", async () => {
+    const fixture = rar5Fixture();
+    const tracked = trackedFile(fixture.bytes, "archive.rar");
+    const test = createViewerTestContext(tracked.file);
+    contexts.push(test);
+    const directRead = vi.spyOn(tracked.file, "arrayBuffer");
+    const controller = await archiveMetadataViewer.open(test.context);
+
+    expect(test.container.textContent).toContain("RAR 5.x");
+    expect(test.container.textContent).toContain("资料/说明.txt");
+    expect(test.container.textContent).toContain("已加密");
+    expect(test.container.textContent).toContain("../unsafe.txt");
+    expect(test.container.textContent).toContain("危险路径");
+    expect(directRead).not.toHaveBeenCalled();
+    expect(tracked.ranges.every((range) => !overlaps(range, fixture.payload))).toBe(true);
+    await controller.dispose();
+  });
+
+  it("reads RAR4 headers without touching compressed payloads", async () => {
+    const fixture = rar4Fixture();
+    const tracked = trackedFile(fixture.bytes, "legacy.rar");
+    const test = createViewerTestContext(tracked.file);
+    contexts.push(test);
+    const controller = await archiveMetadataViewer.open(test.context);
+
+    expect(test.container.textContent).toContain("RAR 4.x");
+    expect(test.container.textContent).toContain("folder/legacy.txt");
+    expect(test.container.textContent).toContain("321");
+    expect(tracked.ranges.every((range) => !overlaps(range, fixture.payload))).toBe(true);
+    await controller.dispose();
+  });
+
+  it("finds SFX RAR signatures and reports encrypted headers and volumes", async () => {
+    const sfx = contextFor(rar5Fixture({ sfx: true, volume: true }).bytes, "installer.rar");
+    const sfxController = await archiveMetadataViewer.open(sfx.context);
+    expect(sfx.container.textContent).toContain("SFX 内 RAR5 签名");
+    expect(sfx.container.textContent).toContain("卷 2");
+    expect(sfx.container.textContent).toContain("不自动查找或拼接其他卷");
+    await sfxController.dispose();
+
+    const encrypted = contextFor(encryptedHeadersRar5Fixture(), "private.rar");
+    const encryptedController = await archiveMetadataViewer.open(encrypted.context);
+    expect(encrypted.container.textContent).toContain("文件头已加密");
+    expect(encrypted.container.querySelector("table")).toBeNull();
+    await encryptedController.dispose();
+  });
+
+  it("rejects damaged and truncated RAR headers", async () => {
+    const damaged = rar5Fixture().bytes.slice();
+    damaged[9] ^= 0xff;
+    await expect(archiveMetadataViewer.open(contextFor(damaged, "damaged.rar").context))
+      .rejects.toMatchObject({ code: "invalid-file" });
+    await expect(archiveMetadataViewer.open(contextFor(rar4Fixture().bytes.subarray(0, 19), "truncated.rar").context))
+      .rejects.toMatchObject({ code: "invalid-file" });
   });
 
   it("reads ZIP central-directory metadata without touching entry payloads", async () => {
@@ -296,6 +353,7 @@ describe("archive metadata viewer", () => {
 
   it.each([
     ["archive.zip", "dangerous-path.txt"],
+    ["archive.rar", "资料/说明.txt"],
     ["empty-zip64.zip", "ZIP64"],
     ["archive.tar", "long-path.txt"],
     ["archive.tar.gz", "未扫描内部归档"],

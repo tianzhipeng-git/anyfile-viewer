@@ -7,6 +7,7 @@
 - **插件 ID**：`archive-metadata-viewer`
 - **支持格式**：
   - ZIP 及派生（`.zip`、`.jar`、`.docx`、`.apk` 等）
+  - RAR 4.x / 5.x（`.rar`，含有界 SFX 签名扫描）
   - TAR（`.tar`）
   - 独立压缩流：gzip、XZ、Zstandard、bzip2、LZ4、zlib、raw DEFLATE、Brotli
   - 复合名如 `.tar.gz`、`.tar.xz`、`.tar.zst`
@@ -25,6 +26,7 @@
 
 3. **分格式解析**
    - **ZIP**（`src/zip-adapter.ts`）：`@zip.js/zip.js` 读取中央目录与条目元数据
+   - **RAR**（`src/parsers/rar.ts`）：顺序读取 RAR4/RAR5 头部，按记录长度跳过压缩数据
    - **TAR**（`src/parsers/tar.ts`）：自研解析 POSIX/PAX 头、符号链接等
    - **包装流**（`src/parsers/wrappers.ts`）：自研解析 gzip/XZ/zstd/bzip2 等头部与尾部字段
 
@@ -46,5 +48,6 @@ TAR 与各压缩包装格式的解析为项目内自研，无额外运行时依�
 - **复合归档**（如 `.tar.gz`）：只解析外层压缩包装，不扫描内部 TAR 目录（需解码数据流）
 - **raw DEFLATE / Brotli**：无独立容器目录，只能展示流级元数据
 - **加密 ZIP**：不支持读取加密条目内容或元数据
+- **RAR**：不解压条目；文件头加密时无法列出目录；分卷归档只展示当前所选卷
 - **超大归档**：ZIP 中央目录或 TAR 头扫描可能较慢，但设计上避免全量读入
 - 部分扩展名（如 `.docx`）在此插件中仅作为 ZIP 容器识别，实际文档预览由对应 Office 插件负责

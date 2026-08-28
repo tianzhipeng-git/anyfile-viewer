@@ -10,6 +10,7 @@ const EXTENSIONS: readonly (readonly [string, ArchiveFormatId])[] = [
   ...[".zip", ".jar", ".war", ".ear", ".apk", ".aab", ".ipa", ".epub", ".odt",
     ".ods", ".odp", ".odg", ".odf", ".docx", ".xlsx", ".pptx", ".nupkg", ".snupkg",
     ".vsix", ".whl", ".xpi", ".cbz", ".kmz", ".usdz"].map((item) => [item, "zip"] as const),
+  [".rar", "rar"],
   [".tar", "tar"], [".gz", "gzip"], [".xz", "xz"], [".zst", "zstd"],
   [".bz2", "bzip2"], [".lz4", "lz4"], [".zlib", "zlib"], [".zz", "zlib"],
   [".dfl", "deflate"], [".br", "brotli"],
@@ -21,6 +22,8 @@ function extensionFor(name: string): readonly [string, ArchiveFormatId] | undefi
 }
 
 function magicFor(bytes: Uint8Array): ArchiveFormatId | undefined {
+  if (bytes.length >= 7 && ascii(bytes.subarray(0, 7)) === "Rar!\x1a\x07\x00") return "rar";
+  if (bytes.length >= 8 && ascii(bytes.subarray(0, 8)) === "Rar!\x1a\x07\x01\x00") return "rar";
   if (bytes.length >= 4) {
     const data = view(bytes);
     const little = data.getUint32(0, true);

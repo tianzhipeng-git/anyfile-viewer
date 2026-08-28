@@ -37,6 +37,7 @@ export type ArchiveMetadata = {
 
 export type ArchiveFormatId =
   | "zip"
+  | "rar"
   | "tar"
   | "gzip"
   | "xz"

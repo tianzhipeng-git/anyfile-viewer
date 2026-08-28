@@ -26,6 +26,72 @@ function concatenate(...parts) {
   return output;
 }
 
+function uint32(value) {
+  const bytes = new Uint8Array(4);
+  new DataView(bytes.buffer).setUint32(0, value, true);
+  return bytes;
+}
+
+function vint(value) {
+  const bytes = [];
+  do {
+    let byte = value % 128;
+    value = Math.floor(value / 128);
+    if (value) byte |= 0x80;
+    bytes.push(byte);
+  } while (value);
+  return Uint8Array.from(bytes);
+}
+
+function crc32(bytes) {
+  let crc = 0xffffffff;
+  for (const byte of bytes) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit += 1) {
+      crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function rar5Block(type, flags, specific, data = new Uint8Array()) {
+  const body = concatenate(
+    vint(type),
+    vint(flags),
+    flags & 2 ? vint(data.length) : new Uint8Array(),
+    specific,
+  );
+  const size = vint(body.length);
+  return concatenate(uint32(crc32(concatenate(size, body))), size, body, data);
+}
+
+function rar5Example() {
+  const signature = Uint8Array.of(0x52, 0x61, 0x72, 0x21, 0x1a, 0x07, 0x01, 0x00);
+  const main = rar5Block(1, 0, vint(0));
+  const file = (path, payload) => {
+    const name = strToU8(path);
+    const specific = concatenate(
+      vint(6),
+      vint(payload.length),
+      vint(0o100644),
+      uint32(Math.floor(fixedDate.getTime() / 1000)),
+      uint32(crc32(payload)),
+      vint(0),
+      vint(1),
+      vint(name.length),
+      name,
+    );
+    return rar5Block(2, 2, specific, payload);
+  };
+  return concatenate(
+    signature,
+    main,
+    file("资料/说明.txt", strToU8("unicode RAR payload\n")),
+    file("../dangerous-path.txt", strToU8("unsafe path marker\n")),
+    rar5Block(5, 0, vint(0)),
+  );
+}
+
 function emptyZip64() {
   const record = new Uint8Array(56);
   const recordView = new DataView(record.buffer);
@@ -73,6 +139,7 @@ try {
     "../dangerous-path.txt": [strToU8("unsafe path marker\n"), { level: 0, mtime: fixedDate }],
   }, { comment: "Anyfile archive metadata example" });
   await writeFile(join(examplesDirectory, "archive.zip"), zip);
+  await writeFile(join(examplesDirectory, "archive.rar"), rar5Example());
   await writeFile(join(examplesDirectory, "empty-zip64.zip"), emptyZip64());
 
   const tarPath = join(examplesDirectory, "archive.tar");

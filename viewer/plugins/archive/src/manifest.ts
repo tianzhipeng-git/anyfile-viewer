@@ -15,6 +15,7 @@ export const archiveMetadataManifest = {
       ],
       mimeTypes: ["application/zip"],
     },
+    { name: "RAR 归档", extensions: [".rar"], mimeTypes: ["application/vnd.rar"] },
     { name: "TAR 归档", extensions: [".tar"], mimeTypes: ["application/x-tar"] },
     { name: "gzip", extensions: [".gz", ".gzip", ".tgz", ".tar.gz"] },
     { name: "XZ", extensions: [".xz", ".txz", ".tar.xz"] },
