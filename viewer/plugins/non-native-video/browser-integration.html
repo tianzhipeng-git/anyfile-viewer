@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Non-native video integration</title>
+    <style>
+      :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+      body { margin: 24px; } button { font: inherit; padding: 8px 14px; }
+      table { border-collapse: collapse; margin-block: 16px; width: 100%; }
+      th, td { border: 1px solid #8888; padding: 6px 8px; text-align: left; }
+      .pass { color: #16803a; } .fail { color: #c62828; }
+      #viewer { height: 320px; min-height: 0; }
+    </style>
+  </head>
+  <body>
+    <h1>Non-native video integration</h1>
+    <p id="environment"></p>
+    <button id="run" type="button">运行集成 smoke</button>
+    <table>
+      <thead><tr><th>样例</th><th>预期</th><th>结果</th><th>证据</th></tr></thead>
+      <tbody id="results"></tbody>
+    </table>
+    <div id="viewer"></div>
+    <script type="module">
+      import { nonNativeVideoViewer } from "./src/index.ts";
+      import { probeNonNativeVideo } from "./src/probe.ts";
+
+      const cases = [
+        ["mkv-avc-aac.mkv", "playable"],
+        ["mkv-hevc-flac.mkv", "playable"],
+        ["mkv-vp8-vorbis.mkv", "playable"],
+        ["mkv-vp9-opus.mkv", "playable"],
+        ["mkv-av1-mp3.mkv", "playable"],
+        ["mkv-avc-video-only.mkv", "playable"],
+        ["mkv-opus-audio-only.mkv", "rejected"],
+        ["mkv-unsupported-mpeg4.mkv", "rejected"],
+        ["mkv-no-cues.mkv", "rejected"],
+        ["disguised-mp4.mkv", "rejected"],
+        ["truncated.mkv", "rejected"],
+        ["corrupt.mkv", "rejected"],
+      ];
+      const viewer = document.querySelector("#viewer");
+      const results = document.querySelector("#results");
+      const runButton = document.querySelector("#run");
+      document.querySelector("#environment").textContent = `${navigator.userAgent} · ${navigator.platform}`;
+      let decodedAudioPeak = 0;
+      let scheduledAudioBuffers = 0;
+      const originalStart = AudioBufferSourceNode.prototype.start;
+      AudioBufferSourceNode.prototype.start = function (...args) {
+        if (this.buffer) {
+          scheduledAudioBuffers += 1;
+          for (let channel = 0; channel < this.buffer.numberOfChannels; channel += 1) {
+            for (const sample of this.buffer.getChannelData(channel)) {
+              decodedAudioPeak = Math.max(decodedAudioPeak, Math.abs(sample));
+            }
+          }
+        }
+        return originalStart.apply(this, args);
+      };
+
+      async function loadFile(fileName) {
+        const response = await fetch(`./examples/${fileName}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return new File([await response.blob()], fileName);
+      }
+
+      async function waitUntil(predicate, message, timeout = 3000) {
+        const deadline = performance.now() + timeout;
+        while (!predicate() && performance.now() < deadline) {
+          await new Promise((resolve) => setTimeout(resolve, 30));
+        }
+        if (!predicate()) throw new Error(`${message} timed out`);
+      }
+
+      function frameSignature(canvas) {
+        const data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
+        let signature = 0;
+        for (let index = 0; index < data.length; index += 97) signature = (signature + data[index]) >>> 0;
+        return signature;
+      }
+
+      async function inspect(fileName) {
+        const file = await loadFile(fileName);
+        const supportLevel = await probeNonNativeVideo({ file, signal: new AbortController().signal });
+        const abortController = new AbortController();
+        const progress = [];
+        let controller;
+        decodedAudioPeak = 0;
+        scheduledAudioBuffers = 0;
+        try {
+          controller = await nonNativeVideoViewer.open({
+            file, container: viewer, signal: abortController.signal, locale: "zh-CN",
+            reportProgress(value) { progress.push(value); },
+          });
+          const canvas = viewer.querySelector("canvas");
+          const button = viewer.querySelector("button");
+          const seek = viewer.querySelector('input[aria-label="播放位置"]');
+          if (!canvas || !button || !seek || button.textContent !== "播放") throw new Error("initial player state is invalid");
+          const firstSignature = frameSignature(canvas);
+          button.click();
+          await waitUntil(() => Number(seek.value) > 0.35, "continuous playback");
+          const laterSignature = frameSignature(canvas);
+          if (firstSignature === laterSignature) throw new Error("canvas frames did not change");
+          button.click();
+          for (const value of ["0.25", "0.9", "0.4", "0.75"]) {
+            seek.value = value;
+            seek.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          await waitUntil(() => Math.abs(Number(seek.value) - 0.75) < 0.03, "rapid seek");
+          seek.value = "0.7";
+          seek.dispatchEvent(new Event("input", { bubbles: true }));
+          await waitUntil(() => Math.abs(Number(seek.value) - 0.7) < 0.03, "forward seek");
+          seek.value = "0.15";
+          seek.dispatchEvent(new Event("input", { bubbles: true }));
+          await waitUntil(() => Math.abs(Number(seek.value) - 0.15) < 0.03, "backward seek");
+          button.click();
+          await waitUntil(() => button.textContent === "重播", "playback end", 4000);
+          button.click();
+          await waitUntil(() => Number(seek.value) > 0.12 && button.textContent === "暂停", "replay");
+          button.click();
+          const videoOnly = fileName.includes("video-only");
+          if (!videoOnly && (scheduledAudioBuffers < 1 || decodedAudioPeak < 0.001)) {
+            throw new Error("primary audio was missing or silent");
+          }
+          if (videoOnly && scheduledAudioBuffers !== 0) throw new Error("video-only scheduled audio");
+          viewer.style.width = "260px";
+          viewer.style.height = "180px";
+          await new Promise((resolve) => requestAnimationFrame(resolve));
+          const viewerRect = viewer.getBoundingClientRect();
+          const canvasRect = canvas.getBoundingClientRect();
+          if (canvasRect.width > viewerRect.width || canvasRect.height > viewerRect.height) {
+            throw new Error("canvas overflowed the narrow viewer");
+          }
+          return {
+            classification: "playable",
+            evidence: `probe=${supportLevel} · frame-change · audioBuffers=${scheduledAudioBuffers} · audioPeak=${decodedAudioPeak.toFixed(3)} · seek/end/replay/resize · ${progress.at(-1)?.stage}`,
+          };
+        } catch (error) {
+          return {
+            classification: "rejected",
+            evidence: `probe=${supportLevel} · ${error && typeof error === "object" && "code" in error ? `${error.code}: ${error.cause?.message ?? error.message}` : error instanceof Error ? error.message : String(error)}`,
+          };
+        } finally {
+          viewer.style.removeProperty("width");
+          viewer.style.removeProperty("height");
+          await controller?.dispose();
+          await controller?.dispose();
+          if (viewer.childElementCount) throw new Error(`${fileName}: dispose left DOM behind`);
+        }
+      }
+
+      async function inspectActiveAbort() {
+        const file = await loadFile("mkv-vp9-opus.mkv");
+        const abortController = new AbortController();
+        const controller = await nonNativeVideoViewer.open({
+          file, container: viewer, signal: abortController.signal, locale: "zh-CN", reportProgress() {},
+        });
+        viewer.querySelector("button").click();
+        await waitUntil(() => Number(viewer.querySelector('input[aria-label="播放位置"]').value) > 0.1, "active playback");
+        abortController.abort();
+        await waitUntil(() => viewer.childElementCount === 0, "active abort cleanup");
+        await controller.dispose();
+        return { classification: "aborted", evidence: "active · audio/input/canvas/DOM clean" };
+      }
+
+      async function inspectOpeningAbort() {
+        const file = await loadFile("mkv-avc-aac.mkv");
+        const abortController = new AbortController();
+        const opening = nonNativeVideoViewer.open({
+          file, container: viewer, signal: abortController.signal, locale: "zh-CN", reportProgress() {},
+        });
+        abortController.abort();
+        try {
+          await opening;
+          throw new Error("opening unexpectedly completed");
+        } catch (error) {
+          if (!(error instanceof DOMException) || error.name !== "AbortError") throw error;
+        }
+        if (viewer.childElementCount) throw new Error("opening abort left DOM behind");
+        return { classification: "aborted", evidence: "opening · input/decoder/DOM clean" };
+      }
+
+      runButton.addEventListener("click", async () => {
+        runButton.disabled = true;
+        results.replaceChildren();
+        for (const [fileName, expected] of cases) {
+          const row = results.insertRow();
+          row.insertCell().textContent = fileName;
+          row.insertCell().textContent = expected;
+          const resultCell = row.insertCell();
+          const evidenceCell = row.insertCell();
+          try {
+            const result = await inspect(fileName);
+            const pass = result.classification === expected;
+            resultCell.textContent = result.classification;
+            resultCell.className = pass ? "pass" : "fail";
+            evidenceCell.textContent = result.evidence;
+          } catch (error) {
+            resultCell.textContent = "harness-error";
+            resultCell.className = "fail";
+            evidenceCell.textContent = error instanceof Error ? error.message : String(error);
+          }
+        }
+        for (const [name, inspectAbort] of [
+          ["mkv-avc-aac.mkv#opening-abort", inspectOpeningAbort],
+          ["mkv-vp9-opus.mkv#active-abort", inspectActiveAbort],
+        ]) {
+          const row = results.insertRow();
+          row.insertCell().textContent = name;
+          row.insertCell().textContent = "aborted";
+          const resultCell = row.insertCell();
+          const evidenceCell = row.insertCell();
+          try {
+            const result = await inspectAbort();
+            resultCell.textContent = result.classification;
+            resultCell.className = "pass";
+            evidenceCell.textContent = result.evidence;
+          } catch (error) {
+            resultCell.textContent = "harness-error";
+            resultCell.className = "fail";
+            evidenceCell.textContent = error instanceof Error ? error.message : String(error);
+          }
+        }
+        AudioBufferSourceNode.prototype.start = originalStart;
+        runButton.disabled = false;
+        window.__integrationDone = true;
+        document.title = "DONE · Non-native video integration";
+      });
+    </script>
+  </body>
+</html>

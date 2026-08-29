@@ -8,6 +8,7 @@ import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
+import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
@@ -95,7 +96,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "video",
     icon: FileVideoIcon,
-    extensions: manifestExtensions(browserVideoManifest),
+    extensions: manifestExtensions(browserVideoManifest, nonNativeVideoManifest),
   },
   {
     kind: "presentation",

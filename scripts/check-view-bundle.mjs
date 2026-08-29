@@ -41,7 +41,10 @@ const deferredImplementationMarkers = [
   "anyfile-modern-raster-viewer__canvas",
   "anyfile-camera-raw-viewer__canvas",
   "anyfile-browser-video-viewer__video",
+  "anyfile-non-native-video-viewer__controls",
   "Video probe read budget exceeded",
+  "Non-native video probe read budget exceeded",
+  "videoTrack must be an InputVideoTrack",
   "jxl-oxide-wasm",
   "heif-decoder.wasm",
   "LibRaw disposed",
@@ -92,6 +95,28 @@ if (videoProbeChunks.length === 0) {
 if (videoProbeChunks.some(({ content }) => content.includes("anyfile-browser-video-viewer__video"))) {
   throw new Error("Browser video probe chunk contains the full video viewer implementation");
 }
+const nonNativeVideoProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Non-native video probe read budget exceeded"));
+if (nonNativeVideoProbeChunks.length === 0) {
+  throw new Error("Non-native video probe chunk was not found");
+}
+if (nonNativeVideoProbeChunks.some(({ content }) => content.includes("anyfile-non-native-video-viewer__controls")
+  || content.includes("videoTrack must be an InputVideoTrack"))) {
+  throw new Error("Non-native video probe chunk contains Mediabunny or the full player implementation");
+}
+const mediabunnyChunks = archiveChunkContents.filter(({ content }) => content.includes("videoTrack must be an InputVideoTrack"));
+if (mediabunnyChunks.length === 0) {
+  throw new Error("Deferred Mediabunny implementation chunk was not found");
+}
+const mediabunnyLicense = await readFile(join(
+  projectRoot,
+  "public/vendor/licenses/mediabunny/1.55.3/MPL-2.0.txt",
+), "utf8").catch(() => "");
+if (!mediabunnyLicense.includes("Mozilla Public License Version 2.0")) {
+  throw new Error("Mediabunny MPL-2.0 license text is missing");
+}
+console.log(
+  `Non-native video: lightweight probe isolated; Mediabunny deferred across ${mediabunnyChunks.length} chunk(s); MPL-2.0 retained`,
+);
 const archiveGzipBytes = archiveChunks.reduce(
   (total, { content }) => total + gzipSync(content, { level: 9 }).byteLength,
   0,

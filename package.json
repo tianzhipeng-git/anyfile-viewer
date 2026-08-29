@@ -33,6 +33,7 @@
     "@anyfile/har-viewer": "workspace:*",
     "@anyfile/hex-viewer": "workspace:*",
     "@anyfile/modern-raster-viewer": "workspace:*",
+    "@anyfile/non-native-video-viewer": "workspace:*",
     "@anyfile/pdf-viewer": "workspace:*",
     "@anyfile/powerpoint-viewer": "workspace:*",
     "@anyfile/safe-svg-viewer": "workspace:*",

@@ -1,6 +1,6 @@
 # 视频查看实施路线图
 
-- 状态：阶段 0、阶段 1 实现及基准环境验收已于 2026-08-29 完成；其他浏览器按支持矩阵逐环境持续验收
+- 状态：阶段 0、阶段 1 与阶段 2 首批 Matroska 实现已于 2026-08-30 完成基准环境验收；其他浏览器按支持矩阵逐环境持续验收
 - 范围：浏览器本地打开的视频文件；包含文件内音频和字幕轨道，不包含独立音频文件
 - 产品结果：播放主要节目，不交付只能检查 metadata、轨道结构、封面或首帧的视频插件
 - 核心目标：在满足播放与资源安全底线后，优先扩大可播放的容器 × 视频 codec × 音频 codec 组合
@@ -119,6 +119,18 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 ## 4. 阶段 2：非原生格式播放扩展
 
 阶段 2 的目标是让更多浏览器原生不能播放的常见视频真正播放，而不是继续系统性提高阶段 1 的支持等级。
+
+### 首批实施结果（2026-08-30）
+
+- 已新增单一 `non-native-video` workspace 插件，首批声明 `.mkv`、`.mk3d`；`browser-video` 保持原生 `<video>` 路径不变；
+- 独立 probe 以 512 KiB 头部 + 256 KiB 尾部、总计 768 KiB 的预算检查 Matroska、轨道、codec、Cues 与资源上限，不导入 Mediabunny、UI 或 decoder；
+- 完整实现精确锁定 Mediabunny 1.55.3（MPL-2.0），以 8 MiB Blob 缓存、2 个 Canvas 解码帧槽和约 1 秒音频预排形成有界播放管线；
+- 已交付 AVC/AAC、HEVC/FLAC、VP8/Vorbis、VP9/Opus、AV1/MP3 与 AVC video-only 六条固定证据路径；实际文件仍通过主轨 decoder config 决定当前环境是否可解；
+- `open()` 真实解码首帧和主音频首包后返回，不自动播放；用户点击后才恢复 AudioContext，并支持播放、暂停、音量、前后 seek、结束与重播；
+- Chromium 151 / macOS 15.6.1（Apple Silicon）真实 smoke 已验证连续 Canvas 帧、非静音音频、seek/end/replay、260 × 180 resize、opening abort、active abort 与重复 dispose；
+- 生产 bundle 门禁确认 `/view` 首包与 probe chunk 均不包含 Mediabunny或完整播放器；Mediabunny 只存在于完整插件的延迟 chunk。
+
+固定样例、生成命令和反例见 [`viewer/plugins/non-native-video/examples/`](../../viewer/plugins/non-native-video/examples/)。多轨选择、字幕、章节、HDR 精确输出和专业色彩语义仍是等级 3 的已知限制。
 
 ### 候选方向
 

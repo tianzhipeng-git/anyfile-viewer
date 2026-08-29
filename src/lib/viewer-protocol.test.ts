@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   VIEWER_PROTOCOL_VERSION,
   ViewerError,
@@ -161,7 +161,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "sqlite-database"]);
+      .toEqual(["browser-video", "non-native-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "sqlite-database"]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -189,6 +189,22 @@ describe("viewer protocol", () => {
     );
     expect(video.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["browser-video", 3], ["hex-viewer", 1]]);
+
+    vi.stubGlobal("VideoDecoder", class VideoDecoder {});
+    vi.stubGlobal("AudioDecoder", class AudioDecoder {});
+    vi.stubGlobal("AudioContext", class AudioContext {});
+    const matroskaBytes = readFileSync(join(
+      process.cwd(),
+      "viewer/plugins/non-native-video/examples/mkv-vp9-opus.mkv",
+    ));
+    const matroska = await resolveViewerRegistrations(
+      new File([matroskaBytes], "clip.mkv"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(matroska.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["non-native-video", 3], ["hex-viewer", 1]]);
+    vi.unstubAllGlobals();
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {
@@ -219,6 +235,8 @@ describe("viewer protocol", () => {
       .toEqual(["browser-video", "hex-viewer"]);
     expect(findViewerRegistrations("clip.3gp", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-video", "hex-viewer"]);
+    expect(findViewerRegistrations("clip.mkv", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["non-native-video", "hex-viewer"]);
     expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "hex-viewer"]);
     expect(findViewerRegistrations("photo.jxl", viewerRegistrations).map(({ manifest: item }) => item.id))

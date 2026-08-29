@@ -1,6 +1,6 @@
 # 视频查看架构
 
-- 状态：阶段 0 基线与阶段 1 浏览器原生插件已验收
+- 状态：阶段 0、阶段 1 与阶段 2 首批 Matroska 播放路径已验收
 - 适用范围：浏览器本地打开的视频文件
 - 不包含：独立音频、流媒体、DRM、编辑、转码和服务端处理
 
@@ -41,7 +41,7 @@
 3. probe 有界读取容器头、轨道描述和 codec 配置，并按插件声明的 codec 子集返回 0–5；
 4. 宿主按动态等级和注册顺序稳定排序；
 5. 只加载默认或用户选中的完整插件；
-6. `open(context)` 创建 Object URL 并让真实媒体元素加载当前文件；
+6. `open(context)` 按插件路径创建 Object URL，或初始化 demux、WebCodecs、Canvas 与 Web Audio；
 7. 切换时先 abort，再幂等 dispose 并清理容器。
 
 `canPlayType()`、Media Capabilities 或未来 `VideoDecoder.isConfigSupported()` 都不能证明当前容器索引、所有轨道、真实样本和 seek 可用。当前 probe 不调用这些 API，也不创建媒体元素；环境能力由 `open()` 的真实媒体事件判定。
@@ -66,7 +66,7 @@ File
   ▼
 完整插件
   ├── browser-video → Object URL → <video>
-  ├── future non-native video → demux → decoder → 播放管线
+  ├── non-native-video → Mediabunny demux → WebCodecs → Canvas / Web Audio
   └── future professional video → 领域 demux/decoder → 专业播放管线
 ```
 
@@ -80,7 +80,7 @@ File
 | non-native video | 浏览器不能原生播放、但用户价值明确的 Matroska、AVI、MPEG-PS/TS 等组合 | 容器 demuxer + 选定 decoder + 最小播放管线 |
 | professional video | MOV/MXF 中的 ProRes、DNx、timecode 等 | 领域 demux/decoder + 专业交互 |
 
-这些边界是控制依赖和产品语义的规划工具，不是现在要创建的公共接口。阶段 1 只需要 `browser-video`。
+这些边界是控制依赖和产品语义的规划工具，不是公共接口。阶段 1 使用 `browser-video`，阶段 2 的首批 Matroska 组合使用 `non-native-video`。
 
 不规划面向用户的 metadata-only 视频插件。容器和轨道解析只服务于 probe、错误诊断及实际播放管线；不能播放主要内容的候选返回 0，不以“可检查 metadata”占据视频查看器位置。
 
@@ -163,7 +163,9 @@ opening abort、active abort、切换文件和重复 dispose 必须走同一套�
 
 ## 11. 非原生播放管线的进入条件
 
-阶段 2 按用户价值逐个选择浏览器不能原生播放的容器与 codec 组合。WebCodecs 或 WASM decoder 不做万能 fallback；每个组合在进入实现前至少要有可行的：
+阶段 2 首批已交付 `.mkv`/`.mk3d` 的 Matroska 路径：Mediabunny 1.55.3 通过 `BlobSource` 分片读取和 demux，WebCodecs 解码主视频/音频，Canvas 输出画面，AudioContext 作为播放时钟。首批视频集合为 AVC、HEVC、VP8、VP9、AV1，主音频集合为 AAC、Opus、Vorbis、MP3、FLAC，并支持 video-only。
+
+后续仍按用户价值逐个选择浏览器不能原生播放的容器与 codec 组合。WebCodecs 或 WASM decoder 不做万能 fallback；每个组合在进入实现前至少要有可行的：
 
 - 容器 demux 与精确时间戳；
 - 视频和音频 decoder 能力与版本；

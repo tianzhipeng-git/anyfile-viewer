@@ -1,12 +1,12 @@
 # 视频格式支持矩阵
 
-- 状态：阶段 0 证据基线与阶段 1 浏览器原生视频插件已验收
+- 状态：阶段 0、阶段 1 与阶段 2 首批 Matroska 播放路径已验收
 - 事实来源：固定真实样例、目标环境中的真实播放、自动协议测试和锁定依赖
 - 覆盖口径：以实际可播放的容器 × 视频 codec × 音频 codec 组合计数，不以扩展名数量或最高支持等级计数
 
 网站 catalog 只概括已交付的容器入口，不替代组合级支持证据。只有本表中达到 `implemented` 或 `verified`、并能播放主要节目的具体组合，才可以进入视频支持文案。
 
-阶段 0 的固定样例、probe 测量和原始媒体元素结果见[阶段 0 验收证据](stage-0-evidence.md)。阶段 1 的组合状态来自同一批固定样例上的实际插件测试。
+阶段 0 的固定样例、probe 测量和原始媒体元素结果见[阶段 0 验收证据](stage-0-evidence.md)。阶段 1 与阶段 2 的组合状态来自各插件固定样例上的实际播放测试。
 
 ## 1. 支持等级
 
@@ -64,7 +64,12 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | WebM | AV1 | Opus | browser video / non-native video | 0 | planned | 3–4 | 原生可播进入阶段 1，否则按需求进入阶段 2 |
 | QuickTime/MOV，尾部 `moov` | AVC/H.264 Constrained Baseline L3.0 | AAC-LC，48 kHz，双声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；`canPlayType()` 假阴性但真实播放通过 |
 | QuickTime/MOV | HEVC 等其他组合 | AAC/PCM 等 | non-native video | 0 | planned | 3–4 | 未声明组合按阶段 2/3 评估 |
-| Matroska | AVC/HEVC/VP9/AV1 等 | 常见音频子集 | non-native video | 0 | planned | 3 | 阶段 2 重点，按具体组合实现 |
+| Matroska，有 Cues | AVC/H.264 Baseline，8-bit 4:2:0 | AAC，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
+| Matroska，有 Cues | HEVC Main，8-bit 4:2:0 | FLAC，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
+| Matroska，有 Cues | VP8 profile 0，8-bit 4:2:0 | Vorbis，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；独立轨道首时间戳恢复已验证 |
+| Matroska，有 Cues | VP9 profile 0，8-bit 4:2:0 | Opus，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
+| Matroska，有 Cues | AV1 Main，8-bit 4:2:0 | MP3，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
+| Matroska，有 Cues | AVC/H.264 Baseline，8-bit 4:2:0 | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only 正常播放且不创建 AudioContext |
 | AVI | 选定高频 codec | 选定高频音频 | non-native video | 0 | planned | 3 | 阶段 2 候选，不承诺整个 AVI 生态 |
 | MPEG-PS/TS | MPEG-1/2、AVC、HEVC 等选定组合 | 选定高频音频 | non-native video | 0 | planned | 3 | 阶段 2 候选，按时间轴可控子集实现 |
 | Ogg Video | Theora | Vorbis/Opus | browser video / non-native video | 0 | planned | 3–4 | 原生可播阶段 1，否则按需求阶段 2 |
@@ -114,6 +119,15 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 - audio-only、损坏、截断和伪装扩展名样例均返回 probe 0，并由插件拒绝；
 - opening abort 与 active abort 均停止媒体并清空插件 DOM；Object URL 撤销和重复 dispose 另由自动生命周期测试覆盖；
 - Safari、Firefox、Windows、Android 和 iOS 尚未在本轮复验，不能从 Chromium 结果外推支持等级。
+
+### 阶段 2 首批 Matroska 目标环境记录（2026-08-30）
+
+- 环境：Codex 应用内 Chromium 151，macOS 15.6.1（Apple Silicon）；实际插件入口为 Vite 直接导入 `non-native-video` probe 与完整实现；
+- 六个声明样例均取得首帧、连续 Canvas 帧变化、前后 seek、播放结束、重播和 260 × 180 窄容器 resize；五个含音频样例实际排入 Web Audio，解码样本峰值为 0.119–0.231，video-only 未创建音频源；
+- audio-only、MPEG-4 Part 2、无 Cues、损坏、截断与伪装文件均由 probe 返回 0，并由完整插件准确拒绝；
+- opening abort 与 active abort 均释放 Input、decoder、AudioContext、帧、回调和 DOM；重复 dispose 由自动协议测试覆盖；
+- probe 预算为 768 KiB，完整 Blob 缓存上限 8 MiB，Canvas pool 为 2，音频预排约 1 秒，编码尺寸上限为 8192、像素上限为 33,554,432；
+- 多视频/音频轨选择、字幕、章节、HDR 精确输出和专业色彩语义未声明；Safari、Firefox、Windows、Android 和 iOS 尚未复验。
 
 ## 7. 自动测试与构建证据
 
