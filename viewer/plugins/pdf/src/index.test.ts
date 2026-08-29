@@ -78,13 +78,15 @@ describe("PDF viewer protocol compliance", () => {
 
     const controller = await pdfViewer.open(context.context);
 
+    await vi.waitFor(() => expect(pdf.document.getPage).toHaveBeenCalledWith(1));
+
     expect(context.container.querySelector("iframe")).toBeNull();
     const canvas = context.container.querySelector<HTMLCanvasElement>(".anyfile-pdf-viewer canvas");
     expect(canvas).not.toBeNull();
     expect(pdfEngine.loadPdfDocument).toHaveBeenCalledWith("about:blank#pdf-test");
     expect(pdf.document.getPage).toHaveBeenCalledWith(1);
     expect(pdf.render).toHaveBeenCalledOnce();
-    expect(context.progress.at(-1)?.stage).toBe("ready");
+    expect(context.progress.at(-1)?.stage).toBe("loading");
     expect(context.outside.dataset.viewerTestOutside).toBe("untouched");
     expect(directRead).not.toHaveBeenCalled();
     expect(fetchRequest).not.toHaveBeenCalled();
@@ -165,7 +167,7 @@ describe("PDF viewer protocol compliance", () => {
     vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
     vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({} as CanvasRenderingContext2D);
     const context = testContext(validPdf());
-    const opening = pdfViewer.open(context.context);
+    const controller = await pdfViewer.open(context.context);
 
     await vi.waitFor(() => expect(task.onPassword).toBeTypeOf("function"));
     const updatePassword = vi.fn((password: string) => {
@@ -177,16 +179,35 @@ describe("PDF viewer protocol compliance", () => {
     const passwordPanel = context.container.querySelector<HTMLElement>(".anyfile-pdf-viewer__password");
     const passwordInput = context.container.querySelector<HTMLInputElement>("input[type=password]");
     expect(passwordPanel?.hidden).toBe(false);
-    expect(context.progress.at(-1)?.stage).toBe("awaiting-input");
+    expect(context.progress.at(-1)?.stage).toBe("loading");
     expect(passwordInput?.getAttribute("aria-label")).toBe("PDF 密码");
 
     passwordInput!.value = "secret";
     context.container.querySelector<HTMLFormElement>("form")!.requestSubmit();
-    const controller = await opening;
+    await vi.waitFor(() => expect(pdf.document.getPage).toHaveBeenCalledWith(1));
 
     expect(updatePassword).toHaveBeenCalledOnce();
     expect(passwordPanel?.hidden).toBe(true);
-    expect(context.progress.at(-1)?.stage).toBe("ready");
+    expect(context.progress.at(-1)?.stage).toBe("loading");
+    await controller.dispose();
+  });
+
+  it("shows failures from post-open loading inside the active viewer", async () => {
+    const pdf = mockPdfDocument();
+    pdf.task.promise = Promise.reject(Object.assign(new Error("broken xref"), {
+      name: "InvalidPDFException",
+    }));
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("about:blank#late-invalid-pdf");
+    vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    const context = testContext(validPdf());
+
+    const controller = await pdfViewer.open(context.context);
+
+    await vi.waitFor(() => {
+      expect(context.container.querySelector('[role="alert"]')?.textContent)
+        .toBe("文件内容不是有效的 PDF 文档。");
+    });
+    expect(context.container.querySelector(".anyfile-pdf-viewer")).not.toBeNull();
     await controller.dispose();
   });
 });

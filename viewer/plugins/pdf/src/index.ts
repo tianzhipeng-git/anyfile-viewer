@@ -26,7 +26,6 @@ function getCopy(locale: string) {
     passwordPrompt: "这个 PDF 受密码保护，请输入打开密码。",
     passwordSubmit: "解锁",
     previousPage: "上一页",
-    ready: "PDF 已打开",
     renderFailed: "部分页面渲染失败，请尝试调整缩放或重新打开文件。",
     zoomIn: "放大",
     zoomOut: "缩小",
@@ -43,7 +42,6 @@ function getCopy(locale: string) {
     passwordPrompt: "This PDF is password protected. Enter its password to open it.",
     passwordSubmit: "Unlock",
     previousPage: "Previous page",
-    ready: "PDF opened",
     renderFailed: "Some pages could not be rendered. Try changing the zoom or reopening the file.",
     zoomIn: "Zoom in",
     zoomOut: "Zoom out",
@@ -94,21 +92,18 @@ async function openPdf(context: OpenViewerContext): Promise<ViewerController> {
     loadingTask = loadPdfDocument(objectUrl);
     loadingTask.onPassword = (updatePassword: (password: string) => void, reason: number) => {
       if (disposed) return;
-      reportProgress({ stage: "awaiting-input", message: copy.passwordPrompt });
       view.requestPassword((password) => {
         if (disposed) return;
-        reportProgress({ stage: "loading", message: copy.loading });
         updatePassword(password);
       }, reason === PasswordResponses.INCORRECT_PASSWORD);
     };
-    loadingTask.onProgress = ({ loaded, total }: { loaded: number; total: number }) => {
-      if (!disposed) reportProgress({ stage: "loading", message: copy.loading, loaded, total });
-    };
-    const document = await loadingTask.promise;
-    if (signal.aborted || disposed) throw abortError();
-    await view.showDocument(document);
-    if (signal.aborted || disposed) throw abortError();
-    reportProgress({ stage: "ready", message: copy.ready });
+    void loadingTask.promise.then(async (document) => {
+      if (signal.aborted || disposed) return;
+      await view.showDocument(document);
+    }).catch((error: unknown) => {
+      if (signal.aborted || disposed) return;
+      view.showOpenError(isInvalidPdfError(error) ? copy.invalid : copy.openFailed);
+    });
     return { dispose };
   } catch (error) {
     await dispose();

@@ -26,7 +26,7 @@ export interface WorkspaceReader {
   list(relativeDirectory?: string, options?: { signal?: AbortSignal }): AsyncIterable<WorkspaceEntry>;
 }
 
-export interface ViewerProgress {
+export interface ViewerOpenProgress {
   readonly stage: string;
   readonly message?: string;
   readonly loaded?: number;
@@ -40,7 +40,7 @@ export interface OpenViewerContext {
   readonly container: HTMLElement;
   readonly signal: AbortSignal;
   readonly locale: string;
-  readonly reportProgress: (progress: ViewerProgress) => void;
+  readonly reportProgress: (progress: ViewerOpenProgress) => void;
 }
 
 export interface ViewerController {

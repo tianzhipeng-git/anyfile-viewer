@@ -14,6 +14,7 @@ const MAX_CANVAS_PIXELS = 16_000_000;
 
 interface PdfCopy {
   fitWidth: string;
+  loading: string;
   nextPage: string;
   page: string;
   password: string;
@@ -39,6 +40,7 @@ export interface PdfView {
   readonly viewport: HTMLElement;
   dispose(): void;
   requestPassword(onSubmit: (password: string) => void, incorrect: boolean): void;
+  showOpenError(message: string): void;
   showDocument(document: PDFDocumentProxy): Promise<void>;
 }
 
@@ -80,6 +82,7 @@ export function createPdfView(fileName: string, copy: PdfCopy): PdfView {
     .anyfile-pdf-viewer button:disabled { cursor:not-allowed; opacity:.42; }
     .anyfile-pdf-viewer__zoom { min-width:52px; color:#475569; text-align:center; font-size:12px; font-variant-numeric:tabular-nums; }
     .anyfile-pdf-viewer__viewport { min-height:0; flex:1; overflow:auto; overscroll-behavior:contain; }
+    .anyfile-pdf-viewer__status { display:grid; min-height:100%; place-items:center; padding:24px; color:#64748b; font-size:13px; text-align:center; }
     .anyfile-pdf-viewer__pages { box-sizing:border-box; display:flex; width:max-content; min-width:100%; flex-direction:column; align-items:center; gap:22px; padding:28px 24px; }
     .anyfile-pdf-viewer__page { position:relative; flex:none; overflow:hidden; background:#fff; box-shadow:0 2px 8px rgb(15 23 42 / 14%),0 14px 34px rgb(15 23 42 / 10%); }
     .anyfile-pdf-viewer__page canvas { display:block; width:100%; height:100%; }
@@ -124,10 +127,15 @@ export function createPdfView(fileName: string, copy: PdfCopy): PdfView {
   viewport.className = "anyfile-pdf-viewer__viewport";
   const pages = document.createElement("div");
   pages.className = "anyfile-pdf-viewer__pages";
+  pages.hidden = true;
+  const status = document.createElement("div");
+  status.className = "anyfile-pdf-viewer__status";
+  status.setAttribute("role", "status");
+  status.textContent = copy.loading;
   const sentinel = document.createElement("div");
   sentinel.className = "anyfile-pdf-viewer__sentinel";
   pages.append(sentinel);
-  viewport.append(pages);
+  viewport.append(status, pages);
 
   const passwordPanel = document.createElement("div");
   passwordPanel.className = "anyfile-pdf-viewer__password";
@@ -374,8 +382,18 @@ export function createPdfView(fileName: string, copy: PdfCopy): PdfView {
       passwordInput.value = "";
       passwordInput.focus();
     },
+    showOpenError(message) {
+      if (disposed) return;
+      passwordPanel.hidden = true;
+      pages.hidden = true;
+      status.hidden = false;
+      status.setAttribute("role", "alert");
+      status.textContent = message;
+    },
     async showDocument(document) {
       documentProxy = document;
+      status.hidden = true;
+      pages.hidden = false;
       await appendBatch();
     },
     dispose() {

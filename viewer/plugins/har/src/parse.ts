@@ -1,4 +1,4 @@
-import { ViewerError, type ViewerProgress } from "@anyfile/viewer-protocol";
+import { ViewerError, type ViewerOpenProgress } from "@anyfile/viewer-protocol";
 
 import type { HarDocument, HarEntry, HarNameValue, HarPostData } from "./types";
 
@@ -107,7 +107,7 @@ function parseDocument(text: string): HarDocument {
 export async function readHar(
   file: File,
   signal: AbortSignal,
-  reportProgress: (progress: ViewerProgress) => void,
+  reportProgress: (progress: ViewerOpenProgress) => void,
 ): Promise<HarDocument> {
   if (file.size > MAX_HAR_BYTES) {
     throw new ViewerError("resource-limit", "HAR 文件超过 64 MiB，无法在浏览器中安全解析。", { cause: file.size });

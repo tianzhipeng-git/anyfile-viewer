@@ -203,6 +203,7 @@ HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实
 - 不带 probe 的插件不会产生额外请求，并以默认支持等级 1 排序。
 - 分别打开 SQLite 和 DuckDB 文件，确认只请求对应插件资源。
 - 打开包含扫描图、复合字体、ICC 配置和密码保护的 PDF，确认支持资源按需加载且密码界面可用。
+- 确认密码等交互在 `open()` 返回后的插件 UI 中完成，宿主不依赖进度 `stage` 切换遮罩。
 - 在正常网络下确认 DuckDB 使用带精确版本号的 jsDelivr URL。
 - 阻断 `cdn.jsdelivr.net` 后确认 DuckDB 可以使用本站资源打开文件。
 - 部署 CSP 后，在 Chrome、Edge、Firefox 和 Safari 的目标版本验证 Worker/WASM。

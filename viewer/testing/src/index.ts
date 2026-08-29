@@ -1,11 +1,11 @@
-import type { OpenViewerContext, ViewerProgress } from "@anyfile/viewer-protocol";
+import type { OpenViewerContext, ViewerOpenProgress } from "@anyfile/viewer-protocol";
 
 export interface ViewerTestContext {
   readonly abortController: AbortController;
   readonly container: HTMLDivElement;
   readonly context: OpenViewerContext;
   readonly outside: HTMLDivElement;
-  readonly progress: ViewerProgress[];
+  readonly progress: ViewerOpenProgress[];
   cleanup(): void;
 }
 
@@ -15,7 +15,7 @@ export function createViewerTestContext(file: File): ViewerTestContext {
   const container = document.createElement("div");
   document.body.append(outside, container);
   const abortController = new AbortController();
-  const progress: ViewerProgress[] = [];
+  const progress: ViewerOpenProgress[] = [];
 
   return {
     abortController,

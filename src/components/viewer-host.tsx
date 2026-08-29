@@ -128,7 +128,7 @@ export function ViewerHost({
         locale: navigator.language || "zh-CN",
         reportProgress(progress) {
           if (!abortController.signal.aborted && sessionRef.current === session) {
-            setStatus(progress.stage === "awaiting-input" ? "active" : "loading");
+            setStatus("loading");
             setMessage(progress.message ?? progress.stage);
           }
         },
