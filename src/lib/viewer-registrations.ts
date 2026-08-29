@@ -11,6 +11,7 @@ import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
+import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import { wordManifest } from "@anyfile/word-viewer/manifest";
 import {
@@ -72,6 +73,17 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/general-raster-viewer");
       return viewerPackage.generalRasterViewer;
+    },
+  },
+  {
+    manifest: safeSvgManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/safe-svg-viewer/probe");
+      return probePackage.probeSafeSvg(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/safe-svg-viewer");
+      return viewerPackage.safeSvgViewer;
     },
   },
   {

@@ -35,6 +35,7 @@
     "@anyfile/modern-raster-viewer": "workspace:*",
     "@anyfile/pdf-viewer": "workspace:*",
     "@anyfile/powerpoint-viewer": "workspace:*",
+    "@anyfile/safe-svg-viewer": "workspace:*",
     "@anyfile/sqlite-viewer": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",

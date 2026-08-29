@@ -161,7 +161,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "pdfjs-pdf", "sqlite-database"]);
+      .toEqual(["browser-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "sqlite-database"]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -241,6 +241,10 @@ describe("viewer protocol", () => {
       .toEqual(["general-raster", "hex-viewer"]);
     expect(findViewerRegistrations("texture.vst", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["general-raster", "hex-viewer"]);
+    expect(findViewerRegistrations("vector.svg", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["safe-svg", "ace-code-text", "hex-viewer"]);
+    expect(findViewerRegistrations("vector.svgz", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["safe-svg", "hex-viewer"]);
     expect(findViewerRegistrations("report.docx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["word-document", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("slides.pptx", viewerRegistrations).map(({ manifest: item }) => item.id))

@@ -47,6 +47,9 @@ importers:
       '@anyfile/powerpoint-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/powerpoint
+      '@anyfile/safe-svg-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/svg
       '@anyfile/sqlite-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/sqlite
@@ -407,6 +410,25 @@ importers:
       '@types/sql.js':
         specifier: 1.4.11
         version: 1.4.11
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/svg:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6
@@ -3943,7 +3965,7 @@ packages:
     engines: {node: '>=20'}
 
   xlsx@https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz:
-    resolution: {tarball: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz}
+    resolution: {integrity: sha512-oLDq3jw7AcLqKWH2AhCpVTZl8mf6X2YReP+Neh0SJUzV/BdZYjth94tG5toiMB1PPrYtxOCfaoUCkvtuH+3AJA==, tarball: https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz}
     version: 0.20.3
     engines: {node: '>=0.8'}
     hasBin: true

@@ -1,6 +1,6 @@
 # 图片格式支持矩阵
 
-- 状态：阶段 0-3 已完成验收；
+- 状态：阶段 0-3 已完成验收，SVG 安全预览已实现自动验收；
 - 事实来源：真实渲染验证、固定测试样例和锁定依赖
 
 ## 1. 支持等级
@@ -43,7 +43,7 @@
 | AVIF 的 HEIF 扩展名 | `.heif` `.heifs` `.hif` | browser image | 3–4 | verified | 4 | IANA 为 `image/avif` 登记的扩展名；仅接受 `avif`/`avis` brand，不把 HEVC HEIF 误报为 AVIF |
 | BMP/DIB | `.bmp` `.dib` | browser image | 3 | verified | 3 | 常见 BMP 可原生查看，较少见的压缩与内部表示可能无法解码 |
 | ICO/CUR | `.ico` `.cur` | browser image | 3 | verified | 3 | 可查看浏览器选取的图标/光标画面，不提供容器内多尺寸导航 |
-| SVG | `.svg` `.svgz` | safe vector image | 0 | planned | 3 | 安全策略未决，不与普通栅格同时上线 |
+| SVG | `.svg` `.svgz` | safe SVG | 3 | implemented | 3 | 独立插件；移除脚本、事件属性、动画、样式与外部引用后通过原生 `<img>` 预览，代码查看器仍可检查源码 |
 | TGA | `.tga` `.icb` `.vda` `.vst` | general raster | 4 | verified | 4 | raw/RLE；灰度、真彩色、调色板；15/16/24/32 bit；应用四种 origin；后三者按相同 TGA 结构 probe |
 | Netpbm | `.pnm` `.pbm` `.pgm` `.ppm` `.pam` | general raster | 4 | verified | 4 | P1–P7；文本/二进制；1/8/16 bit；PAM 灰度、RGB 与 alpha tuple |
 | classic TIFF（无 ICC） | `.tif` `.tiff` | general raster | 4 | verified | 4 | unsigned 1–16 bit、alpha、orientation；strip/tile、多页；固定样例覆盖 None、LZW、Deflate、PackBits、JPEG |
@@ -81,7 +81,14 @@
 - 扩展格式 smoke（2026-08-28，Chromium）：BMP 解码为 96×64，ICO/CUR 解码为 96×96，2 帧 AVIF sequence 解码为 96×64；其他目标浏览器仍以运行时 decode 结果为准，因此维持等级 3。
 - 真实浏览器手工验收（2026-08-29）：`viewer/plugins/browser-image/examples/` 中全部正常、损坏和截断样例均通过。
 
-## 6. 阶段 2 读取、资源与验证证据
+## 6. SVG 读取、资源与验证证据
+
+- `safe-svg` 使用独立 Manifest、probe 和完整插件入口，不改变普通栅格插件的原始文件直解码路径；`.svg` 同时保留代码查看器作为源码检查备选。
+- 输入与 SVGZ 解压后内容均限制为 16 MiB，DOM 元素限制为 100,000 个；SVGZ 使用浏览器 `DecompressionStream`，缺少能力时返回 `unsupported-environment`。
+- 完整打开拒绝 DOCTYPE、格式错误和非 SVG XML；移除脚本、`foreignObject`、嵌入式主动内容、SMIL 动画、事件属性、`style` 以及非本地 URL，再把序列化结果作为新的 `image/svg+xml` Blob 交给 `<img>`。
+- 当前等级为 3：安全清理会有意移除样式、动画与外部资源，因此不承诺与原文件像素级一致；自动测试覆盖真实 SVG、伪装文件、主动内容清理、资源上限、probe、取消、重复 dispose 和 Object URL 释放。真实浏览器窄/矮窗口与 SVGZ smoke 尚待发布前手工验收。
+
+## 7. 阶段 2 读取、资源与验证证据
 
 - probe 最多读取前 1 MiB，并与完整插件、Worker、Canvas UI 和 `geotiff` 保持独立动态入口。
 - TGA/Netpbm 完整读取前检查 256 MiB 输入上限；TIFF 通过 `geotiff.fromBlob()` 分片读取，不创建完整编码文件副本。
@@ -91,14 +98,14 @@
 - `pnpm test`、`pnpm lint`、`pnpm build` 通过；`/view` 初始 JavaScript 为 200.8 KiB gzip，未包含 Canvas UI 或 TIFF decoder 标记。完整插件入口约 5.6 KiB gzip，Worker 核心约 14.8 KiB gzip，压缩 decoder 继续按需拆分。
 - 真实浏览器手工验收（2026-08-29）：`viewer/plugins/general-raster/examples/` 中全部正常、损坏和截断样例均通过；已覆盖 TGA raw/RLE、Netpbm P1–P7，以及 TIFF strip/tile、多页、8/16 bit、alpha、orientation 和 None/LZW/Deflate/PackBits/JPEG 压缩。
 
-## 7. 阶段 3 验证证据
+## 8. 阶段 3 验证证据
 
 - modern-raster 的 JPEG XL 输入上限为 256 MiB；HEIC 原生路径沿用 256 MiB 通用上限，WASM 回退输入上限为 128 MiB；两者解码后均不得超过 64 Mi 像素，JPEG XL 另外限制为 4096 个关键帧。
 - 真实浏览器手工验收（2026-08-29）：`viewer/plugins/modern-raster/examples/` 中全部正常、损坏和截断样例均通过，覆盖 HEVC HEIC primary image，以及 JPEG XL 有损、无损 alpha 和两帧动画。
 - HEIC fallback 自动验收（2026-08-29）：独立 Worker 中的 `1.23.2-anyfile.1` 产物把固定样例解码为 96×64 straight-alpha RGBA8；自动测试覆盖无原生能力时的打开、opening/active abort、重复 dispose、DOM 所有权和资源释放。NCLX/ICC、方向、alpha、10-bit、grid 与真实手机大图仍需随扩展语料持续回归，因此状态保持 `implemented`、等级保持 3。
 - 桌面真实文件手工验收（2026-08-29）：`raw_images/` 中 16 个文件全部通过；其中 13 个相机 RAW 文件覆盖 DNG、CR2、CRW、NEF、ARW、RWL、RAW、RW2，另外覆盖 PGM、PAM 和 JPEG XL。该结果确认 RAW 当前等级 2，不构成型号级回归语料，也不将 RAW 提升为等级 3。
 
-## 8. 每个格式必须记录的维度
+## 9. 每个格式必须记录的维度
 
 实施后，每个格式或子格式增加独立条目，至少包含：
 
