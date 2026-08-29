@@ -35,6 +35,14 @@ Client Component: FileWorkspace / ViewerHost
 - 构建和服务端请求不会访问 jsDelivr，也不会初始化 Worker/WASM。
 - 搜索引擎可以索引静态格式页和查看页的基础内容；真实文件预览仍只在浏览器运行。
 
+### 静态预渲染不等于静态导出
+
+当前生产命令是普通 `next build`，由 Next.js/Vercel 运行构建产物。`/view` 虽然在构建期生成静态 HTML，部署时仍保留 Next.js 路由层，因此 `next.config.ts` 中的 `headers()` 会作用于页面和静态资源响应。这是“静态预渲染”，不是 `output: "export"`。
+
+只有显式配置 `output: "export"` 并把 `out/` 交给通用静态服务器时，才属于真正的静态导出。静态导出不执行 Next.js 的响应头路由逻辑；部署服务器、对象存储或 CDN 必须为 `/view`、Worker、WASM 和其他相关资产配置本文规定的 COOP、COEP、CORP、CORS、CSP 和 MIME 响应头。不能因为构建产生了 HTML 文件，就假定 `next.config.ts` 的响应头已经包含在文件中。
+
+`/view` 只承载相同的页面外壳和浏览器本地文件处理，当前应继续使用静态预渲染。SSG、SSR 和 ISR 决定页面何时生成以及是否使用服务端计算，不决定浏览器下载的静态资源由谁承担流量；大体积运行时的流量策略见第 3 节。
+
 ## 2. 插件级按需加载
 
 `src/lib/viewer-registrations.ts` 是插件加载入口。每个插件由一个轻量 manifest、一个可选的动态 probe 和一个动态完整实现组成。
@@ -77,7 +85,30 @@ PDF 插件实现保持动态加载。`npm run dev` 和 `npm run build` 会先运
 资源与用户文件都走同源，不依赖 CDN；版本目录避免依赖升级后缓存混用。该目录是生成产物，
 不提交仓库，但生产构建必须包含准备步骤。
 
-## 3. 体积较大的WASM 的 jsDelivr 与本地回退
+## 3. 大体积运行时的 CDN 与回退
+
+### 目标部署拓扑
+
+目标生产环境采用以下职责分离：
+
+```text
+应用域名（Vercel）
+├── 静态预渲染的页面外壳
+├── 内容哈希化的 Next.js JavaScript / CSS
+└── 小型或必须同源的支持资源
+
+官方公共 CDN（当前为 jsDelivr）
+└── npm 上游已发布、版本锁定的大型 WASM / Worker
+
+受控资产域名（计划使用 Cloudflare R2 + CDN）
+└── 自建产物和大型同版本 fallback
+```
+
+不在 Vercel 前再叠加 Cloudflare 反向代理作为常规部署方式。Cloudflare 可以继续负责 DNS，并通过独立资产域名提供 R2/CDN；应用域名直接使用 Vercel CDN。这样避免双层 CDN 的缓存、失效和诊断边界，同时让高流量的大型二进制不经过 Vercel 应用域名。
+
+静态预渲染和 Vercel CDN 命中可以减少服务端计算与源站访问，但用户实际下载的页面和静态文件仍产生 CDN 数据传输。降低运行时流量成本的主要手段是按需加载、压缩、长期不可变缓存，以及把大型公共二进制放到官方 CDN 或受控资产域名，而不是把 `/view` 改成 SSR。
+
+### 加载与回退顺序
 
 DuckDB JavaScript API 由应用自身打包。体积较大的 WASM 与 Worker 按以下顺序加载：
 
@@ -88,9 +119,27 @@ DuckDB JavaScript API 由应用自身打包。体积较大的 WASM 与 Worker �
 
 回退只处理引擎加载/初始化失败。文件损坏、格式不支持或查询失败不会触发 CDN 到本地的重复初始化。
 
-由于需要本地回退，部署产物仍会包含 DuckDB WASM 和 Worker。jsDelivr 减少正常流量对本站大文件分发的依赖，但不会缩小构建产物。
+由于需要回退，当前部署产物仍会包含 DuckDB WASM 和 Worker。jsDelivr 减少正常流量对本站大文件分发的依赖，但不会缩小构建产物。迁移到 Cloudflare R2 前，本地回退继续保持同源；迁移后必须保留完全离线或 CDN 失败时的明确产品行为，不能静默变成无限重试。
 
 项目的 local-first 含义保持不变：用户选择的文件不会上传到 jsDelivr 或应用服务器。jsDelivr 只收到公共 DuckDB 引擎资源的请求。
+
+新增大体积运行时时，按以下顺序决策：
+
+1. 优先使用上游官方、精确版本、可长期缓存的公共 CDN 资产。
+2. 对每个真实 URL 校验 CORS、CORP、Content-Type、缓存、重定向和区域可用性，不能只根据 CDN 品牌推断兼容。
+3. 上游 CDN 不满足要求时，把审核过的版本化产物放到受控资产域名；不能运行时代理任意用户 URL。
+4. 只有小型资源、必须同源的 Worker 或尚未迁移的 fallback 才进入 Vercel 部署产物。
+5. CDN 和 fallback 必须指向同一依赖版本，并由构建门禁交叉校验。
+
+受控公共资产域名至少返回：
+
+```text
+Access-Control-Allow-Origin: *
+Cross-Origin-Resource-Policy: cross-origin
+Cache-Control: public, max-age=31536000, immutable
+```
+
+WASM 必须使用 `application/wasm`，JavaScript 和 Worker 必须使用正确的 JavaScript MIME。公开资产使用内容不可变的版本路径；升级时发布新路径，不覆盖旧对象。
 
 ### 部署头与网络策略
 
@@ -103,7 +152,21 @@ worker-src 'self' blob:
 
 具体 CSP 应与整站已有策略合并，并在目标浏览器上验证 Worker 和 WASM。完全离线或 CDN 被阻断时会使用本站资源，但应用自身的静态资源仍需可访问或由 Service Worker 缓存。
 
-当前本站回退提供 MVP/EH 单线程资源。如果以后启用 COOP/COEP 和 DuckDB 多线程 COI bundle，需要同步给本地回退增加 COI WASM、主 Worker 和 pthread Worker；SSG/SSR 本身不受这一变化影响。
+`/view` 已经启用 COOP/COEP。当前 DuckDB 仍使用 MVP/EH 单线程资源；如果以后启用多线程 COI bundle，需要同步给 fallback 增加 COI WASM、主 Worker 和 pthread Worker，并继续保留经验证的单线程 bundle 作为浏览器能力 fallback。SSG/SSR 本身不受这一变化影响。
+
+### 外部资源边界
+
+`/view` 是受控的本地文件计算环境，不是能够嵌入任意网站和远程资源的通用浏览器。插件默认不得因为用户文件中包含 URL，就自动加载远程图片、字体、媒体、tile、脚本或 iframe。
+
+确有格式语义需要加载远程子资源时，接入评审必须逐项确认：
+
+- 资源使用 CORS 请求并返回匹配的 `Access-Control-Allow-Origin`，或者对 no-CORS 请求返回允许嵌入的 CORP；
+- 请求不发送用户文件内容、文件名、本地路径、凭据或不必要的 referrer；
+- 来源是明确 allowlist，不把应用或 Cloudflare Worker 实现成任意 URL 的开放代理；
+- 失败时只影响对应子资源，并向用户说明远程内容没有加载；
+- 跨源 iframe 的文档及其子资源链满足 COEP，且不依赖被 COOP 切断的 opener 通信。
+
+普通图床、对象存储、旧式 WMS/IIIF/tile 服务、视频分片服务和第三方嵌入页即使能在非隔离页面通过 `<img>`、`<video>` 或 `<iframe>` 打开，也不代表满足上述要求。官方 jsDelivr 的标准 npm/GitHub 资产当前符合已有运行时需要，但仍必须检查依赖实际生成的 URL、重定向和响应头。
 
 ## 4. 依赖版本锁定
 
@@ -164,9 +227,11 @@ public/vendor/<dependency>/<version>/     不提交的部署资源
 - 检查 PDF.js Worker 已产出，且版本化 CMap、标准字体、ICC、WASM 和 JavaScript 解码回退齐全。
 - 检查 JXL 与 RAW 的 Worker/WASM 没有进入 `/view` 初始 JavaScript，并且只在对应插件完整入口加载。
 
-### 相机 RAW 的跨源隔离
+### `/view` 统一计算环境的跨源隔离
 
-`libraw-wasm@1.6.0` 的 pthread 构建要求 `crossOriginIsolated`。`/view` 返回：
+`/view` 当前被设计为统一、受控的本地文件计算环境。它从页面进入时就启用跨源隔离，以支持 `libraw-wasm@1.6.0` 的 pthread 构建，并为未来 FFmpeg、推理、数据库、图像处理等 threaded WASM 留出一致的执行环境。隔离只作用于查看环境，不要求首页、格式介绍页等整个网站采用相同策略。
+
+`/view` 返回：
 
 ```text
 Cross-Origin-Opener-Policy: same-origin
@@ -180,7 +245,22 @@ Cross-Origin-Embedder-Policy: require-corp
 Cross-Origin-Resource-Policy: same-origin
 ```
 
-部署层不得丢弃这些响应头。Worker 是独立执行上下文，仅给 `/view` 加 COEP 不足以启动 LibRaw pthread。启用或调整 CSP 时还需要允许同源 Worker 和 WebAssembly；同时回归 DuckDB 的 jsDelivr 与本地回退资源能在 COEP 下加载。
+部署层不得丢弃这些响应头。Worker 是独立执行上下文，仅给 `/view` 加 COEP 不足以启动 LibRaw pthread。启用或调整 CSP 时还需要允许同源 Worker 和 WebAssembly；同时回归 DuckDB 的 jsDelivr 与 fallback 资源能在 COEP 下加载。
+
+页面级隔离是当前有意选择的执行环境及其代价，不等于所有插件都必须使用多线程，也不应被表述成不可修改的永久协议。优先采用上游提供的 feature detection 和单线程 fallback；只有实测性能或功能需要时才选择 threaded bundle。若未来确实需要同时支持非隔离查看环境，再评审协议能力声明，例如 `crossOriginIsolation: "required" | "preferred" | "none"`。在宿主尚未提供多个执行环境前，不把该字段加入 v1 manifest，避免产生不能兑现的路由承诺。
+
+普通同源 iframe 不能在非隔离顶层页面内单独成为隔离岛。若未来拆分执行环境，必须使用真正的顶层文档边界，并同时解决本地 `File` 跨导航保留和统一选择体验；当前不采用该复杂方案。
+
+### `/view` 的文档导航边界
+
+COOP/COEP 在顶层文档响应时生效，客户端路由切换不会因为 pathname 变化而重新建立或撤销跨源隔离。因此：
+
+- 从普通页面进入 `/view` 必须执行完整文档导航，不能只使用 Next.js 客户端 `<Link>`；
+- 从 `/view` 返回非隔离页面也必须执行完整文档导航；
+- `/view` 内部切换文件、目录和插件继续使用客户端状态，不得为此刷新页面；
+- 发布前必须从首页实际点击进入 `/view`，断言 `crossOriginIsolated === true`，不能只测试直接访问或刷新 `/view`。
+
+当前站内入口仍使用 Next.js `<Link>`，尚未满足这一边界；在修复并增加浏览器测试前，RAW 只能保证直接访问或刷新 `/view` 的路径。该问题是发布阻断项，不通过文档约定视为已经解决。
 
 JXL 的打包 Worker 和 WASM 位于 `/_next/static/:path*`，该路径同样返回上述 COEP/CORP 头。如果未来用 `assetPrefix` 将 Next 静态资源迁移到独立 CDN，CDN 必须保留等价响应头，否则 JXL Worker 会在加载前被浏览器拦截。
 
@@ -199,6 +279,8 @@ HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实
 - 使用 `npm ci` 从 lockfile 安装。
 - `npm test`、`npm run lint`、`npm run build` 全部通过。
 - `/view` 仍能完成 SSG 构建；若改为 SSR，服务端日志中没有 CDN、Worker 或 WASM 初始化。
+- 确认当前部署不是把“静态预渲染”误当成 `output: "export"`；如果使用静态导出，逐项验证部署服务器提供本文要求的响应头。
+- 从非隔离首页通过真实入口完整导航到 `/view`，确认 `crossOriginIsolated === true`；再完整导航离开，确认普通页面不继承查看环境。
 - 候选插件的 probe 只在用户选择文件后加载，完成顺序不影响支持等级排序。
 - 不带 probe 的插件不会产生额外请求，并以默认支持等级 1 排序。
 - 分别打开 SQLite 和 DuckDB 文件，确认只请求对应插件资源。
@@ -206,4 +288,6 @@ HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实
 - 确认密码等交互在 `open()` 返回后的插件 UI 中完成，宿主不依赖进度 `stage` 切换遮罩。
 - 在正常网络下确认 DuckDB 使用带精确版本号的 jsDelivr URL。
 - 阻断 `cdn.jsdelivr.net` 后确认 DuckDB 可以使用本站资源打开文件。
+- 对所有外部 Worker/WASM 的最终 URL（包括重定向后 URL）检查 CORS、CORP、MIME 和不可变缓存头。
+- 若启用 Cloudflare R2 fallback，确认应用域名未通过 Cloudflare 再代理到 Vercel，并确认资产域名缓存命中时不回源 Vercel。
 - 部署 CSP 后，在 Chrome、Edge、Firefox 和 Safari 的目标版本验证 Worker/WASM。

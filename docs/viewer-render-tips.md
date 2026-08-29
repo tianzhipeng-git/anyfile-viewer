@@ -207,6 +207,11 @@ await renderDocument(bytes, documentHost, generatedStyles)
 - 外部链接只允许明确支持的协议，并设置 `rel="noreferrer noopener"`。
 - Object URL 只用于当前文件实例，并在 `dispose()` 中调用 `URL.revokeObjectURL()`。
 - 默认不发出携带文件内容、文件名或本地路径的网络请求。
+- 默认不自动加载文件中引用的远程图片、字体、媒体、tile、脚本或 iframe；链接存在不等于用户同意建立网络连接。
+- 必须保留的远程子资源只能来自明确 allowlist，并满足 [加载与部署约定](viewer-loading-and-deployment.md) 中 `/view` 跨源隔离环境的 CORS/COEP/CORP 要求。
+- 不使用本站 API、Vercel rewrite、Cloudflare Worker 或其他服务代理任意用户提供的 URL。确需代理的公共运行时必须是版本锁定、来源固定、与用户文件内容无关的资产。
+- 远程资源加载失败时，在对应局部显示可理解的降级状态；不能为绕过 COEP 而关闭整个 `/view` 的跨源隔离。
+- 不使用外部 iframe 执行或展示文件主动内容。产品确实需要嵌入受信第三方页面时，必须单独完成 COEP、sandbox、CSP、隐私和 opener 通信评审。
 - 关联文件只能通过 `context.workspace` 读取，并传递当前 `signal`。
 
 ## 9. 性能要求
