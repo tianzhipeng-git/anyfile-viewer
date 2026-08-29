@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Anyfile Viewer 视频阶段 0 浏览器 Smoke</title>
+    <style>
+      :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+      body { margin: 24px; }
+      button { font: inherit; padding: 8px 14px; }
+      table { border-collapse: collapse; margin-top: 16px; width: 100%; }
+      th, td { border: 1px solid #8888; padding: 6px 8px; text-align: left; }
+      video { display: block; margin-top: 16px; max-height: 240px; max-width: 100%; }
+      .pass { color: #16803a; }
+      .fail { color: #c62828; }
+    </style>
+  </head>
+  <body>
+    <h1>视频阶段 0 浏览器 Smoke</h1>
+    <p>点击后逐个验证 metadata、首帧、连续播放、基础 seek、错误与媒体清理。测试使用本地固定样例和临时 Object URL。</p>
+    <button id="run" type="button">运行 smoke</button>
+    <p id="environment"></p>
+    <table>
+      <thead><tr><th>样例</th><th>预期</th><th>结果</th><th>证据</th></tr></thead>
+      <tbody id="results"></tbody>
+    </table>
+    <video id="video" controls muted playsinline></video>
+    <script type="module">
+      const cases = [
+        ["mp4-avc-aac-faststart.mp4", "playable"],
+        ["mp4-avc-aac-tail-moov.mp4", "playable"],
+        ["mp4-avc-video-only.mp4", "playable"],
+        ["mp4-aac-audio-only.mp4", "metadata-only"],
+        ["webm-vp8-vorbis.webm", "playable"],
+        ["webm-vp9-opus.webm", "playable"],
+        ["webm-vp9-video-only.webm", "playable"],
+        ["webm-opus-audio-only.webm", "metadata-only"],
+        ["mp4-hevc-aac.mp4", "environment"],
+        ["mp4-av1-aac.mp4", "environment"],
+        ["mov-avc-aac.mov", "environment"],
+        ["ogv-theora-vorbis.ogv", "environment"],
+        ["3gp-avc-aac.3gp", "environment"],
+        ["corrupt.mp4", "error"],
+        ["truncated.mp4", "error"],
+        ["corrupt.webm", "error"],
+        ["truncated.webm", "error"],
+        ["corrupt.mov", "error"],
+        ["truncated.mov", "error"],
+        ["corrupt.ogv", "error"],
+        ["truncated.ogv", "error"],
+        ["corrupt.3gp", "error"],
+        ["truncated.3gp", "error"],
+        ["disguised-webm.mp4", "environment"],
+        ["disguised-mp4.webm", "environment"],
+        ["disguised-webm.mov", "environment"],
+        ["disguised-mp4.ogv", "environment"],
+        ["disguised-webm.3gp", "environment"],
+      ];
+
+      const video = document.querySelector("#video");
+      const results = document.querySelector("#results");
+      const runButton = document.querySelector("#run");
+      document.querySelector("#environment").textContent = `${navigator.userAgent} · ${navigator.platform}`;
+
+      const waitFor = (names, timeout = 5000) => new Promise((resolve) => {
+        const listeners = [];
+        const finish = (name) => {
+          clearTimeout(timer);
+          for (const [event, listener] of listeners) video.removeEventListener(event, listener);
+          resolve(name);
+        };
+        for (const name of names) {
+          const listener = () => finish(name);
+          listeners.push([name, listener]);
+          video.addEventListener(name, listener, { once: true });
+        }
+        const timer = setTimeout(() => finish("timeout"), timeout);
+      });
+
+      async function inspect(fileName) {
+        const response = await fetch(`./examples/${fileName}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const file = new File([await response.blob()], fileName);
+        const objectUrl = URL.createObjectURL(file);
+        const evidence = [];
+        let classification = "error";
+        try {
+          video.src = objectUrl;
+          video.load();
+          const metadataEvent = await waitFor(["loadedmetadata", "error"]);
+          if (metadataEvent !== "loadedmetadata") return { classification, evidence: [metadataEvent] };
+          evidence.push(`metadata ${video.duration.toFixed(3)}s ${video.videoWidth}×${video.videoHeight}`);
+          if (video.videoWidth === 0 || video.videoHeight === 0) {
+            return { classification: "metadata-only", evidence };
+          }
+
+          if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+            const frameEvent = await waitFor(["loadeddata", "error"]);
+            if (frameEvent !== "loadeddata") return { classification, evidence: [...evidence, frameEvent] };
+          }
+          evidence.push("first-frame");
+          const start = video.currentTime;
+          await video.play();
+          const playbackDeadline = performance.now() + 1800;
+          while (video.currentTime - start < 0.35 && performance.now() < playbackDeadline) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          video.pause();
+          const advanced = video.currentTime - start;
+          if (advanced < 0.35) return { classification: "metadata-only", evidence: [...evidence, `advanced ${advanced.toFixed(3)}s`] };
+          evidence.push(`advanced ${advanced.toFixed(3)}s`);
+
+          const target = Math.min(video.duration * 0.6, Math.max(0, video.duration - 0.2));
+          video.currentTime = target;
+          const seekEvent = await waitFor(["seeked", "error"]);
+          if (seekEvent !== "seeked" || Math.abs(video.currentTime - target) > 0.35) {
+            return { classification: "metadata-only", evidence: [...evidence, `seek ${seekEvent}`] };
+          }
+          evidence.push(`seek ${video.currentTime.toFixed(3)}s`);
+          classification = "playable";
+          return { classification, evidence };
+        } finally {
+          video.pause();
+          video.removeAttribute("src");
+          video.load();
+          URL.revokeObjectURL(objectUrl);
+          evidence.push(`cleanup networkState=${video.networkState}`);
+        }
+      }
+
+      runButton.addEventListener("click", async () => {
+        runButton.disabled = true;
+        results.replaceChildren();
+        for (const [fileName, expected] of cases) {
+          const row = results.insertRow();
+          row.insertCell().textContent = fileName;
+          row.insertCell().textContent = expected;
+          const resultCell = row.insertCell();
+          const evidenceCell = row.insertCell();
+          try {
+            const result = await inspect(fileName);
+            const pass = expected === "environment" || result.classification === expected;
+            resultCell.textContent = result.classification;
+            resultCell.className = pass ? "pass" : "fail";
+            evidenceCell.textContent = result.evidence.join(" · ");
+          } catch (error) {
+            resultCell.textContent = "harness-error";
+            resultCell.className = "fail";
+            evidenceCell.textContent = error instanceof Error ? error.message : String(error);
+          }
+        }
+        runButton.disabled = false;
+        document.title = "DONE · Anyfile Viewer 视频阶段 0 浏览器 Smoke";
+      });
+    </script>
+  </body>
+</html>

@@ -1,10 +1,12 @@
 # 视频格式支持矩阵
 
-- 状态：阶段 0 规划基线，尚无视频插件通过验收
+- 状态：阶段 0 证据基线与阶段 1 浏览器原生视频插件已验收
 - 事实来源：固定真实样例、目标环境中的真实播放、自动协议测试和锁定依赖
 - 覆盖口径：以实际可播放的容器 × 视频 codec × 音频 codec 组合计数，不以扩展名数量或最高支持等级计数
 
-网站 catalog 当前列出的格式只是产品候选，不构成支持证据。只有本表中达到 `implemented` 或 `verified`、并能播放主要节目的具体组合，才可以进入视频支持文案。
+网站 catalog 只概括已交付的容器入口，不替代组合级支持证据。只有本表中达到 `implemented` 或 `verified`、并能播放主要节目的具体组合，才可以进入视频支持文案。
+
+阶段 0 的固定样例、probe 测量和原始媒体元素结果见[阶段 0 验收证据](stage-0-evidence.md)。阶段 1 的组合状态来自同一批固定样例上的实际插件测试。
 
 ## 1. 支持等级
 
@@ -50,31 +52,30 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 
 ## 4. 当前规划矩阵
 
-以下条目尚无视频插件实现，等级均为 0。精确 codec 参数将在固定样例确认后拆为可验证行。
-
 | 容器/组织 | 视频 | 音频 | 目标播放插件族 | 当前等级 | 状态 | 近期目标 | 阶段与说明 |
 |---|---|---|---|---:|---|---:|---|
-| MP4，常见组织 | AVC/H.264 | AAC | browser video | 0 | planned | 3–4 | 阶段 1 第一候选 |
-| MP4，常见组织 | AVC/H.264 | 无 | browser video | 0 | planned | 3–4 | 阶段 1；video-only 是有效视频 |
-| MP4，包括文件尾 `moov` 或 fragment | AVC/H.264 | AAC | browser video | 0 | planned | 3–4 | 阶段 1 按真实原生播放结果纳入，不单设深挖阶段 |
-| MP4 | HEVC | AAC | browser video / non-native video | 0 | planned | 3–4 | 原生可播进入阶段 1，否则按需求进入阶段 2 |
-| MP4 | AV1 | AAC/Opus | browser video / non-native video | 0 | planned | 3–4 | 原生可播进入阶段 1，否则按需求进入阶段 2 |
-| WebM | VP8 | Vorbis/Opus | browser video | 0 | planned | 3–4 | 阶段 1 候选 |
-| WebM | VP9 | Opus | browser video | 0 | planned | 3–4 | 阶段 1 候选 |
-| WebM | VP8/VP9 | 无 | browser video | 0 | planned | 3–4 | 阶段 1 video-only 基线 |
+| MP4，头部或尾部 `moov` | AVC/H.264 Constrained Baseline L3.0，8-bit 4:2:0 | AAC-LC，48 kHz，双声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；连续播放、音频轨道与 seek 通过 |
+| MP4，头部 `moov` | AVC/H.264 Constrained Baseline L3.0，8-bit 4:2:0 | 无 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；video-only 正常播放 |
+| MP4，头部 `moov`，`hvc1` | HEVC Main，8-bit 4:2:0 | AAC-LC，48 kHz，双声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；`canPlayType()` 假阴性但真实播放通过 |
+| MP4，头部 `moov`，`av01` | AV1 Main，8-bit 4:2:0 | AAC-LC，48 kHz，双声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
+| WebM | VP8 profile 0，8-bit 4:2:0 | Vorbis，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
+| WebM | VP9 profile 0，8-bit 4:2:0 | Opus，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
+| WebM | VP9 profile 0，8-bit 4:2:0 | 无 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；video-only 正常播放 |
 | WebM | AV1 | Opus | browser video / non-native video | 0 | planned | 3–4 | 原生可播进入阶段 1，否则按需求进入阶段 2 |
-| QuickTime/MOV | AVC/HEVC | AAC/PCM | browser video / non-native video | 0 | planned | 3–4 | 原生明确组合阶段 1，其余阶段 2 |
+| QuickTime/MOV，尾部 `moov` | AVC/H.264 Constrained Baseline L3.0 | AAC-LC，48 kHz，双声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；`canPlayType()` 假阴性但真实播放通过 |
+| QuickTime/MOV | HEVC 等其他组合 | AAC/PCM 等 | non-native video | 0 | planned | 3–4 | 未声明组合按阶段 2/3 评估 |
 | Matroska | AVC/HEVC/VP9/AV1 等 | 常见音频子集 | non-native video | 0 | planned | 3 | 阶段 2 重点，按具体组合实现 |
 | AVI | 选定高频 codec | 选定高频音频 | non-native video | 0 | planned | 3 | 阶段 2 候选，不承诺整个 AVI 生态 |
 | MPEG-PS/TS | MPEG-1/2、AVC、HEVC 等选定组合 | 选定高频音频 | non-native video | 0 | planned | 3 | 阶段 2 候选，按时间轴可控子集实现 |
 | Ogg Video | Theora | Vorbis/Opus | browser video / non-native video | 0 | planned | 3–4 | 原生可播阶段 1，否则按需求阶段 2 |
-| 3GPP | AVC/H.263 等 | AAC/AMR 等 | browser video / non-native video | 0 | planned | 3–4 | 原生可播阶段 1，否则按需求阶段 2 |
+| 3GPP，尾部 `moov` | AVC/H.264 Constrained Baseline L1.3 | AAC-LC，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
+| 3GPP | H.263 等其他组合 | AMR 等 | non-native video | 0 | planned | 3–4 | 未声明组合按阶段 2 评估 |
 | Flash Video | Sorenson/VP6/AVC 等 | AAC/MP3 等 | non-native video | 0 | deferred | 3 | 阶段 2 低优先级，取决于真实需求 |
 | QuickTime/MOV | ProRes | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 3，先播放再增加专业能力 |
 | MXF | MPEG-2、AVC-Intra、DNx、JPEG 2000 等 | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 3，按具体专业组合实现 |
 | audio-only MP4/WebM/Ogg | 无 | 任意 | future audio | 0 | deferred | 0 | 视频 probe 必须返回 0；不属于视频路线图 |
 
-`browser video` 在当前环境无法播放某个组合时返回 0；只有已经实现该组合端到端播放的 `non-native video` 或 `professional video` 才能接管。不会增加只解析 metadata 的视频候选。
+`browser video` 对损坏的 A/V 轨道或 codec 不在声明范围内的文件返回 0，但不会因无法识别或非 A/V 的辅助轨道否决已有合法主 A/V。由于浏览器能力查询可能假阴性，probe 不调用 `canPlayType()`、不创建 DOM；真实环境解码失败由 `open()` 返回 `unsupported-environment`。只有已经实现端到端播放的后续插件才能接管，不增加只解析 metadata 的视频候选。
 
 ## 5. 固定样例要求
 
@@ -104,6 +105,15 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 - 已知但未声明支持的高级语义不会被文案误报。
 
 Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视频矩阵必须记录实际媒体环境，而不是从框架支持范围推导。
+
+### 阶段 1 目标环境记录（2026-08-29）
+
+- 环境：Codex 应用内 Chromium 151，macOS 15.6.1（Apple Silicon）；
+- 实际插件入口：Vite 直接导入 `browser-video` 的 `probe` 与完整实现，不使用模拟媒体事件；
+- 十个声明样例均取得首帧、连续推进至少 0.35 秒，并完成基础 seek、播放到结束、重播与 260 × 180 窄容器 resize；含音频样例的 `captureStream()` 暴露 1 条音频轨道，且 Web Audio 时域峰值为 0.090–0.129，两个 video-only 样例暴露 0 条并保持 0 峰值；
+- audio-only、损坏、截断和伪装扩展名样例均返回 probe 0，并由插件拒绝；
+- opening abort 与 active abort 均停止媒体并清空插件 DOM；Object URL 撤销和重复 dispose 另由自动生命周期测试覆盖；
+- Safari、Firefox、Windows、Android 和 iOS 尚未在本轮复验，不能从 Chromium 结果外推支持等级。
 
 ## 7. 自动测试与构建证据
 

@@ -1,6 +1,6 @@
 # 视频查看实施路线图
 
-- 状态：规划中，阶段 0 尚未验收
+- 状态：阶段 0、阶段 1 实现及基准环境验收已于 2026-08-29 完成；其他浏览器按支持矩阵逐环境持续验收
 - 范围：浏览器本地打开的视频文件；包含文件内音频和字幕轨道，不包含独立音频文件
 - 产品结果：播放主要节目，不交付只能检查 metadata、轨道结构、封面或首帧的视频插件
 - 核心目标：在满足播放与资源安全底线后，优先扩大可播放的容器 × 视频 codec × 音频 codec 组合
@@ -31,6 +31,14 @@
 rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 seek、色彩和 HDR 等不默认进入上述底线。缺失有实际影响时降低到等级 3 并记录限制，后续按需求增强。
 
 ## 2. 阶段 0：建立最小可验收基线
+
+### 实施结果（2026-08-29）
+
+- 已提交 13 个参数明确的正常/对照样例，以及 MP4、WebM、QuickTime、Ogg、3GPP 各自的损坏、截断和伪装样例；MP4/WebM 同时覆盖 video-only 与 audio-only；
+- 已建立可重复的 FFmpeg 生成脚本、FFprobe 参数记录和 probe 测量脚本；
+- 已确定 256 KiB 头部 + 256 KiB 尾部、总计 512 KiB 的初始 probe 读取预算，以及深度 12、轨道 32、访问项 4,096 的结构边界；
+- 已用真实 Chromium 151 验证 metadata、首帧、连续播放、基础 seek、错误和 Object URL/媒体清理顺序；
+- 已记录持续验收环境、未测试环境和首包/插件 chunk 门禁。完整证据见[阶段 0 验收证据](stage-0-evidence.md)。
 
 ### 工作
 
@@ -65,6 +73,17 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 
 ## 3. 阶段 1：浏览器原生播放广覆盖
 
+### 实施结果（2026-08-29）
+
+- 已新增 `browser-video` workspace 插件，并接入网站注册表；manifest、probe 与完整实现保持独立入口；
+- probe 在 256 KiB 头部 + 256 KiB 尾部、总计 512 KiB 的预算内识别 ISO BMFF/WebM、视频轨道、音频轨道与声明 codec 子集；
+- 已交付 MP4/M4V 的 AVC + AAC-LC、AVC video-only、HEVC + AAC-LC、AV1 + AAC-LC，MOV/QuickTime 与 3GPP 的 AVC + AAC-LC，以及 WebM 的 VP8 + Vorbis、VP9 + Opus、VP9 video-only；
+- 完整实现使用 `<video controls>` 与 Object URL，不自动播放；以真实 `loadeddata` 判断首帧，幂等释放媒体、URL 和插件 DOM；
+- Chromium 151 / macOS 15.6.1 的真实插件 smoke 已验证十个固定样例的连续播放、非静音解码音频、seek，以及损坏、截断、audio-only、伪装文件、opening abort 和 active abort；
+- `canPlayType()` 对本环境中的 HEVC MP4 与 AVC MOV 存在假阴性，因此已从 probe 路径移除；probe 只依赖有界字节解析和声明 codec 子集，真实环境失败由 `open()` 的媒体事件准确返回。
+
+固定样例已移动到插件自己的 [`examples/`](../../viewer/plugins/browser-video/examples/) 目录；组合级证据见[支持矩阵](support-matrix.md)。
+
 ### 产品能力
 
 - 使用一个 `browser-video` 插件打开目标环境中实际可原生播放的组合；
@@ -77,7 +96,7 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 ### 技术原则
 
 - manifest、probe 和完整实现使用不同入口；
-- probe 只进行有界容器/轨道识别并查询辅助能力信号；
+- probe 只进行有界容器/轨道识别，不创建 DOM 或初始化媒体元素；
 - 完整插件使用 `<video controls>` + Object URL；
 - `open()` 以真实文件的媒体事件判断是否达到播放条件，不能只相信扩展名、MIME 或 `canPlayType()`；
 - 没有视频轨道时返回 0，不截获未来 audio-only 路由；

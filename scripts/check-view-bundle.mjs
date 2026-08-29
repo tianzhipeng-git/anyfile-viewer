@@ -40,6 +40,8 @@ const deferredImplementationMarkers = [
   "anyfile-general-raster-viewer__canvas",
   "anyfile-modern-raster-viewer__canvas",
   "anyfile-camera-raw-viewer__canvas",
+  "anyfile-browser-video-viewer__video",
+  "Video probe read budget exceeded",
   "jxl-oxide-wasm",
   "heif-decoder.wasm",
   "LibRaw disposed",
@@ -83,6 +85,13 @@ const archiveChunks = archiveChunkContents.filter(({ content }) => {
   const code = content.toString("utf8");
   return code.includes("__anyfile_archive_metadata_viewer_v1__") || code.includes("Unsafe filename");
 });
+const videoProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Video probe read budget exceeded"));
+if (videoProbeChunks.length === 0) {
+  throw new Error("Browser video probe chunk was not found");
+}
+if (videoProbeChunks.some(({ content }) => content.includes("anyfile-browser-video-viewer__video"))) {
+  throw new Error("Browser video probe chunk contains the full video viewer implementation");
+}
 const archiveGzipBytes = archiveChunks.reduce(
   (total, { content }) => total + gzipSync(content, { level: 9 }).byteLength,
   0,

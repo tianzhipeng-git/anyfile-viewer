@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   VIEWER_PROTOCOL_VERSION,
@@ -159,7 +161,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-image", "modern-raster", "camera-raw", "general-raster", "pdfjs-pdf", "sqlite-database"]);
+      .toEqual(["browser-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "pdfjs-pdf", "sqlite-database"]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -175,6 +177,18 @@ describe("viewer protocol", () => {
     );
     expect(sqlite.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["sqlite-database", 5], ["hex-viewer", 1]]);
+
+    const videoBytes = readFileSync(join(
+      process.cwd(),
+      "viewer/plugins/browser-video/examples/mp4-avc-aac-faststart.mp4",
+    ));
+    const video = await resolveViewerRegistrations(
+      new File([videoBytes], "clip.mp4"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(video.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["browser-video", 3], ["hex-viewer", 1]]);
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {
@@ -197,6 +211,14 @@ describe("viewer protocol", () => {
   });
 
   it("keeps specialized viewers ahead of archive metadata and hex fallback", () => {
+    expect(findViewerRegistrations("clip.mp4", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["browser-video", "hex-viewer"]);
+    expect(findViewerRegistrations("clip.webm", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["browser-video", "hex-viewer"]);
+    expect(findViewerRegistrations("clip.mov", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["browser-video", "hex-viewer"]);
+    expect(findViewerRegistrations("clip.3gp", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["browser-video", "hex-viewer"]);
     expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "hex-viewer"]);
     expect(findViewerRegistrations("photo.jxl", viewerRegistrations).map(({ manifest: item }) => item.id))

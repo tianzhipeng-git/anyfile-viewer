@@ -62,6 +62,8 @@ Probe 必须保持轻量。它可以分片读取必要文件头或容器结构�
 
 SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 DuckDB 或 Apache Arrow。DuckDB 数据插件处理 CSV、TSV、JSON、Parquet、Arrow 和 DuckDB 数据库，不包含 SQLite 路径。
 
+`browser-video` 同样保持三段加载边界：manifest 只包含格式声明；候选扩展名命中后才加载纯字节、有界且无 DOM 副作用的 ISO BMFF/WebM probe；只有插件被选中后才加载 DOM、Object URL 和媒体生命周期实现。构建门禁同时检查 `/view` 首包不含 probe/parser 或完整播放器，并检查 probe chunk 不带入完整播放器 UI。
+
 新增插件时必须：
 
 1. 为 manifest 和完整实现保留不同的导出路径；需要 probe 时再增加独立 `/probe` 导出。

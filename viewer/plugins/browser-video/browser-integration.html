@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Browser video plugin integration</title>
+    <style>
+      :root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+      body { margin: 24px; }
+      button { font: inherit; padding: 8px 14px; }
+      table { border-collapse: collapse; margin-block: 16px; width: 100%; }
+      th, td { border: 1px solid #8888; padding: 6px 8px; text-align: left; }
+      .pass { color: #16803a; }
+      .fail { color: #c62828; }
+      #viewer { height: 320px; min-height: 0; }
+    </style>
+  </head>
+  <body>
+    <h1>Browser video plugin integration</h1>
+    <p id="environment"></p>
+    <button id="run" type="button">运行集成 smoke</button>
+    <table>
+      <thead><tr><th>样例</th><th>预期</th><th>结果</th><th>证据</th></tr></thead>
+      <tbody id="results"></tbody>
+    </table>
+    <div id="viewer"></div>
+    <script type="module">
+      import { browserVideoViewer } from "./src/index.ts";
+      import { probeBrowserVideo } from "./src/probe.ts";
+
+      const cases = [
+        ["mp4-avc-aac-faststart.mp4", "playable"],
+        ["mp4-avc-aac-tail-moov.mp4", "playable"],
+        ["mp4-avc-video-only.mp4", "playable"],
+        ["webm-vp8-vorbis.webm", "playable"],
+        ["webm-vp9-opus.webm", "playable"],
+        ["webm-vp9-video-only.webm", "playable"],
+        ["mp4-hevc-aac.mp4", "playable"],
+        ["mp4-av1-aac.mp4", "playable"],
+        ["mov-avc-aac.mov", "playable"],
+        ["3gp-avc-aac.3gp", "playable"],
+        ["mp4-aac-audio-only.mp4", "rejected"],
+        ["webm-opus-audio-only.webm", "rejected"],
+        ["corrupt.mp4", "rejected"],
+        ["truncated.mp4", "rejected"],
+        ["corrupt.webm", "rejected"],
+        ["truncated.webm", "rejected"],
+        ["disguised-webm.mp4", "rejected"],
+        ["disguised-mp4.webm", "rejected"],
+        ["disguised-webm.mov", "rejected"],
+        ["disguised-webm.3gp", "rejected"],
+      ];
+
+      const viewer = document.querySelector("#viewer");
+      const results = document.querySelector("#results");
+      const runButton = document.querySelector("#run");
+      document.querySelector("#environment").textContent = `${navigator.userAgent} · ${navigator.platform}`;
+
+      async function loadFile(fileName) {
+        const response = await fetch(`./examples/${fileName}`, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return new File([await response.blob()], fileName);
+      }
+
+      function waitForEvent(target, eventName, timeout = 2000) {
+        return new Promise((resolve, reject) => {
+          const timer = setTimeout(() => reject(new Error(`${eventName} timed out`)), timeout);
+          target.addEventListener(eventName, () => {
+            clearTimeout(timer);
+            resolve();
+          }, { once: true });
+          target.addEventListener("error", (error) => {
+            clearTimeout(timer);
+            reject(error);
+          }, { once: true });
+        });
+      }
+
+      async function seek(video, target) {
+        const completed = waitForEvent(video, "seeked");
+        video.currentTime = target;
+        await completed;
+      }
+
+      async function inspect(fileName) {
+        const file = await loadFile(fileName);
+        const probeController = new AbortController();
+        const supportLevel = await probeBrowserVideo({ file, signal: probeController.signal });
+        const openController = new AbortController();
+        const progress = [];
+        let controller;
+        let capturedStream;
+        let audioContext;
+        try {
+          controller = await browserVideoViewer.open({
+            file,
+            container: viewer,
+            signal: openController.signal,
+            locale: "zh-CN",
+            reportProgress(value) { progress.push(value); },
+          });
+          const video = viewer.querySelector("video");
+          if (!video || !video.videoWidth || !video.videoHeight) throw new Error("missing first frame");
+          video.muted = true;
+          const start = video.currentTime;
+          await video.play();
+          const deadline = performance.now() + 1800;
+          while (video.currentTime - start < 0.35 && performance.now() < deadline) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+          }
+          if (video.currentTime - start < 0.35) throw new Error("playback did not advance");
+          capturedStream = video.captureStream?.();
+          const audioTrackCount = capturedStream?.getAudioTracks().length ?? 0;
+          let audioPeak = 0;
+          if (!fileName.includes("video-only") && audioTrackCount === 0) {
+            throw new Error("expected audio track was not exposed");
+          }
+          if (audioTrackCount > 0) {
+            audioContext = new AudioContext();
+            const source = audioContext.createMediaStreamSource(capturedStream);
+            const analyser = audioContext.createAnalyser();
+            const silentGain = audioContext.createGain();
+            silentGain.gain.value = 0;
+            source.connect(analyser).connect(silentGain).connect(audioContext.destination);
+            await audioContext.resume();
+            await new Promise((resolve) => setTimeout(resolve, 150));
+            const samples = new Float32Array(analyser.fftSize);
+            analyser.getFloatTimeDomainData(samples);
+            audioPeak = samples.reduce((peak, sample) => Math.max(peak, Math.abs(sample)), 0);
+            if (audioPeak < 0.001) throw new Error("decoded audio was silent");
+          }
+          video.pause();
+          const target = Math.min(video.duration * 0.6, Math.max(0, video.duration - 0.2));
+          await seek(video, target);
+          await seek(video, Math.max(0, video.duration - 0.12));
+          const ended = waitForEvent(video, "ended");
+          await video.play();
+          await ended;
+          await seek(video, 0);
+          await video.play();
+          const replayDeadline = performance.now() + 1200;
+          while (video.currentTime < 0.12 && performance.now() < replayDeadline) {
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+          video.pause();
+          if (video.currentTime < 0.12) throw new Error("replay did not advance");
+          viewer.style.width = "260px";
+          viewer.style.height = "180px";
+          await new Promise((resolve) => requestAnimationFrame(() => resolve()));
+          const viewerRect = viewer.getBoundingClientRect();
+          const videoRect = video.getBoundingClientRect();
+          if (videoRect.left < viewerRect.left || videoRect.right > viewerRect.right
+            || videoRect.top < viewerRect.top || videoRect.bottom > viewerRect.bottom) {
+            throw new Error("video overflowed the narrow viewer");
+          }
+          return {
+            classification: "playable",
+            evidence: `probe=${supportLevel} · ${video.videoWidth}×${video.videoHeight} · audioTracks=${audioTrackCount} · audioPeak=${audioPeak.toFixed(3)} · seek/end/replay/resize · progress=${progress.at(-1)?.stage}`,
+          };
+        } catch (error) {
+          return {
+            classification: "rejected",
+            evidence: `probe=${supportLevel} · ${error && typeof error === "object" && "code" in error ? error.code : error instanceof Error ? error.message : String(error)}`,
+          };
+        } finally {
+          viewer.style.removeProperty("width");
+          viewer.style.removeProperty("height");
+          capturedStream?.getTracks().forEach((track) => track.stop());
+          await audioContext?.close();
+          await controller?.dispose();
+          if (viewer.childElementCount) throw new Error(`${fileName}: dispose left DOM behind`);
+        }
+      }
+
+      async function inspectAbort(fileName, phase) {
+        const file = await loadFile(fileName);
+        const abortController = new AbortController();
+        const opening = browserVideoViewer.open({
+          file,
+          container: viewer,
+          signal: abortController.signal,
+          locale: "zh-CN",
+          reportProgress() {},
+        });
+        if (phase === "opening") {
+          abortController.abort();
+          try { await opening; } catch (error) {
+            if (!(error instanceof DOMException) || error.name !== "AbortError") throw error;
+          }
+        } else {
+          const controller = await opening;
+          const video = viewer.querySelector("video");
+          video.muted = true;
+          await video.play();
+          abortController.abort();
+          await controller.dispose();
+          if (!video.paused || video.getAttribute("src")) throw new Error("active abort did not stop media");
+        }
+        if (viewer.childElementCount) throw new Error(`${phase} abort left DOM behind`);
+        return { classification: "aborted", evidence: `${phase} · clean` };
+      }
+
+      runButton.addEventListener("click", async () => {
+        runButton.disabled = true;
+        results.replaceChildren();
+        for (const [fileName, expected] of cases) {
+          const row = results.insertRow();
+          row.insertCell().textContent = fileName;
+          row.insertCell().textContent = expected;
+          const resultCell = row.insertCell();
+          const evidenceCell = row.insertCell();
+          try {
+            const result = await inspect(fileName);
+            const pass = result.classification === expected;
+            resultCell.textContent = result.classification;
+            resultCell.className = pass ? "pass" : "fail";
+            evidenceCell.textContent = result.evidence;
+          } catch (error) {
+            resultCell.textContent = "harness-error";
+            resultCell.className = "fail";
+            evidenceCell.textContent = error instanceof Error ? error.message : String(error);
+          }
+        }
+        for (const phase of ["opening", "active"]) {
+          const row = results.insertRow();
+          row.insertCell().textContent = `mp4-avc-aac-faststart.mp4#${phase}`;
+          row.insertCell().textContent = "aborted";
+          const resultCell = row.insertCell();
+          const evidenceCell = row.insertCell();
+          try {
+            const result = await inspectAbort("mp4-avc-aac-faststart.mp4", phase);
+            resultCell.textContent = result.classification;
+            resultCell.className = result.classification === "aborted" ? "pass" : "fail";
+            evidenceCell.textContent = result.evidence;
+          } catch (error) {
+            resultCell.textContent = "harness-error";
+            resultCell.className = "fail";
+            evidenceCell.textContent = error instanceof Error ? error.message : String(error);
+          }
+        }
+        runButton.disabled = false;
+        document.title = "DONE · Browser video plugin integration";
+      });
+    </script>
+  </body>
+</html>

@@ -16,6 +16,7 @@
     "dev": "npm run prepare:assets && next dev",
     "build": "npm run prepare:assets && next build --webpack && npm run check:bundle",
     "check:bundle": "node scripts/check-view-bundle.mjs",
+    "measure:video-probes": "node scripts/measure-video-probes.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "npm run test:app && npm test --workspaces --if-present",
@@ -23,6 +24,7 @@
   },
   "dependencies": {
     "@anyfile/archive-metadata-viewer": "*",
+    "@anyfile/browser-video-viewer": "*",
     "@anyfile/code-viewer": "*",
     "@anyfile/data-viewer": "*",
     "@anyfile/excel-viewer": "*",

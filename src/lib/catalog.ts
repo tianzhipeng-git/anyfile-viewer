@@ -37,8 +37,10 @@ export const formats: FileFormat[] = [
   { extension: "pnm", name: "Netpbm 图片", description: "查看 PBM、PGM、PPM 与 PAM 栅格图片。", category: "images-video", native: false },
   { extension: "tiff", name: "TIFF 图片", description: "分片读取常见压缩、分块与多页 TIFF。", category: "images-video", native: false },
   { extension: "svg", name: "SVG 矢量图", description: "可缩放、可检查源码的矢量图形。", category: "images-video", native: true },
-  { extension: "mp4", name: "MP4 视频", description: "浏览器广泛支持的视频容器格式。", category: "images-video", native: true },
-  { extension: "webm", name: "WebM 视频", description: "面向 Web 的开放视频格式。", category: "images-video", native: true },
+  { extension: "mp4", name: "MP4 视频", description: "本地播放已验证的 AVC、HEVC 或 AV1 + AAC-LC 组合，以及 AVC video-only 文件。", category: "images-video", native: true },
+  { extension: "webm", name: "WebM 视频", description: "本地播放已验证的 VP8/Vorbis、VP9/Opus 与 VP9 video-only 组合。", category: "images-video", native: true },
+  { extension: "mov", name: "QuickTime 视频", description: "本地播放已验证的 AVC + AAC-LC QuickTime 组合。", category: "images-video", native: true },
+  { extension: "3gp", name: "3GPP 视频", description: "本地播放已验证的 AVC + AAC-LC 3GPP 组合。", category: "images-video", native: true },
   { extension: "pdf", name: "PDF 文档", description: "查看版式固定的文档与电子资料。", category: "documents", native: true },
   { extension: "docx", name: "Word 文档", description: "预览 Office Open XML 文字文档。", category: "documents", native: false },
   { extension: "xlsx", name: "Excel 表格", description: "查看工作表、数据与基础格式。", category: "documents", native: false },
@@ -66,7 +68,7 @@ export const formats: FileFormat[] = [
 ];
 
 export const categories: FileCategory[] = [
-  { slug: "images-video", name: "图片与视频", eyebrow: "看见每个细节", description: "通过浏览器原生能力或本地 Worker 解码查看图片与媒体。", extensions: ["png", "apng", "jpg", "gif", "webp", "avif", "jxl", "heic", "dng", "cr2", "cr3", "crw", "nef", "arw", "raf", "rwl", "raw", "rw2", "tga", "pnm", "tiff", "svg", "mp4", "webm"] },
+  { slug: "images-video", name: "图片与视频", eyebrow: "看见每个细节", description: "通过浏览器原生能力或本地 Worker 解码查看图片与媒体。", extensions: ["png", "apng", "jpg", "gif", "webp", "avif", "jxl", "heic", "dng", "cr2", "cr3", "crw", "nef", "arw", "raf", "rwl", "raw", "rw2", "tga", "pnm", "tiff", "svg", "mp4", "webm", "mov", "3gp"] },
   { slug: "documents", name: "文档", eyebrow: "阅读，不必等待", description: "在本地打开文档、表格与演示资料，不经过上传队列。", extensions: ["pdf", "docx", "xlsx", "xls", "xlsb", "ods", "pptx"] },
   { slug: "code-data", name: "代码与数据", eyebrow: "让结构清晰可见", description: "检查文本、代码和结构化数据，适合快速排错与校验。", extensions: ["md", "json", "jsonl", "csv", "tsv", "parquet", "arrow", "duckdb", "sqlite", "html", "har"] },
   { slug: "3d", name: "3D", eyebrow: "在浏览器里转动模型", description: "以 WebGL 与 WebGPU 为基础，浏览网格、材质和场景。", extensions: ["obj", "gltf", "stl"] },

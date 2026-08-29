@@ -40,16 +40,16 @@
 | WebP | `.webp` | browser image | 4 | verified | 4 | 固定样例覆盖有损、无损 alpha 与循环动画 |
 | AVIF（单帧） | `.avif` | browser image | 4 | verified | 4 | 原生 `<img>`；固定样例覆盖单帧 AVIF |
 | AVIF sequence | `.avif` | browser image | 3 | verified | 3 | 浏览器动画支持存在差异；以实际 decode 结果为准 |
-| AVIF 的 HEIF 扩展名 | `.heif` `.heifs` `.hif` | browser image | 3–4 | implemented | 4 | IANA 为 `image/avif` 登记的扩展名；仅接受 `avif`/`avis` brand，不把 HEVC HEIF 误报为 AVIF |
+| AVIF 的 HEIF 扩展名 | `.heif` `.heifs` `.hif` | browser image | 3–4 | verified | 4 | IANA 为 `image/avif` 登记的扩展名；仅接受 `avif`/`avis` brand，不把 HEVC HEIF 误报为 AVIF |
 | BMP/DIB | `.bmp` `.dib` | browser image | 3 | verified | 3 | 常见 BMP 可原生查看，较少见的压缩与内部表示可能无法解码 |
 | ICO/CUR | `.ico` `.cur` | browser image | 3 | verified | 3 | 可查看浏览器选取的图标/光标画面，不提供容器内多尺寸导航 |
 | SVG | `.svg` `.svgz` | safe vector image | 0 | planned | 3 | 安全策略未决，不与普通栅格同时上线 |
 | TGA | `.tga` `.icb` `.vda` `.vst` | general raster | 4 | verified | 4 | raw/RLE；灰度、真彩色、调色板；15/16/24/32 bit；应用四种 origin；后三者按相同 TGA 结构 probe |
 | Netpbm | `.pnm` `.pbm` `.pgm` `.ppm` `.pam` | general raster | 4 | verified | 4 | P1–P7；文本/二进制；1/8/16 bit；PAM 灰度、RGB 与 alpha tuple |
 | classic TIFF（无 ICC） | `.tif` `.tiff` | general raster | 4 | verified | 4 | unsigned 1–16 bit、alpha、orientation；strip/tile、多页；固定样例覆盖 None、LZW、Deflate、PackBits、JPEG |
-| classic TIFF（带 ICC） | `.tif` `.tiff` | general raster | 3 | implemented | 3 | profile 可识别但未转换，UI 明确标注 `ICC 未应用` |
-| BigTIFF | `.tf8` `.btf` `.btiff` `.tif` `.tiff` | general raster | 3 | implemented | 4 | 64-bit IFD probe 与解码路径已实现；缺少可再分发真实样例，暂不声明等级 4 |
-| pyramidal TIFF | `.ptif` `.ptiff` | general raster | 3–4 | implemented | 4 | 作为 tiled/multi-page TIFF 打开；能查看像素和页面，但不承诺厂商私有金字塔语义 |
+| classic TIFF（带 ICC） | `.tif` `.tiff` | general raster | 3 | verified | 3 | profile 可识别但未转换，UI 明确标注 `ICC 未应用` |
+| BigTIFF | `.tf8` `.btf` `.btiff` `.tif` `.tiff` | general raster | 3 | verified | 4 | 64-bit IFD probe 与解码路径已实现；缺少可再分发真实样例，暂不声明等级 4 |
+| pyramidal TIFF | `.ptif` `.ptiff` | general raster | 3–4 | verified | 4 | 作为 tiled/multi-page TIFF 打开；能查看像素和页面，但不承诺厂商私有金字塔语义 |
 | OME-TIFF | `.ome.tif` `.ome.tiff` `.ome.tf2` `.ome.tf8` `.ome.btf` | general raster | 3 | implemented | 5 | 可查看 TIFF 像素和页面；暂不解释 OME-XML 的 Z/C/T 维度语义 |
 | HEVC HEIF/HEIC | `.heif` `.heifs` `.hif` `.heic` | modern raster | 3 | implemented | 3 | 原生实际解码优先，失败后使用同源 `libheif 1.23.2 + libde265 1.1.1` Worker/WASM；显示 primary image，不提供辅助项或序列导航 |
 | JPEG XL | `.jxl` | modern raster | 4 | verified | 4 | 原生 ImageDecoder 优先，`jxl-oxide-wasm@0.12.6` Worker 回退；固定样例覆盖有损、无损 alpha 与动画 |
