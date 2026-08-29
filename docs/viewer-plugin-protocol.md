@@ -165,6 +165,8 @@ Manifest 规则：
 - `mimeTypes` 只用于页面展示，不参与插件选择。
 - 同一插件即使有多条规则匹配，也只在候选列表中出现一次。
 
+网站外壳的目录树图标不是协议字段，但会复用轻量 Manifest 进行文件类型分类。给现有插件增加 `extensions` 或 `fileNames` 时，图标通常会自动跟随；新增插件时，维护者必须同时在 `src/components/file-type-icon.tsx` 中把该 Manifest 加入对应语义类别，新增语义类别时还需指定新的 Lucide 图标。`src/components/file-type-icon.test.ts` 会检查所有已注册的非通配扩展名均能取得明确类别，不能通过删除或放宽该检查来绕过缺失映射。
+
 ## 5. 插件选择与支持等级
 
 网站按照显式注册顺序保存插件，不能依赖目录扫描、对象属性、probe 完成顺序或动态导入完成顺序。

@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ChevronRightIcon, FileIcon, FolderIcon, FolderOpenIcon, LoaderCircleIcon } from "lucide-react";
+import { ChevronRightIcon, FolderIcon, FolderOpenIcon, LoaderCircleIcon } from "lucide-react";
 
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { FileTypeIcon } from "@/components/file-type-icon";
 import type { WorkspaceTreeEntry } from "@/lib/file-system-access";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +64,7 @@ function TreeNode({ node, selectedId, onSelect, onExpand }: TreeNodeProps) {
         style={rowStyle}
         onClick={() => onSelect(entry)}
       >
-        <FileIcon className="size-4 shrink-0" aria-hidden="true" />
+        <FileTypeIcon fileName={entry.name} />
         <span className="truncate" title={entry.displayPath}>{entry.name}</span>
       </button>
     );
