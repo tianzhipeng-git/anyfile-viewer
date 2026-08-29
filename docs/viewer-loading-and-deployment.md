@@ -170,22 +170,7 @@ worker-src 'self' blob:
 
 ## 4. 依赖版本锁定
 
-查看器的关键运行时依赖在各插件 `package.json` 中使用精确版本：
-
-| 插件 | 关键依赖 | 版本 |
-|---|---|---:|
-| PDF 查看器 | `pdfjs-dist` | `6.2.108` |
-| 代码查看器 | `ace-builds` | `1.44.0` |
-| DuckDB 数据查看器 | `@duckdb/duckdb-wasm` | `1.32.0` |
-| DuckDB 数据查看器 | `apache-arrow` | `17.0.0` |
-| Word 查看器 | `docx-preview` | `0.4.0` |
-| Excel 查看器 | `xlsx` | `0.20.3` |
-| PowerPoint 查看器 | `@aiden0z/pptx-renderer` | `1.2.4` |
-| SQLite 查看器 | `sql.js` | `1.14.2` |
-| 通用栅格查看器 | `geotiff` | `3.0.5` |
-| 现代栅格查看器 | `jxl-oxide-wasm` | `0.12.6` |
-| HEIF 回退 | `libheif + libde265` 自建产物 | `1.23.2-anyfile.1`（`libde265 1.1.1`） |
-| 相机 RAW 查看器 | `libraw-wasm` | `1.6.0` |
+查看器的关键运行时依赖在各插件 `package.json` 中使用精确版本.
 
 `package-lock.json` 使用 lockfile v3，锁定其余直接依赖和全部传递依赖的实际版本、下载地址与完整性哈希。根项目中的 `^` 版本不会在 `npm ci` 时漂移。
 

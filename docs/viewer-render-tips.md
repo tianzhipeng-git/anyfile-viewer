@@ -39,7 +39,7 @@ context.container                 宿主拥有
 
 ### 3.1 默认模式：由宿主滚动
 
-文档、图片集合、普通表格等自然向下增长的内容，优先使用宿主的 `context.container` 作为唯一滚动容器。
+文档、图片集合、普通表格等自然向下增长的内容，优先使用宿主的 `context.container` 作为滚动容器。
 
 ```css
 .anyfile-example-viewer {
@@ -93,7 +93,7 @@ Word 查看器属于此模式。之前 DOCX 无法上下滚动的根因，就是
 内部滚动模式必须满足：
 
 - 根节点使用确定的 `height: 100%`，同时设置 `min-height: 0` 和 `overflow: hidden`。
-- 只有内容面板设置 `overflow: auto`；不要再增加第三层滚动。
+- 只有内容面板设置 `overflow: auto`；非必要不要再增加第三层滚动。
 - flex 或 grid 高度链中的每个可收缩中间节点都要设置 `min-height: 0`。
 - 将内容面板作为第三方库的 `scrollContainer`，不能传入另一个尺寸不确定的后代节点。
 - 横向滚动和纵向滚动尽量归同一内容面板管理。
