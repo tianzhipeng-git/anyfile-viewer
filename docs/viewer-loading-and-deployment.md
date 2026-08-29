@@ -245,7 +245,7 @@ COOP/COEP 在顶层文档响应时生效，客户端路由切换不会因为 pat
 - `/view` 内部切换文件、目录和插件继续使用客户端状态，不得为此刷新页面；
 - 发布前必须从首页实际点击进入 `/view`，断言 `crossOriginIsolated === true`，不能只测试直接访问或刷新 `/view`。
 
-当前站内入口仍使用 Next.js `<Link>`，尚未满足这一边界；在修复并增加浏览器测试前，RAW 只能保证直接访问或刷新 `/view` 的路径。该问题是发布阻断项，不通过文档约定视为已经解决。
+站内导航统一通过 `IsolationBoundaryLink` 表达该边界：进入或离开 `/view` 时渲染原生 `<a>`，同一侧的普通站内导航继续使用 Next.js `<Link>`。新增导航入口不得绕过该组件。
 
 JXL 的打包 Worker 和 WASM 位于 `/_next/static/:path*`，该路径同样返回上述 COEP/CORP 头。如果未来用 `assetPrefix` 将 Next 静态资源迁移到独立 CDN，CDN 必须保留等价响应头，否则 JXL Worker 会在加载前被浏览器拦截。
 

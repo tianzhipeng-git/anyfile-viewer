@@ -1,6 +1,5 @@
-import Link from "next/link";
-
 import { BrandMark } from "@/components/brand-mark";
+import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
 import { Separator } from "@/components/ui/separator";
 import { categories } from "@/lib/catalog";
 
@@ -16,14 +15,14 @@ export function SiteFooter() {
           <div className="flex flex-col gap-3 text-sm">
             <p className="font-semibold">格式类别</p>
             {categories.slice(0, 3).map((category) => (
-              <Link key={category.slug} href={`/categories/${category.slug}`} className="text-muted-foreground hover:text-foreground">{category.name}</Link>
+              <IsolationBoundaryLink key={category.slug} href={`/categories/${category.slug}`} className="text-muted-foreground hover:text-foreground">{category.name}</IsolationBoundaryLink>
             ))}
           </div>
           <div className="flex flex-col gap-3 text-sm">
             <p className="font-semibold">开始使用</p>
-            <Link href="/view" className="text-muted-foreground hover:text-foreground">打开文件</Link>
-            <Link href="/formats/pdf" className="text-muted-foreground hover:text-foreground">PDF 查看器</Link>
-            <Link href="/formats/json" className="text-muted-foreground hover:text-foreground">JSON 查看器</Link>
+            <IsolationBoundaryLink href="/view" className="text-muted-foreground hover:text-foreground">打开文件</IsolationBoundaryLink>
+            <IsolationBoundaryLink href="/formats/pdf" className="text-muted-foreground hover:text-foreground">PDF 查看器</IsolationBoundaryLink>
+            <IsolationBoundaryLink href="/formats/json" className="text-muted-foreground hover:text-foreground">JSON 查看器</IsolationBoundaryLink>
           </div>
         </div>
         <Separator />

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowRightIcon } from "lucide-react";
 
 import { FormatGlyph } from "@/components/format-glyph";
+import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -59,7 +60,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
               <p className="text-sm font-semibold text-primary">{categoryFormats.length} FORMATS</p>
               <h2 className="display-title text-3xl sm:text-4xl">选择一种文件格式</h2>
             </div>
-            <Button nativeButton={false} variant="outline" render={<Link href="/view" />}>直接打开文件</Button>
+            <Button nativeButton={false} variant="outline" render={<IsolationBoundaryLink href="/view" />}>直接打开文件</Button>
           </div>
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {categoryFormats.map((format) => (

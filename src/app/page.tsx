@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRightIcon, FolderOpenIcon, LockKeyholeIcon, ZapIcon } from "lucide-react";
 
 import { CategoryCard } from "@/components/category-card";
+import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
 import { Button } from "@/components/ui/button";
 import { categories } from "@/lib/catalog";
 
@@ -24,7 +25,7 @@ export default function Home() {
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
-            <Button nativeButton={false} size="lg" render={<Link href="/view" />}>
+            <Button nativeButton={false} size="lg" render={<IsolationBoundaryLink href="/view" />}>
               选择本地文件
               <ArrowRightIcon data-icon="inline-end" />
             </Button>

@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowRightIcon, CheckIcon, LockKeyholeIcon, ZapIcon } from "lucide-react";
 
 import { FormatGlyph } from "@/components/format-glyph";
+import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
 import { Badge } from "@/components/ui/badge";
 import {
   Breadcrumb,
@@ -52,7 +53,7 @@ export default async function FormatPage({ params }: FormatPageProps) {
                 <h1 className="display-title text-5xl leading-none sm:text-6xl">{format.name}，打开就看。</h1>
                 <p className="max-w-2xl text-xl leading-8 text-muted-foreground">{format.description} 文件不上传，预览过程仅发生在你的浏览器中。</p>
               </div>
-              <Button nativeButton={false} size="lg" render={<Link href="/view" />}>
+              <Button nativeButton={false} size="lg" render={<IsolationBoundaryLink href="/view" />}>
                 选择 .{format.extension} 文件
                 <ArrowRightIcon data-icon="inline-end" />
               </Button>
