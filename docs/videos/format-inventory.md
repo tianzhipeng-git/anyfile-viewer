@@ -7,30 +7,30 @@
 
 ## 1. 纳入原则
 
-本清单收录主要用于保存本地视频节目的容器和其中常见的视频、音频、字幕编码。排序需要同时考虑：
+本清单收录主要用于保存本地视频节目的容器和其中常见的视频、音频、字幕编码。路线图以实际可播放组合数量为主要覆盖指标，不以扩展名数量或高支持等级为指标。排序依次考虑：
 
 1. 用户遇到频率和本地预览价值；
-2. 浏览器原生播放能力；
-3. 能否获得可再分发且能证明编码组合的样例；
-4. 容器解析、索引和 seek 复杂度；
-5. 自定义 demux/decode 的包体积、内存和许可成本；
-6. 色彩、HDR、多轨、字幕和专业元数据的正确性要求。
+2. 能否在目标环境中连续播放画面与应有主音频；
+3. 浏览器原生播放能力，以及非原生 demux/decode 的实现成本；
+4. 能否获得可再分发且能证明编码组合的样例；
+5. 基础 seek、取消、资源释放和大文件安全边界；
+6. 色彩、HDR、多轨、字幕和专业元数据作为后续增强的价值。
 
 ## 2. 常见容器
 
 | 容器家族 | 常见扩展名 | 常见内容 | 首期判断 |
 |---|---|---|---|
 | ISO BMFF / MP4 | `.mp4` `.m4v` | AVC、HEVC、AV1；AAC、Opus 等 | 阶段 1 首选，但必须按 sample entry 和 codec 配置验证 |
-| QuickTime | `.mov` `.qt` | AVC、HEVC、ProRes；AAC、PCM 等 | 与 MP4 结构相关但编码范围更宽，不自动并入首期 |
+| QuickTime | `.mov` `.qt` | AVC、HEVC、ProRes；AAC、PCM 等 | 浏览器原生可播放的明确组合进入阶段 1，其余按阶段 2/3 评估 |
 | WebM | `.webm` | VP8、VP9、AV1；Vorbis、Opus | 阶段 1 首选 |
-| Matroska | `.mkv` `.mk3d` | 多种视频、音频和字幕编码 | 容器范围远大于 WebM，后续独立评估 |
-| Ogg | `.ogv` `.ogg` | Theora；Vorbis、Opus | 价值与目标浏览器能力验证后排期 |
-| AVI | `.avi` | 多种历史 VfW/DirectShow 编码 | 容器简单不代表 codec 可用，后续评估 |
-| MPEG Program Stream | `.mpg` `.mpeg` `.vob` | MPEG-1/2 Video、MPEG audio、AC-3 等 | 后续评估；DVD 语义不纳入 |
-| MPEG Transport Stream | `.ts` `.mts` `.m2ts` | AVC/HEVC、AAC/AC-3 等 | 广播分段、时间戳和损坏恢复复杂，后续评估 |
-| Flash Video | `.flv` `.f4v` | Sorenson、VP6、AVC；AAC/MP3 | 历史格式，近期价值较低 |
-| MXF | `.mxf` | MPEG-2、AVC-Intra、DNx、JPEG 2000 等 | 专业领域插件候选 |
-| 3GPP | `.3gp` `.3g2` | AVC/H.263、AAC/AMR 等 | 移动历史格式，按真实需求排期 |
+| Matroska | `.mkv` `.mk3d` | 多种视频、音频和字幕编码 | 阶段 2 非原生播放重点，按高频 codec 组合逐项实现 |
+| Ogg | `.ogv` `.ogg` | Theora；Vorbis、Opus | 原生可播放组合进入阶段 1，否则按用户价值进入阶段 2 |
+| AVI | `.avi` | 多种历史 VfW/DirectShow 编码 | 阶段 2 候选；按实际高频 codec 子集交付播放 |
+| MPEG Program Stream | `.mpg` `.mpeg` `.vob` | MPEG-1/2 Video、MPEG audio、AC-3 等 | 阶段 2 候选；DVD 菜单与加密语义不纳入 |
+| MPEG Transport Stream | `.ts` `.mts` `.m2ts` | AVC/HEVC、AAC/AC-3 等 | 阶段 2 候选；先选择时间轴可控的代表组合 |
+| Flash Video | `.flv` `.f4v` | Sorenson、VP6、AVC；AAC/MP3 | 阶段 2 低优先级候选，取决于真实需求 |
+| MXF | `.mxf` | MPEG-2、AVC-Intra、DNx、JPEG 2000 等 | 阶段 3 专业播放候选 |
+| 3GPP | `.3gp` `.3g2` | AVC/H.263、AAC/AMR 等 | 原生组合进入阶段 1，其余按需求进入阶段 2 |
 
 `.ogg`、`.mp4` 等容器也可能只有音频轨道。视频插件必须检查是否存在可播放视频轨道；audio-only 文件留给未来音频插件。
 
@@ -39,18 +39,18 @@
 | 家族 | 典型标识 | 主要变量 | 建议阶段 |
 |---|---|---|---|
 | AVC / H.264 | `avc1` `avc3` | profile、level、bit depth、reference frames | 阶段 1 常见组合 |
-| HEVC / H.265 | `hvc1` `hev1` | profile、tier、level、10-bit、系统许可与硬件 | 阶段 2 按环境验证 |
+| HEVC / H.265 | `hvc1` `hev1` | profile、tier、level、10-bit、系统许可与硬件 | 原生组合阶段 1；明确缺口阶段 2 |
 | VP8 | `vp8` | 容器与浏览器路径 | 阶段 1 WebM 基线 |
 | VP9 | `vp09` | profile、bit depth、chroma | 阶段 1/2 WebM 基线 |
-| AV1 | `av01` | profile、level、tier、bit depth、硬件能力 | 阶段 2 按环境验证 |
-| MPEG-1/2 Video | 容器专属标识 | profile、level、interlace | 后续 |
-| MPEG-4 Part 2 | `mp4v` 等 | profile 和历史实现差异 | 后续 |
-| Theora | Ogg codec identification | 浏览器路径 | 后续 |
-| Motion JPEG | `mjpg` 等 | 色彩、帧尺寸、容器 | 后续 |
-| ProRes | `apch` `ap4h` 等 | profile、alpha、10/12-bit、色彩 | 专业视频 spike |
-| DNxHD / DNxHR | VC-3/DNx 标识 | profile、bit depth、MXF/MOV | 专业视频 spike |
-| CineForm | `cfhd` 等 | profile、bit depth | 专业视频 spike |
-| JPEG 2000 video | `mjp2` 等 | profile、色彩、MXF/JP2 family | 专业视频 spike |
+| AV1 | `av01` | profile、level、tier、bit depth、硬件能力 | 原生组合阶段 1；明确缺口阶段 2 |
+| MPEG-1/2 Video | 容器专属标识 | profile、level、interlace | 阶段 2 候选 |
+| MPEG-4 Part 2 | `mp4v` 等 | profile 和历史实现差异 | 阶段 2 候选 |
+| Theora | Ogg codec identification | 浏览器路径 | 阶段 1/2 按实际播放路径 |
+| Motion JPEG | `mjpg` 等 | 色彩、帧尺寸、容器 | 阶段 2 候选 |
+| ProRes | `apch` `ap4h` 等 | profile、alpha、10/12-bit、色彩 | 阶段 3 专业播放 spike |
+| DNxHD / DNxHR | VC-3/DNx 标识 | profile、bit depth、MXF/MOV | 阶段 3 专业播放 spike |
+| CineForm | `cfhd` 等 | profile、bit depth | 阶段 3 专业播放 spike |
+| JPEG 2000 video | `mjp2` 等 | profile、色彩、MXF/JP2 family | 阶段 3 专业播放 spike |
 
 “支持 H.264”不是完整声明。支持矩阵至少要绑定容器、sample entry、profile/level 和固定样例。
 

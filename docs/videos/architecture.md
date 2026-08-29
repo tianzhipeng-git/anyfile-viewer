@@ -8,11 +8,13 @@
 
 视频查看架构需要同时满足：
 
+- 在达到可播放、安全和生命周期底线后，优先扩大可播放的容器与 codec 组合；
 - 常见浏览器原生组合保持简单，优先使用 `<video>` 和 Object URL；
 - 支持声明绑定容器、视频 codec、音频 codec、关键配置和真实环境；
 - probe 只做有界识别与排序，完整插件仍以真实媒体加载结果为准；
 - 大文件不因插件实现而复制完整编码内容或展开全部帧；
-- 音画同步、seek、方向、轨道和色彩缺失如实反映到支持等级；
+- 连续播放、应有主音频、基础 seek 和资源释放属于播放底线；
+- 方向、多轨、字幕、色彩和 HDR 等缺失如实记录，但不默认阻塞下一个格式；
 - 重型 parser、demuxer、Worker、WASM 和 decoder 只在对应插件打开后加载；
 - abort、dispose、DOM 所有权和本地处理遵守现有插件协议。
 
@@ -64,8 +66,8 @@ File
   ▼
 完整插件
   ├── browser-video → Object URL → <video>
-  ├── future container inspector → 分片解析 → 元数据 UI
-  └── future professional video → demux → decoder → 专属播放管线
+  ├── future non-native video → demux → decoder → 播放管线
+  └── future professional video → 领域 demux/decoder → 专业播放管线
 ```
 
 这不是所有视频必须经过的统一流水线。原生路径不应为了统一而自行 demux 或逐帧画到 Canvas。
@@ -75,13 +77,14 @@ File
 | 插件族 | 目标范围 | 主要路径 |
 |---|---|---|
 | browser video | 浏览器可原生播放的 MP4/WebM 等具体组合 | `<video controls>` + Object URL |
-| video metadata | 浏览器不能播放但能安全解析的容器 | 分片读取轨道、时长和 codec 信息 |
-| legacy video | AVI、MPEG-PS/TS 等有明确需求的历史组合 | 容器 parser + 选定 decoder，按组合评估 |
+| non-native video | 浏览器不能原生播放、但用户价值明确的 Matroska、AVI、MPEG-PS/TS 等组合 | 容器 demuxer + 选定 decoder + 最小播放管线 |
 | professional video | MOV/MXF 中的 ProRes、DNx、timecode 等 | 领域 demux/decoder + 专业交互 |
 
 这些边界是控制依赖和产品语义的规划工具，不是现在要创建的公共接口。阶段 1 只需要 `browser-video`。
 
-同一扩展名可以由多个插件竞争。例如未来 `.mov` 文件中浏览器可播放的 AVC 由 browser video 返回较高等级，包含 ProRes 和 timecode 的文件由 professional video 返回更高等级。没有视频轨道的 `.mp4` 或 `.ogg`，视频 probe 应返回 0，留给未来音频插件。
+不规划面向用户的 metadata-only 视频插件。容器和轨道解析只服务于 probe、错误诊断及实际播放管线；不能播放主要内容的候选返回 0，不以“可检查 metadata”占据视频查看器位置。
+
+同一扩展名可以由多个播放插件竞争。例如未来 `.mov` 文件中浏览器可播放的 AVC 由 browser video 返回较高等级，包含 ProRes 的文件由 professional video 返回更高等级。没有视频轨道的 `.mp4` 或 `.ogg`，视频 probe 应返回 0，留给未来音频插件。
 
 ## 6. 阶段 1 原生播放路径
 
@@ -115,7 +118,7 @@ Probe 的目标是安全排序，不是完整媒体分析：
 - 不遍历全部 sample、cluster、fragment 或 packet；
 - 不初始化完整 demuxer、decoder、Worker 或 WASM；
 - 无法在预算内取得 codec 配置时，可以保守降级，不得根据扩展名返回虚假的高等级；
-- 损坏结构返回 0；结构可识别但当前环境不能播放时，browser video 返回 0，未来 metadata 插件可返回 1。
+- 损坏结构返回 0；结构可识别但当前环境不能播放时，browser video 返回 0，让已实现对应组合的非原生播放插件参与路由；没有播放实现时不保留 metadata-only 候选。
 
 阶段 0 必须用真实样例测量后确定 probe 的头部、尾部、box/element 和轨道数量上限。图片现有的 1 MiB 只是参考，不自动成为视频阈值。
 
@@ -145,7 +148,7 @@ Probe 的目标是安全排序，不是完整媒体分析：
 6. 撤销 Object URL；
 7. 移除插件根节点。
 
-准确调用顺序要用真实浏览器验证。opening abort、active abort、切换文件和重复 dispose 必须走同一套清理逻辑。dispose 后不允许继续播放、写 DOM 或报告进度。
+opening abort、active abort、切换文件和重复 dispose 必须走同一套清理逻辑。dispose 后不允许继续播放、写 DOM 或报告进度。
 
 ## 10. 资源、安全与隐私
 
@@ -158,20 +161,21 @@ Probe 的目标是安全排序，不是完整媒体分析：
 - 不支持 DRM 或绕过浏览器/系统的访问控制；
 - 达到自定义实现边界返回 `resource-limit`，损坏文件返回 `invalid-file`，缺少环境能力返回 `unsupported-environment`。
 
-## 11. 自定义播放管线的进入条件
+## 11. 非原生播放管线的进入条件
 
-WebCodecs 或 WASM decoder 只有在原生阶段完成、存在明确高价值缺口后才进入 spike。进入实现前必须同时解决：
+阶段 2 按用户价值逐个选择浏览器不能原生播放的容器与 codec 组合。WebCodecs 或 WASM decoder 不做万能 fallback；每个组合在进入实现前至少要有可行的：
 
 - 容器 demux 与精确时间戳；
 - 视频和音频 decoder 能力与版本；
 - 音频输出和 A/V clock；
 - seek、flush、keyframe 恢复和 end-of-stream；
 - 帧/音频缓冲上限与背压；
-- rotation、pixel aspect ratio、色彩和 HDR；
 - Worker/WASM/GPU 资源清理；
 - 依赖许可、体积、CSP、COOP/COEP 和首包隔离。
 
-只解出第一帧可以形成等级 2 预览，但不能包装成视频播放器或等级 3/4。项目不以 FFmpeg WASM 作为未评审格式的万能 fallback。
+交付底线是主要节目可连续播放、文件应有的主音频可用、基础 seek 可验证，并能完整取消和释放资源。rotation、pixel aspect ratio、色彩、HDR、多轨和字幕的已知缺失可以让组合停留在等级 3，后续按价值增强，不要求先升到等级 4 才扩展下一个格式。
+
+只解出第一帧或只展示 metadata 不属于本路线图的视频交付，不能包装成播放器。项目不以 FFmpeg WASM 作为未评审格式的万能 fallback。
 
 ## 12. 共享能力策略
 
