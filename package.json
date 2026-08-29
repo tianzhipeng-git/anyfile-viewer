@@ -34,6 +34,7 @@
     "@anyfile/modern-raster-viewer": "*",
     "@anyfile/pdf-viewer": "*",
     "@anyfile/powerpoint-viewer": "*",
+    "@anyfile/safe-svg-viewer": "*",
     "@anyfile/sqlite-viewer": "*",
     "@anyfile/viewer-rendering": "*",
     "@anyfile/viewer-protocol": "*",
