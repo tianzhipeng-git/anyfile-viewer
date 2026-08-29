@@ -130,10 +130,11 @@ export class PlaybackSession {
       if (!frame) throw new Error("No frame exists at the requested timestamp.");
       this.#draw(frame);
     }
+    else if (this.#disposed || request !== this.#seekRequest) return;
     this.#elements.playButton.textContent = this.#position >= this.#media.duration
       ? this.#copy.replay
       : this.#copy.play;
-    if (this.#resumeAfterSeek) {
+    if (this.#resumeAfterSeek && this.#position < this.#media.duration) {
       this.#resumeAfterSeek = false;
       await this.play();
     }

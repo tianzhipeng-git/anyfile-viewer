@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   VIEWER_PROTOCOL_VERSION,
   ViewerError,
@@ -15,6 +15,8 @@ import {
   type ViewerPluginRegistration,
 } from "@anyfile/viewer-protocol";
 import { viewerRegistrations } from "./viewer-registrations";
+
+afterEach(() => vi.unstubAllGlobals());
 
 function manifest(
   id: string,
@@ -204,7 +206,6 @@ describe("viewer protocol", () => {
     );
     expect(matroska.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["non-native-video", 3], ["hex-viewer", 1]]);
-    vi.unstubAllGlobals();
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {

@@ -134,7 +134,7 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 
 ### 候选方向
 
-- Matroska 中用户常见的 AVC、HEVC、VP9、AV1 与常见音频组合；
+- Matroska 中尚未交付但需求明确的 codec 组合与容器语义；
 - AVI 中用户常见且 decoder 可控的 codec 子集；
 - MPEG-PS/TS 中 MPEG-1/2 Video、AVC、HEVC 与常见音频的代表组合；
 - 原生路径未覆盖但仍有实际需求的 Ogg Video、3GPP 和 Flash Video 组合；

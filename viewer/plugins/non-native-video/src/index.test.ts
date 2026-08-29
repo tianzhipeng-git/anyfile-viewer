@@ -13,6 +13,7 @@ const media = vi.hoisted(() => ({
   contextResume: vi.fn(),
   sourceStart: vi.fn(),
   drawImage: vi.fn(),
+  getCanvas: vi.fn(),
 }));
 
 vi.mock("mediabunny", () => {
@@ -44,9 +45,7 @@ vi.mock("mediabunny", () => {
       dispose = media.inputDispose;
     },
     CanvasSink: class CanvasSink {
-      getCanvas = async (timestamp: number) => ({
-        canvas: document.createElement("canvas"), timestamp, duration: 1 / 15,
-      });
+      getCanvas = media.getCanvas;
       async *canvases() {
         yield { canvas: document.createElement("canvas"), timestamp: 0, duration: 1 / 15 };
       }
@@ -104,6 +103,9 @@ beforeEach(() => {
   media.height = 90;
   media.duration = 1.2;
   media.videoStart = 0;
+  media.getCanvas.mockImplementation(async (timestamp: number) => ({
+    canvas: document.createElement("canvas"), timestamp, duration: 1 / 15,
+  }));
   vi.stubGlobal("VideoDecoder", class VideoDecoder {});
   vi.stubGlobal("AudioDecoder", class AudioDecoder {});
   vi.stubGlobal("AudioContext", MockAudioContext);
@@ -151,6 +153,24 @@ describe("non-native video viewer protocol lifecycle", () => {
 
     await controller.dispose();
     expect(media.contextClose).toHaveBeenCalledOnce();
+  });
+
+  it("resumes the latest seek when an end seek is immediately superseded", async () => {
+    const context = testContext();
+    const controller = await nonNativeVideoViewer.open(context.context);
+    const playButton = context.container.querySelector<HTMLButtonElement>("button")!;
+    const seek = context.container.querySelector<HTMLInputElement>('input[aria-label="播放位置"]')!;
+
+    playButton.click();
+    await vi.waitFor(() => expect(playButton.textContent).toBe("暂停"));
+    seek.value = String(media.duration);
+    seek.dispatchEvent(new Event("input"));
+    seek.value = "0.6";
+    seek.dispatchEvent(new Event("input"));
+
+    await vi.waitFor(() => expect(playButton.textContent).toBe("暂停"));
+    expect(media.getCanvas).toHaveBeenCalledWith(0.6);
+    await controller.dispose();
   });
 
   it("stops and removes an active player on host abort", async () => {

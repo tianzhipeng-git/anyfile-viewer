@@ -146,6 +146,16 @@ function readTrackEntries(bytes: Uint8Array, start: number, counter: { value: nu
   return undefined;
 }
 
+function hasCues(bytes: Uint8Array, start: number, counter: { value: number }) {
+  let offset = locate(bytes, CUES_ID, start);
+  while (offset >= 0) {
+    const cues = readElement(bytes, offset, bytes.length);
+    if (cues?.id === 0x1c53bb6b && children(bytes, cues, counter)?.length) return true;
+    offset = locate(bytes, CUES_ID, offset + 1);
+  }
+  return false;
+}
+
 export function inspectMatroska(
   head: Uint8Array,
   tail: Uint8Array | undefined,
@@ -174,6 +184,6 @@ export function inspectMatroska(
   if (videoCount < 1) return undefined;
   return {
     tracks,
-    hasSeekIndex: locate(head, CUES_ID, segmentStart) >= 0 || (tail ? locate(tail, CUES_ID) >= 0 : false),
+    hasSeekIndex: hasCues(head, segmentStart, counter) || (tail ? hasCues(tail, 0, counter) : false),
   };
 }

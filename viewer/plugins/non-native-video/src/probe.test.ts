@@ -44,6 +44,20 @@ describe("non-native video Matroska probe", () => {
     expect(await probeNonNativeVideo(context(fixture(name)))).toBe(0);
   });
 
+  it("rejects an unknown-size Matroska file truncated after its SeekHead", async () => {
+    const bytes = new Uint8Array(readFileSync(join(process.cwd(), "examples", "mkv-avc-aac.mkv")));
+    const segmentOffset = bytes.findIndex((value, offset) => value === 0x18
+      && bytes[offset + 1] === 0x53
+      && bytes[offset + 2] === 0x80
+      && bytes[offset + 3] === 0x67);
+    expect(segmentOffset).toBeGreaterThanOrEqual(0);
+    bytes[segmentOffset + 4] = 0x01;
+    bytes.fill(0xff, segmentOffset + 5, segmentOffset + 12);
+
+    const file = new File([bytes.subarray(0, 20_000)], "truncated-stream.mkv");
+    expect(await probeNonNativeVideo(context(file))).toBe(0);
+  });
+
   it("checks only the capabilities required by the file", async () => {
     vi.stubGlobal("AudioDecoder", undefined);
     vi.stubGlobal("AudioContext", undefined);

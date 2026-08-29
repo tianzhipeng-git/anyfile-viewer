@@ -107,15 +107,21 @@ const mediabunnyChunks = archiveChunkContents.filter(({ content }) => content.in
 if (mediabunnyChunks.length === 0) {
   throw new Error("Deferred Mediabunny implementation chunk was not found");
 }
+const mediabunnyPackage = JSON.parse(await readFile(join(
+  projectRoot,
+  "viewer/plugins/non-native-video/node_modules/mediabunny/package.json",
+), "utf8"));
 const mediabunnyLicense = await readFile(join(
   projectRoot,
-  "public/vendor/licenses/mediabunny/1.55.3/MPL-2.0.txt",
+  "public/vendor/licenses/mediabunny",
+  mediabunnyPackage.version,
+  "MPL-2.0.txt",
 ), "utf8").catch(() => "");
 if (!mediabunnyLicense.includes("Mozilla Public License Version 2.0")) {
   throw new Error("Mediabunny MPL-2.0 license text is missing");
 }
 console.log(
-  `Non-native video: lightweight probe isolated; Mediabunny deferred across ${mediabunnyChunks.length} chunk(s); MPL-2.0 retained`,
+  `Non-native video: lightweight probe isolated; Mediabunny ${mediabunnyPackage.version} deferred across ${mediabunnyChunks.length} chunk(s); MPL-2.0 retained`,
 );
 const archiveGzipBytes = archiveChunks.reduce(
   (total, { content }) => total + gzipSync(content, { level: 9 }).byteLength,
