@@ -249,7 +249,7 @@ HEVC 还存在独立于开源许可证的标准必要专利问题。Access Advan
 - 更新 catalog、README、roadmap、加载部署文档和支持矩阵；
 - 记录实际资产体积、浏览器矩阵、资源阈值和已知缺失。
 
-完成标准：`npm test`、`npm run lint`、`npm run build` 通过，真实浏览器与真实设备语料验收完成，合规材料随分发产物可获取。
+完成标准：`pnpm test`、`pnpm lint`、`pnpm build` 通过，真实浏览器与真实设备语料验收完成，合规材料随分发产物可获取。
 
 ## 12. 测试矩阵
 
@@ -303,4 +303,4 @@ HEVC 还存在独立于开源许可证的标准必要专利问题。Access Advan
 - 输出契约：应用容器变换后的 RGBA8、straight alpha、transferable `ArrayBuffer`；NCLX/无 profile 转 sRGB，ICC 明示未应用，>8-bit 明示 SDR 预览。
 - 发布阈值：HEIF 原生路径沿用 256 MiB 通用输入上限，WASM 回退输入 128 MiB、输出 64 Mi 像素、256 items、4096 tiles、384 MiB libheif 总内存预算；Worker 终止负责取消和资源回收。
 - 自动验收：probe 的真实样例/损坏结构、fallback 生命周期与 DOM 所有权测试；本地浏览器 smoke 在 Worker 中把固定 HEIC 解码为 96×64、24,576 字节 RGBA。
-- 产物体积：JavaScript 33,783 字节；WASM 1,166,264 字节。普通 `npm` 构建只校验并复制审核产物，不编译 native 依赖。
+- 产物体积：JavaScript 33,783 字节；WASM 1,166,264 字节。普通 `pnpm` 构建只校验并复制审核产物，不编译 native 依赖。

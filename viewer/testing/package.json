@@ -7,6 +7,6 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@anyfile/viewer-protocol": "*"
+    "@anyfile/viewer-protocol": "workspace:*"
   }
 }

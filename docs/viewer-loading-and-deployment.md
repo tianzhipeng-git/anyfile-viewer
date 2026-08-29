@@ -70,11 +70,11 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 2. 在注册表中静态导入 manifest，通过 `import()` 动态导入 probe 和完整实现。
 3. 不需要精确路由的插件省略 probe，以默认支持等级 1 参与排序。
 4. 注册顺序只作为同支持等级候选的稳定 tie-break；通用兜底插件仍放在末尾。
-5. 运行 `npm run build`，确认首包体积检查通过。
+5. 运行 `pnpm build`，确认首包体积检查通过。
 
 ### PDF.js 支持资源
 
-PDF 插件实现保持动态加载。`npm run dev` 和 `npm run build` 会先运行
+PDF 插件实现保持动态加载。`pnpm dev` 和 `pnpm build` 会先运行
 `scripts/prepare-pdfjs-assets.mjs`，把已锁定版本 `pdfjs-dist` 的以下官方资源复制到
 `public/vendor/pdfjs/<version>/`：
 
@@ -174,23 +174,23 @@ worker-src 'self' blob:
 
 查看器的关键运行时依赖在各插件 `package.json` 中使用精确版本.
 
-`package-lock.json` 使用 lockfile v3，锁定其余直接依赖和全部传递依赖的实际版本、下载地址与完整性哈希。根项目中的 `^` 版本不会在 `npm ci` 时漂移。
+`pnpm-lock.yaml` 锁定其余直接依赖和全部传递依赖的实际版本、下载地址与完整性哈希。根项目中的 `^` 版本不会在 `pnpm install --frozen-lockfile` 时漂移。
 
-内部 `@anyfile/*` 依赖使用 `*`，但它们是 npm workspace 链接，解析到当前仓库目录，不会从 registry 获取任意版本。
+内部 `@anyfile/*` 依赖使用 `workspace:*`，只能解析到当前 pnpm workspace 中的包，不会从 registry 获取任意版本。
 
 生产环境和 CI 必须使用：
 
 ```bash
-npm ci
-npm test
-npm run build
+pnpm install --frozen-lockfile
+pnpm test
+pnpm build
 ```
 
-不要删除或忽略 `package-lock.json`。升级关键依赖时应明确指定目标版本，提交对应 lockfile，并重新验证插件测试、CDN URL、本地回退和生产构建。
+不要删除或忽略 `pnpm-lock.yaml`。升级关键依赖时应明确指定目标版本，提交对应 lockfile，并重新验证插件测试、CDN URL、本地回退和生产构建。
 
 ### 源码构建型依赖
 
-当没有满足安全、许可、CSP 或功能裁剪要求的上游包，项目可以在有明确方案评审后自行构建第三方依赖。此类依赖不进入普通 npm 构建时的 native 编译流程，而采用：
+当没有满足安全、许可、CSP 或功能裁剪要求的上游包，项目可以在有明确方案评审后自行构建第三方依赖。此类依赖不进入普通 pnpm 构建时的 native 编译流程，而采用：
 
 ```text
 tools/<dependency>-build/                 可重复构建配方
@@ -204,7 +204,7 @@ public/vendor/<dependency>/<version>/     不提交的部署资源
 
 ## 5. 首包体积门禁
 
-`npm run build` 会在 Next.js 构建后执行 `scripts/check-view-bundle.mjs`：
+`pnpm build` 会在 Next.js 构建后执行 `scripts/check-view-bundle.mjs`：
 
 - 从 `/view` 的预渲染 HTML 读取真实初始脚本列表。
 - 分别计算传输时的 gzip 体积。
@@ -257,14 +257,14 @@ JXL 的打包 Worker 和 WASM 位于 `/_next/static/:path*`，该路径同样返
 
 ### HEIF 的同源源码构建产物
 
-`npm run prepare:heif` 校验 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json` 中的文件大小和 SHA-256，再把 decoder、WASM、许可证与对应源码说明复制到 `/vendor/libheif/1.23.2-anyfile.1/`。运行时 URL 与产物版本由构建门禁交叉校验。
+`pnpm prepare:heif` 校验 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json` 中的文件大小和 SHA-256，再把 decoder、WASM、许可证与对应源码说明复制到 `/vendor/libheif/1.23.2-anyfile.1/`。运行时 URL 与产物版本由构建门禁交叉校验。
 
 HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实际解码失败后，独立 Worker 才动态导入同源 glue 并加载 WASM。`/vendor/libheif/:path*` 返回与其他本地 Worker/WASM 一致的 COEP/CORP 头；CSP 只需允许同源 Worker 和 WebAssembly，不新增 CDN 来源。
 
 ## 6. 发布前检查清单
 
-- 使用 `npm ci` 从 lockfile 安装。
-- `npm test`、`npm run lint`、`npm run build` 全部通过。
+- 使用 `pnpm install --frozen-lockfile` 从 lockfile 安装。
+- `pnpm test`、`pnpm lint`、`pnpm build` 全部通过。
 - `/view` 仍能完成 SSG 构建；若改为 SSR，服务端日志中没有 CDN、Worker 或 WASM 初始化。
 - 确认当前部署不是把“静态预渲染”误当成 `output: "export"`；如果使用静态导出，逐项验证部署服务器提供本文要求的响应头。
 - 从非隔离首页通过真实入口完整导航到 `/view`，确认 `crossOriginIsolated === true`；再完整导航离开，确认普通页面不继承查看环境。

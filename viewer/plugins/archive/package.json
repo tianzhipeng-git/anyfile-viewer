@@ -11,11 +11,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@anyfile/viewer-protocol": "*",
+    "@anyfile/viewer-protocol": "workspace:*",
     "@zip.js/zip.js": "2.8.60"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "*",
+    "@anyfile/viewer-test": "workspace:*",
     "fflate": "0.8.3",
     "happy-dom": "20.11.6",
     "vitest": "4.1.11"

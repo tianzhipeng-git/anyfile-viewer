@@ -12,12 +12,12 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@anyfile/viewer-protocol": "*",
-    "@anyfile/viewer-ui": "*",
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-ui": "workspace:*",
     "sql.js": "1.14.2"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "*",
+    "@anyfile/viewer-test": "workspace:*",
     "@types/sql.js": "1.4.11",
     "happy-dom": "20.11.6",
     "vitest": "4.1.11"

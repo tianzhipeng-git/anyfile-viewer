@@ -1,0 +1,6 @@
+packages:
+  - viewer/protocol
+  - viewer/rendering
+  - viewer/testing
+  - viewer/ui
+  - viewer/plugins/*

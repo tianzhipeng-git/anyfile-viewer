@@ -11,12 +11,12 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@anyfile/viewer-protocol": "*",
-    "@anyfile/viewer-ui": "*",
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-ui": "workspace:*",
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "*",
+    "@anyfile/viewer-test": "workspace:*",
     "fflate": "0.8.3",
     "happy-dom": "20.11.6",
     "vitest": "4.1.11"

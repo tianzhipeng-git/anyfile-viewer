@@ -12,7 +12,7 @@
 运行测试：
 
 ```bash
-npm test --workspace @anyfile/browser-video-viewer
+pnpm --filter @anyfile/browser-video-viewer test
 ```
 
 固定样例及再分发依据见 [`examples/README.md`](examples/README.md)。阶段 0/1 的跨浏览器证据和未支持范围仍以 `docs/videos/support-matrix.md` 为准。

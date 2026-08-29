@@ -12,11 +12,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@anyfile/viewer-rendering": "*",
-    "@anyfile/viewer-protocol": "*"
+    "@anyfile/viewer-rendering": "workspace:*",
+    "@anyfile/viewer-protocol": "workspace:*"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "*",
+    "@anyfile/viewer-test": "workspace:*",
     "happy-dom": "20.11.6",
     "vitest": "4.1.11"
   }

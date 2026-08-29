@@ -124,7 +124,7 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 - opening abort、active abort、重复 dispose、媒体停止及 DOM 所有权；
 - 原生路径的 Object URL 撤销；自定义路径的 Worker、WASM、AudioContext、帧缓存和 GPU 清理；
 - mock DOM 测试只验证生命周期，不冒充真实 codec 播放验收；
-- `npm test`、`npm run lint`、`npm run build` 通过；
+- `pnpm test`、`pnpm lint`、`pnpm build` 通过；
 - `/view` 初始 bundle 不包含视频实现、probe parser、demuxer 或 decoder；
 - probe chunk 不静态带入完整播放器或重型依赖。
 

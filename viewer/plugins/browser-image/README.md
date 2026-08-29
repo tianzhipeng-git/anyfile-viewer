@@ -7,7 +7,7 @@
 运行测试：
 
 ```bash
-npm test --workspace @anyfile/browser-image-viewer
+pnpm --filter @anyfile/browser-image-viewer test
 ```
 
 ## 实现原理

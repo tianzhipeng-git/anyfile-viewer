@@ -12,12 +12,12 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@anyfile/viewer-protocol": "*",
-    "@anyfile/viewer-rendering": "*",
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-rendering": "workspace:*",
     "geotiff": "3.0.5"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "*",
+    "@anyfile/viewer-test": "workspace:*",
     "happy-dom": "20.11.6",
     "vitest": "4.1.11"
   }

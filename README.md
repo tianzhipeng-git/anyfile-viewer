@@ -12,8 +12,8 @@
 ## 开发
 
 ```bash
-npm install
-npm run dev
+pnpm install
+pnpm dev
 ```
 
 打开 [http://localhost:3000](http://localhost:3000)。
@@ -44,18 +44,18 @@ HEVC HEIF/HEIC 会先尝试浏览器原生解码，失败后在独立 Worker 中
 ## 验证
 
 ```bash
-npm test
-npm run lint
-npm run build
+pnpm test
+pnpm lint
+pnpm build
 ```
 
-`npm run build` 还会检查 `/view` 的初始 JavaScript 体积，并阻止查看器实现意外进入首包。
+`pnpm build` 还会检查 `/view` 的初始 JavaScript 体积，并阻止查看器实现意外进入首包。
 
 插件也可以独立测试：
 
 ```bash
-npm test -w @anyfile/pdf-viewer
-npm test -w @anyfile/word-viewer
-npm test -w @anyfile/excel-viewer
-npm test -w @anyfile/powerpoint-viewer
+pnpm --filter @anyfile/pdf-viewer test
+pnpm --filter @anyfile/word-viewer test
+pnpm --filter @anyfile/excel-viewer test
+pnpm --filter @anyfile/powerpoint-viewer test
 ```

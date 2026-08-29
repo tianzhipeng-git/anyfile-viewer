@@ -2,7 +2,7 @@
 
 - 状态：生效
 - 适用范围：查看器使用的 C/C++/Rust 等源码构建依赖，以及由此产生的 WASM、Worker、JavaScript glue 或数据资产
-- 不适用：能够直接使用且满足要求的普通 npm 依赖
+- 不适用：能够直接使用且满足要求的普通 registry 依赖
 
 ## 1. 使用原则
 
@@ -66,14 +66,14 @@ public/vendor/<dependency>/<artifact-version>/
 满足要求的上游 npm 包继续使用现有流程：
 
 ```text
-package-lock.json 锁定的 node_modules 包
+pnpm-lock.yaml 锁定的 node_modules 包
         ↓ prepare
 public/vendor/<dependency>/<version>/
 ```
 
 例如当前 PDF.js 与 LibRaw 资产属于这种模式，不需要复制到 `third_party/`。
 
-只有项目自己生成、且无法由 `npm ci` 中的受信任上游包恢复的二进制，才把审核后的产物放入 `third_party/`。不要同时把同一份产物既作为 npm 依赖又提交到 `third_party/`。
+只有项目自己生成、且无法由 `pnpm install --frozen-lockfile` 中的受信任上游包恢复的二进制，才把审核后的产物放入 `third_party/`。不要同时把同一份产物既作为 registry 依赖又提交到 `third_party/`。
 
 ## 4. 版本命名与锁定
 
@@ -106,7 +106,7 @@ public/vendor/<dependency>/<version>/
 
 ## 5. 构建与应用发布分离
 
-普通 `npm run dev`、`npm test` 和 `npm run build` 不编译 C/C++/Rust。它们只执行轻量 prepare 和完整性检查，保证应用构建快速、稳定且不依赖 native toolchain 或临时外网下载。
+普通 `pnpm dev`、`pnpm test` 和 `pnpm build` 不编译 C/C++/Rust。它们只执行轻量 prepare 和完整性检查，保证应用构建快速、稳定且不依赖 native toolchain 或临时外网下载。
 
 源码构建只在以下情况运行：
 
@@ -126,7 +126,7 @@ public/vendor/<dependency>/<version>/
 5. 运行 decoder/renderer 的真实样例、损坏样例、资源上限和安全回归测试；
 6. 记录 raw/gzip 体积、初始化时间和峰值内存变化；
 7. 更新许可证、第三方声明、运行时版本 URL、prepare 与 bundle 检查；
-8. 运行 `npm test`、`npm run lint` 和 `npm run build`；
+8. 运行 `pnpm test`、`pnpm lint` 和 `pnpm build`；
 9. 合并后继续监控该精确上游版本的安全公告。
 
 安全升级不能只替换 `.wasm`。adapter API、JavaScript glue、许可证、build info 和真实文件行为都必须作为同一版本验收。

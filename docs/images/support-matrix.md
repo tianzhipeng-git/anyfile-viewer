@@ -88,7 +88,7 @@
 - 单页最多 64 Mi 像素，TIFF 最多 1024 页，Canvas backing store 单边最多 8192 物理像素。
 - Worker 终止承担 opening/active abort；成功结果的 RGBA8 非预乘缓冲通过 transferable 返回；ImageBitmap、ResizeObserver、animation frame、事件与 Worker 由幂等 `dispose()` 释放。
 - 自动测试覆盖真实样例解码、probe 0/3/4、扩展名候选、损坏/截断、极端尺寸、alpha、orientation、opening/active abort、重复 dispose 与 DOM 所有权。
-- `npm test`、`npm run lint`、`npm run build` 通过；`/view` 初始 JavaScript 为 200.8 KiB gzip，未包含 Canvas UI 或 TIFF decoder 标记。完整插件入口约 5.6 KiB gzip，Worker 核心约 14.8 KiB gzip，压缩 decoder 继续按需拆分。
+- `pnpm test`、`pnpm lint`、`pnpm build` 通过；`/view` 初始 JavaScript 为 200.8 KiB gzip，未包含 Canvas UI 或 TIFF decoder 标记。完整插件入口约 5.6 KiB gzip，Worker 核心约 14.8 KiB gzip，压缩 decoder 继续按需拆分。
 - 真实浏览器手工验收（2026-08-29）：`viewer/plugins/general-raster/examples/` 中全部正常、损坏和截断样例均通过；已覆盖 TGA raw/RLE、Netpbm P1–P7，以及 TIFF strip/tile、多页、8/16 bit、alpha、orientation 和 None/LZW/Deflate/PackBits/JPEG 压缩。
 
 ## 7. 阶段 3 验证证据

@@ -238,6 +238,6 @@ await renderDocument(bytes, documentHost, generatedStyles)
 - 损坏文件、空文件和超过资源上限的文件返回正确错误码。
 - 插件不会修改测试容器外的 DOM。
 - 使用真实格式样例完成一次渲染冒烟测试，不能只 mock 第三方渲染函数。
-- `npm test`、`npm run lint` 和 `npm run build` 全部通过。
+- `pnpm test`、`pnpm lint` 和 `pnpm build` 全部通过。
 
 滚动相关改动还应使用至少一个内容明显超过一屏的真实文件，在桌面窄窗口和矮窗口各手动验证一次。DOM 测试环境通常不会计算真实的 `scrollHeight`，不能用单元测试替代这项检查。
