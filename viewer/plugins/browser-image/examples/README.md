@@ -1,6 +1,6 @@
 # 测试样例清单
 
-样例均由 `node viewer/plugins/image/scripts/generate-examples.mjs` 通过 ImageMagick 和 libavif 的 `avifenc` 从纯色渐变生成，不含第三方版权素材。
+样例均由 `node viewer/plugins/browser-image/scripts/generate-examples.mjs` 通过 ImageMagick 和 libavif 的 `avifenc` 从纯色渐变生成，不含第三方版权素材。
 
 | 格式 | 正常样例 | 异常样例 |
 |---|---|---|

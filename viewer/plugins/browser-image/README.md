@@ -1,8 +1,14 @@
-# 浏览器原生图片查看器
+# Browser image viewer
 
 ## 基本介绍
 
 支持 JPEG、PNG/APNG、GIF、WebP、AVIF、BMP/DIB 和 ICO/CUR，并提供缩放、旋转、适应窗口及动画查看。
+
+运行测试：
+
+```bash
+npm test --workspace @anyfile/browser-image-viewer
+```
 
 ## 实现原理
 

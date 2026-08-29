@@ -25,7 +25,7 @@ function testContext(file: File) {
 }
 
 beforeEach(() => {
-  vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:image-viewer");
+  vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:browser-image-viewer");
   vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
   vi.spyOn(HTMLImageElement.prototype, "decode").mockResolvedValue();
   vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(96);
@@ -53,8 +53,8 @@ describe("browser image viewer protocol compliance", () => {
 
     const controller = await browserImageViewer.open(context.context);
 
-    const image = context.container.querySelector<HTMLImageElement>(".anyfile-image-viewer__image");
-    expect(image?.src).toBe("blob:image-viewer");
+    const image = context.container.querySelector<HTMLImageElement>(".anyfile-browser-image-viewer__image");
+    expect(image?.src).toBe("blob:browser-image-viewer");
     expect(context.container.textContent).toContain("GIF · 96 × 64 · 2 帧");
     expect(context.progress.at(-1)?.stage).toBe("ready");
     expect(context.outside.dataset.viewerTestOutside).toBe("untouched");

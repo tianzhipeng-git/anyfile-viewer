@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 const pluginRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const examples = join(pluginRoot, "examples");
-const temporary = mkdtempSync(join(tmpdir(), "anyfile-image-examples-"));
+const temporary = mkdtempSync(join(tmpdir(), "anyfile-browser-image-examples-"));
 
 function magick(...args) {
   execFileSync("magick", args, { stdio: "inherit" });

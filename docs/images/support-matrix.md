@@ -74,12 +74,12 @@
 ## 5. 阶段 1 验证证据
 
 - 自生成正常样例：baseline JPEG、RGBA PNG、循环 APNG、循环 GIF、有损/无损 alpha/循环 WebP、单帧/循环 AVIF、BMP v3、ICO 和 CUR。
-- 异常样例：每个格式族至少包含损坏或截断文件；样例清单位于 `viewer/plugins/image/examples/README.md`。
+- 异常样例：每个格式族至少包含损坏或截断文件；样例清单位于 `viewer/plugins/browser-image/examples/README.md`。
 - 自动测试：格式容器解析、probe 0/4、协议 Manifest、完整打开、opening abort、active abort、重复 dispose、Object URL 释放、容器 DOM 所有权和中英文错误。
-- 部署检查：`browser-image` manifest 静态加载；probe 与完整插件使用不同动态入口；`anyfile-image-viewer__viewport` 不得出现在 `/view` 初始 bundle。
+- 部署检查：`browser-image` manifest 静态加载；probe 与完整插件使用不同动态入口；`anyfile-browser-image-viewer__viewport` 不得出现在 `/view` 初始 bundle。
 - 真实浏览器 smoke（2026-08-28，Chromium）：六种样例均经完整插件入口解码为 96×64；APNG/GIF/WebP 截图帧发生变化；缩放、旋转、连续切换、360×640 窄窗口与 900×320 矮窗口通过。原生 `<img>` 不创建需要单独同步 DPR 的 Canvas 像素面。
 - 扩展格式 smoke（2026-08-28，Chromium）：BMP 解码为 96×64，ICO/CUR 解码为 96×96，2 帧 AVIF sequence 解码为 96×64；其他目标浏览器仍以运行时 decode 结果为准，因此维持等级 3。
-- 真实浏览器手工验收（2026-08-29）：`viewer/plugins/image/examples/` 中全部正常、损坏和截断样例均通过。
+- 真实浏览器手工验收（2026-08-29）：`viewer/plugins/browser-image/examples/` 中全部正常、损坏和截断样例均通过。
 
 ## 6. 阶段 2 读取、资源与验证证据
 
