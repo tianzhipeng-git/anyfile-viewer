@@ -1,4 +1,4 @@
-export type RawFormat = "DNG" | "CR2" | "CR3" | "CRW" | "NEF" | "ARW" | "RAF" | "RWL" | "RAW" | "RW2";
+export type RawFormat = "DNG" | "CR2" | "CR3" | "CRW" | "NEF" | "NRW" | "ARW" | "SR2" | "SRF" | "RAF" | "ORF" | "PEF" | "RWL" | "RAW" | "RW2";
 export interface RawInspection { readonly format: RawFormat; readonly make?: string; readonly model?: string; readonly hasPreview: boolean }
 
 const ascii = (bytes: Uint8Array, offset: number, length: number) => String.fromCharCode(...bytes.subarray(offset, offset + length));
@@ -7,14 +7,15 @@ const MAX_TIFF_CAMERA_TEXT_BYTES = 1024;
 
 function extension(fileName: string) { return fileName.slice(fileName.lastIndexOf(".")).toLowerCase(); }
 
-function inspectTiff(bytes: Uint8Array, acceptedMagic = 42) {
+function inspectTiff(bytes: Uint8Array, acceptedMagic: number | readonly number[] = 42) {
   if (bytes.length < 16) return undefined;
   const little = ascii(bytes, 0, 2) === "II";
   if (!little && ascii(bytes, 0, 2) !== "MM") return undefined;
   const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
   const read16 = (offset: number) => view.getUint16(offset, little);
   const read32 = (offset: number) => view.getUint32(offset, little);
-  if (read16(2) !== acceptedMagic) return undefined;
+  const magic = read16(2);
+  if (Array.isArray(acceptedMagic) ? !acceptedMagic.includes(magic) : magic !== acceptedMagic) return undefined;
   const directory = read32(4);
   if (directory + 2 > bytes.length) return undefined;
   const count = read16(directory);
@@ -55,6 +56,10 @@ export function inspectRawHeader(bytes: Uint8Array, fileName: string): RawInspec
     const format = ext === ".rwl" ? "RWL" : ext === ".rw2" ? "RW2" : "RAW";
     return { format, ...panasonic };
   }
+  if (ext === ".orf") {
+    const olympus = inspectTiff(bytes, [0x4f52, 0x5352]);
+    return olympus ? { format: "ORF", ...olympus } : undefined;
+  }
   const tiff = inspectTiff(bytes); if (!tiff) return undefined;
   if (ext === ".cr2") {
     if (bytes.length < 12 || ascii(bytes, 8, 2) !== "CR" || bytes[10] !== 2) return undefined;
@@ -62,15 +67,10 @@ export function inspectRawHeader(bytes: Uint8Array, fileName: string): RawInspec
   }
   if (ext === ".dng") return tiff.dng ? { format: "DNG", ...tiff } : undefined;
   if (ext === ".nef") return { format: "NEF", ...tiff };
+  if (ext === ".nrw") return { format: "NRW", ...tiff };
   if (ext === ".arw") return { format: "ARW", ...tiff };
+  if (ext === ".sr2") return { format: "SR2", ...tiff };
+  if (ext === ".srf") return { format: "SRF", ...tiff };
+  if (ext === ".pef") return { format: "PEF", ...tiff };
   return undefined;
-}
-
-const VERIFIED_RAW_MODELS = new Set<string>([
-  // Add only models backed by committed, redistributable real-camera fixtures.
-]);
-
-export function isVerifiedRawModel(inspection: RawInspection) {
-  if (!inspection.make || !inspection.model) return false;
-  return VERIFIED_RAW_MODELS.has(`${inspection.make.trim().toLowerCase()}\0${inspection.model.trim().toLowerCase()}`);
 }

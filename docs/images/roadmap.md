@@ -8,7 +8,7 @@
 格式优先级不只按“浏览器原生、摄影、设计、科学、医学”分类，还要同时评价：
 
 1. 用户遇到频率和预览价值；
-2. 能否获得合法、可再分发的测试样例；
+2. 补齐合法测试材料和验证记录的成本；样例可以自生成、人工取得或只用于本地手工验收，暂缺可再分发样例不阻止实现和诚实声明待验证支持；
 3. 是否有维护中的浏览器实现或可锁定依赖；
 4. 包体积、WASM、Worker 和静态资产成本；
 5. 大文件、解压炸弹和主动内容风险；
@@ -85,7 +85,7 @@ SVG 不自动包含在此阶段，因为它有独立的主动内容和外部资�
 
 ### 实施结果（2026-08-28）
 
-- 新增独立 `general-raster` 插件，覆盖 TGA、P1–P7 Netpbm 和已验证 classic TIFF 子集，并让相同底层结构的 TGA 别名、BigTIFF、pyramidal TIFF、GeoTIFF 与 OME-TIFF 进入候选；不完整的领域语义通过动态 probe 降级，而不是从 Manifest 排除。BigTIFF 因缺少可再分发真实样例暂按等级 3。
+- 新增独立 `general-raster` 插件，覆盖 TGA、P1–P7 Netpbm 和已验证 classic TIFF 子集，并让相同底层结构的 TGA 别名、BigTIFF、pyramidal TIFF、GeoTIFF 与 OME-TIFF 进入候选；不完整的领域语义通过动态 probe 降级，而不是从 Manifest 排除。BigTIFF 的 64-bit IFD 路径已实现，验证状态与运行时能力等级分开记录。
 - TGA/Netpbm 使用插件内 decoder；TIFF 使用锁定的 `geotiff@3.0.5`（MIT）。完整 decoder、Worker、Canvas UI 与 TIFF 依赖均不进入 manifest 或 probe chunk。
 - 解码在专用 Worker 中执行，宿主取消时终止 Worker；RGBA8 非预乘缓冲通过 transferable 返回主线程。
 - Canvas 视口实现 DPR、ResizeObserver、`requestAnimationFrame` 合并重绘、fit/actual、缩放、平移、旋转和幂等资源释放；第一款 Canvas 插件仍保留局部实现，未提前提取公共包。
@@ -126,11 +126,11 @@ SVG 不自动包含在此阶段，因为它有独立的主动内容和外部资�
 
 - 新增 `modern-raster` 插件。JPEG XL 先使用原生 `ImageDecoder`，否则在专用 Worker 中按需加载 `jxl-oxide-wasm@0.12.6`；固定生成样例覆盖有损、无损 alpha、两帧动画、损坏和截断文件，真实 WASM 测试验证 96×64 两帧循环动画。
 - HEVC HEIF/HEIC 使用有界 BMFF probe，原生实际解码失败后按需加载独立的同源 `libheif 1.23.2 + libde265 1.1.1` Worker/WASM；当前只显示 primary image，因此动态等级为 3。
-- 新增 `camera-raw` 插件，注册 DNG、CR2、CR3、NEF、ARW 和 RAF。轻量 probe 校验 TIFF、Canon CR2/CR3 与 RAF 容器；未被真实语料验证的相机型号只返回等级 2。
+- 新增 `camera-raw` 插件，注册 DNG、CR2、CR3、CRW、NEF、NRW、ARW、SR2、SRF、RAF、ORF、PEF、RWL、RAW 和 RW2。轻量 probe 校验 TIFF、Olympus ORF、Canon CR2/CR3、Canon CIFF、Panasonic RAW 与 RAF 容器；当前提供内嵌预览和基础显影，因此对识别出的文件返回等级 2，型号验证状态单独记录。
 - RAW 完整插件锁定 `libraw-wasm@1.6.0`，提取内嵌预览后在后台执行相机白平衡、相机矩阵、8-bit sRGB 和文件方向的基础显影，并允许在内嵌预览与显影结果之间切换。输入上限为 256 MiB，输出上限为 64 Mi 像素。
 - `/view` 使用 COOP/COEP 响应头满足 pthread WASM；环境不是 `crossOriginIsolated` 时返回 `unsupported-environment`。JXL、RAW Worker/WASM 均保持在插件动态入口之后。
 - `@anyfile/viewer-rendering` 已从两款既有图片插件的真实重复中提取 viewport、输入、Canvas DPR surface、帧调度和资源清理；没有同时引入 Lit、d3-zoom 或 scene model。
-- 尚未取得六个 RAW 扩展各两个具有明确再分发依据的真实相机样例，因此验证型号清单保持为空，阶段 3 不声明任何 RAW 文件达到等级 3。完成该语料门禁后才能把对应型号加入清单并完成阶段验收。
+- 当前还没有按型号维护的自动回归语料；已有桌面真实文件的手工验收记录，因此 RAW 以等级 2 交付。后续可以通过可再分发 fixture、人工补充的真实文件或可审计的手工验收记录扩大型号覆盖并更新验证状态。样例是否能够提交到仓库不作为格式进入 Manifest 或声明待验证支持的门禁；支持等级应由实际可提供的查看能力和已知缺失决定。
 
 HEVC HEIF/HEIC 的跨浏览器本地解码回退已按 [HEIC / HEIF 跨浏览器支持方案](heic-heif-support-plan.md) 实施；审核产物、对应源码/替换说明和许可证材料随分发提供。
 
@@ -156,7 +156,7 @@ RAW 至少拆为以下递进能力，不把序号直接当作协议支持等级�
 
 - 选定 decoder 有明确维护状态；
 - WASM/Worker 资产可以在现有部署中稳定加载；
-- 对目标相机和子格式有可再分发样例；
+- 已规划目标相机和子格式的验证方式；可再分发样例优先，也允许人工取得的真实文件和有记录的本地验收；
 - 峰值内存和打开时间可测量；
 - 色彩准确度的验收范围已经定义。
 
@@ -195,7 +195,7 @@ HDF5、NetCDF 不因为可以保存数组就自动归入图片查看器。它们
 
 ### 进入条件
 
-- 有对应领域的真实用例和样例；
+- 有对应领域的真实用例，并已规划样例、合成数据或手工验收方式；
 - 确定采用领域库还是自建 adapter；
 - 明确单文件与工作区序列的关系；
 - 敏感元数据、隐私和本地处理边界经过评审；
@@ -221,10 +221,10 @@ HDF5、NetCDF 不因为可以保存数组就自动归入图片查看器。它们
 出现以下任一情况时，不通过堆叠 workaround 强行发布：
 
 - decoder 无法可靠取消或释放资源；
-- 没有足够真实样例验证声明范围；
+- 实测表明 decoder 无法稳定覆盖拟声明范围，且无法通过缩小范围、动态降级或准确错误来诚实交付；
 - 格式只能通过上传到第三方服务处理；
 - 峰值内存无法受控；
 - 依赖进入首包或污染无关插件且无法隔离；
 - 只能展示可能误导用户的错误颜色、方向或领域数据。
 
-此时把条目标记为 `blocked` 或降低支持等级，并记录具体原因。
+此时把条目标记为 `blocked` 或降低支持等级，并记录具体原因。仅缺少固定或可再分发样例时保持 `implemented` / 待验证，继续补充验证材料，不得据此把已经实现且能够准确识别、打开的格式写成不支持或移出 Manifest。

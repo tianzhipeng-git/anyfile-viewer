@@ -22,7 +22,7 @@
 
 [`browser-video/examples/README.md`](../../viewer/plugins/browser-video/examples/README.md) 记录 13 个正常/对照样例的生成来源、再分发依据和精确参数。MP4、WebM、QuickTime、Ogg 和 3GPP 每个容器族均有损坏、截断和伪装扩展名样例；MP4 与 WebM 另有 video-only 和 audio-only 对照。
 
-所有媒体由合成画面和合成音频生成，不依赖网络下载。阶段 1 每次扩大声明范围时，必须先在该目录增加参数明确的固定样例。
+所有媒体由合成画面和合成音频生成，不依赖网络下载。阶段 1 每次把新增组合标记为 `verified` 前，必须在该目录增加参数明确的固定样例；实现可以先以 `implemented` / 待验证状态进入声明范围，缺少固定样例本身不等于不支持。
 
 ## 3. Probe 测量与预算
 

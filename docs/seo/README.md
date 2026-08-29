@@ -55,7 +55,7 @@
 
 - 「支持 100+ 格式」——与竞品同质化，无法传达楔子
 - 把 metadata-only、首帧预览或 probe 能力包装成「完整支持」
-- 在 SEO 文案中承诺 roadmap 尚未 verified 的组合
+- 把 `planned` / `spike` 写成已经交付；`implemented` 格式可以如实发布，但必须同时标明待验证范围和已知限制
 
 ## 5. 页面与站点结构
 
@@ -104,4 +104,3 @@
 - [ ] 上线前生成全量格式 sitemap
 - [ ] 为 catalog 已有但缺着陆页的格式补 `/formats/[extension]`（含 ZIP、RAR 等 archive 族）
 - [ ] 配置 Search Console / 分析工具，启动「零结果查询 → 格式 backlog」闭环
-

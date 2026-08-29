@@ -249,6 +249,10 @@ describe("viewer protocol", () => {
       .toEqual(["camera-raw", "hex-viewer"]);
     expect(findViewerRegistrations("photo.rw2", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["camera-raw", "hex-viewer"]);
+    for (const extension of ["nrw", "sr2", "srf", "orf", "pef"]) {
+      expect(findViewerRegistrations(`photo.${extension}`, viewerRegistrations).map(({ manifest: item }) => item.id))
+        .toEqual(["camera-raw", "hex-viewer"]);
+    }
     expect(findViewerRegistrations("scan.tiff", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["general-raster", "hex-viewer"]);
     expect(findViewerRegistrations("scan.tf8", viewerRegistrations).map(({ manifest: item }) => item.id))

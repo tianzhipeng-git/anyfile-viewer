@@ -6,8 +6,12 @@ function tiffDng() {
   const bytes = new Uint8Array(64); const view = new DataView(bytes.buffer); bytes.set([73, 73]); view.setUint16(2, 42, true); view.setUint32(4, 8, true); view.setUint16(8, 1, true); view.setUint16(10, 50706, true); view.setUint16(12, 1, true); view.setUint32(14, 4, true); bytes.set([1, 6, 0, 0], 18); return bytes;
 }
 
+function emptyTiff(magic = 42, little = true) {
+  const bytes = new Uint8Array(16); const view = new DataView(bytes.buffer); bytes.set(little ? [73, 73] : [77, 77]); view.setUint16(2, magic, little); view.setUint32(4, 8, little); view.setUint16(8, 0, little); return bytes;
+}
+
 describe("camera RAW probe", () => {
-  it("recognizes DNG but does not claim unverified models as level 3", async () => {
+  it("recognizes DNG and returns the current level-2 preview capability", async () => {
     const bytes = tiffDng(); expect(inspectRawHeader(bytes, "sample.dng")?.format).toBe("DNG");
     expect(await probeCameraRaw({ file: new File([bytes], "sample.dng"), signal: new AbortController().signal })).toBe(2);
   });
@@ -25,6 +29,19 @@ describe("camera RAW probe", () => {
       const bytes = new Uint8Array(16); const view = new DataView(bytes.buffer); bytes.set([73, 73]); view.setUint16(2, 85, true); view.setUint32(4, 8, true); view.setUint16(8, 0, true);
       expect(inspectRawHeader(bytes, name)?.format).toBe(format);
     }
+  });
+
+  it("recognizes Nikon NRW, Sony SR2/SRF and Pentax PEF TIFF containers", () => {
+    for (const [name, format] of [["sample.nrw", "NRW"], ["sample.sr2", "SR2"], ["sample.srf", "SRF"]] as const) {
+      expect(inspectRawHeader(emptyTiff(), name)?.format).toBe(format);
+    }
+    expect(inspectRawHeader(emptyTiff(42, false), "sample.pef")?.format).toBe("PEF");
+  });
+
+  it("recognizes both Olympus ORF TIFF signatures", () => {
+    expect(inspectRawHeader(emptyTiff(0x5352), "sample.orf")?.format).toBe("ORF");
+    expect(inspectRawHeader(emptyTiff(0x4f52), "sample.orf")?.format).toBe("ORF");
+    expect(inspectRawHeader(emptyTiff(), "renamed.orf")).toBeUndefined();
   });
 
   it("rejects extensions with the wrong container", async () => {

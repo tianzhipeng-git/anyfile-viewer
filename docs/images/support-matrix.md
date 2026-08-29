@@ -22,9 +22,9 @@
 
 - `planned`：已经进入路线图，但尚未实现；
 - `spike`：正在验证浏览器或第三方依赖；
-- `implemented`：代码存在，尚未完成全部验收；
+- `implemented`：代码存在并可诚实描述当前能力，尚未完成全部验收；缺少固定或可再分发样例通常属于此状态，不等于不支持；
 - `verified`：完成矩阵要求的自动和手工验收；
-- `blocked`：存在已记录的技术、许可或样例阻塞；
+- `blocked`：存在已记录且确实阻止实现或安全交付的技术、许可或部署问题；
 - `deferred`：当前没有足够产品价值，不进入近期计划。
 
 ## 3. 当前基线
@@ -48,12 +48,12 @@
 | Netpbm | `.pnm` `.pbm` `.pgm` `.ppm` `.pam` | general raster | 4 | verified | 4 | P1–P7；文本/二进制；1/8/16 bit；PAM 灰度、RGB 与 alpha tuple |
 | classic TIFF（无 ICC） | `.tif` `.tiff` | general raster | 4 | verified | 4 | unsigned 1–16 bit、alpha、orientation；strip/tile、多页；固定样例覆盖 None、LZW、Deflate、PackBits、JPEG |
 | classic TIFF（带 ICC） | `.tif` `.tiff` | general raster | 3 | verified | 3 | profile 可识别但未转换，UI 明确标注 `ICC 未应用` |
-| BigTIFF | `.tf8` `.btf` `.btiff` `.tif` `.tiff` | general raster | 3 | verified | 4 | 64-bit IFD probe 与解码路径已实现；缺少可再分发真实样例，暂不声明等级 4 |
+| BigTIFF | `.tf8` `.btf` `.btiff` `.tif` `.tiff` | general raster | 4 | implemented | 4 | 64-bit IFD probe 与解码路径已实现；合成头覆盖格式识别，完整文件回归仍待补充，因此验证状态为 `implemented`，不据此降低运行时能力等级 |
 | pyramidal TIFF | `.ptif` `.ptiff` | general raster | 3–4 | verified | 4 | 作为 tiled/multi-page TIFF 打开；能查看像素和页面，但不承诺厂商私有金字塔语义 |
 | OME-TIFF | `.ome.tif` `.ome.tiff` `.ome.tf2` `.ome.tf8` `.ome.btf` | general raster | 3 | implemented | 5 | 可查看 TIFF 像素和页面；暂不解释 OME-XML 的 Z/C/T 维度语义 |
 | HEVC HEIF/HEIC | `.heif` `.heifs` `.hif` `.heic` | modern raster | 3 | implemented | 3 | 原生实际解码优先，失败后使用同源 `libheif 1.23.2 + libde265 1.1.1` Worker/WASM；显示 primary image，不提供辅助项或序列导航 |
 | JPEG XL | `.jxl` | modern raster | 4 | verified | 4 | 原生 ImageDecoder 优先，`jxl-oxide-wasm@0.12.6` Worker 回退；固定样例覆盖有损、无损 alpha 与动画 |
-| 相机 RAW | `.dng` `.cr2` `.cr3` `.crw` `.nef` `.arw` `.raf` `.rwl` `.raw` `.rw2` | camera RAW | 2 | verified | 3 | 内嵌预览与 LibRaw 基础显影已实现；桌面真实文件已手工验证当前等级 2；尚无满足门禁的型号级回归语料，因此不返回等级 3 |
+| 相机 RAW | `.dng` `.cr2` `.cr3` `.crw` `.nef` `.nrw` `.arw` `.sr2` `.srf` `.raf` `.orf` `.pef` `.rwl` `.raw` `.rw2` | camera RAW | 2 | verified | 3 | 内嵌预览与 LibRaw 基础显影已实现；桌面真实文件已手工验证当前交付能力为等级 2。型号级自动回归覆盖仍待补充，但它不限制新增已实现格式以 `implemented` / 待验证状态进入 Manifest |
 | PSD/PSB | `.psd` `.psb` | layered document | 0 | deferred | 3 | 先合成预览与图层元数据 |
 | ORA/KRA | `.ora` `.kra` | layered document | 0 | deferred | 3 | 利用规范中的合成预览，不承诺编辑语义 |
 | DDS | `.dds` | GPU texture | 0 | deferred | 5 | mip、array、cubemap 和 BC family |
@@ -104,6 +104,7 @@
 - 真实浏览器手工验收（2026-08-29）：`viewer/plugins/modern-raster/examples/` 中全部正常、损坏和截断样例均通过，覆盖 HEVC HEIC primary image，以及 JPEG XL 有损、无损 alpha 和两帧动画。
 - HEIC fallback 自动验收（2026-08-29）：独立 Worker 中的 `1.23.2-anyfile.1` 产物把固定样例解码为 96×64 straight-alpha RGBA8；自动测试覆盖无原生能力时的打开、opening/active abort、重复 dispose、DOM 所有权和资源释放。NCLX/ICC、方向、alpha、10-bit、grid 与真实手机大图仍需随扩展语料持续回归，因此状态保持 `implemented`、等级保持 3。
 - 桌面真实文件手工验收（2026-08-29）：`raw_images/` 中 16 个文件全部通过；其中 13 个相机 RAW 文件覆盖 DNG、CR2、CRW、NEF、ARW、RWL、RAW、RW2，另外覆盖 PGM、PAM 和 JPEG XL。该结果确认 RAW 当前等级 2，不构成型号级回归语料，也不将 RAW 提升为等级 3。
+- 新增 RAW 桌面验收（2026-08-30）：使用 `raw_images/` 中 Nikon COOLPIX P7100 NRW、Sony DSC-R1 SR2、Sony DSC-F828 SRF、Olympus C5050Z ORF、Pentax *ist DL PEF。五个文件的有界 probe 均返回等级 2，项目锁定的 LibRaw WASM 均成功读取相机元数据、提取 JPEG 缩略图并生成 8-bit RGB 基础显影。
 
 ## 9. 每个格式必须记录的维度
 

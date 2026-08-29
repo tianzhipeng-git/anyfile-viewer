@@ -74,7 +74,7 @@ describe("general raster probe", () => {
     view.setBigUint64(8, BigInt(16), true);
     view.setBigUint64(16, BigInt(0), true);
     const file = new File([bytes], "sample.btf");
-    await expect(probeGeneralRaster({ file, signal: new AbortController().signal })).resolves.toBe(3);
+    await expect(probeGeneralRaster({ file, signal: new AbortController().signal })).resolves.toBe(4);
   });
 
   it("accepts contiguous plain PBM bits", async () => {

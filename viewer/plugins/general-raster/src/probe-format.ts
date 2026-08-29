@@ -205,7 +205,7 @@ function inspectTiff(bytes: Uint8Array): RasterProbe | undefined {
   if (!TIFF_VERIFIED_COMPRESSIONS.has(compression) && !TIFF_EXPERIMENTAL_COMPRESSIONS.has(compression)) return undefined;
   if (photometric !== undefined && !TIFF_SUPPORTED_PHOTOMETRICS.has(photometric)) return undefined;
   if (bitsPerSample.some((value) => value < 1 || value > 16) || sampleFormats.some((value) => value !== 1)) return undefined;
-  const partial = big || hasIcc || hasGeoMetadata || sampleLayoutUncertain || TIFF_EXPERIMENTAL_COMPRESSIONS.has(compression) || (tiled && compression === 7);
+  const partial = hasIcc || hasGeoMetadata || sampleLayoutUncertain || TIFF_EXPERIMENTAL_COMPRESSIONS.has(compression) || (tiled && compression === 7);
   return { format: big ? "BigTIFF" : "TIFF", supportLevel: partial ? 3 : 4 };
 }
 

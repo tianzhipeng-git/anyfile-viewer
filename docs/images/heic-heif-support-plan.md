@@ -38,7 +38,7 @@
 - HEIC 通常表示 HEVC 编码的 HEIF，但扩展名本身不能证明 codec；
 - `avif` / `avis` brand 继续交给 `browser-image`；
 - VVC、AVC、JPEG、JPEG 2000、未压缩等其他 HEIF codec 首期返回不支持；
-- Sony `.hif` 等真实设备变体只有进入回归语料后才声明支持。
+- Sony `.hif` 等真实设备变体已经按扩展名和实际 HEVC/HEIF 内容进入候选；缺少设备级回归语料时标记为 `implemented` / 待验证并公开已知边界，不把语料收录当作支持门禁。
 
 ## 3. 方案选择
 

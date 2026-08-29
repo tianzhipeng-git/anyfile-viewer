@@ -17,4 +17,4 @@ probe 最多读取前 1 MiB 识别格式。解码在专用 Worker 中完成，�
 - TGA/Netpbm 需完整读入，输入最大 256 MiB；单页最大 64 Mi 像素，TIFF 最多 1024 页。
 - TIFF 支持 unsigned 1–16 bit、strip/tile、多页及 None、LZW、Deflate、PackBits、JPEG 等常见压缩；未由真实样例覆盖的压缩变体和 tiled JPEG 兼容性不作完整保证。
 - TIFF ICC profile 仅识别、不转换；GeoTIFF 和 OME-TIFF 只显示普通像素与分页，不解释地理坐标或 OME-XML 维度语义。
-- BigTIFF、存在 ICC/GeoTIFF 标签或缺少充分样例的文件，probe 会保守返回主要内容等级 3。
+- BigTIFF 使用与 TIFF 相同的能力分级；存在 ICC/GeoTIFF 标签、布局不确定或实验性压缩等实际能力缺失时，probe 返回主要内容等级 3。固定样例覆盖度单独记录为验证状态，不参与运行时等级判断。
