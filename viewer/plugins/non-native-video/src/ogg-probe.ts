@@ -2,11 +2,16 @@ export interface OggInspection {
   readonly audioCodec: "vorbis" | "opus" | null;
 }
 
+export interface OggStreamInspection {
+  readonly audioCodecs: readonly ("vorbis" | "opus")[];
+  readonly videoStreams: number;
+}
+
 function matches(bytes: Uint8Array, offset: number, expected: readonly number[]) {
   return expected.every((value, index) => bytes[offset + index] === value);
 }
 
-export function inspectOgg(bytes: Uint8Array): OggInspection | undefined {
+export function inspectOggStreams(bytes: Uint8Array): OggStreamInspection | undefined {
   const streams = new Map<number, Uint8Array>();
   let offset = 0;
   while (offset + 27 <= bytes.length && streams.size <= 8) {
@@ -35,6 +40,14 @@ export function inspectOgg(bytes: Uint8Array): OggInspection | undefined {
   const videos = packets.filter((packet) => matches(packet, 0, [0x80, 0x74, 0x68, 0x65, 0x6f, 0x72, 0x61]));
   const audio = packets.filter((packet) => matches(packet, 0, [0x01, 0x76, 0x6f, 0x72, 0x62, 0x69, 0x73])
     || matches(packet, 0, [0x4f, 0x70, 0x75, 0x73, 0x48, 0x65, 0x61, 0x64]));
-  if (videos.length !== 1 || audio.length > 1) return undefined;
-  return { audioCodec: !audio.length ? null : audio[0][0] === 0x01 ? "vorbis" : "opus" };
+  return {
+    audioCodecs: audio.map((packet) => packet[0] === 0x01 ? "vorbis" : "opus"),
+    videoStreams: videos.length,
+  };
+}
+
+export function inspectOgg(bytes: Uint8Array): OggInspection | undefined {
+  const inspection = inspectOggStreams(bytes);
+  if (!inspection || inspection.videoStreams !== 1 || inspection.audioCodecs.length > 1) return undefined;
+  return { audioCodec: inspection.audioCodecs[0] ?? null };
 }

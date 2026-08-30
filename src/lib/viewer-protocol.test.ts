@@ -163,7 +163,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-video", "non-native-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
+      .toEqual(["browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -206,6 +206,30 @@ describe("viewer protocol", () => {
     );
     expect(matroska.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["non-native-video", 3], ["hex-viewer", 1]]);
+
+    const mp3Bytes = readFileSync(join(
+      process.cwd(),
+      "viewer/plugins/browser-audio/examples/mp3-cbr.mp3",
+    ));
+    const audio = await resolveViewerRegistrations(
+      new File([mp3Bytes], "tone.mp3"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(audio.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["browser-audio", 3], ["hex-viewer", 1]]);
+
+    const mkaBytes = readFileSync(join(
+      process.cwd(),
+      "viewer/plugins/non-native-audio/examples/mka-opus.mka",
+    ));
+    const mka = await resolveViewerRegistrations(
+      new File([mkaBytes], "tone.mka"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(mka.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["non-native-audio", 3], ["hex-viewer", 1]]);
 
     const transportStreamBytes = readFileSync(join(
       process.cwd(),
@@ -295,9 +319,9 @@ describe("viewer protocol", () => {
 
   it("keeps specialized viewers ahead of archive metadata and hex fallback", () => {
     expect(findViewerRegistrations("clip.mp4", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-video", "hex-viewer"]);
+      .toEqual(["browser-video", "browser-audio", "hex-viewer"]);
     expect(findViewerRegistrations("clip.webm", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-video", "hex-viewer"]);
+      .toEqual(["browser-video", "browser-audio", "hex-viewer"]);
     expect(findViewerRegistrations("clip.mov", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-video", "non-native-video", "hex-viewer"]);
     expect(findViewerRegistrations("clip.3gp", viewerRegistrations).map(({ manifest: item }) => item.id))
@@ -310,6 +334,12 @@ describe("viewer protocol", () => {
       .toEqual(["non-native-video", "hex-viewer"]);
     expect(findViewerRegistrations("clip.ogv", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["non-native-video", "hex-viewer"]);
+    expect(findViewerRegistrations("clip.ogg", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["non-native-video", "browser-audio", "hex-viewer"]);
+    expect(findViewerRegistrations("tone.mp3", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["browser-audio", "hex-viewer"]);
+    expect(findViewerRegistrations("tone.mka", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["non-native-audio", "hex-viewer"]);
     expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "hex-viewer"]);
     expect(findViewerRegistrations("photo.jxl", viewerRegistrations).map(({ manifest: item }) => item.id))

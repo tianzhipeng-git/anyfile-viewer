@@ -1,4 +1,5 @@
 import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
+import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
@@ -13,6 +14,7 @@ import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
+import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
@@ -44,6 +46,28 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/non-native-video-viewer");
       return viewerPackage.nonNativeVideoViewer;
+    },
+  },
+  {
+    manifest: browserAudioManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/browser-audio-viewer/probe");
+      return probePackage.probeBrowserAudio(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/browser-audio-viewer");
+      return viewerPackage.browserAudioViewer;
+    },
+  },
+  {
+    manifest: nonNativeAudioManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/non-native-audio-viewer/probe");
+      return probePackage.probeNonNativeAudio(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/non-native-audio-viewer");
+      return viewerPackage.nonNativeAudioViewer;
     },
   },
   {

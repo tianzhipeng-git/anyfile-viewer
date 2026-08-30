@@ -7,7 +7,8 @@ import { inspectOgg } from "./ogg-probe";
 import { readProbeHead, readProbeSlices } from "./read-blob";
 
 function extensionOf(name: string) {
-  return name.slice(name.lastIndexOf(".")).toLowerCase();
+  const index = name.lastIndexOf(".");
+  return index < 0 ? "" : name.slice(index).toLowerCase();
 }
 
 export async function probeNonNativeVideo(

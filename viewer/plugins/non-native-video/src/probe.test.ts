@@ -25,6 +25,10 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllGlobals());
 
 describe("non-native video Matroska probe", () => {
+  it("rejects a file without an extension", async () => {
+    expect(await probeNonNativeVideo(context(new File(["p"], "clip")))).toBe(0);
+  });
+
   it.each([
     "mkv-avc-aac.mkv",
     "mkv-hevc-flac.mkv",

@@ -1,6 +1,6 @@
 # 音频格式支持矩阵
 
-- 状态：阶段 0 尚未执行；当前没有音频播放插件，以下均为规划候选，不是支持承诺
+- 状态：阶段 0 已完成；阶段 1、2 组合已实现并在当前 Chromium 环境验证，完整目标浏览器矩阵仍在补证
 - 覆盖口径：以实际可播放的容器/裸码流 × codec/profile/sample format × 声道组合计数，不以扩展名数量计数
 
 网站 catalog 和文件图标只能概括已经交付的格式入口，不能替代本表的组合级证据。只有达到 `implemented` 或 `verified`、并能播放主要音频节目的具体组合，才可以进入支持文案。
@@ -22,23 +22,23 @@
 
 | 容器/组织 | codec / sample format | 声道与关键配置 | 目标插件族 | 当前等级 | 状态 | 目标等级 | 阶段与说明 |
 |---|---|---|---|---:|---|---:|---|
-| MP3 frame stream | MP3 | MPEG-1 Layer III，44.1/48 kHz，mono/stereo，CBR | browser audio | 0 | planned | 3 | 阶段 1；固定样例和目标浏览器真实播放后锁定 |
-| MP3 frame stream | MP3 | Xing/VBRI VBR，mono/stereo | browser audio | 0 | planned | 3 | 阶段 1；重点验证时长、前后 seek 和结束位置 |
+| MP3 frame stream | MP3 | MPEG-1 Layer III，48 kHz，stereo，CBR | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 真实播放、暂停、seek、结束和重播通过；其他环境待补证 |
+| MP3 frame stream | MP3 | Xing VBR，48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 时长、前后 seek 和结束位置通过；VBRI 与其他环境待补证 |
 | MP3 frame stream | 其他 Layer/version/free-format 变体 | 待定 | browser/non-native/FFmpeg audio | 0 | candidate | 3 | 按真实频率与解码证据逐项增加 |
-| RIFF/WAVE | PCM S16LE | 44.1/48 kHz，mono/stereo | browser audio | 0 | planned | 3 | 阶段 1 原生首批 |
-| RIFF/WAVE | PCM S24LE / PCM F32LE | mono/stereo | browser/non-native audio | 0 | planned | 3 | 阶段 1 基线测量，阶段 2 承接原生缺口 |
+| RIFF/WAVE | PCM S16LE | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 原生播放通过 |
+| RIFF/WAVE | PCM S24LE / PCM F32LE | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 原生播放通过，其他环境待补证 |
 | RIFF/WAVE | A-law / μ-law | mono/stereo | non-native/FFmpeg audio | 0 | candidate | 3 | 以 Mediabunny PCM 路径和真实浏览器输出为准 |
 | RIFF/WAVE | IMA/MS ADPCM 等 | 具体 block layout | FFmpeg audio | 0 | candidate | 3 | 不因扩展名为 WAV 自动支持 |
-| M4A/MP4 audio-only | AAC-LC | 44.1/48 kHz，mono/stereo | browser audio | 0 | planned | 3 | 阶段 1；与 MP4 视频按轨道内容分流 |
+| M4A/MP4 audio-only | AAC-LC | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 真实播放及 MP4 视频互斥通过 |
 | M4A/MP4 audio-only | HE-AAC/HE-AACv2 | profile、SBR/PS 待定 | browser/non-native/FFmpeg audio | 0 | candidate | 3 | 环境差异和 duration/gapless 需独立证据 |
 | M4A/MP4 audio-only | ALAC | 16/24-bit，mono/stereo | browser/FFmpeg audio | 0 | candidate | 3 | 先测原生路径，再决定 fallback |
-| Ogg audio-only | Vorbis | 44.1/48 kHz，mono/stereo | browser audio | 0 | planned | 3 | 阶段 1；Theora 文件必须由音频 probe 返回 0 |
-| Ogg audio-only | Opus | 48 kHz，mono/stereo，pre-skip | browser audio | 0 | planned | 3 | 阶段 1；验证时长、seek、结束和 pre-skip |
+| Ogg audio-only | Vorbis | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 播放及 Theora 互斥通过 |
+| Ogg audio-only | Opus | 48 kHz，stereo，pre-skip | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 时长、seek、结束和重播通过 |
 | Ogg audio-only | FLAC | 常见位深/声道 | browser/non-native audio | 0 | candidate | 3 | 按真实环境能力决定路径 |
-| WebM audio-only | Opus/Vorbis | mono/stereo | browser audio | 0 | planned | 3 | 阶段 1；同扩展名视频对照必须路由到视频插件 |
-| Matroska audio-only | Opus/Vorbis/FLAC/AAC | 单个主音轨，存在可用 seek index | non-native audio | 0 | planned | 3 | 阶段 2；首批 `.mka` 候选 |
-| native FLAC | FLAC | 16/24-bit，mono/stereo | browser audio | 0 | planned | 3 | 阶段 1；picture block 与 metadata 必须有界 |
-| ADTS | AAC-LC | mono/stereo | browser/non-native audio | 0 | planned | 3 | 阶段 1 测原生，阶段 2 承接明确缺口 |
+| WebM audio-only | Opus/Vorbis | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 播放及 WebM 视频互斥通过 |
+| Matroska audio-only | Opus/Vorbis/FLAC/AAC | 48 kHz stereo，单个主音轨，存在可用 seek index | non-native audio | 3 | implemented | 3 | 阶段 2；四个 `.mka` 固定样例在 Chromium 连续输出、seek、结束和重播通过 |
+| native FLAC | FLAC | 16/24-bit，48 kHz stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 播放通过，picture block 与 metadata 有界跳过 |
+| ADTS | AAC-LC | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 原生播放通过，其他环境待补证 |
 | AIFF/AIFC | PCM S16BE/S24BE/F32BE 等 | mono/stereo | FFmpeg audio | 0 | planned | 3 | FFmpeg 首批 audio spike |
 | ASF audio-only | WMA v1/v2 首批代表组合 | mono/stereo | FFmpeg audio | 0 | planned | 3 | 与 ASF/WMV 视频共享 runtime，独立音频证据 |
 | APE | Monkey's Audio | 代表版本/压缩等级 | FFmpeg audio | 0 | candidate | 3 | 测 CPU、内存、seek 和取消后再决定 |
@@ -46,7 +46,7 @@
 | AMR | AMR-NB/WB | mono | FFmpeg audio | 0 | deferred | 3 | 许可和真实需求评审后决定 |
 | AC-3/E-AC-3 elementary | AC-3/E-AC-3 | stereo/多声道 | FFmpeg audio | 0 | deferred | 3 | 声道、专利和输出语义必须独立评审 |
 | DTS elementary | DTS family | 多声道 | FFmpeg audio | 0 | deferred | 3 | 近期不承诺 |
-| 含主视频节目的 MP4/WebM/Ogg/ASF | 任意音频 | 任意 | video viewers | 0 | planned | 0 | 音频 probe 必须返回 0；attached picture 除外 |
+| 含主视频节目的 MP4/WebM/Ogg/ASF | 任意音频 | 任意 | video viewers | 0 | implemented | 0 | MP4/WebM/Ogg 音频 probe 互斥已实现；attached picture 不计主视频 |
 
 本表的 `browser audio` 只表示首选路径，不表示当前浏览器已被证明支持。阶段 0 完成后，应把参数、浏览器/OS、样例和证据写回每一行。
 
@@ -96,4 +96,3 @@ probe 返回 0 不能代替完整插件校验。`open()` 必须独立复验真�
 - [音频查看实施路线图](roadmap.md)
 - [视频格式支持矩阵](../videos/support-matrix.md)
 - [FFmpeg 音视频播放 fallback 接入方案](../videos/ffmpeg-playback-runtime-plan.md)
-

@@ -17,6 +17,7 @@
     "build": "pnpm prepare:assets && next build --webpack && pnpm check:bundle",
     "check:bundle": "node scripts/check-view-bundle.mjs",
     "measure:video-probes": "node scripts/measure-video-probes.mjs",
+    "measure:audio-probes": "node scripts/measure-audio-probes.mjs",
     "start": "next start",
     "lint": "eslint",
     "test": "pnpm test:app && pnpm --recursive --if-present test",
@@ -25,6 +26,7 @@
   "dependencies": {
     "@anyfile/archive-metadata-viewer": "workspace:*",
     "@anyfile/browser-image-viewer": "workspace:*",
+    "@anyfile/browser-audio-viewer": "workspace:*",
     "@anyfile/browser-video-viewer": "workspace:*",
     "@anyfile/camera-raw-viewer": "workspace:*",
     "@anyfile/code-viewer": "workspace:*",
@@ -38,6 +40,7 @@
     "@anyfile/hex-viewer": "workspace:*",
     "@anyfile/modern-raster-viewer": "workspace:*",
     "@anyfile/non-native-video-viewer": "workspace:*",
+    "@anyfile/non-native-audio-viewer": "workspace:*",
     "@anyfile/pdf-viewer": "workspace:*",
     "@anyfile/powerpoint-viewer": "workspace:*",
     "@anyfile/safe-svg-viewer": "workspace:*",

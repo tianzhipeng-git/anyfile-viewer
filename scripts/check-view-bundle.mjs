@@ -50,9 +50,14 @@ const deferredImplementationMarkers = [
   "anyfile-camera-raw-viewer__canvas",
   "anyfile-browser-video-viewer__video",
   "anyfile-non-native-video-viewer__controls",
+  "anyfile-browser-audio-viewer__audio",
+  "anyfile-non-native-audio-viewer__controls",
   "Video probe read budget exceeded",
   "Non-native video probe read budget exceeded",
+  "Audio probe read budget exceeded",
+  "Non-native audio probe read budget exceeded",
   "videoTrack must be an InputVideoTrack",
+  "audioTrack must be an InputAudioTrack",
   "jxl-oxide-wasm",
   "heif-decoder.wasm",
   "LibRaw disposed",
@@ -138,6 +143,24 @@ const nonNativeVideoProbeChunks = archiveChunkContents.filter(({ content }) => c
 if (nonNativeVideoProbeChunks.length === 0) {
   throw new Error("Non-native video probe chunk was not found");
 }
+const browserAudioProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Audio probe read budget exceeded"));
+if (browserAudioProbeChunks.length === 0) throw new Error("Browser audio probe chunk was not found");
+if (browserAudioProbeChunks.some(({ content }) => content.includes("anyfile-browser-audio-viewer__audio")
+  || content.includes("Decoded PCM buffer exceeds limits")
+  || content.includes("audioTrack must be an InputAudioTrack"))) {
+  throw new Error("Browser audio probe chunk contains a full audio player implementation");
+}
+const nonNativeAudioProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Non-native audio probe read budget exceeded"));
+if (nonNativeAudioProbeChunks.length === 0) throw new Error("Non-native audio probe chunk was not found");
+if (nonNativeAudioProbeChunks.some(({ content }) => content.includes("anyfile-non-native-audio-viewer__controls")
+  || content.includes("Decoded PCM buffer exceeds limits")
+  || content.includes("audioTrack must be an InputAudioTrack"))) {
+  throw new Error("Non-native audio probe chunk contains Mediabunny or the full player implementation");
+}
+const nonNativeAudioViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-non-native-audio-viewer__controls"));
+if (nonNativeAudioViewerChunks.length === 0) throw new Error("Non-native audio viewer chunk was not found");
+const mediabunnyAudioChunks = archiveChunkContents.filter(({ content }) => content.includes("audioTrack must be an InputAudioTrack"));
+if (mediabunnyAudioChunks.length === 0) throw new Error("Deferred Mediabunny audio implementation chunk was not found");
 if (nonNativeVideoProbeChunks.some(({ content }) => content.includes("anyfile-non-native-video-viewer__controls")
   || content.includes("videoTrack must be an InputVideoTrack"))) {
   throw new Error("Non-native video probe chunk contains Mediabunny or the full player implementation");

@@ -1,6 +1,6 @@
 # 音频格式与编码候选清单
 
-- 状态：规划候选 inventory；不是支持承诺或开发排期
+- 状态：阶段 0 inventory 已建立；实际交付仍只以支持矩阵的组合级状态为准
 - 用途：确定固定样例、插件边界、真实浏览器基线和 FFmpeg spike 范围
 
 实际支持状态只看 [support-matrix.md](support-matrix.md)。扩展名出现在网站图标规则、catalog 或本文中，不表示已有可用插件。
@@ -103,4 +103,3 @@
 - [音频查看架构](architecture.md)
 - [音频查看实施路线图](roadmap.md)
 - [FFmpeg 音视频播放 fallback 接入方案](../videos/ffmpeg-playback-runtime-plan.md)
-

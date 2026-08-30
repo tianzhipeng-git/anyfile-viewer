@@ -1,6 +1,6 @@
 # 音频查看实施路线图
 
-- 状态：规划中；阶段 0 尚未开始，当前没有音频播放插件
+- 状态：阶段 0 已完成；阶段 1、2 已实现并通过 Chromium 端到端验证，Firefox/Safari/Edge 的完整环境矩阵仍待补证
 - 范围：浏览器本地打开的独立音频文件与 audio-only 容器
 - 产品结果：播放主要音频节目，不交付只能检查 metadata、封面、波形或代表性片段的音频插件
 - 核心目标：满足播放和资源安全底线后，优先扩大可播放的容器/裸码流 × codec/sample format 组合
@@ -26,6 +26,8 @@
 - 损坏、不支持、环境缺失和资源超限准确分类。
 
 ## 2. 阶段 0：证据与边界
+
+实现记录见[阶段 0–2 证据](roadmap-stage0-2-evidence.md)。固定语料、SHA-256、生成脚本、probe 测量脚本与资源门禁已经入库；当前 FFmpeg 构建没有 APE encoder，因此 APE spike 样例保持明确阻塞，不据此扩大支持声明。
 
 目标是建立音频路线图所需的固定语料、原生媒体行为、probe 预算和资源门禁，不注册音频插件。
 
@@ -62,6 +64,8 @@
 
 ## 3. 阶段 1：browser-audio
 
+已实现 `browser-audio` workspace 插件。当前声明范围为 MP3 CBR/Xing VBR、WAVE PCM S16LE/S24LE/F32LE、M4A/MP4 AAC-LC audio-only、Ogg Vorbis/Opus、WebM Opus/Vorbis audio-only、native FLAC 16/24-bit 和 ADTS AAC-LC；所有组合均已在当前 Chromium 环境取得真实媒体数据并完成非静音播放推进。
+
 新增单一 `browser-audio` workspace 插件，使用 `<audio controls>` + Object URL。首批候选：
 
 - MP3 CBR/VBR；
@@ -94,6 +98,8 @@
 - `/view` 首包不包含完整插件或 probe parser。
 
 ## 4. 阶段 2：non-native-audio
+
+已实现 `non-native-audio` workspace 插件，首个完整 vertical slice 为带安全 seek index 的单主音轨 `.mka`，声明 Opus、Vorbis、FLAC 与 AAC。Mediabunny 只存在于完整实现 chunk；`open()` 在不创建 `AudioContext` 的前提下解码首个 PCM buffer，首次播放手势才建立 Web Audio 输出链。
 
 新增单一 `non-native-audio` workspace 插件，承接浏览器媒体元素不能稳定播放、但 Mediabunny 能分片 demux且 PCM/WebCodecs 能解码的明确组合。
 
@@ -215,4 +221,3 @@ FFmpeg 资产只保留一份版本化产物。`ffmpeg-audio` 与 `ffmpeg-video` 
 - [查看器插件渲染规范](../viewer-render-tips.md)
 - [查看器加载、渲染与部署约定](../viewer-loading-and-deployment.md)
 - [源码构建型第三方依赖规范](../viewer-source-built-dependencies.md)
-

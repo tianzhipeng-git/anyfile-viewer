@@ -1,4 +1,5 @@
 import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
+import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
@@ -12,6 +13,7 @@ import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
+import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
@@ -138,10 +140,8 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "audio",
     icon: FileAudioIcon,
-    extensions: [
-      ".mp3", ".m4a", ".aac", ".wav", ".flac", ".ogg", ".oga", ".opus", ".aiff",
-      ".aif", ".wma",
-    ],
+    extensions: manifestExtensions(browserAudioManifest, nonNativeAudioManifest)
+      .filter((extension) => ![".mp4", ".webm", ".ogg"].includes(extension)),
   },
   {
     kind: "model",

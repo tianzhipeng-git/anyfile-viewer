@@ -156,7 +156,7 @@ function hasCues(bytes: Uint8Array, start: number, counter: { value: number }) {
   return false;
 }
 
-export function inspectMatroska(
+export function inspectMatroskaTracks(
   head: Uint8Array,
   tail: Uint8Array | undefined,
   fileSize: number,
@@ -180,10 +180,17 @@ export function inspectMatroska(
     if (!track) return undefined;
     if (track !== "other") tracks.push(track);
   }
-  const videoCount = tracks.filter(({ type }) => type === "video").length;
-  if (videoCount < 1) return undefined;
   return {
     tracks,
     hasSeekIndex: hasCues(head, segmentStart, counter) || (tail ? hasCues(tail, 0, counter) : false),
   };
+}
+
+export function inspectMatroska(
+  head: Uint8Array,
+  tail: Uint8Array | undefined,
+  fileSize: number,
+): MatroskaInspection | undefined {
+  const inspection = inspectMatroskaTracks(head, tail, fileSize);
+  return inspection?.tracks.some(({ type }) => type === "video") ? inspection : undefined;
 }

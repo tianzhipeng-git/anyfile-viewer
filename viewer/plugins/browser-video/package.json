@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./container-inspection": "./src/container-inspection.ts",
     "./manifest": "./src/manifest.ts",
     "./probe": "./src/probe.ts"
   },
