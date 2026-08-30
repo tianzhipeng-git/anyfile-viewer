@@ -71,7 +71,7 @@
 - 空文件、损坏、截断、伪装扩展名；
 - 同扩展名但包含主视频节目的文件；
 - 不支持 codec/profile/sample format；
-- 超大 ID3/APIC、comment、picture block、track count 或异常长度字段；
+- 大型 ID3/APIC、comment、picture block 的有界跳读，以及异常长度字段、过多 block/track；
 - 无法安全建立时长或基础 seek 的 VBR/无索引文件；
 - 异常时间戳、零时长、无音频帧或只含辅助图片；
 - 多个无法确定默认项的主音轨；

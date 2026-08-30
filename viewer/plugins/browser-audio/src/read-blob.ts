@@ -35,6 +35,10 @@ async function readBlob(blob: Blob, signal: AbortSignal) {
   return bytes;
 }
 
+export function readAudioProbeRange(file: File, signal: AbortSignal, offset: number, length: number) {
+  return readBlob(file.slice(offset, offset + length), signal);
+}
+
 export interface AudioProbeSlices {
   readonly head: Uint8Array;
   readonly tail?: Uint8Array;

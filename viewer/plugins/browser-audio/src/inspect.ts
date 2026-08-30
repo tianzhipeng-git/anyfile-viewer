@@ -2,8 +2,9 @@ import { inspectIsoBmff, inspectWebm } from "@anyfile/browser-video-viewer/conta
 import { inspectOggStreams } from "@anyfile/non-native-video-viewer/container-inspection";
 import type { ProbeViewerContext } from "@anyfile/viewer-protocol";
 
-import { inspectAdts, inspectFlac, inspectMp3, inspectWave } from "./basic-formats";
+import { inspectAdts, inspectWave } from "./basic-formats";
 import { readAudioProbeSlices } from "./read-blob";
+import { inspectFlacFile, inspectMp3File } from "./tagged-formats";
 import type { AudioFileInspection } from "./types";
 
 function extensionOf(name: string) {
@@ -27,10 +28,10 @@ export async function inspectBrowserAudioFile(
 ): Promise<AudioFileInspection | undefined> {
   if (!file.size) return undefined;
   const extension = extensionOf(file.name);
+  if (extension === ".mp3") return inspectMp3File(file, signal);
+  if ([".flac", ".fla"].includes(extension)) return inspectFlacFile(file, signal);
   const slices = await readAudioProbeSlices(file, signal);
-  if (extension === ".mp3") return inspectMp3(slices.head);
   if ([".wav", ".wave"].includes(extension)) return inspectWave(slices.head);
-  if ([".flac", ".fla"].includes(extension)) return inspectFlac(slices.head);
   if ([".aac", ".adts"].includes(extension)) return inspectAdts(slices.head);
   if ([".m4a", ".mp4"].includes(extension)) {
     const inspection = inspectIsoBmff(slices);

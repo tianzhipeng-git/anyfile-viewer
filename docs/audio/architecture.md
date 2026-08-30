@@ -160,7 +160,7 @@ FFmpeg 只作为最后一层。底层共享：
 Probe 的初始预算在阶段 0 通过真实样例测量后锁定，不自动照抄视频 512 KiB。规划基线：
 
 - 优先读取小型头部；需要尾部 tag/index 时增加独立尾片；
-- 限制 ID3 tag、APIC、Vorbis Comment、FLAC metadata block、MP4 box、EBML element、RIFF chunk、track 和访问项；
+- 限制 tag、box、block 的实际读取字节和访问项；ID3/APIC 与 FLAC metadata 根据已校验长度使用范围读取跳过正文，不因封面正文较大而整体读取或拒绝；
 - 限制为寻找首帧而跳过的 tag 字节和扫描的音频帧数；
 - 不解析或解码封面，不建立完整波形，不遍历完整帧流；
 - 无法在预算内取得 codec、主轨和基本 seek 证据时保守返回 0；

@@ -56,9 +56,9 @@ describe("browser audio viewer lifecycle", () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledOnce();
   });
 
-  it("classifies an oversized ID3 tag as a resource limit", async () => {
+  it("classifies a truncated oversized ID3 tag as invalid", async () => {
     const context = testContext("oversized-id3.mp3");
-    await expect(browserAudioViewer.open(context.context)).rejects.toMatchObject({ code: "resource-limit" });
+    await expect(browserAudioViewer.open(context.context)).rejects.toMatchObject({ code: "invalid-file" });
     expect(URL.createObjectURL).not.toHaveBeenCalled();
   });
 });

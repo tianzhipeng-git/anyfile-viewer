@@ -12,8 +12,68 @@ function fixture(name: string) {
 
 function context(file: File, signal = new AbortController().signal) { return { file, signal }; }
 
+function synchsafe(size: number) {
+  return new Uint8Array([size >> 21 & 0x7f, size >> 14 & 0x7f, size >> 7 & 0x7f, size & 0x7f]);
+}
+
+function fileWithLargeId3(tagSize = 512 * 1024) {
+  const source = new Uint8Array(readFileSync(join(process.cwd(), "examples", "mp3-cbr.mp3")));
+  const existingTagSize = source.subarray(6, 10).reduce((total, value) => total * 128 + value, 0);
+  const audio = source.subarray(10 + existingTagSize);
+  return new File([
+    new Uint8Array([0x49, 0x44, 0x33, 4, 0, 0]),
+    synchsafe(tagSize),
+    new Uint8Array(tagSize),
+    audio,
+  ], "large-cover.mp3");
+}
+
+function fileWithLargeFlacPicture(pictureSize = 512 * 1024) {
+  const source = new Uint8Array(readFileSync(join(process.cwd(), "examples", "flac-24.flac")));
+  const streamInfo = source.slice(4, 42);
+  streamInfo[0] &= 0x7f;
+  return new File([
+    new Uint8Array([0x66, 0x4c, 0x61, 0x43]),
+    streamInfo,
+    new Uint8Array([0x86, pictureSize >> 16, pictureSize >> 8 & 0xff, pictureSize & 0xff]),
+    new Uint8Array(pictureSize),
+    new Uint8Array([0xff]),
+  ], "large-picture.flac");
+}
+
 describe("browser audio probe", () => {
-  it("accepts large FLAC padding within the bounded probe head", async () => {
+  it.each([
+    ["MP3 ID3/APIC", fileWithLargeId3, 10 + 4 * 1024],
+    ["FLAC picture", fileWithLargeFlacPicture, 4 + 4 + 34 + 4],
+  ])("skips large %s metadata with bounded range reads", async (_label, createFile, maximumBytes) => {
+    const file = createFile();
+    let bytesRequested = 0;
+    const originalSlice = file.slice.bind(file);
+    vi.spyOn(file, "slice").mockImplementation((start, end, type) => {
+      bytesRequested += Number(end ?? file.size) - Number(start ?? 0);
+      return originalSlice(start, end, type);
+    });
+
+    expect(await probeBrowserAudio(context(file))).toBe(3);
+    expect(bytesRequested).toBeLessThanOrEqual(maximumBytes);
+  });
+
+  it("rejects metadata offsets that extend beyond the file", async () => {
+    const truncatedId3 = new File([
+      new Uint8Array([0x49, 0x44, 0x33, 4, 0, 0]),
+      synchsafe(512 * 1024),
+      new Uint8Array(16),
+    ], "truncated.mp3");
+    const truncatedFlac = new File([
+      new Uint8Array([0x66, 0x4c, 0x61, 0x43, 0x86, 0x10, 0, 0]),
+      new Uint8Array(16),
+    ], "truncated.flac");
+
+    expect(await probeBrowserAudio(context(truncatedId3))).toBe(0);
+    expect(await probeBrowserAudio(context(truncatedFlac))).toBe(0);
+  });
+
+  it("accepts large FLAC padding without reading its body", async () => {
     const source = new Uint8Array(readFileSync(join(process.cwd(), "examples", "flac-24.flac")));
     const streamInfo = source.slice(4, 42);
     streamInfo[0] &= 0x7f;

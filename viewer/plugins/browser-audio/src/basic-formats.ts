@@ -1,11 +1,8 @@
 import type { AudioFileInspection } from "./types";
 
-const MAX_TAG_BYTES = 128 * 1024;
 const MAX_CHUNKS = 128;
 const MP3_BITRATES = [0, 32, 40, 48, 56, 64, 80, 96, 112, 128, 160, 192, 224, 256, 320];
 const SAMPLE_RATES = [44_100, 48_000, 32_000];
-
-export class AudioProbeLimitError extends Error {}
 
 function ascii(bytes: Uint8Array, offset: number, length: number) {
   return String.fromCharCode(...bytes.subarray(offset, offset + length));
@@ -32,14 +29,8 @@ function parseMp3Frame(bytes: Uint8Array, offset: number) {
   };
 }
 
-export function inspectMp3(bytes: Uint8Array): AudioFileInspection | undefined {
+export function inspectMp3Frames(bytes: Uint8Array): AudioFileInspection | undefined {
   let offset = 0;
-  if (ascii(bytes, 0, 3) === "ID3") {
-    if (bytes.length < 10 || bytes.subarray(6, 10).some((value) => value & 0x80)) return undefined;
-    const size = bytes.slice(6, 10).reduce((total, value) => total * 128 + value, 0);
-    if (size > MAX_TAG_BYTES) throw new AudioProbeLimitError("ID3 tag exceeds the audio probe limit");
-    offset = 10 + size;
-  }
   for (let scanned = 0; scanned < 16 && offset + 4 <= bytes.length; scanned += 1, offset += 1) {
     const first = parseMp3Frame(bytes, offset);
     if (!first) continue;
@@ -95,22 +86,8 @@ export function inspectWave(bytes: Uint8Array): AudioFileInspection | undefined 
   };
 }
 
-export function inspectFlac(bytes: Uint8Array): AudioFileInspection | undefined {
-  if (ascii(bytes, 0, 4) !== "fLaC") return undefined;
-  let offset = 4;
-  let streamInfo: Uint8Array | undefined;
-  let last = false;
-  for (let count = 0; count < MAX_CHUNKS && !last; count += 1) {
-    if (offset + 4 > bytes.length) return undefined;
-    last = Boolean(bytes[offset] & 0x80);
-    const type = bytes[offset] & 0x7f;
-    const size = (bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3];
-    if (type !== 1 && size > MAX_TAG_BYTES) throw new AudioProbeLimitError("FLAC metadata block exceeds the audio probe limit");
-    if (offset + 4 + size > bytes.length) return undefined;
-    if (type === 0) streamInfo = bytes.subarray(offset + 4, offset + 4 + size);
-    offset += 4 + size;
-  }
-  if (!last || streamInfo?.length !== 34 || offset >= bytes.length) return undefined;
+export function inspectFlacStreamInfo(streamInfo: Uint8Array): AudioFileInspection | undefined {
+  if (streamInfo.length !== 34) return undefined;
   const sampleRate = (streamInfo[10] << 12) | (streamInfo[11] << 4) | (streamInfo[12] >> 4);
   const channels = ((streamInfo[12] >> 1) & 7) + 1;
   const bitsPerSample = ((streamInfo[12] & 1) << 4 | (streamInfo[13] >> 4)) + 1;
@@ -119,6 +96,8 @@ export function inspectFlac(bytes: Uint8Array): AudioFileInspection | undefined 
   if (![16, 24].includes(bitsPerSample) || channels > 2 || !sampleRate || sampleRate > 192_000 || !totalSamples) return undefined;
   return { container: "FLAC", codec: "FLAC", mimeType: "audio/flac", channels, sampleRate, bitsPerSample };
 }
+
+export { MAX_CHUNKS as MAX_FLAC_METADATA_BLOCKS };
 
 function adtsFrame(bytes: Uint8Array, offset: number) {
   if (offset + 7 > bytes.length || bytes[offset] !== 0xff || (bytes[offset + 1] & 0xf6) !== 0xf0) return undefined;

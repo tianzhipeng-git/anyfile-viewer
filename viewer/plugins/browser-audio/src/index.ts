@@ -5,7 +5,6 @@ import {
   type ViewerController,
 } from "@anyfile/viewer-protocol";
 
-import { AudioProbeLimitError } from "./basic-formats";
 import { abortError } from "./abort-error";
 import { inspectBrowserAudioFile } from "./inspect";
 import { browserAudioManifest } from "./manifest";
@@ -67,7 +66,6 @@ async function openBrowserAudio(context: OpenViewerContext): Promise<ViewerContr
   } catch (error) {
     dispose();
     if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;
-    if (error instanceof AudioProbeLimitError) throw new ViewerError("resource-limit", "音频标签或元数据超出安全限制。", { cause: error });
     if (error instanceof MediaLoadError) {
       const code = error.mediaCode === 4 ? "unsupported-environment" : error.mediaCode === 3 ? "invalid-file" : "open-failed";
       const message = code === "unsupported-environment" ? copy.unsupported : code === "invalid-file" ? copy.invalid : copy.failed;

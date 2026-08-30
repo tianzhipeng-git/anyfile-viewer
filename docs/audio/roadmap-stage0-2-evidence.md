@@ -29,9 +29,10 @@ pnpm measure:audio-probes
 
 | 门禁 | 上限 |
 |---|---:|
-| browser-audio probe head / tail | 256 KiB / 64 KiB |
+| browser-audio 通用容器 probe head / tail | 256 KiB / 64 KiB |
 | non-native-audio probe head / tail | 256 KiB / 64 KiB |
-| ID3 tag / 单个非 PADDING FLAC metadata block | 128 KiB；PADDING 仍受 256 KiB probe head 总预算限制 |
+| MP3 ID3/APIC | 读取 10-byte ID3 header，按校验后的 synchsafe size 跳到音频帧，帧读取不超过 4 KiB |
+| native FLAC metadata | 读取 4-byte signature、每个 4-byte block header 与 34-byte STREAMINFO；其他 block 正文按校验后的长度跳过，最多 128 blocks |
 | MP3 首帧扫描 | 16 offsets |
 | WAVE/FLAC chunk 或 block | 128 |
 | Matroska tracks | probe 32；open 16 |
@@ -41,7 +42,7 @@ pnpm measure:audio-probes
 | 单 PCM buffer | 2 s / 8 MiB |
 | PCM lookahead | 1 s |
 
-超大 ID3 与 FLAC metadata 在 probe 返回 0，在 `open()` 映射为 `resource-limit`。损坏、截断、伪装、主视频、多主轨和不支持 codec/profile 映射为 `invalid-file`；环境缺少 WebCodecs/Web Audio 映射为 `unsupported-environment`。
+格式正确的大型 ID3/APIC 与 FLAC metadata 不再按正文大小拒绝，probe 的实际读取量不随封面正文增长；越界长度、截断、损坏、伪装、主视频、多主轨和不支持 codec/profile 映射为 `invalid-file`，环境缺少 WebCodecs/Web Audio 映射为 `unsupported-environment`。
 
 ## 3. Chromium 真实播放证据
 
