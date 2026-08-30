@@ -23,6 +23,7 @@ export type ArchiveEntry = {
   readonly linkTarget?: string;
   readonly comment?: string;
   readonly encrypted?: boolean;
+  readonly suspiciousCompression?: boolean;
   readonly dangerousPath: boolean;
 };
 
@@ -37,6 +38,7 @@ export type ArchiveMetadata = {
 
 export type ArchiveFormatId =
   | "zip"
+  | "jmod"
   | "rar"
   | "tar"
   | "gzip"
@@ -53,4 +55,5 @@ export type IdentifiedFormat = {
   readonly extension: string;
   readonly magicMatched: boolean;
   readonly compoundTar: boolean;
+  readonly containerOffset: number;
 };

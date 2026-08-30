@@ -139,12 +139,19 @@ try {
     "../dangerous-path.txt": [strToU8("unsafe path marker\n"), { level: 0, mtime: fixedDate }],
   }, { comment: "Anyfile archive metadata example" });
   await writeFile(join(examplesDirectory, "archive.zip"), zip);
+  for (const name of ["package.egg", "application.pyz", "application.pyzw"]) {
+    await writeFile(join(examplesDirectory, name), zip);
+  }
+  await writeFile(join(examplesDirectory, "module.jmod"), concatenate(Uint8Array.of(0x4a, 0x4d, 1, 0), zip));
   await writeFile(join(examplesDirectory, "archive.rar"), rar5Example());
   await writeFile(join(examplesDirectory, "empty-zip64.zip"), emptyZip64());
 
   const tarPath = join(examplesDirectory, "archive.tar");
   run("tar", ["--format", "pax", "-cf", tarPath, "-C", temporaryDirectory, "payload"]);
-  await writeFile(join(examplesDirectory, "archive.tar.gz"), run("gzip", ["-n", "-c", tarPath]));
+  const gzipTar = run("gzip", ["-n", "-c", tarPath]);
+  await writeFile(join(examplesDirectory, "archive.tar.gz"), gzipTar);
+  await writeFile(join(examplesDirectory, "package.tgz"), gzipTar);
+  await writeFile(join(examplesDirectory, "package.crate"), gzipTar);
   await writeFile(join(examplesDirectory, "archive.tar.xz"), run("xz", ["-c", tarPath]));
   await writeFile(join(examplesDirectory, "archive.tar.zst"), run("zstd", ["-q", "-c", tarPath]));
 
@@ -156,6 +163,9 @@ try {
   await writeFile(join(examplesDirectory, "sample.zlib"), deflateSync(sampleText));
   await writeFile(join(examplesDirectory, "sample.deflate"), deflateRawSync(sampleText));
   await writeFile(join(examplesDirectory, "sample.br"), brotliCompressSync(sampleText));
+  for (const name of ["disguised.egg", "disguised.pyz", "disguised.pyzw", "disguised.jmod", "disguised.tgz", "disguised.crate"]) {
+    await writeFile(join(examplesDirectory, name), sampleText);
+  }
 } finally {
   await rm(temporaryDirectory, { recursive: true, force: true });
 }

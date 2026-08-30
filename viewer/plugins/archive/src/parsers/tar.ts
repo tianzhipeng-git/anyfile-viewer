@@ -1,7 +1,7 @@
 import { ViewerError } from "@anyfile/viewer-protocol";
 
 import { dangerousPath, formatBytes, text } from "../binary";
-import type { RangeReader } from "../range-reader";
+import type { ReadPurpose } from "../types";
 import type { ArchiveEntry, ArchiveMetadata, IdentifiedFormat, MetadataField } from "../types";
 
 const BLOCK_SIZE = 512;
@@ -97,7 +97,13 @@ function parsePaxNumber(value: string | undefined, fallback: number, label: stri
   return parsed;
 }
 
-export async function parseTar(reader: RangeReader, format: IdentifiedFormat): Promise<ArchiveMetadata> {
+export type TarReader = {
+  readonly size: number;
+  read(start: number, length: number, purpose: ReadPurpose): Promise<Uint8Array>;
+  throwIfAborted(): void;
+};
+
+export async function parseTar(reader: TarReader, format: IdentifiedFormat): Promise<ArchiveMetadata> {
   if (reader.size < BLOCK_SIZE) throw new ViewerError("invalid-file", "TAR 头部已截断。");
   const entries: ArchiveEntry[] = [];
   const fields: MetadataField[] = [];

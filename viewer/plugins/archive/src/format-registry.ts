@@ -6,10 +6,11 @@ const EXTENSIONS: readonly (readonly [string, ArchiveFormatId])[] = [
   [".tar.lz4", "lz4"], [".tar.xz", "xz"], [".tar.gz", "gzip"],
   [".deflate", "deflate"], [".bzip2", "bzip2"], [".gzip", "gzip"],
   [".zip64", "zip"], [".zstd", "zstd"], [".tgz", "gzip"], [".txz", "xz"],
+  [".crate", "gzip"], [".jmod", "jmod"],
   [".tzst", "zstd"], [".tbz2", "bzip2"], [".tbz", "bzip2"],
   ...[".zip", ".jar", ".war", ".ear", ".apk", ".aab", ".ipa", ".epub", ".odt",
     ".ods", ".odp", ".odg", ".odf", ".docx", ".xlsx", ".pptx", ".nupkg", ".snupkg",
-    ".vsix", ".whl", ".xpi", ".cbz", ".kmz", ".usdz"].map((item) => [item, "zip"] as const),
+    ".vsix", ".whl", ".xpi", ".cbz", ".kmz", ".usdz", ".egg", ".pyz", ".pyzw"].map((item) => [item, "zip"] as const),
   [".rar", "rar"],
   [".tar", "tar"], [".gz", "gzip"], [".xz", "xz"], [".zst", "zstd"],
   [".bz2", "bzip2"], [".lz4", "lz4"], [".zlib", "zlib"], [".zz", "zlib"],
@@ -22,6 +23,8 @@ function extensionFor(name: string): readonly [string, ArchiveFormatId] | undefi
 }
 
 function magicFor(bytes: Uint8Array): ArchiveFormatId | undefined {
+  if (bytes.length >= 8 && ascii(bytes.subarray(0, 4)) === "JM\x01\x00" &&
+      view(bytes).getUint32(4, true) === 0x04034b50) return "jmod";
   if (bytes.length >= 7 && ascii(bytes.subarray(0, 7)) === "Rar!\x1a\x07\x00") return "rar";
   if (bytes.length >= 8 && ascii(bytes.subarray(0, 8)) === "Rar!\x1a\x07\x01\x00") return "rar";
   if (bytes.length >= 4) {
@@ -53,6 +56,11 @@ export function identifyFormat(fileName: string, header: Uint8Array): Identified
     id,
     extension,
     magicMatched: magicId === extensionId,
-    compoundTar: extension.startsWith(".tar.") || [".tgz", ".txz", ".tzst", ".tbz", ".tbz2"].includes(extension),
+    compoundTar: extension.startsWith(".tar.") || [".tgz", ".crate", ".txz", ".tzst", ".tbz", ".tbz2"].includes(extension),
+    containerOffset: id === "jmod" ? 4 : 0,
   };
+}
+
+export function expectedFormat(fileName: string): ArchiveFormatId | undefined {
+  return extensionFor(fileName)?.[1];
 }

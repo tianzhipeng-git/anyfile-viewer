@@ -3,6 +3,9 @@ import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
+import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
+import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
+import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
@@ -156,7 +159,44 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     },
   },
   {
+    manifest: devArrayManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/dev-array-viewer/probe");
+      return probePackage.probeDevArray(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/dev-array-viewer");
+      return viewerPackage.devArrayViewer;
+    },
+  },
+  {
+    manifest: devWasmManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/dev-wasm-viewer/probe");
+      return probePackage.probeDevWasm(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/dev-wasm-viewer");
+      return viewerPackage.devWasmViewer;
+    },
+  },
+  {
+    manifest: devSourceMapManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/dev-source-map-viewer/probe");
+      return probePackage.probeDevSourceMap(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/dev-source-map-viewer");
+      return viewerPackage.devSourceMapViewer;
+    },
+  },
+  {
     manifest: dataManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/data-viewer/probe");
+      return probePackage.probeData(context);
+    },
     async load() {
       const viewerPackage = await import("@anyfile/data-viewer");
       return viewerPackage.dataViewer;
@@ -164,6 +204,10 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
   },
   {
     manifest: archiveMetadataManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/archive-metadata-viewer/probe");
+      return probePackage.probeArchive(context);
+    },
     async load() {
       const viewerPackage = await import("@anyfile/archive-metadata-viewer");
       return viewerPackage.archiveMetadataViewer;

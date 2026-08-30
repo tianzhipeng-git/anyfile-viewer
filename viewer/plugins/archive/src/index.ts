@@ -10,6 +10,7 @@ import { archiveMetadataManifest } from "./manifest";
 import { parseRar } from "./parsers/rar";
 import { parseTar } from "./parsers/tar";
 import { parseWrapper } from "./parsers/wrappers";
+import { parseGzipTar } from "./parsers/gzip-tar";
 import { RangeReader } from "./range-reader";
 import { createArchiveView } from "./ui";
 import { parseZip } from "./zip-adapter";
@@ -26,6 +27,7 @@ async function identificationBytes(reader: RangeReader, fileName: string): Promi
   else if (prefix[0] === 0x52 && prefix[1] === 0x61) length = 8;
   else if ((prefix[0] === 0x42 && prefix[1] === 0x5a) || prefix[0] === 0x50 && prefix[1] === 0x4b ||
     prefix[0] === 0x28 && prefix[1] === 0xb5 || prefix[0] === 0x04 && prefix[1] === 0x22) length = 4;
+  else if (prefix[0] === 0x4a && prefix[1] === 0x4d) length = 8;
   if (length === 2) return prefix;
   const suffix = await reader.read(2, length - 2, "header");
   const result = new Uint8Array(length);
@@ -38,9 +40,12 @@ async function parse(context: OpenViewerContext, reader: RangeReader) {
   const header = await identificationBytes(reader, context.file.name);
   const format = identifyFormat(context.file.name, header);
   context.reportProgress({ stage: "parsing", message: "正在读取归档元数据…" });
-  if (format.id === "zip") return parseZip(reader, format, context.signal);
+  if (format.id === "zip" || format.id === "jmod") return parseZip(reader, format, context.signal);
   if (format.id === "rar") return parseRar(reader, format);
   if (format.id === "tar") return parseTar(reader, format);
+  if (format.id === "gzip" && format.compoundTar) {
+    return parseGzipTar(context.file, reader, format, context.signal);
+  }
   return parseWrapper(reader, format);
 }
 

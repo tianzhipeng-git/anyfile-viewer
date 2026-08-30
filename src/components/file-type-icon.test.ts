@@ -21,7 +21,9 @@ describe("getFileTypeKind", () => {
     ["layout.fig", "design"],
     ["typeface.woff2", "font"],
     ["bundle.tar.gz", "archive"],
-    ["module.wasm", "binary"],
+    ["module.wasm", "developer"],
+    ["bundle.js.map", "developer"],
+    ["matrix.npy", "developer"],
     ["unknown.anyfile", "unknown"],
   ] as const)("classifies %s as %s", (fileName, expectedKind) => {
     expect(getFileTypeKind(fileName)).toBe(expectedKind);

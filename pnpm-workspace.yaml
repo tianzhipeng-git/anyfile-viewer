@@ -1,4 +1,5 @@
 packages:
+  - viewer/dev-binary-core
   - viewer/protocol
   - viewer/rendering
   - viewer/testing

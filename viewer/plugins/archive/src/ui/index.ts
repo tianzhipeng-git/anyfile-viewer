@@ -15,6 +15,7 @@ type Copy = {
   readonly columns: readonly string[];
   readonly dangerous: string;
   readonly encrypted: string;
+  readonly suspiciousCompression: string;
   readonly kind: Readonly<Record<ArchiveMetadata["kind"], string>>;
 };
 
@@ -25,6 +26,7 @@ function copyFor(locale: string): Copy {
       previous: "Previous", next: "Next", noMatches: "No matching entries.",
       columns: ["Path", "Type", "Original size", "Compressed size", "Modified", "Method"],
       dangerous: "Unsafe path", encrypted: "Encrypted",
+      suspiciousCompression: "Suspicious compression ratio",
       kind: { archive: "Archive directory", wrapper: "Compression wrapper", bare: "Raw stream" },
     };
   }
@@ -33,6 +35,7 @@ function copyFor(locale: string): Copy {
     previous: "上一页", next: "下一页", noMatches: "没有匹配的条目。",
     columns: ["路径", "类型", "原始大小", "压缩后大小", "修改时间", "方法"],
     dangerous: "危险路径", encrypted: "已加密",
+    suspiciousCompression: "异常压缩比",
     kind: { archive: "归档目录", wrapper: "压缩包装层", bare: "裸压缩流" },
   };
 }
@@ -67,6 +70,7 @@ function renderRows(body: HTMLTableSectionElement, entries: readonly ArchiveEntr
     addText(pathCell, "span", entry.path);
     if (entry.dangerousPath) addText(pathCell, "span", copy.dangerous, "anyfile-archive-viewer__badge");
     if (entry.encrypted) addText(pathCell, "span", copy.encrypted, "anyfile-archive-viewer__badge");
+    if (entry.suspiciousCompression) addText(pathCell, "span", copy.suspiciousCompression, "anyfile-archive-viewer__badge");
     const extra = extraMetadata(entry);
     if (extra) addText(pathCell, "span", extra, "anyfile-archive-viewer__entry-meta");
     row.append(pathCell);

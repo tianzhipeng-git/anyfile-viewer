@@ -35,6 +35,14 @@ const deferredImplementationMarkers = [
   "正在读取 PowerPoint 演示文稿",
   "anyfile-pdf-viewer__viewport",
   "__anyfile_archive_metadata_viewer_v1__",
+  "__anyfile_archive_probe_v1__",
+  "__anyfile_dev_array_viewer_v1__",
+  "__anyfile_dev_array_probe_v1__",
+  "__anyfile_data_probe_v1__",
+  "__anyfile_dev_wasm_probe_v1__",
+  "__anyfile_dev_source_map_probe_v1__",
+  "anyfile-wasm-viewer__viewport",
+  "anyfile-source-map-viewer__viewport",
   "anyfile-hex-viewer__viewport",
   "anyfile-browser-image-viewer__viewport",
   "anyfile-general-raster-viewer__canvas",
@@ -88,6 +96,37 @@ const archiveChunks = archiveChunkContents.filter(({ content }) => {
   const code = content.toString("utf8");
   return code.includes("__anyfile_archive_metadata_viewer_v1__") || code.includes("Unsafe filename");
 });
+const archiveProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_archive_probe_v1__"));
+if (archiveProbeChunks.length === 0) throw new Error("Archive probe chunk was not found");
+if (archiveProbeChunks.some(({ content }) => content.includes("__anyfile_archive_metadata_viewer_v1__"))) {
+  throw new Error("Archive probe chunk contains the full archive viewer implementation");
+}
+const arrayViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_dev_array_viewer_v1__"));
+if (arrayViewerChunks.length === 0) throw new Error("Array viewer dynamic chunk was not found");
+const arrayProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_dev_array_probe_v1__"));
+if (arrayProbeChunks.length === 0) throw new Error("Array probe chunk was not found");
+if (arrayProbeChunks.some(({ content }) => content.includes("__anyfile_dev_array_viewer_v1__"))) {
+  throw new Error("Array probe chunk contains the full array viewer implementation");
+}
+const dataProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_data_probe_v1__"));
+if (dataProbeChunks.length === 0) throw new Error("Data probe chunk was not found");
+if (dataProbeChunks.some(({ content }) => content.includes("Starting DuckDB"))) {
+  throw new Error("Data probe chunk contains the full DuckDB viewer implementation");
+}
+const wasmViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-wasm-viewer__viewport"));
+if (wasmViewerChunks.length === 0) throw new Error("WASM viewer dynamic chunk was not found");
+const wasmProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_dev_wasm_probe_v1__"));
+if (wasmProbeChunks.length === 0) throw new Error("WASM probe chunk was not found");
+if (wasmProbeChunks.some(({ content }) => content.includes("anyfile-wasm-viewer__viewport"))) {
+  throw new Error("WASM probe chunk contains the full viewer implementation");
+}
+const sourceMapViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-source-map-viewer__viewport"));
+if (sourceMapViewerChunks.length === 0) throw new Error("Source map viewer dynamic chunk was not found");
+const sourceMapProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_dev_source_map_probe_v1__"));
+if (sourceMapProbeChunks.length === 0) throw new Error("Source map probe chunk was not found");
+if (sourceMapProbeChunks.some(({ content }) => content.includes("anyfile-source-map-viewer__viewport"))) {
+  throw new Error("Source map probe chunk contains the full viewer implementation");
+}
 const videoProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Video probe read budget exceeded"));
 if (videoProbeChunks.length === 0) {
   throw new Error("Browser video probe chunk was not found");

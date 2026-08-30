@@ -1,0 +1,1 @@
+{"version":3,"file":"bundle.js","sourceRoot":"webpack:///src","sources":["index.ts","math.ts"],"sourcesContent":["console.log(add(1, 2));\n","export const add = (a, b) => a + b;\n"],"names":["console","log","add"],"ignoreList":[1],"mappings":"AAAAA,QAAQC,IAAI,CAAAC"}

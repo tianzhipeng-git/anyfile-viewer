@@ -4,6 +4,9 @@ import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
+import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
+import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
+import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
@@ -17,6 +20,7 @@ import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
 import { wordManifest } from "@anyfile/word-viewer/manifest";
 import {
   BinaryIcon,
+  BracesIcon,
   BoxIcon,
   DatabaseIcon,
   FileArchiveIcon,
@@ -40,6 +44,7 @@ export type FileTypeKind =
   | "code"
   | "database"
   | "design"
+  | "developer"
   | "document"
   | "font"
   | "image"
@@ -121,6 +126,11 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     fileNames: manifestFileNames(codeManifest),
   },
   {
+    kind: "developer",
+    icon: BracesIcon,
+    extensions: manifestExtensions(devArrayManifest, devSourceMapManifest, devWasmManifest),
+  },
+  {
     kind: "database",
     icon: DatabaseIcon,
     extensions: manifestExtensions(sqliteManifest, dataManifest),
@@ -156,7 +166,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "binary",
     icon: BinaryIcon,
-    extensions: [".bin", ".exe", ".dll", ".so", ".dylib", ".wasm", ".dmg", ".iso"],
+    extensions: [".bin", ".exe", ".dll", ".so", ".dylib", ".dmg", ".iso"],
   },
 ];
 

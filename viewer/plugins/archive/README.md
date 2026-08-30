@@ -5,6 +5,9 @@
 ## 基本介绍
 
 - **插件 ID**：`archive-metadata-viewer`
+- ZIP、ZIP 派生包、JMOD、RAR 和 TAR 返回等级 2；只展示压缩包装信息的格式返回等级 1。
+- `.tgz`、`.tar.gz` 与 `.crate` 使用浏览器流式 gzip 解压，只保留 TAR 条目头，不读取包清单或执行包内内容。
+- `.egg`、`.pyz`、`.pyzw`、JAR、Wheel 与 NuGet 只复用通用目录 UI，不增加生态专属语义。
 - **支持格式**：
   - ZIP 及派生（`.zip`、`.jar`、`.docx`、`.apk` 等）
   - RAR 4.x / 5.x（`.rar`，含有界 SFX 签名扫描）

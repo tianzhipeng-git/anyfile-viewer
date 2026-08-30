@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import { gzipSync } from "fflate";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { validateManifest, ViewerError } from "@anyfile/viewer-protocol";
 import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer-test";
@@ -186,6 +187,24 @@ describe("archive metadata viewer", () => {
     await encryptedController.dispose();
   });
 
+  it("marks suspicious ZIP compression ratios without decompressing entries", async () => {
+    const bytes = zipFixture(1);
+    const data = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+    let central = -1;
+    for (let offset = 0; offset + 46 <= bytes.length; offset += 1) {
+      if (data.getUint32(offset, true) === 0x02014b50) {
+        central = offset;
+        break;
+      }
+    }
+    expect(central).toBeGreaterThanOrEqual(0);
+    data.setUint32(central + 24, 2 * 1024 * 1024, true);
+    const test = contextFor(bytes, "suspicious.zip");
+    const controller = await archiveMetadataViewer.open(test.context);
+    expect(test.container.textContent).toContain("异常压缩比");
+    await controller.dispose();
+  });
+
   it("decodes UTF-8 ZIP paths when the language encoding flag is missing", async () => {
     const test = contextFor(unflaggedUtf8ZipFixture(), "macos.zip");
     const controller = await archiveMetadataViewer.open(test.context);
@@ -293,16 +312,27 @@ describe("archive metadata viewer", () => {
     await controller.dispose();
   });
 
-  it("uses the outer wrapper for compound TAR compression", async () => {
-    const bytes = wrapperFixtures["sample.gz"];
+  it("streams the inner TAR directory for gzip packages", async () => {
+    const bytes = gzipSync(tarFixture().bytes);
     const tracked = trackedFile(bytes, "backup.tar.gz");
     const test = createViewerTestContext(tracked.file);
     contexts.push(test);
     const controller = await archiveMetadataViewer.open(test.context);
-    expect(test.container.textContent).toContain("未扫描内部归档");
-    expect(test.container.textContent).not.toContain("条目列表");
-    const payload = { start: 10, end: bytes.length - 8 };
-    expect(tracked.ranges.some((range) => overlaps(range, payload))).toBe(false);
+    expect(test.container.textContent).toContain("gzip + TAR");
+    expect(test.container.textContent).toContain("folder/来自-pax.txt");
+    expect(test.container.textContent).toContain("条目列表");
+    await controller.dispose();
+  });
+
+  it("opens JMOD as a prefixed ZIP directory", async () => {
+    const zip = zipFixture();
+    const bytes = new Uint8Array(zip.length + 4);
+    bytes.set([0x4a, 0x4d, 1, 0]);
+    bytes.set(zip, 4);
+    const test = contextFor(bytes, "module.jmod");
+    const controller = await archiveMetadataViewer.open(test.context);
+    expect(test.container.textContent).toContain("JMOD / ZIP");
+    expect(test.container.textContent).toContain("资料/说明.txt");
     await controller.dispose();
   });
 
@@ -314,6 +344,34 @@ describe("archive metadata viewer", () => {
     const test = contextFor(damaged, "truncated.zip");
     await expect(archiveMetadataViewer.open(test.context)).rejects.toMatchObject({ code: "invalid-file" });
     expect(test.container.childElementCount).toBe(0);
+  });
+
+  it("rejects oversized ZIP directories and entry counts before reading them", async () => {
+    const oversizedDirectory = zipFixture();
+    const eocdOffset = oversizedDirectory.length - 22;
+    new DataView(oversizedDirectory.buffer).setUint32(eocdOffset + 12, 65 * 1024 * 1024, true);
+    await expect(archiveMetadataViewer.open(contextFor(oversizedDirectory, "large-directory.zip").context))
+      .rejects.toMatchObject({ code: "resource-limit" });
+
+    const tooMany = zip64Fixture();
+    const zip64 = new DataView(tooMany.buffer);
+    zip64.setBigUint64(24, BigInt(100_001), true);
+    zip64.setBigUint64(32, BigInt(100_001), true);
+    await expect(archiveMetadataViewer.open(contextFor(tooMany, "too-many.zip").context))
+      .rejects.toMatchObject({ code: "resource-limit" });
+  });
+
+  it("rejects gzip TAR decompression size and ratio bombs before streaming", async () => {
+    const compressed = gzipSync(tarFixture().bytes);
+    const oversized = compressed.slice();
+    new DataView(oversized.buffer).setUint32(oversized.length - 4, 513 * 1024 * 1024, true);
+    await expect(archiveMetadataViewer.open(contextFor(oversized, "oversized.tgz").context))
+      .rejects.toMatchObject({ code: "resource-limit" });
+
+    const ratio = compressed.slice();
+    new DataView(ratio.buffer).setUint32(ratio.length - 4, 2 * 1024 * 1024, true);
+    await expect(archiveMetadataViewer.open(contextFor(ratio, "ratio.crate").context))
+      .rejects.toMatchObject({ code: "resource-limit" });
   });
 
   it("trusts recognized magic over a wrong suffix", async () => {
@@ -365,7 +423,13 @@ describe("archive metadata viewer", () => {
     ["archive.rar", "资料/说明.txt"],
     ["empty-zip64.zip", "ZIP64"],
     ["archive.tar", "long-path.txt"],
-    ["archive.tar.gz", "未扫描内部归档"],
+    ["archive.tar.gz", "payload/README.txt"],
+    ["package.tgz", "payload/README.txt"],
+    ["package.crate", "payload/README.txt"],
+    ["module.jmod", "JMOD / ZIP"],
+    ["package.egg", "README.txt"],
+    ["application.pyz", "README.txt"],
+    ["application.pyzw", "README.txt"],
     ["archive.tar.xz", "未扫描内部归档"],
     ["archive.tar.zst", "未扫描内部归档"],
     ["sample.gz", "gzip"],

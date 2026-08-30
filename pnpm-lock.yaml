@@ -26,6 +26,15 @@ importers:
       '@anyfile/data-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/data
+      '@anyfile/dev-array-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/dev-array
+      '@anyfile/dev-source-map-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/dev-source-map
+      '@anyfile/dev-wasm-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/dev-wasm
       '@anyfile/excel-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/excel
@@ -129,6 +138,15 @@ importers:
       typescript:
         specifier: ^5
         version: 5.9.3
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/dev-binary-core:
+    devDependencies:
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
@@ -245,6 +263,66 @@ importers:
       apache-arrow:
         specifier: 17.0.0
         version: 17.0.0
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/dev-array:
+    dependencies:
+      '@anyfile/dev-binary-core':
+        specifier: workspace:*
+        version: link:../../dev-binary-core
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/dev-source-map:
+    dependencies:
+      '@anyfile/dev-binary-core':
+        specifier: workspace:*
+        version: link:../../dev-binary-core
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/dev-wasm:
+    dependencies:
+      '@anyfile/dev-binary-core':
+        specifier: workspace:*
+        version: link:../../dev-binary-core
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -499,6 +577,13 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../protocol
+    devDependencies:
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
   viewer/ui:
     devDependencies:

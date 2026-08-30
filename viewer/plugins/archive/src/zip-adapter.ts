@@ -171,6 +171,8 @@ function mapEntry(entry: Entry): ArchiveEntry {
     permissions: entry.unixMode === undefined ? undefined : `0${(entry.unixMode & 0xfff).toString(8).padStart(3, "0")}`,
     comment: entry.comment || undefined,
     encrypted: entry.encrypted,
+    suspiciousCompression: entry.uncompressedSize > 1024 * 1024 &&
+      entry.uncompressedSize > Math.max(1, entry.compressedSize) * 1_000,
     dangerousPath: dangerousPath(entry.filename),
   };
 }
@@ -195,12 +197,24 @@ export async function parseZip(
   signal: AbortSignal,
 ): Promise<ArchiveMetadata> {
   const layout = await readDirectoryLayout(rangeReader);
+  const directoryOffset = layout.directoryOffset + format.containerOffset;
+  if (!Number.isSafeInteger(directoryOffset) || directoryOffset + layout.directoryLength > rangeReader.size) {
+    throw new ViewerError("invalid-file", "ZIP 中央目录偏移超出文件范围。");
+  }
   if (layout.split) return unsupportedZip(format, layout, "这是分卷 ZIP；当前查看器不拼接或读取依赖外部分卷的目录。");
   const directory: Region = {
-    start: layout.directoryOffset,
-    bytes: await rangeReader.read(layout.directoryOffset, layout.directoryLength, "directory"),
+    start: directoryOffset,
+    bytes: await rangeReader.read(directoryOffset, layout.directoryLength, "directory"),
   };
-  const reader = new MetadataOnlyZipReader(rangeReader.size, [directory, ...layout.extraRegions, layout.eocd]);
+  let eocd = layout.eocd;
+  if (format.containerOffset) {
+    if (layout.zip64) throw new ViewerError("invalid-file", "暂不支持 ZIP64 JMOD。");
+    const bytes = layout.eocd.bytes.slice();
+    const offset = view(bytes).getUint32(16, true) + format.containerOffset;
+    view(bytes).setUint32(16, offset, true);
+    eocd = { ...layout.eocd, bytes };
+  }
+  const reader = new MetadataOnlyZipReader(rangeReader.size, [directory, ...layout.extraRegions, eocd]);
   const zipReader = new ZipReader(reader, {
     useWebWorkers: false,
     useCompressionStream: false,
@@ -220,14 +234,14 @@ export async function parseZip(
     }
     const fields: MetadataField[] = [
       { label: "格式变体", value: entries.some((entry, index) => rawEntries[index].zip64) || layout.zip64 ? "ZIP64" : "ZIP" },
-      { label: "中央目录偏移", value: `${formatBytes(layout.directoryOffset)} 字节` },
+      { label: "中央目录偏移", value: `${formatBytes(directoryOffset)} 字节` },
       { label: "中央目录大小", value: `${formatBytes(layout.directoryLength)} 字节` },
       { label: "条目数量", value: formatBytes(entries.length) },
       { label: "归档注释", value: layout.comment.length ? text(layout.comment) : "—" },
       { label: "解析警告", value: zipReader.warnings?.length ? zipReader.warnings.map((warning) => warning.reason).join("；") : "无" },
     ];
     return {
-      format: layout.zip64 ? "ZIP64" : "ZIP",
+      format: format.id === "jmod" ? "JMOD / ZIP" : layout.zip64 ? "ZIP64" : "ZIP",
       kind: "archive",
       detectedBy: format.magicMatched ? `扩展名 ${format.extension} 与 ZIP 标识一致` : `按 ZIP 尾部目录识别`,
       fields,

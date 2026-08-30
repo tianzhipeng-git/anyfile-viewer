@@ -163,7 +163,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-video", "non-native-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "sqlite-database"]);
+      .toEqual(["browser-video", "non-native-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -218,6 +218,45 @@ describe("viewer protocol", () => {
     );
     expect(transportStream.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["non-native-video", 3], ["ace-code-text", 1], ["hex-viewer", 1]]);
+
+    const npyBytes = readFileSync(join(process.cwd(), "viewer/plugins/dev-array/examples/matrix.npy"));
+    const npy = await resolveViewerRegistrations(
+      new File([npyBytes], "matrix.npy"), viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(npy.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["dev-array-viewer", 3], ["hex-viewer", 1]]);
+
+    const wasm = await resolveViewerRegistrations(
+      new File([Uint8Array.of(0, 0x61, 0x73, 0x6d, 1, 0, 0, 0)], "module.wasm"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(wasm.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["dev-wasm-viewer", 2], ["hex-viewer", 1]]);
+
+    const sourceMap = await resolveViewerRegistrations(
+      new File(['{"version":3,"sources":[],"names":[],"mappings":""}'], "bundle.js.map"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(sourceMap.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["dev-source-map-viewer", 3], ["hex-viewer", 1]]);
+
+    const duckdb = await resolveViewerRegistrations(
+      new File([], "database.duckdb"), viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(duckdb.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["duckdb-data", 3], ["hex-viewer", 1]]);
+
+    const tgzBytes = readFileSync(join(process.cwd(), "viewer/plugins/archive/examples/package.tgz"));
+    const tgz = await resolveViewerRegistrations(
+      new File([tgzBytes], "package.tgz"), viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(tgz.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {
@@ -296,6 +335,12 @@ describe("viewer protocol", () => {
       .toEqual(["duckdb-data", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("network.har", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["http-archive", "hex-viewer"]);
+    expect(findViewerRegistrations("module.wasm", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dev-wasm-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("bundle.js.map", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dev-source-map-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("database.duckdb", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["duckdb-data", "hex-viewer"]);
     expect(findViewerRegistrations("backup.tar.gz", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("backup.rar", viewerRegistrations).map(({ manifest: item }) => item.id))
