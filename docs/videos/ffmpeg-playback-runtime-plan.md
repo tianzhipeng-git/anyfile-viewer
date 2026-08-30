@@ -1,13 +1,15 @@
-# 阶段 3：FFmpeg 播放 fallback 接入方案
+# 阶段 3：FFmpeg 音视频播放 fallback 接入方案
 
 - 状态：规划中，先执行运行时 spike，再实现插件
-- 目标：为浏览器原生与 `non-native-video` 均未覆盖的高价值普通视频组合提供本地播放 fallback
+- 目标：构建一套受控、共享的 decode-only FFmpeg Worker/WASM runtime，分别为浏览器原生与 non-native 路径未覆盖的高价值普通视频和独立音频组合提供本地播放 fallback
 - 非目标：格式转换、编辑、录制、流媒体、DRM、DVD 菜单、完整 FFmpeg CLI 和“支持 FFmpeg 所有格式”的产品承诺
-- 阶段关系：阶段 2 保持已完成；原播放体验与专业视频阶段顺延为阶段 4
+- 阶段关系：视频阶段 2 保持已完成；音频阶段 0–2 独立推进；视频专业能力与音频播放体验增强分别进入各自阶段 4
 
 ## 1. 方案决策
 
-阶段 3 采用独立的 `ffmpeg-video` 插件，以及从锁定 FFmpeg 官方源码自行构建的只播放运行时。运行时只在插件完整实现被选中后加载，不进入 `/view` 首包、manifest、probe 或其他视频插件 chunk。
+阶段 3 采用两个独立插件 `ffmpeg-video`、`ffmpeg-audio`，以及一套从锁定 FFmpeg 官方源码自行构建的共享只播放运行时。两个插件保留独立 manifest、probe、UI、支持矩阵和验收，但通过同一精确版本 URL 使用一份 Worker/WASM 资产。
+
+运行时只在 `ffmpeg-video` 或 `ffmpeg-audio` 的完整实现被选中后加载，不进入 `/view` 首包、manifest、probe、browser/non-native 音视频插件或其他无关 chunk。浏览器缓存可以复用同一套版本化资产，构建产物和 plugin chunk 不得复制 WASM。
 
 这不是直接安装完整 `ffmpeg.wasm`、libav.js 或 libmedia：
 
@@ -16,7 +18,7 @@
 - libmedia 会引入另一套播放器与媒体抽象，但仍不能替代最终 FFmpeg fallback，形成两次集成和两套维护边界；
 - 直接使用 FFmpeg libraries 可以从同一套 demux/decode 基础按真实需求增加组合，同时保留项目自己的加载、资源和 UI 约束。
 
-阶段 3 的“fallback”是插件选择层级，不是宿主在 `open()` 失败后自动重试。宿主仍遵守插件协议：按扩展名产生候选，执行轻量 probe，按真实支持等级和注册顺序排序，只加载默认或用户选择的完整插件。
+阶段 3 的“fallback”是插件选择层级，不是宿主在 `open()` 失败后自动重试。宿主仍遵守插件协议：按扩展名产生候选，执行轻量 probe，按真实支持等级和注册顺序排序，只加载默认或用户选择的完整插件。共享 runtime 也不是面向用户的万能媒体插件。
 
 ## 2. 是否需要 fork FFmpeg
 
@@ -46,29 +48,40 @@ File
   │     ├── Mediabunny + WebCodecs
   │     └── OGV.js Ogg 专用软件路径
   │
-  └── ffmpeg-video（阶段 3）
-        ├── 独立轻量、有界 probe
-        └── FFmpeg Worker/WASM → 规范化视频帧/PCM → Canvas/Web Audio
+  ├── browser-audio / non-native-audio
+  │     └── 轻量音频路径
+  │
+  ├── ffmpeg-video（阶段 3）
+  │     ├── 独立轻量、有界 video probe
+  │     └── shared FFmpeg Worker/WASM → 规范化视频帧/PCM → Canvas/Web Audio
+  │
+  └── ffmpeg-audio（音频阶段 3）
+        ├── 独立轻量、有界 audio probe
+        └── shared FFmpeg Worker/WASM → Float32 PCM → Web Audio
 ```
 
-`ffmpeg-video` 单列插件的原因是它具有独立的重型资产、源码构建、Worker、许可、安全和强制终止边界。它不能替换已有的两个插件：已有路径体积更小，原生路径还能保留硬件解码、浏览器 controls 和更低的内存带宽。
+FFmpeg 插件单列的原因是共享 runtime 具有独立的重型资产、源码构建、Worker、许可、安全和强制终止边界。它们不能替换已有的轻量插件：原生与 Mediabunny/OGV.js 路径体积更小，原生路径还能保留系统 decoder、浏览器 controls 和更低的内存带宽。
+
+`ffmpeg-video` 和 `ffmpeg-audio` 不能合并：视频交付要求主视频节目和文件应有主音频均可播放；音频交付要求没有主视频节目、存在明确主音频节目，并使用不同 UI、路由和支持矩阵。attached picture 或 album cover 不视为主视频节目。
 
 路由规则：
 
-- manifest 只列出已经安排独立 probe 的扩展名，不使用 `"*"`；
-- probe 按容器族独立实现，只读取有界头尾分片，不加载 FFmpeg、Worker 或播放器；
-- 只有完成端到端播放证据的容器 × 视频 codec × 音频 codec 子集才返回等级 3；
+- 两个 manifest 只列出已经安排独立 probe 的扩展名，不使用 `"*"`；
+- probe 按容器族和产品语义独立实现，只读取有界头尾分片，不加载 FFmpeg、Worker 或播放器；
+- `ffmpeg-video` 只有完成端到端证据的容器 × 视频 codec × 音频 codec 子集才返回等级 3；
+- `ffmpeg-audio` 只有完成端到端证据的容器/裸码流 × audio codec/profile/sample format × 声道子集才返回等级 3；
 - 已由 `browser-video` 或 `non-native-video` 验证的组合继续由原插件返回更高或同级但注册顺序更优的等级；
-- audio-only、损坏、超限或主音频不可解的文件返回 0 或由 `open()` 返回准确错误；
+- 已由 `browser-audio` 或 `non-native-audio` 验证的组合同样保持轻路径优先；
+- audio-only 对 `ffmpeg-video` 返回 0；含主视频节目的文件对 `ffmpeg-audio` 返回 0；损坏、超限或对应主轨不可解的文件返回 0 或由 `open()` 返回准确错误；
 - 不依据 FFmpeg 编译时存在某个 demuxer/decoder 就扩大 manifest 或产品文案。
 
-首批可能涉及 `.avi`、`.mpg`、`.mpeg`、`.vob`、`.asf`、`.wmv`。最终扩展名和组合必须由 spike 与固定样例确认后再写入 manifest。
+视频首批可能涉及 `.avi`、`.mpg`、`.mpeg`、`.vob`、`.asf`、`.wmv`；音频首批 spike 候选包括 `.aif`、`.aiff`、`.aifc`、`.wma`、audio-only `.asf` 和 `.ape`。最终扩展名和组合必须由 spike 与固定样例确认后再写入各自 manifest。
 
 ## 4. 运行时架构
 
 ```text
 主线程
-  ffmpeg-video UI / playback session
+  ffmpeg-video 或 ffmpeg-audio UI / playback session
        │ File + 命令
        ▼
 专用 Worker
@@ -82,14 +95,14 @@ File
   libswresample ─ 音频 Float32 PCM 归一化
   libavutil
        │
-       ├── metadata / state / error
-       ├── 有界视频 frame buffers
-       └── 有界 PCM buffers
+       ├── metadata / selected tracks / state / error
+       ├── 有界视频 frame buffers（视频插件）
+       └── 有界 PCM buffers（两个插件）
 ```
 
 专用 Worker 是必需边界：同步文件读取、demux/decode 和 WASM 内存都不阻塞主线程；取消无法及时穿透第三方代码时，终止 Worker 是最终的硬取消和资源回收手段。Worker/WASM 仍不被视为不可信输入的安全沙箱，输入大小、偏移、维度、轨道和队列仍必须在应用层限制。
 
-首期以单线程运行时为基线。只有实测表明目标组合无法实时播放，才评估 pthread variant；不能仅因为 `/view` 已跨源隔离就默认承担多线程资产、兼容性和内存成本。
+首期以单线程共同运行时为基线。只有实测表明已选视频或音频组合无法实时播放，才评估 pthread variant；不能仅因为 `/view` 已跨源隔离就默认承担多线程资产、兼容性和内存成本。不得为两个插件分别构建无测量依据的 runtime variant。
 
 ## 5. FFmpeg 构建范围
 
@@ -114,7 +127,8 @@ File
 不向前端暴露 FFmpeg CLI 命令或大面积 `libav*` API。C adapter 提供小而稳定的会话能力：
 
 ```text
-open(mountedPath)       → 媒体与主轨信息
+open(mountedPath)       → 媒体、节目与轨道信息
+select_tracks(video?, audio?) → 锁定插件已验证的主轨组合
 decode_next()           → video-frame | audio-frame | eof | error
 seek(timestamp)         → 定位到可恢复解码的位置
 flush()                 → 清空 decoder 与 adapter 队列
@@ -122,7 +136,7 @@ close()                 → 释放 format/codec/frame/packet/buffer
 set_abort_flag()        → 尽可能中断 FFmpeg I/O 或长操作
 ```
 
-内部实现覆盖 `avformat_open_input`、`avformat_find_stream_info`、主轨选择、decoder 打开、`av_read_frame`、packet/frame send/receive、时间戳换算、`avformat_seek_file`、`avcodec_flush_buffers`、像素/采样格式转换和完整清理。
+内部实现覆盖 `avformat_open_input`、`avformat_find_stream_info`、受插件约束的主轨选择、decoder 打开、`av_read_frame`、packet/frame send/receive、时间戳换算、`avformat_seek_file`、`avcodec_flush_buffers`、像素/采样格式转换和完整清理。runtime 不得自行把 attached picture 选成视频节目，也不得在多主轨语义不明确时静默决定产品行为。
 
 bridge 输出必须是有所有权约定的有界事件，而不是把 FFmpeg 指针暴露给 JavaScript。每个 buffer 明确由谁释放，seek/generation 变化后旧 frame 不能再进入 UI。错误至少能区分损坏文件、不在声明范围、资源超限、环境初始化失败和取消。
 
@@ -144,21 +158,28 @@ spike 必须验证：
 
 视频首期归一化为 8-bit I420 或 NV12 plane，必要时使用 `libswscale`；不默认从 Worker 传输全尺寸 RGBA，因为它会显著增加带宽和内存。主线程用可转移 `ArrayBuffer` 构造 `VideoFrame` 或直接绘制 Canvas，并保持固定数量的帧槽。
 
-音频使用 `libswresample` 归一化为 Float32 PCM，通过现有 Web Audio 时钟播放。10/12-bit、HDR、精确色彩、alpha、隔行和专业像素语义可以作为等级 3 的已知限制，但不能在转换后误报为无损或专业准确。
+音频使用 `libswresample` 归一化为 Float32 PCM，通过 Web Audio 时钟播放。音频插件必须记录重采样、声道重排/下混、encoder delay/padding 和 gapless 的已知限制，不能把可播放误报为 bit-perfect。视频的 10/12-bit、HDR、精确色彩、alpha、隔行和专业像素语义可以作为等级 3 的已知限制，但不能在转换后误报为无损或专业准确。
 
-当前 `non-native-video` 播放会话与 Mediabunny sink 直接耦合。FFmpeg spike 成功后，提取最小的内部 decoded-media provider 边界：
+当前 `non-native-video` 播放会话与 Mediabunny sink 直接耦合，且要求 Canvas/video track。FFmpeg spike 和一个真实 `non-native-audio` vertical slice 成功后，提取最小的内部 provider 与 PCM 调度边界，而不是把现有视频类直接用于独立音频：
 
 ```ts
-interface DecodedMediaProvider {
+interface DecodedVideoProvider {
   initialize(): Promise<MediaInfo>
   videoFrames(from: number): AsyncIterable<DecodedVideoFrame>
   audioFrames(from: number): AsyncIterable<DecodedAudioFrame>
   seek(time: number): Promise<void>
   dispose(): Promise<void>
 }
+
+interface DecodedAudioProvider {
+  initialize(): Promise<AudioMediaInfo>
+  audioFrames(from: number): AsyncIterable<DecodedAudioFrame>
+  seek(time: number): Promise<void>
+  dispose(): Promise<void>
+}
 ```
 
-Mediabunny 和 FFmpeg 分别实现 provider，播放/暂停、AudioContext 主时钟、A/V sync、背压、Canvas、seek generation、结束和重播尽量复用。该接口是视频实现内部边界，不加入查看器公共协议，也不预先演化成通用媒体框架；OGV.js 可以在收益明确前保持现有专用路径。
+Mediabunny 和 FFmpeg 分别实现需要的 provider。音视频可以复用 PCM lookahead、AudioContext 时钟、gain、seek generation、结束、重播和清理；只有视频层处理 Canvas、A/V sync 和视频帧背压。接口属于内部实现边界，不加入查看器公共协议，也不预先演化成通用媒体框架；OGV.js 可以在收益明确前保持现有专用路径。
 
 ## 9. 源码构建与资产交付
 
@@ -199,42 +220,49 @@ FFmpeg 构建的许可证取决于最终 configure 选项和链接组件。首�
 open → 主轨信息 → 第一帧/第一段音频 → 连续解码 → seek → close
 ```
 
-代表组合：
+视频代表组合：
 
 1. AVI + MPEG-4 Part 2/Xvid + MP3；
 2. MPEG-PS/VOB + MPEG-2 Video + AC-3，并补一个 MP2 音频对照；
 3. ASF/WMV + Windows Media Video + WMA。
 
-同时准备 video-only、audio-only、损坏、截断、不支持 codec 和资源超限反例。记录 WASM/JS/Worker raw 与 gzip 体积、初始化和首帧时间、持续解码帧率、峰值/稳定内存、seek 延迟、读取量和取消完成时间。
+音频代表组合：
+
+1. AIFF/AIFC + PCM 代表 sample format；
+2. ASF audio-only + WMA 代表组合；
+3. APE 代表版本与压缩等级。
+
+同时准备 video-only、audio-only、attached picture、多主轨、损坏、截断、不支持 codec 和资源超限样例。audio-only 是 `ffmpeg-video` 的反例，也是 `ffmpeg-audio` 的正常/反例语料；含主视频节目则相反。记录 WASM/JS/Worker raw 与 gzip 体积、每组 demuxer/decoder 的增量、初始化和首帧/首 buffer 时间、持续解码帧率或实时倍速、CPU、峰值/稳定内存、seek 延迟、读取量和取消完成时间。
 
 ### 3.1 首批插件交付
 
 只有 spike 达到体积、实时播放、内存、seek、取消、许可和部署门槛后才：
 
 - 锁定正式 FFmpeg/Emscripten 版本与构建配置；
-- 确定首批容器 × codec 组合和 manifest 扩展名；
-- 实现独立 probe 与 `ffmpeg-video` registration；
-- 接入内部 decoded-media provider 和播放器 UI；
+- 分别确定首批视频容器 × 视频/音频 codec 组合、音频容器/裸码流 × codec/sample format 组合和 manifest 扩展名；
+- 实现独立 video/audio probe 与 `ffmpeg-video`、`ffmpeg-audio` registration；
+- 接入各自 decoded provider、播放 session 和 UI；
 - 添加 prepare、哈希、许可证、响应头和 bundle 门禁；
-- 以真实 Chromium 完成端到端与生命周期验收。
+- 以真实目标浏览器完成音视频各自的端到端与生命周期验收。
 
 ### 3.2 按证据扩展
 
-后续按真实使用价值增加 FLV、其他 AVI/MPEG-PS/ASF、普通 MOV/3GPP 或其他历史组合。每批只增加有固定样例和完整播放证据的组合。专业 MOV/MXF、timecode、逐帧和专业色彩属于阶段 4，即使底层 decoder 已存在也不能自动并入阶段 3。
+视频后续按真实使用价值增加 FLV、其他 AVI/MPEG-PS/ASF、普通 MOV/3GPP 或其他历史组合；音频后续按价值评估 Musepack、AMR、AC-3/E-AC-3、Sun/NeXT、RealAudio 和更多 AIFF/WMA/APE 变体。每批只增加有固定样例、独立 probe 和完整播放证据的组合。专业 MOV/MXF、timecode、专业色彩、BWF/ADM 等领域语义属于各自后续阶段，即使底层 decoder 已存在也不能自动并入阶段 3。
 
 ## 11. 阶段验收标准
 
 每个正式声明组合必须满足：
 
 - 只处理本地 `File`，不上传、不联网读取容器引用，也不整体复制大文件；
-- FFmpeg 资产只在插件完整实现被选中后加载；
-- `open()` 在真实首个视频帧，以及文件存在主音频时的首个可用音频 buffer 已准备后返回；
-- 连续播放、暂停、音量、A/V sync、前后与快速 seek、结束和重播可用；
+- FFmpeg 资产只在 `ffmpeg-video` 或 `ffmpeg-audio` 完整实现被选中后加载，且只有一份精确版本产物；
+- 视频 `open()` 在真实首个视频帧，以及文件存在主音频时的首个可用音频 buffer 已准备后返回；音频 `open()` 在首个时间戳和长度有效的 PCM buffer 与可销毁播放链准备后返回；
+- 连续播放、暂停、音量、前后与快速 seek、结束和重播可用；视频组合另需 A/V sync；
+- 用户手势前不自动播放或发声，静音首 buffer 不被误判为损坏；
 - 队列、WASM memory、尺寸、轨道、索引、probe 和读取工作量有边界；
 - opening abort、active abort、切换与重复 dispose 都能停止 Worker、声音、帧和回调；
-- 损坏、不支持 codec、资源超限和环境失败准确映射，不静默丢弃应有主音频；
+- 损坏、不支持 codec、资源超限和环境失败准确映射；视频不静默丢弃应有主音频，音频不静默选择未实现的多主轨；
 - 产物、源码、版本、哈希、构建配置、许可证、部署响应头和 CSP 可审计；
-- `/view` 首包、manifest、probe 与无关插件 chunk 不包含 FFmpeg；
+- `/view` 首包、manifest、probe、browser/non-native 音视频插件与无关 chunk 不包含 FFmpeg；
 - 自动协议测试、插件测试、真实浏览器 smoke、`pnpm test`、`pnpm lint` 和 `pnpm build` 通过。
 
 ## 12. Spike 后需要锁定的决策
@@ -243,7 +271,7 @@ open → 主轨信息 → 第一帧/第一段音频 → 连续解码 → seek �
 - 宽 decoder 构建是否达到体积目标，是否需要 demuxer/decoder allowlist；
 - 单线程是否足够，是否需要 SIMD 或 pthread variant；
 - WORKERFS 在目标浏览器和大文件上的偏移、seek 与内存结果；
-- 首批正式支持组合、扩展名和 probe 预算；
+- 首批正式视频/音频支持组合、各自扩展名和 probe 预算；
 - 视频 plane 的最终传输格式与浏览器绘制路径；
 - 运行资产放同源部署还是受控资产域名，以及对应离线行为；
 - 最终许可证、对应源码分发和 codec 专利决策。
@@ -255,6 +283,9 @@ open → 主轨信息 → 第一帧/第一段音频 → 连续解码 → seek �
 - [视频查看实施路线图](roadmap.md)
 - [视频查看架构](architecture.md)
 - [视频格式支持矩阵](support-matrix.md)
+- [音频查看实施路线图](../audio/roadmap.md)
+- [音频查看架构](../audio/architecture.md)
+- [音频格式支持矩阵](../audio/support-matrix.md)
 - [格式查看器插件协议](../viewer-plugin-protocol.md)
 - [查看器插件渲染规范](../viewer-render-tips.md)
 - [查看器加载、渲染与部署约定](../viewer-loading-and-deployment.md)

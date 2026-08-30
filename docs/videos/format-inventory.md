@@ -33,7 +33,7 @@
 | MXF | `.mxf` | MPEG-2、AVC-Intra、DNx、JPEG 2000 等 | 阶段 4 专业播放候选 |
 | 3GPP | `.3gp` `.3g2` | AVC/H.263、AAC/AMR 等 | 原生组合阶段 1，其余按需求进入阶段 3 |
 
-`.ogg`、`.mp4` 等容器也可能只有音频轨道。视频插件必须检查是否存在可播放视频轨道；audio-only 文件留给未来音频插件。
+`.ogg`、`.mp4` 等容器也可能只有音频轨道。视频插件必须检查是否存在可播放主视频节目；audio-only 文件交给[音频插件路线](../audio/architecture.md)，attached picture 或 album cover 不视为主视频节目。
 
 ## 3. 视频 codec 候选
 
@@ -68,7 +68,7 @@
 | FLAC | Matroska/WebM 等 | 组合与浏览器行为需独立验证 |
 | DTS family | Matroska/TS 等 | 近期不承诺 |
 
-本文不规划 `.mp3`、`.flac`、`.wav`、`.m4a` 等独立音频文件的产品体验。
+本文不规划 `.mp3`、`.flac`、`.wav`、`.m4a` 等独立音频文件的产品体验；相关候选见[音频格式与编码候选清单](../audio/format-inventory.md)。
 
 ## 5. 字幕和辅助轨道
 
@@ -83,7 +83,7 @@
 
 ## 6. 明确排除的类别
 
-- 独立音频文件；
+- 独立音频文件；由[音频路线图](../audio/roadmap.md)规划；
 - HLS、DASH、RTMP、SRT、WebRTC 等传输或流媒体协议；
 - DRM、加密媒体和访问控制绕过；
 - DVD/Blu-ray 菜单、播放列表、分支和加密体系；
@@ -93,6 +93,7 @@
 
 ## 7. 参考资料
 
+- [音频格式与编码候选清单](../audio/format-inventory.md)
 - [IANA Media Types](https://www.iana.org/assignments/media-types/media-types.xhtml)
 - [MP4 Registration Authority](https://mp4ra.org/)
 - [WebM Container Guidelines](https://www.webmproject.org/docs/container/)

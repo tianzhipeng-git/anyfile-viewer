@@ -6,7 +6,7 @@
 - 第二批 MPEG-TS 已完成：单 program 的 AVC/HEVC + AAC/MP3/video-only，覆盖 188-byte TS 与 192-byte M2TS 真实播放证据。
 - 第三批普通 QuickTime 已完成：AVC + PCM S16LE、HEVC video-only；与原生 AVC/AAC MOV 按内容 probe 竞争。
 - 第四批 Ogg Video 已完成：OGV.js 1.9.0 软件解码 Theora + Vorbis/Opus/video-only，Worker/WASM 仅在 Ogg 完整路径加载。
-- AVI、MPEG-PS、MPEG-1/2 Video、AC-3/DTS 的依赖 spike 在阶段 2 内以“没有可直接接入的合适 provider”闭环；它们不是阶段 2 已声明范围，也不阻塞本阶段完成。阶段 2 完成后的产品决策是将受控 FFmpeg 播放 fallback 正式列为阶段 3，见 [FFmpeg 播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
+- AVI、MPEG-PS、MPEG-1/2 Video、AC-3/DTS 的依赖 spike 在阶段 2 内以“没有可直接接入的合适 provider”闭环；它们不是阶段 2 已声明范围，也不阻塞本阶段完成。阶段 2 完成后的产品决策是将受控 `ffmpeg-video` fallback 正式列为阶段 3，并与音频阶段 3 共享底层运行资产，见 [FFmpeg 音视频播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
 
 ## Summary
 
@@ -88,7 +88,7 @@ non-native-video
   1. MPEG-TS：AVC/HEVC + AAC/MP3 已完成；未声明 codec 与多 program/多音轨语义按需求继续扩展；
   2. Ogg：Theora + Vorbis/Opus/video-only 已通过 OGV.js 软件解码交付；
   3. MOV 中 AVC/HEVC + PCM S16 或 video-only 已交付；
-  4. AVI、MPEG-PS：Mediabunny 当前不直接覆盖；阶段 2 的依赖 spike 已结束，转入阶段 3 的独立 FFmpeg 播放 fallback；
+  4. AVI、MPEG-PS：Mediabunny 当前不直接覆盖；阶段 2 的依赖 spike 已结束，转入阶段 3 的独立 `ffmpeg-video` fallback，并复用共享 FFmpeg runtime；
   5. AC-3、DTS、MPEG-2 等 Chromium 原生 decoder 缺口，作为阶段 3 的具体容器 × codec 组合逐批验收；Theora 已由 OGV.js 路径交付。
 - 新增 codec provider不得进入其他 codec 的加载路径；例如打开 MKV/AVC/AAC 时不能下载 AC-3 或 MPEG-2 decoder。
 - ProRes、DNx、MXF、timecode 等仍留给阶段 4 `professional-video`，不因阶段 3 引入 FFmpeg decoder 就自动宣称支持。
@@ -106,5 +106,5 @@ non-native-video
 
 - 第一目标环境为 Chromium，运行时仍以实际 track decoder config 为准；缺少所需 WebCodecs 能力时返回 `unsupported-environment`。
 - 第一批追求“一个通用 MKV 播放管线覆盖多种 Chromium 可解 codec”，不是为每个组合复制实现。
-- 阶段 2 不自行构建通用 FFmpeg/WASM；OGV.js 使用锁定的上游预构建 Ogg 专用资产。后续阶段 3 另行构建只播放、按需加载且按组合声明的 FFmpeg fallback，不回写为阶段 2 能力。
+- 阶段 2 不自行构建通用 FFmpeg/WASM；OGV.js 使用锁定的上游预构建 Ogg 专用资产。后续阶段 3 另行构建音视频共享、只播放、按需加载且按组合声明的 FFmpeg runtime，不回写为阶段 2 能力。
 - Mediabunny 的 MPL-2.0 许可证与项目分发方式可接受，并保留版权与许可证要求。

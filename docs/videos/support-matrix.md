@@ -1,6 +1,6 @@
 # 视频格式支持矩阵
 
-- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 FFmpeg 播放 fallback 已规划、尚未实现，专业视频顺延为阶段 4
+- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 `ffmpeg-video` 已规划、尚未实现，并与音频阶段 3 共享 FFmpeg runtime；专业视频顺延为阶段 4
 - 事实来源：固定真实样例、目标环境中的真实播放、自动协议测试和锁定依赖
 - 覆盖口径：以实际可播放的容器 × 视频 codec × 音频 codec 组合计数，不以扩展名数量或最高支持等级计数
 
@@ -86,7 +86,7 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | Flash Video | Sorenson/VP6/AVC 等 | AAC/MP3 等 | FFmpeg video fallback | 0 | deferred | 3 | 阶段 3 后续批次，取决于真实需求 |
 | QuickTime/MOV | ProRes | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 4，先播放再增加专业能力；不能因阶段 3 decoder 存在而自动宣称支持 |
 | MXF | MPEG-2、AVC-Intra、DNx、JPEG 2000 等 | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 4，按具体专业组合实现 |
-| audio-only MP4/WebM/Ogg | 无 | 任意 | future audio | 0 | deferred | 0 | 视频 probe 必须返回 0；不属于视频路线图 |
+| audio-only MP4/WebM/Ogg | 无主视频节目 | 已规划音频子集 | browser/non-native/FFmpeg audio | 0 | planned | 0 | 视频 probe 必须返回 0；实际音频支持状态见[音频矩阵](../audio/support-matrix.md)，attached picture 不算主视频节目 |
 
 `browser video` 对损坏的 A/V 轨道或 codec 不在声明范围内的文件返回 0，但不会因无法识别或非 A/V 的辅助轨道否决已有合法主 A/V。由于浏览器能力查询可能假阴性，probe 不调用 `canPlayType()`、不创建 DOM；真实环境解码失败由 `open()` 返回 `unsupported-environment`。只有已经实现端到端播放的后续插件才能接管，不增加只解析 metadata 的视频候选。
 
@@ -183,3 +183,10 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 - 多视频/音频轨、字幕、章节和附件；
 - primaries、transfer、matrix、range、HDR 和 alpha；
 - 逐帧、timecode 和专业轨道能力。
+
+## 9. 相关文档
+
+- [视频查看实施路线图](roadmap.md)
+- [视频查看架构](architecture.md)
+- [FFmpeg 音视频播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)
+- [音频格式支持矩阵](../audio/support-matrix.md)

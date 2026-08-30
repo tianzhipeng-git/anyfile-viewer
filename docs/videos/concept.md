@@ -17,7 +17,7 @@
 
 以下内容不属于本路线图：
 
-- 独立音频文件；未来由 `docs/audio/` 和音频插件规划；
+- 独立音频文件；由[音频查看路线图](../audio/roadmap.md)和独立音频插件规划；
 - HLS、DASH、RTMP、WebRTC 等流媒体协议；
 - DRM、付费内容和访问控制绕过；
 - 摄像头采集、录屏和实时通信；
@@ -105,6 +105,7 @@ MP4 等容器可能把索引放在文件头、文件尾，或使用多个 fragme
 
 ## 7. 参考资料
 
+- [音频查看相关概念](../audio/concept.md)
 - [WHATWG HTML media elements](https://html.spec.whatwg.org/multipage/media.html)
 - [RFC 6381: The `codecs` and `profiles` Parameters](https://www.rfc-editor.org/rfc/rfc6381)
 - [W3C Media Capabilities](https://www.w3.org/TR/media-capabilities/)

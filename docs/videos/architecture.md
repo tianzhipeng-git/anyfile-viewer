@@ -1,8 +1,8 @@
 # 视频查看架构
 
-- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 规划独立 FFmpeg 播放 fallback，专业视频顺延为阶段 4
+- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 规划独立 `ffmpeg-video` 插件并与 `ffmpeg-audio` 共享 FFmpeg 播放 runtime，专业视频顺延为阶段 4
 - 适用范围：浏览器本地打开的视频文件
-- 不包含：独立音频、流媒体、DRM、编辑、转码和服务端处理
+- 不包含：独立音频、流媒体、DRM、编辑、转码和服务端处理；独立音频见[音频查看架构](../audio/architecture.md)
 
 ## 1. 设计目标
 
@@ -68,7 +68,7 @@ File
   ├── browser-video → Object URL → <video>
   ├── non-native-video → Mediabunny demux → WebCodecs → Canvas / Web Audio
   │                    └→ OGV.js Ogg demux/Theora software decode → Canvas / Web Audio
-  ├── ffmpeg-video → decode-only FFmpeg Worker/WASM → normalized frames / PCM
+  ├── ffmpeg-video → shared decode-only FFmpeg Worker/WASM → normalized frames / PCM
   │                └→ Canvas / Web Audio playback session
   └── future professional video → 领域 demux/decoder → 专业播放管线（阶段 4）
 ```
@@ -81,14 +81,14 @@ File
 |---|---|---|
 | browser video | 浏览器可原生播放的 MP4/WebM 等具体组合 | `<video controls>` + Object URL |
 | non-native video | 浏览器不能原生播放、但用户价值明确的 Matroska、MPEG-TS、普通 MOV、Ogg 等组合 | 容器 demuxer + 选定 decoder + 最小播放管线 |
-| FFmpeg video fallback | 前两条路径未覆盖、并在阶段 3 逐项验收的 AVI、MPEG-PS/ASF 等普通组合 | 自建 decode-only FFmpeg Worker/WASM + 最小播放管线 |
+| FFmpeg video fallback | 前两条路径未覆盖、并在阶段 3 逐项验收的 AVI、MPEG-PS/ASF 等普通组合 | 共享 decode-only FFmpeg Worker/WASM + 视频 adapter + 最小播放管线 |
 | professional video | MOV/MXF 中的 ProRes、DNx、timecode 等 | 领域 demux/decoder + 专业交互（阶段 4） |
 
-这些边界是控制依赖和产品语义的规划工具，不是公共接口。阶段 1 使用 `browser-video`；阶段 2 的 Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 组合使用 `non-native-video`；阶段 3 使用独立 `ffmpeg-video`，具体见 [FFmpeg 播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
+这些边界是控制依赖和产品语义的规划工具，不是公共接口。阶段 1 使用 `browser-video`；阶段 2 的 Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 组合使用 `non-native-video`；阶段 3 使用独立 `ffmpeg-video`，但与 `ffmpeg-audio` 共享一份底层运行资产，具体见 [FFmpeg 音视频播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
 
 不规划面向用户的 metadata-only 视频插件。容器和轨道解析只服务于 probe、错误诊断及实际播放管线；不能播放主要内容的候选返回 0，不以“可检查 metadata”占据视频查看器位置。
 
-同一扩展名可以由多个播放插件竞争。例如 `.mov` 文件中浏览器可播放的 AVC 由 browser video 返回较高等级，已由 `non-native-video` 交付的普通组合保持原路径；未来包含 ProRes 的文件只有在阶段 4 完成专业播放证据后才由 professional video 返回更高等级。没有视频轨道的 `.mp4` 或 `.ogg`，视频 probe 应返回 0，留给未来音频插件。
+同一扩展名可以由多个播放插件竞争。例如 `.mov` 文件中浏览器可播放的 AVC 由 browser video 返回较高等级，已由 `non-native-video` 交付的普通组合保持原路径；未来包含 ProRes 的文件只有在阶段 4 完成专业播放证据后才由 professional video 返回更高等级。没有主视频节目、但有主音轨的 `.mp4`、`.webm` 或 `.ogg`，视频 probe 应返回 0，交给 `browser-audio` / `non-native-audio` / `ffmpeg-audio` 竞争；attached picture 不视为主视频节目。
 
 ## 6. 阶段 1 原生播放路径
 
@@ -170,7 +170,7 @@ opening abort、active abort、切换文件和重复 dispose 必须走同一套�
 
 阶段 2 已交付 `.mkv`/`.mk3d` Matroska、`.ts`/`.mts`/`.m2ts`/`.m2t` MPEG-TS、普通 `.mov`/`.qt` 与 `.ogv`/`.ogg` Theora。前三类由 Mediabunny 1.55.3 分片 demux、WebCodecs 解码并复用 Canvas/Web Audio 会话；Ogg 由独立延迟路径加载 OGV.js 1.9.0 的 Ogg demux 与 Theora/Vorbis/Opus Worker/WASM。软件音频同样只在用户操作后恢复 AudioContext。两套完整实现不共享动态 chunk，probe 不加载任一运行时。
 
-阶段 3 增加独立 `ffmpeg-video`，从锁定官方源码构建关闭编码、封装、滤镜、设备与网络能力的播放运行时。它只承接前两条路径未覆盖、且已经完成独立 probe 与端到端证据的普通视频组合；FFmpeg 编译能力本身不等于产品支持。每个组合在进入实现前至少要有可行的：
+阶段 3 增加独立 `ffmpeg-video`，使用从锁定官方源码构建、关闭编码、封装、滤镜、设备与网络能力的共享播放 runtime。该 runtime 同时服务独立的 `ffmpeg-audio` adapter，但两个插件的 manifest、probe、UI 和支持证据互不替代。`ffmpeg-video` 只承接前两条视频路径未覆盖、且已经完成独立 probe 与端到端证据的普通视频组合；FFmpeg 编译能力本身不等于产品支持。每个视频组合在进入实现前至少要有可行的：
 
 - 容器 demux 与精确时间戳；
 - 视频和音频 decoder 能力与版本；
@@ -193,13 +193,15 @@ opening abort、active abort、切换文件和重复 dispose 必须走同一套�
 - `viewer-rendering` 的 `ResourceScope`；
 - 现有主题变量、内部滚动规范和动态加载门禁。
 
-暂不创建 `MediaDocument`、`MediaPlayer`、`TrackModel` 或统一媒体工具栏。阶段 3 的 FFmpeg spike 成功后，Mediabunny 与 FFmpeg 会成为两个真实 decoded-media provider，此时只提取播放所需的最小内部 provider 边界，复用 Canvas、Web Audio、A/V clock、背压和 seek generation；不把它加入公共插件协议。独立音频和阶段 4 专业视频仍保留自己的内容模型，出现真实重复后再评估进一步共享。
+暂不创建 `MediaDocument`、`MediaPlayer`、`TrackModel` 或统一媒体工具栏。阶段 3 的 FFmpeg spike 与一个真实 `non-native-audio` vertical slice 成功后，只提取播放所需的最小内部 provider 和 PCM scheduler 边界：音视频可以复用 Web Audio 时钟、PCM lookahead、gain、seek generation、结束和清理；Canvas、视频帧背压与 A/V sync 仍属于视频层。独立音频和阶段 4 专业视频保留自己的内容模型，内部边界不加入公共插件协议。
 
 ## 13. 参考资料
 
 - [格式查看器插件协议](../viewer-plugin-protocol.md)
 - [查看器插件渲染规范](../viewer-render-tips.md)
 - [查看器加载、渲染与部署约定](../viewer-loading-and-deployment.md)
+- [音频查看架构](../audio/architecture.md)
+- [音频查看实施路线图](../audio/roadmap.md)
 - [WHATWG HTML media elements](https://html.spec.whatwg.org/multipage/media.html)
 - [W3C Media Capabilities](https://www.w3.org/TR/media-capabilities/)
 - [W3C WebCodecs](https://www.w3.org/TR/webcodecs/)
