@@ -1,6 +1,6 @@
 # 视频查看实施路线图
 
-- 状态：阶段 0、阶段 1 与阶段 2 已于 2026-08-30 完成基准环境验收；阶段 2 覆盖 Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora
+- 状态：阶段 0、阶段 1 与阶段 2 已于 2026-08-30 完成基准环境验收；阶段 3 规划为按需加载的 FFmpeg 播放 fallback，原专业能力阶段顺延为阶段 4
 - 范围：浏览器本地打开的视频文件；包含文件内音频和字幕轨道，不包含独立音频文件
 - 产品结果：播放主要节目，不交付只能检查 metadata、轨道结构、封面或首帧的视频插件
 - 核心目标：在满足播放与资源安全底线后，优先扩大可播放的容器 × 视频 codec × 音频 codec 组合
@@ -38,7 +38,7 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 - 已建立可重复的 FFmpeg 生成脚本、FFprobe 参数记录和 probe 测量脚本；
 - 已确定 256 KiB 头部 + 256 KiB 尾部、总计 512 KiB 的初始 probe 读取预算，以及深度 12、轨道 32、访问项 4,096 的结构边界；
 - 已用真实 Chromium 151 验证 metadata、首帧、连续播放、基础 seek、错误和 Object URL/媒体清理顺序；
-- 已记录持续验收环境、未测试环境和首包/插件 chunk 门禁。完整证据见[阶段 0 验收证据](stage-0-evidence.md)。
+- 已记录持续验收环境、未测试环境和首包/插件 chunk 门禁。完整证据见[阶段 0 验收证据](roadmap-stage0-evidence.md)。
 
 ### 工作
 
@@ -114,7 +114,7 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 - 初始 `/view` bundle 不包含视频完整实现或 probe parser；
 - 支持矩阵按实际环境记录等级 3 或 4 及已知限制。
 
-文件尾 `moov`、fragmented MP4、edit list、VFR、rotation 等变体如果影响某个已声明组合的基本播放，应作为该组合的缺陷修复；如果只影响高级语义，则进入阶段 3，不再单独占据一个“深挖 browser-video”的产品阶段。
+文件尾 `moov`、fragmented MP4、edit list、VFR、rotation 等变体如果影响某个已声明组合的基本播放，应作为该组合的缺陷修复；如果只影响高级语义，则进入阶段 4，不再单独占据一个“深挖 browser-video”的产品阶段。
 
 ## 4. 阶段 2：非原生格式播放扩展
 
@@ -146,10 +146,10 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 - 普通 QuickTime 增加 AVC/HEVC + PCM S16 或 video-only 路径，复用 Mediabunny/WebCodecs 播放会话，并与 `browser-video` 的 AVC/AAC MOV 通过精确 probe 分工；
 - Ogg 增加 Theora + Vorbis/Opus/video-only 软件播放路径，锁定 OGV.js 1.9.0，仅分发 Ogg 所需 Worker/WASM 与许可证；AudioContext 在用户播放手势后才恢复；
 - Ogg 与 Mediabunny 完整实现分别动态加载，manifest/probe、首包和无关格式均不包含软件 decoder；
-- AVI/MPEG-PS 与 MPEG-1/2/AC-3/DTS 已完成依赖 spike，但未形成满足体积、裁剪、许可和维护边界的 provider，明确转为按真实需求另立交付，不作为阶段 2 的虚假支持；
-- 阶段 2 至此完成，后续工作进入阶段 3 的体验/专业能力，或由新需求触发新的容器/provider 项目。
+- AVI/MPEG-PS 与 MPEG-1/2/AC-3/DTS 已完成依赖 spike，但阶段 2 未形成满足体积、裁剪、许可和维护边界的 provider，不作为阶段 2 的虚假支持；
+- 阶段 2 至此完成；后续以阶段 3 的独立 `ffmpeg-video` fallback 承接剩余高价值普通格式，具体方案见 [FFmpeg 播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
 
-### 阶段 2 之外的后续候选
+### 转入阶段 3 的覆盖候选
 
 - Matroska 中尚未交付但需求明确的 codec 组合与容器语义；
 - AVI 中用户常见且 decoder 可控的 codec 子集；
@@ -162,7 +162,7 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 ### 实现原则
 
 - 优先使用维护活跃、许可清楚、可锁定版本的现成 demuxer 和 decoder；确需自行构建时遵守[源码构建型第三方依赖规范](../viewer-source-built-dependencies.md)；
-- WebCodecs、WASM 或裁剪后的 FFmpeg 组件只是实现手段，不构成万能 fallback；
+- 阶段 3 的 FFmpeg 是有明确扩展名、probe、codec 子集和验收证据的播放 fallback，不是对 FFmpeg 理论能力的无条件宣称；
 - 重型依赖仅在对应完整插件打开后加载，不进入 manifest、probe、首包或无关插件 chunk；
 - demux、视频解码、音频输出、A/V clock、seek、背压和结束状态形成完整播放路径；
 - 每条路径都能取消，并释放 Worker、WASM、AudioContext、帧缓存和 GPU 资源；
@@ -179,9 +179,27 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 - 依赖版本、许可证、资产来源、CSP、COOP/COEP 和部署路径可审计；
 - 首包和不相关插件不包含新增 parser、decoder 或媒体实现。
 
-## 5. 阶段 3：播放体验与专业能力增强
+## 5. 阶段 3：FFmpeg 播放 fallback
 
-阶段 3 按用户价值增强已经可播放的组合，并评估专业视频播放，不作为扩大普通格式覆盖的前置阶段。
+阶段 3 新增独立的 `ffmpeg-video` 插件，覆盖浏览器原生与 `non-native-video` 均不能播放、但 FFmpeg 能以可接受成本完成端到端播放的高价值普通格式。它不替换前两条轻量路径，也不在前两条路径失败后由宿主自动重试；各插件通过扩展名候选、轻量 probe、真实支持等级和稳定注册顺序竞争。
+
+本阶段不直接采用完整 `ffmpeg.wasm` CLI，也不接入完整 libav.js/libmedia 分发。项目从锁定的 FFmpeg 官方源码构建只读、解码用途的 Worker/WASM 运行时，关闭程序、编码、封装、滤镜、设备和网络等无关能力，并通过项目自有的窄 C/JS bridge 暴露打开、读取媒体信息、连续解码、seek、flush 和关闭。首个 spike 先验证 AVI、MPEG-PS/VOB、ASF/WMV 三组代表组合，再根据实测体积、首帧、内存、seek、取消、许可和部署结果决定首批 manifest 范围。
+
+详细构建、插件边界、播放接入、分批交付和验收方案见 [FFmpeg 播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
+
+### 完成标准
+
+- FFmpeg 与 Emscripten 版本、源码哈希、构建容器、功能开关、许可证和运行资产均可审计、可重复构建；
+- manifest 和 probe 不加载 FFmpeg，完整运行时只在 `ffmpeg-video` 被选中后按需加载；
+- 首批声明组合满足首帧、连续画面、应有主音频、A/V sync、基础 seek、结束和重播；
+- 大文件不整体复制进主线程内存，帧、PCM、WASM 内存、索引工作量和并发队列有明确上限；
+- opening abort、active abort、快速 seek、切换与重复 dispose 都能终止 Worker 并释放声音、帧和 DOM；
+- 损坏、截断、不支持 codec、资源超限与环境不支持返回准确结果，不静默丢弃主音频；
+- 未完成端到端证据的 FFmpeg 格式不进入 manifest，也不进入产品支持文案。
+
+## 6. 阶段 4：播放体验与专业能力增强
+
+阶段 4 按用户价值增强已经可播放的组合，并评估专业视频播放，不作为扩大普通格式覆盖的前置阶段。FFmpeg 可以作为某些专业组合的底层 demux/decode 能力，但不能因为阶段 3 运行时已经包含 decoder，就自动宣称专业格式支持。
 
 ### 普通播放增强候选
 
@@ -199,7 +217,7 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 
 专业方向仍必须先完成主要画面、应有音频、时间轴和资源清理，不能用 metadata 面板代替播放能力。
 
-## 6. 每个可播放组合的交付清单
+## 7. 每个可播放组合的交付清单
 
 ### 必须完成
 

@@ -1,12 +1,12 @@
 # 视频格式支持矩阵
 
-- 状态：阶段 0、阶段 1 与阶段 2 已完成；Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 路径已验收
+- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 FFmpeg 播放 fallback 已规划、尚未实现，专业视频顺延为阶段 4
 - 事实来源：固定真实样例、目标环境中的真实播放、自动协议测试和锁定依赖
 - 覆盖口径：以实际可播放的容器 × 视频 codec × 音频 codec 组合计数，不以扩展名数量或最高支持等级计数
 
 网站 catalog 只概括已交付的容器入口，不替代组合级支持证据。只有本表中达到 `implemented` 或 `verified`、并能播放主要节目的具体组合，才可以进入视频支持文案。
 
-阶段 0 的固定样例、probe 测量和原始媒体元素结果见[阶段 0 验收证据](stage-0-evidence.md)。阶段 1 与阶段 2 的组合状态来自各插件固定样例上的实际播放测试。
+阶段 0 的固定样例、probe 测量和原始媒体元素结果见[阶段 0 验收证据](roadmap-stage0-evidence.md)。阶段 1 与阶段 2 的组合状态来自各插件固定样例上的实际播放测试。
 
 ## 1. 支持等级
 
@@ -74,17 +74,18 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | MPEG-TS，188-byte，单 program | AVC/H.264 Baseline，8-bit 4:2:0 | AAC，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
 | MPEG-TS，188-byte，单 program | HEVC Main，8-bit 4:2:0 | MP3，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
 | M2TS，192-byte，单 program | AVC/H.264 Baseline，8-bit 4:2:0 | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only、seek 与 resize 通过 |
-| AVI | 选定高频 codec | 选定高频音频 | non-native video | 0 | deferred | 3 | 需受控 libav.js 裁剪 variant；不引入约 167 MB 完整 npm 分发 |
-| MPEG-PS | MPEG-1/2 等选定组合 | MP2/AC-3 等 | non-native video | 0 | deferred | 3 | Mediabunny 不覆盖；PL_MPEG 仅覆盖 MPEG-1+MP2，libav.js 需单独裁剪项目 |
-| MPEG-TS | MPEG-1/2 Video、AC-3、多 program/多主音频等未声明组合 | 对应音频 | non-native video | 0 | deferred | 3 | 需独立 decoder provider 或轨道语义，按真实需求另立交付 |
+| AVI | MPEG-4 Part 2/Xvid 等首批代表组合 | MP3 等首批代表组合 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 spike；通过体积、seek、内存、取消、许可和真实播放后才确定声明子集 |
+| MPEG-PS/VOB | MPEG-2 Video 等首批代表组合 | AC-3/MP2 等 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 spike；不包含 DVD 菜单、分支和加密语义 |
+| ASF/WMV | Windows Media Video 首批代表组合 | WMA 首批代表组合 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 spike；具体 codec/profile 以固定样例和端到端证据为准 |
+| MPEG-TS | MPEG-1/2 Video、AC-3、多 program/多主音频等未声明组合 | 对应音频 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 按具体组合评估；多 program/多主音频仍需独立轨道语义 |
 | Ogg Video | Theora | Vorbis，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；OGV.js 软件解码，非静音 PCM 与 seek 通过 |
 | Ogg Video | Theora | Opus，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；OGV.js 软件解码 |
 | Ogg Video | Theora | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only 不创建 AudioContext |
 | 3GPP，尾部 `moov` | AVC/H.264 Constrained Baseline L1.3 | AAC-LC，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
-| 3GPP | H.263 等其他组合 | AMR 等 | non-native video | 0 | planned | 3–4 | 未声明组合按阶段 2 评估 |
-| Flash Video | Sorenson/VP6/AVC 等 | AAC/MP3 等 | non-native video | 0 | deferred | 3 | 阶段 2 低优先级，取决于真实需求 |
-| QuickTime/MOV | ProRes | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 3，先播放再增加专业能力 |
-| MXF | MPEG-2、AVC-Intra、DNx、JPEG 2000 等 | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 3，按具体专业组合实现 |
+| 3GPP | H.263 等其他组合 | AMR 等 | FFmpeg video fallback | 0 | planned | 3–4 | 阶段 3 按真实需求和固定样例评估 |
+| Flash Video | Sorenson/VP6/AVC 等 | AAC/MP3 等 | FFmpeg video fallback | 0 | deferred | 3 | 阶段 3 后续批次，取决于真实需求 |
+| QuickTime/MOV | ProRes | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 4，先播放再增加专业能力；不能因阶段 3 decoder 存在而自动宣称支持 |
+| MXF | MPEG-2、AVC-Intra、DNx、JPEG 2000 等 | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 4，按具体专业组合实现 |
 | audio-only MP4/WebM/Ogg | 无 | 任意 | future audio | 0 | deferred | 0 | 视频 probe 必须返回 0；不属于视频路线图 |
 
 `browser video` 对损坏的 A/V 轨道或 codec 不在声明范围内的文件返回 0，但不会因无法识别或非 A/V 的辅助轨道否决已有合法主 A/V。由于浏览器能力查询可能假阴性，probe 不调用 `canPlayType()`、不创建 DOM；真实环境解码失败由 `open()` 返回 `unsupported-environment`。只有已经实现端到端播放的后续插件才能接管，不增加只解析 metadata 的视频候选。
@@ -155,7 +156,7 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 
 - manifest 扩展名、协议版本和 workspace 权限；
 - 有界 probe 对正常、损坏、截断、伪装、audio-only 和不支持子集返回正确等级；
-- 同扩展名的 browser、non-native 和 professional 候选动态排序稳定；
+- 同扩展名的 browser、non-native、FFmpeg fallback 和 professional 候选动态排序稳定；
 - 完整 `open()` 的 success/error/abort 事件映射；
 - opening abort、active abort、重复 dispose、媒体停止及 DOM 所有权；
 - 原生路径的 Object URL 撤销；自定义路径的 Worker、WASM、AudioContext、帧缓存和 GPU 清理；

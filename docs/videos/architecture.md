@@ -1,6 +1,6 @@
 # 视频查看架构
 
-- 状态：阶段 0、阶段 1 与阶段 2 已完成；Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 播放路径已验收
+- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 规划独立 FFmpeg 播放 fallback，专业视频顺延为阶段 4
 - 适用范围：浏览器本地打开的视频文件
 - 不包含：独立音频、流媒体、DRM、编辑、转码和服务端处理
 
@@ -68,7 +68,9 @@ File
   ├── browser-video → Object URL → <video>
   ├── non-native-video → Mediabunny demux → WebCodecs → Canvas / Web Audio
   │                    └→ OGV.js Ogg demux/Theora software decode → Canvas / Web Audio
-  └── future professional video → 领域 demux/decoder → 专业播放管线
+  ├── ffmpeg-video → decode-only FFmpeg Worker/WASM → normalized frames / PCM
+  │                └→ Canvas / Web Audio playback session
+  └── future professional video → 领域 demux/decoder → 专业播放管线（阶段 4）
 ```
 
 这不是所有视频必须经过的统一流水线。原生路径不应为了统一而自行 demux 或逐帧画到 Canvas。
@@ -79,13 +81,14 @@ File
 |---|---|---|
 | browser video | 浏览器可原生播放的 MP4/WebM 等具体组合 | `<video controls>` + Object URL |
 | non-native video | 浏览器不能原生播放、但用户价值明确的 Matroska、MPEG-TS、普通 MOV、Ogg 等组合 | 容器 demuxer + 选定 decoder + 最小播放管线 |
-| professional video | MOV/MXF 中的 ProRes、DNx、timecode 等 | 领域 demux/decoder + 专业交互 |
+| FFmpeg video fallback | 前两条路径未覆盖、并在阶段 3 逐项验收的 AVI、MPEG-PS/ASF 等普通组合 | 自建 decode-only FFmpeg Worker/WASM + 最小播放管线 |
+| professional video | MOV/MXF 中的 ProRes、DNx、timecode 等 | 领域 demux/decoder + 专业交互（阶段 4） |
 
-这些边界是控制依赖和产品语义的规划工具，不是公共接口。阶段 1 使用 `browser-video`；阶段 2 的 Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 组合使用 `non-native-video`。
+这些边界是控制依赖和产品语义的规划工具，不是公共接口。阶段 1 使用 `browser-video`；阶段 2 的 Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 组合使用 `non-native-video`；阶段 3 使用独立 `ffmpeg-video`，具体见 [FFmpeg 播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
 
 不规划面向用户的 metadata-only 视频插件。容器和轨道解析只服务于 probe、错误诊断及实际播放管线；不能播放主要内容的候选返回 0，不以“可检查 metadata”占据视频查看器位置。
 
-同一扩展名可以由多个播放插件竞争。例如未来 `.mov` 文件中浏览器可播放的 AVC 由 browser video 返回较高等级，包含 ProRes 的文件由 professional video 返回更高等级。没有视频轨道的 `.mp4` 或 `.ogg`，视频 probe 应返回 0，留给未来音频插件。
+同一扩展名可以由多个播放插件竞争。例如 `.mov` 文件中浏览器可播放的 AVC 由 browser video 返回较高等级，已由 `non-native-video` 交付的普通组合保持原路径；未来包含 ProRes 的文件只有在阶段 4 完成专业播放证据后才由 professional video 返回更高等级。没有视频轨道的 `.mp4` 或 `.ogg`，视频 probe 应返回 0，留给未来音频插件。
 
 ## 6. 阶段 1 原生播放路径
 
@@ -122,7 +125,7 @@ Probe 的目标是安全排序，不是完整媒体分析：
 - 无法在预算内取得 codec 配置时，可以保守降级，不得根据扩展名返回虚假的高等级；
 - 损坏的 A/V 轨道或声明 codec 组合之外的文件返回 0；无法识别或明确为非 A/V 的辅助轨道不否决已有合法主 A/V 轨道；probe 不创建媒体元素，真实环境失败由 `open()` 的媒体错误返回；没有播放实现时不保留 metadata-only 候选。
 
-阶段 0 已用固定真实样例完成测量，初始预算为头部 256 KiB + 尾部 256 KiB、总读取 512 KiB、嵌套深度 12、轨道 32、访问项 4,096。完整观测值和调整规则见[阶段 0 验收证据](stage-0-evidence.md)。该预算来自视频样例，不是自动沿用图片阈值。
+阶段 0 已用固定真实样例完成测量，初始预算为头部 256 KiB + 尾部 256 KiB、总读取 512 KiB、嵌套深度 12、轨道 32、访问项 4,096。完整观测值和调整规则见[阶段 0 验收证据](roadmap-stage0-evidence.md)。该预算来自视频样例，不是自动沿用图片阈值。
 
 ## 8. UI 与布局
 
@@ -163,11 +166,11 @@ opening abort、active abort、切换文件和重复 dispose 必须走同一套�
 - 不支持 DRM 或绕过浏览器/系统的访问控制；
 - 达到自定义实现边界返回 `resource-limit`，损坏文件返回 `invalid-file`，缺少环境能力返回 `unsupported-environment`。
 
-## 11. 非原生播放管线的进入条件
+## 11. 非原生与 FFmpeg 播放管线的进入条件
 
 阶段 2 已交付 `.mkv`/`.mk3d` Matroska、`.ts`/`.mts`/`.m2ts`/`.m2t` MPEG-TS、普通 `.mov`/`.qt` 与 `.ogv`/`.ogg` Theora。前三类由 Mediabunny 1.55.3 分片 demux、WebCodecs 解码并复用 Canvas/Web Audio 会话；Ogg 由独立延迟路径加载 OGV.js 1.9.0 的 Ogg demux 与 Theora/Vorbis/Opus Worker/WASM。软件音频同样只在用户操作后恢复 AudioContext。两套完整实现不共享动态 chunk，probe 不加载任一运行时。
 
-后续仍按用户价值逐个选择浏览器不能原生播放的容器与 codec 组合。WebCodecs 或 WASM decoder 不做万能 fallback；每个组合在进入实现前至少要有可行的：
+阶段 3 增加独立 `ffmpeg-video`，从锁定官方源码构建关闭编码、封装、滤镜、设备与网络能力的播放运行时。它只承接前两条路径未覆盖、且已经完成独立 probe 与端到端证据的普通视频组合；FFmpeg 编译能力本身不等于产品支持。每个组合在进入实现前至少要有可行的：
 
 - 容器 demux 与精确时间戳；
 - 视频和音频 decoder 能力与版本；
@@ -179,7 +182,7 @@ opening abort、active abort、切换文件和重复 dispose 必须走同一套�
 
 交付底线是主要节目可连续播放、文件应有的主音频可用、基础 seek 可验证，并能完整取消和释放资源。rotation、pixel aspect ratio、色彩、HDR、多轨和字幕的已知缺失可以让组合停留在等级 3，后续按价值增强，不要求先升到等级 4 才扩展下一个格式。
 
-只解出第一帧或只展示 metadata 不属于本路线图的视频交付，不能包装成播放器。项目不以 FFmpeg WASM 作为未评审格式的万能 fallback。
+只解出第一帧或只展示 metadata 不属于本路线图的视频交付，不能包装成播放器。FFmpeg 运行时必须保持完整插件级按需加载、受控输入和按组合声明，不能作为未评审格式的万能入口。
 
 ## 12. 共享能力策略
 
@@ -190,7 +193,7 @@ opening abort、active abort、切换文件和重复 dispose 必须走同一套�
 - `viewer-rendering` 的 `ResourceScope`；
 - 现有主题变量、内部滚动规范和动态加载门禁。
 
-暂不创建 `MediaDocument`、`MediaPlayer`、`TrackModel` 或统一媒体工具栏。未来独立音频插件成为第二个调用方，并出现状态与生命周期真正相同的重复后，才评估提取小型 media element session；视频专业管线仍保留自己的内容模型。
+暂不创建 `MediaDocument`、`MediaPlayer`、`TrackModel` 或统一媒体工具栏。阶段 3 的 FFmpeg spike 成功后，Mediabunny 与 FFmpeg 会成为两个真实 decoded-media provider，此时只提取播放所需的最小内部 provider 边界，复用 Canvas、Web Audio、A/V clock、背压和 seek generation；不把它加入公共插件协议。独立音频和阶段 4 专业视频仍保留自己的内容模型，出现真实重复后再评估进一步共享。
 
 ## 13. 参考资料
 
