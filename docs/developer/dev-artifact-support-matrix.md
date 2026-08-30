@@ -7,7 +7,7 @@
 | ZIP 与 `.jar` `.war` `.ear` `.whl` `.nupkg` `.snupkg` | `archive-metadata-viewer` | 2 | yes | yes | `viewer/plugins/archive/examples/archive.zip`；测试生成伪装、截断、ZIP64、重复路径和超大目录 |
 | `.egg` `.pyz` `.pyzw` | `archive-metadata-viewer` | 2 | yes | yes | `package.egg`、`application.pyz`、`application.pyzw` 及对应 `disguised.*` |
 | TAR | `archive-metadata-viewer` | 2 | yes | yes | `archive.tar`；测试生成 PAX、GNU longname、负时间、损坏大小和截断头 |
-| gzip + TAR：`.tar.gz` `.tgz` `.crate` | `archive-metadata-viewer` | 2 | yes | yes | `archive.tar.gz`、`package.tgz`、`package.crate` 及对应伪装样例；测试覆盖解压大小和压缩比上限 |
+| gzip + TAR：`.tar.gz` `.tgz` `.crate` | `archive-metadata-viewer` | 2 | yes | yes | 首开会顺序解压到 TAR 目录结束，延迟随到目录末尾前的压缩内容线性增长；`archive.tar.gz`、`package.tgz`、`package.crate` 及对应伪装样例；测试覆盖实际解压输出、声明大小和压缩比上限 |
 | JMOD | `archive-metadata-viewer` | 2 | yes | yes | `module.jmod` 与 `disguised.jmod` |
 | RAR 4/5 | `archive-metadata-viewer` | 2 | yes | yes | `archive.rar`；固定 RAR4/5、SFX、加密头、损坏 CRC 与截断 fixture |
 | gzip、XZ、Zstandard、bzip2、LZ4、zlib wrapper | `archive-metadata-viewer` | 1 | yes | yes | `sample.gz`、`sample.xz`、`sample.zst`、`sample.bz2`、`sample.lz4`、`sample.zlib` |

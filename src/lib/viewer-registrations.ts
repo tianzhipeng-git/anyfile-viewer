@@ -114,6 +114,10 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
   },
   {
     manifest: wordManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/word-viewer/probe");
+      return probePackage.probeWordDocument(context);
+    },
     async load() {
       const viewerPackage = await import("@anyfile/word-viewer");
       return viewerPackage.wordViewer;
@@ -121,6 +125,10 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
   },
   {
     manifest: excelManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/excel-viewer/probe");
+      return probePackage.probeExcelWorkbook(context);
+    },
     async load() {
       const viewerPackage = await import("@anyfile/excel-viewer");
       return viewerPackage.excelViewer;
@@ -128,6 +136,10 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
   },
   {
     manifest: powerpointManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/powerpoint-viewer/probe");
+      return probePackage.probePowerPointPresentation(context);
+    },
     async load() {
       const viewerPackage = await import("@anyfile/powerpoint-viewer");
       return viewerPackage.powerpointViewer;

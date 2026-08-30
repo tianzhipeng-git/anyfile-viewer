@@ -16,6 +16,7 @@ import {
   encryptedEntryZipFixture,
   gnuTarFixture,
   invalidSizeTarFixture,
+  largeTarFixture,
   negativeMtimeTarFixture,
   tarFixture,
   unflaggedUtf8ZipFixture,
@@ -57,6 +58,7 @@ function overlaps(left: { start: number; end: number }, right: { start: number; 
 
 afterEach(() => {
   for (const context of contexts.splice(0)) context.cleanup();
+  vi.unstubAllGlobals();
 });
 
 describe("archive metadata viewer", () => {
@@ -324,6 +326,23 @@ describe("archive metadata viewer", () => {
     await controller.dispose();
   });
 
+  it("falls back to gzip wrapper metadata when a compound file is not TAR", async () => {
+    const test = contextFor(gzipSync(new TextEncoder().encode("plain text")), "logs.tar.gz");
+    const controller = await archiveMetadataViewer.open(test.context);
+    expect(test.container.textContent).toContain("gzip");
+    expect(test.container.textContent).not.toContain("gzip + TAR");
+    await controller.dispose();
+  });
+
+  it("opens compound gzip wrapper metadata without DecompressionStream", async () => {
+    vi.stubGlobal("DecompressionStream", undefined);
+    const test = contextFor(gzipSync(tarFixture().bytes), "package.tgz");
+    const controller = await archiveMetadataViewer.open(test.context);
+    expect(test.container.textContent).toContain("gzip");
+    expect(test.container.textContent).not.toContain("gzip + TAR");
+    await controller.dispose();
+  });
+
   it("opens JMOD as a prefixed ZIP directory", async () => {
     const zip = zipFixture();
     const bytes = new Uint8Array(zip.length + 4);
@@ -371,6 +390,14 @@ describe("archive metadata viewer", () => {
     const ratio = compressed.slice();
     new DataView(ratio.buffer).setUint32(ratio.length - 4, 2 * 1024 * 1024, true);
     await expect(archiveMetadataViewer.open(contextFor(ratio, "ratio.crate").context))
+      .rejects.toMatchObject({ code: "resource-limit" });
+  });
+
+  it("interrupts actual gzip output when a forged ISIZE understates the TAR size", async () => {
+    const compressed = gzipSync(largeTarFixture(2 * 1024 * 1024));
+    new DataView(compressed.buffer, compressed.byteOffset, compressed.byteLength)
+      .setUint32(compressed.length - 4, 0, true);
+    await expect(archiveMetadataViewer.open(contextFor(compressed, "forged.tgz").context))
       .rejects.toMatchObject({ code: "resource-limit" });
   });
 

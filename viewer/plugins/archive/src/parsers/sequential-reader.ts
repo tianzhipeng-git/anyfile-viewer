@@ -5,7 +5,7 @@ function abortError() {
 }
 
 export class SequentialReader {
-  readonly size: number;
+  readonly size = Number.MAX_SAFE_INTEGER;
   private chunk: Uint8Array<ArrayBufferLike> = new Uint8Array();
   private chunkOffset = 0;
   private position = 0;
@@ -14,10 +14,8 @@ export class SequentialReader {
   constructor(
     private readonly reader: ReadableStreamDefaultReader<Uint8Array>,
     private readonly signal: AbortSignal,
-    maximumBytes: number,
-  ) {
-    this.size = maximumBytes;
-  }
+    private readonly maximumBytes: number,
+  ) {}
 
   async read(start: number, length: number): Promise<Uint8Array> {
     this.throwIfAborted();
@@ -52,8 +50,8 @@ export class SequentialReader {
       if (result.done) throw new ViewerError("invalid-file", "压缩 TAR 数据已截断。");
       if (result.value.byteLength === 0) return this.nextChunk();
       this.produced += result.value.byteLength;
-      if (this.produced > this.size) {
-        throw new ViewerError("resource-limit", "压缩 TAR 解压后超过 512 MiB 安全上限。");
+      if (this.produced > this.maximumBytes) {
+        throw new ViewerError("resource-limit", "压缩 TAR 的实际解压输出超过安全上限。");
       }
       this.chunk = result.value;
       this.chunkOffset = 0;

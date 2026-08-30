@@ -7,6 +7,7 @@ import type { ArrayByteSource } from "./source";
 const MAGIC = Uint8Array.of(0x93, 0x4e, 0x55, 0x4d, 0x50, 0x59);
 const MAX_HEADER_BYTES = 1024 * 1024;
 const MAX_DIMENSIONS = 32;
+const MAX_PAGE_BYTES = 1024 * 1024;
 
 export type NpyDescriptor = {
   readonly version: string;
@@ -25,6 +26,10 @@ export type ArrayPage = {
   readonly end: number;
   readonly total: number;
 };
+
+export function arrayPageSize(descriptor: NpyDescriptor, requestedSize: number): number {
+  return Math.min(requestedSize, Math.max(1, Math.floor(MAX_PAGE_BYTES / descriptor.dtype.itemSize)));
+}
 
 function invalid(message: string): never {
   throw new ViewerError("invalid-file", `NPY ${message}。`);
@@ -133,11 +138,12 @@ export async function readArrayPage(
   pageSize: number,
 ): Promise<ArrayPage> {
   if (descriptor.dtype.object) invalid("对象数组不能反序列化");
-  const start = pageIndex * pageSize;
+  const effectivePageSize = arrayPageSize(descriptor, pageSize);
+  const start = pageIndex * effectivePageSize;
   if (!Number.isSafeInteger(start) || start < 0 || start >= Math.max(1, descriptor.elementCount)) {
     invalid("页码超出数组范围");
   }
-  const count = Math.min(pageSize, descriptor.elementCount - start);
+  const count = Math.min(effectivePageSize, descriptor.elementCount - start);
   const byteLength = count * descriptor.dtype.itemSize;
   const bytes = await source.read(descriptor.dataOffset + start * descriptor.dtype.itemSize, byteLength);
   const columns = descriptor.dtype.type === "structured"

@@ -31,6 +31,10 @@ function zipMagic(bytes: Uint8Array) {
   return bytes.length >= 4 && [0x04034b50, 0x06054b50, 0x06064b50, 0x08074b50].includes(little32(bytes));
 }
 
+function gzipMagic(bytes: Uint8Array) {
+  return bytes.length >= 3 && bytes[0] === 0x1f && bytes[1] === 0x8b && bytes[2] === 8;
+}
+
 function tarHeader(bytes: Uint8Array) {
   if (bytes.length < 512) return false;
   if (bytes.every((byte) => byte === 0)) return true;
@@ -43,6 +47,18 @@ function tarHeader(bytes: Uint8Array) {
     checksum += index >= 148 && index < 156 ? 32 : bytes[index];
   }
   return checksum === Number.parseInt(checksumText, 8);
+}
+
+function recognizedArchiveMagic(bytes: Uint8Array) {
+  if (zipMagic(bytes) || gzipMagic(bytes) || tarHeader(bytes)) return true;
+  if (bytes.length >= 8 && bytes.slice(0, 8).join(",") === "82,97,114,33,26,7,1,0") return true;
+  if (bytes.length >= 7 && bytes.slice(0, 7).join(",") === "82,97,114,33,26,7,0") return true;
+  if (bytes.length >= 8 && bytes[0] === 0x4a && bytes[1] === 0x4d &&
+      bytes[2] === 1 && bytes[3] === 0 && zipMagic(bytes.subarray(4))) return true;
+  if (bytes.length >= 6 && bytes.slice(0, 6).join(",") === "253,55,122,88,90,0") return true;
+  if (bytes.length >= 4 && [0xfd2fb528, 0x184d2204].includes(little32(bytes))) return true;
+  if (bytes.length >= 4 && bytes[0] === 0x42 && bytes[1] === 0x5a && bytes[2] === 0x68) return true;
+  return bytes.length >= 2 && (bytes[0] & 0x0f) === 8 && ((bytes[0] << 8) + bytes[1]) % 31 === 0;
 }
 
 async function gzipTarHeader(file: File, signal: AbortSignal) {
@@ -74,32 +90,34 @@ async function gzipTarHeader(file: File, signal: AbortSignal) {
 
 export async function probeArchive({ file, signal }: ProbeViewerContext): Promise<ViewerSupportLevel> {
   const expected = expectedFormat(file.name);
-  if (!expected || file.size === 0) return 0;
+  if (!expected) return 0;
+  if (signal.aborted) throw abortError();
+  if (file.size === 0) return 1;
   const prefix = await read(file, signal, 0, Math.min(PROBE_PREFIX_BYTES, file.size));
 
-  if (expected === "zip") return zipMagic(prefix) ? 2 : 0;
+  if (expected === "zip") return zipMagic(prefix) ? 2 : recognizedArchiveMagic(prefix) ? 1 : 0;
   if (expected === "jmod") {
     return prefix.length >= 8 && prefix[0] === 0x4a && prefix[1] === 0x4d &&
-      prefix[2] === 1 && prefix[3] === 0 && zipMagic(prefix.subarray(4)) ? 2 : 0;
+      prefix[2] === 1 && prefix[3] === 0 && zipMagic(prefix.subarray(4)) ? 2 : recognizedArchiveMagic(prefix) ? 1 : 0;
   }
-  if (expected === "tar") return tarHeader(prefix) ? 2 : 0;
+  if (expected === "tar") return tarHeader(prefix) ? 2 : recognizedArchiveMagic(prefix) ? 1 : 0;
   if (expected === "rar") {
     const signature = Array.from(prefix.subarray(0, 8));
     return signature.slice(0, 7).join(",") === "82,97,114,33,26,7,0" ||
-      signature.join(",") === "82,97,114,33,26,7,1,0" ? 2 : 0;
+      signature.join(",") === "82,97,114,33,26,7,1,0" ? 2 : recognizedArchiveMagic(prefix) ? 1 : 0;
   }
   if (expected === "gzip") {
-    if (prefix.length < 3 || prefix[0] !== 0x1f || prefix[1] !== 0x8b || prefix[2] !== 8) return 0;
+    if (!gzipMagic(prefix)) return recognizedArchiveMagic(prefix) ? 1 : 0;
     const compound = file.name.toLowerCase().endsWith(".tar.gz") ||
       [".tgz", ".crate"].some((suffix) => file.name.toLowerCase().endsWith(suffix));
-    return compound ? (await gzipTarHeader(file, signal) ? 2 : 0) : 1;
+    return compound && await gzipTarHeader(file, signal) ? 2 : 1;
   }
-  if (expected === "xz") return prefix.length >= 6 && prefix.slice(0, 6).join(",") === "253,55,122,88,90,0" ? 1 : 0;
-  if (expected === "zstd") return prefix.length >= 4 && little32(prefix) === 0xfd2fb528 ? 1 : 0;
-  if (expected === "bzip2") return prefix.length >= 4 && prefix[0] === 0x42 && prefix[1] === 0x5a && prefix[2] === 0x68 ? 1 : 0;
-  if (expected === "lz4") return prefix.length >= 4 && little32(prefix) === 0x184d2204 ? 1 : 0;
+  if (expected === "xz") return prefix.length >= 6 && prefix.slice(0, 6).join(",") === "253,55,122,88,90,0" ? 1 : recognizedArchiveMagic(prefix) ? 1 : 0;
+  if (expected === "zstd") return prefix.length >= 4 && little32(prefix) === 0xfd2fb528 ? 1 : recognizedArchiveMagic(prefix) ? 1 : 0;
+  if (expected === "bzip2") return prefix.length >= 4 && prefix[0] === 0x42 && prefix[1] === 0x5a && prefix[2] === 0x68 ? 1 : recognizedArchiveMagic(prefix) ? 1 : 0;
+  if (expected === "lz4") return prefix.length >= 4 && little32(prefix) === 0x184d2204 ? 1 : recognizedArchiveMagic(prefix) ? 1 : 0;
   if (expected === "zlib") {
-    return prefix.length >= 2 && (prefix[0] & 0x0f) === 8 && ((prefix[0] << 8) + prefix[1]) % 31 === 0 ? 1 : 0;
+    return recognizedArchiveMagic(prefix) ? 1 : 0;
   }
   return 1;
 }

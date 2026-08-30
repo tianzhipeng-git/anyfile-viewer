@@ -12,6 +12,17 @@ describe("dev source map probe", () => {
     await expect(probeDevSourceMap(context('{"version":3,"sections":[]}'))).resolves.toBe(3);
   });
 
+  it("recognizes mappings after a large sourcesContent field", async () => {
+    const content = JSON.stringify({
+      version: 3,
+      sources: ["large.ts"],
+      sourcesContent: ["x".repeat(128 * 1024)],
+      names: [],
+      mappings: "",
+    });
+    await expect(probeDevSourceMap(context(content))).resolves.toBe(3);
+  });
+
   it("rejects disguised JSON and invalid UTF-8", async () => {
     await expect(probeDevSourceMap(context('{"hello":"world"}'))).resolves.toBe(0);
     await expect(probeDevSourceMap({ file: new File([Uint8Array.of(0xff, 0xfe)], "fake.map"), signal: new AbortController().signal })).resolves.toBe(0);

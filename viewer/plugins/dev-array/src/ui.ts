@@ -1,5 +1,5 @@
 import type { NpyDescriptor, ArrayPage } from "./npy";
-import { readArrayPage, readNpyDescriptor } from "./npy";
+import { arrayPageSize, readArrayPage, readNpyDescriptor } from "./npy";
 import type { ArrayByteSource } from "./source";
 import { arrayViewerStyles } from "./ui-styles";
 
@@ -137,9 +137,12 @@ export async function createArrayView(
     select.disabled = busy;
     previous.disabled = busy || pageIndex === 0;
     next.disabled = busy || !descriptor || descriptor.dtype.object ||
-      (pageIndex + 1) * PAGE_SIZE >= descriptor.elementCount;
+      (pageIndex + 1) * arrayPageSize(descriptor, PAGE_SIZE) >= descriptor.elementCount;
     status.hidden = !busy;
-    if (busy) status.textContent = copy.loading;
+    if (busy) {
+      status.textContent = copy.loading;
+      status.setAttribute("role", "status");
+    }
   };
 
   const showDescriptor = () => {
@@ -153,7 +156,7 @@ export async function createArrayView(
     }
   };
 
-  const loadPage = async () => {
+  const loadPage = async (targetPageIndex = pageIndex) => {
     if (!source || !descriptor || descriptor.dtype.object || descriptor.elementCount === 0) {
       table.replaceChildren();
       table.hidden = true;
@@ -162,12 +165,23 @@ export async function createArrayView(
       return;
     }
     setBusy(true);
-    const page = await readArrayPage(source, descriptor, pageIndex, PAGE_SIZE);
-    if (disposed || signal.aborted) return;
-    renderPage(table, page);
-    table.hidden = false;
-    pageMeta.textContent = `${page.start + 1}–${page.end} / ${page.total.toLocaleString()}`;
-    setBusy(false);
+    try {
+      const page = await readArrayPage(source, descriptor, targetPageIndex, PAGE_SIZE);
+      if (disposed || signal.aborted) return;
+      pageIndex = targetPageIndex;
+      renderPage(table, page);
+      table.hidden = false;
+      pageMeta.textContent = `${page.start + 1}–${page.end} / ${page.total.toLocaleString()}`;
+    } finally {
+      if (!disposed && !signal.aborted) setBusy(false);
+    }
+  };
+
+  const showPageError = (error: unknown) => {
+    if (disposed || signal.aborted || (error instanceof DOMException && error.name === "AbortError")) return;
+    status.textContent = error instanceof Error ? error.message : copy.error;
+    status.hidden = false;
+    status.setAttribute("role", "alert");
   };
 
   const loadChoice = async (index: number, surfaceError = true) => {
@@ -177,6 +191,7 @@ export async function createArrayView(
     pageMeta.textContent = "";
     pageIndex = 0;
     try {
+      await source?.dispose?.();
       source = await choices[index].open();
       descriptor = await readNpyDescriptor(source);
       if (disposed || signal.aborted) return;
@@ -187,6 +202,8 @@ export async function createArrayView(
       }
       await loadPage();
     } catch (error) {
+      await source?.dispose?.();
+      source = undefined;
       if (disposed || signal.aborted || (error instanceof DOMException && error.name === "AbortError")) return;
       if (!surfaceError) throw error;
       status.textContent = error instanceof Error ? error.message : copy.error;
@@ -199,8 +216,8 @@ export async function createArrayView(
   };
 
   const onSelect = () => { void loadChoice(Number(select.value)); };
-  const onPrevious = () => { pageIndex -= 1; void loadPage(); };
-  const onNext = () => { pageIndex += 1; void loadPage(); };
+  const onPrevious = () => { void loadPage(pageIndex - 1).catch(showPageError); };
+  const onNext = () => { void loadPage(pageIndex + 1).catch(showPageError); };
   select.addEventListener("change", onSelect);
   previous.addEventListener("click", onPrevious);
   next.addEventListener("click", onNext);
@@ -222,6 +239,7 @@ export async function createArrayView(
       select.removeEventListener("change", onSelect);
       previous.removeEventListener("click", onPrevious);
       next.removeEventListener("click", onNext);
+      void source?.dispose?.();
       root.remove();
     },
   };

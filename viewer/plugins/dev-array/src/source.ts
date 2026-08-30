@@ -4,6 +4,7 @@ import { readFileRange } from "@anyfile/dev-binary-core";
 export interface ArrayByteSource {
   readonly size: number;
   read(start: number, length: number): Promise<Uint8Array>;
+  dispose?(): void | Promise<void>;
 }
 
 export class FileByteSource implements ArrayByteSource {

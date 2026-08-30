@@ -6,8 +6,11 @@ import { validateManifest } from "@anyfile/viewer-protocol";
 import { createTrackedFile, createViewerTestContext, truncated, type ViewerTestContext } from "@anyfile/viewer-test";
 
 import { devArrayViewer } from "./index";
+import { decodeScalar, parseDType } from "./dtype";
 import { devArrayManifest } from "./manifest";
+import { readArrayPage, type NpyDescriptor } from "./npy";
 import { int32Data, npyFixture, npzFixture } from "./test-fixtures";
+import { createArrayView } from "./ui";
 
 const contexts: ViewerTestContext[] = [];
 
@@ -88,6 +91,36 @@ describe("dev array viewer", () => {
     await unicodeController.dispose();
   });
 
+  it("decodes maximum-size Unicode scalars without spreading all code points as arguments", () => {
+    const dtype = parseDType("<U262144");
+    expect(dtype.type).toBe("scalar");
+    if (dtype.type !== "scalar") throw new Error("Expected scalar dtype");
+    const bytes = new Uint8Array(dtype.itemSize);
+    const view = new DataView(bytes.buffer);
+    for (let offset = 0; offset < bytes.length; offset += 4) view.setUint32(offset, 0x61, true);
+    const decoded = decodeScalar(bytes, 0, dtype);
+    expect(decoded).toHaveLength(262_144);
+    expect(decoded.startsWith("aaaa")).toBe(true);
+  });
+
+  it("limits a rendered page to a 1 MiB byte budget", async () => {
+    const dtype = parseDType("<U262144");
+    const descriptor: NpyDescriptor = {
+      version: "1.0", dtype, shape: [100], fortranOrder: false,
+      elementCount: 100, dataOffset: 0, sourceSize: 100 * 1024 * 1024,
+    };
+    let largestRead = 0;
+    const page = await readArrayPage({
+      size: descriptor.sourceSize,
+      async read(_start, length) {
+        largestRead = Math.max(largestRead, length);
+        return new Uint8Array(length);
+      },
+    }, descriptor, 0, 100);
+    expect(page.rows).toHaveLength(1);
+    expect(largestRead).toBe(1024 * 1024);
+  });
+
   it("lists NPZ arrays and reuses the NPY rendering path for selected compressed entries", async () => {
     const first = npyFixture({ descr: "'<i4'", shape: [2], data: int32Data([11, 12]) });
     const second = npyFixture({ descr: "'<i4'", shape: [1], data: int32Data([99]) });
@@ -102,6 +135,47 @@ describe("dev array viewer", () => {
     await vi.waitFor(() => expect(test.container.textContent).toContain("99"));
     expect(test.container.textContent).toContain("nested/second.npy");
     await controller.dispose();
+  });
+
+  it("reuses one DEFLATE stream while paging forward through an NPZ entry", async () => {
+    const values = Array.from({ length: 205 }, (_, index) => index);
+    const array = npyFixture({ descr: "'<i4'", shape: [205], data: int32Data(values) });
+    const test = context(npzFixture({ "values.npy": array }), "paged.npz");
+    const stream = vi.spyOn(Blob.prototype, "stream");
+    const controller = await devArrayViewer.open(test.context);
+    const next = [...test.container.querySelectorAll("button")].find((button) => button.textContent === "下一页")!;
+    next.click();
+    await vi.waitFor(() => expect(test.container.textContent).toContain("101–200 / 205"));
+    next.click();
+    await vi.waitFor(() => expect(test.container.textContent).toContain("201–205 / 205"));
+    expect(stream).toHaveBeenCalledTimes(1);
+    await controller.dispose();
+  });
+
+  it("surfaces active page failures and restores pagination controls", async () => {
+    const values = Array.from({ length: 205 }, (_, index) => index);
+    const bytes = npyFixture({ descr: "'<i4'", shape: [205], data: int32Data(values) });
+    const dataOffset = bytes.length - values.length * 4;
+    const view = await createArrayView("broken.npy", [{
+      name: "broken.npy",
+      size: bytes.length,
+      async open() {
+        return {
+          size: bytes.length,
+          async read(start, length) {
+            if (start >= dataOffset + 400) throw new Error("page read failed");
+            return bytes.slice(start, start + length);
+          },
+        };
+      },
+    }], "zh-CN", new AbortController().signal);
+    document.body.append(view.root);
+    const next = [...view.root.querySelectorAll("button")].find((button) => button.textContent === "下一页")!;
+    next.click();
+    await vi.waitFor(() => expect(view.root.textContent).toContain("page read failed"));
+    expect(view.root.querySelector('[role="alert"]')).not.toBeNull();
+    expect(next.disabled).toBe(false);
+    view.dispose();
   });
 
   it("rejects an NPZ entry with an unsafe declared compression ratio", async () => {

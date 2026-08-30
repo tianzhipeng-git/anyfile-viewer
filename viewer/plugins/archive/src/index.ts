@@ -44,7 +44,13 @@ async function parse(context: OpenViewerContext, reader: RangeReader) {
   if (format.id === "rar") return parseRar(reader, format);
   if (format.id === "tar") return parseTar(reader, format);
   if (format.id === "gzip" && format.compoundTar) {
-    return parseGzipTar(context.file, reader, format, context.signal);
+    try {
+      return await parseGzipTar(context.file, reader, format, context.signal);
+    } catch (error) {
+      if (context.signal.aborted || (error instanceof DOMException && error.name === "AbortError")) throw error;
+      if (error instanceof ViewerError && error.code === "resource-limit") throw error;
+      return parseWrapper(reader, format);
+    }
   }
   return parseWrapper(reader, format);
 }

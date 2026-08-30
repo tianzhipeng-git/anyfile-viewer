@@ -155,12 +155,15 @@ export function decodeScalar(bytes: Uint8Array, offset: number, dtype: ScalarDTy
     return new TextDecoder("latin1").decode(value);
   }
   if (dtype.kind === "U") {
+    const chunks: string[] = [];
     const points: number[] = [];
     for (let index = 0; index < dtype.itemSize; index += 4) {
       const point = view.getUint32(index, little);
       if (point) points.push(point <= 0x10ffff ? point : 0xfffd);
+      if (points.length === 4096) chunks.push(String.fromCodePoint(...points.splice(0)));
     }
-    return String.fromCodePoint(...points);
+    if (points.length) chunks.push(String.fromCodePoint(...points));
+    return chunks.join("");
   }
   if (dtype.kind === "M" || dtype.kind === "m") return formatNumber(view.getBigInt64(0, little));
   return Array.from(bytes.subarray(offset, offset + dtype.itemSize), (byte) => byte.toString(16).padStart(2, "0")).join("");

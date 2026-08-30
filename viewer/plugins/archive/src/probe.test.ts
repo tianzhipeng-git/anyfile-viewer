@@ -1,5 +1,5 @@
 import { gzipSync } from "fflate";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { probeArchive } from "./probe";
 import { tarFixture, zipFixture } from "./test-fixtures";
@@ -13,6 +13,8 @@ function context(bytes: Uint8Array, name: string, signal = new AbortController()
 }
 
 describe("archive probe", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
   it.each(["package.zip", "package.jar", "package.whl", "package.egg", "app.pyz", "app.pyzw"])(
     "returns level 2 for a valid ZIP directory named %s",
     async (name) => expect(probeArchive(context(zipFixture(), name))).resolves.toBe(2),
@@ -35,6 +37,18 @@ describe("archive probe", () => {
 
   it("keeps plain compression wrappers at level 1", async () => {
     await expect(probeArchive(context(gzipSync(new TextEncoder().encode("text")), "sample.gz"))).resolves.toBe(1);
+  });
+
+  it("keeps recognized archive content and empty files available for inspection", async () => {
+    const gzip = gzipSync(new TextEncoder().encode("plain text"));
+    await expect(probeArchive(context(gzip, "wrong.zip"))).resolves.toBe(1);
+    await expect(probeArchive(context(gzip, "logs.tar.gz"))).resolves.toBe(1);
+    await expect(probeArchive(context(new Uint8Array(), "empty.zip"))).resolves.toBe(1);
+  });
+
+  it("keeps compound gzip wrappers when streaming decompression is unavailable", async () => {
+    vi.stubGlobal("DecompressionStream", undefined);
+    await expect(probeArchive(context(gzipSync(tarFixture().bytes), "package.tgz"))).resolves.toBe(1);
   });
 
   it("propagates cancellation before reading", async () => {

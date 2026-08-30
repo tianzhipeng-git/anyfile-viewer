@@ -163,7 +163,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-video", "non-native-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
+      .toEqual(["browser-video", "non-native-video", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -257,6 +257,21 @@ describe("viewer protocol", () => {
     );
     expect(tgz.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
+
+    const officeBytes = readFileSync(join(process.cwd(), "viewer/plugins/archive/examples/archive.zip"));
+    for (const [name, expected] of [
+      ["document.docx", "word-document"],
+      ["workbook.xlsx", "excel-workbook"],
+      ["workbook.ods", "excel-workbook"],
+      ["slides.pptx", "powerpoint-presentation"],
+    ] as const) {
+      const resolved = await resolveViewerRegistrations(
+        new File([officeBytes], name), viewerRegistrations,
+        { signal: new AbortController().signal },
+      );
+      expect(resolved.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+        .toEqual([[expected, 4], ["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
+    }
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {

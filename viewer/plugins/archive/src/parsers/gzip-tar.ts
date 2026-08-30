@@ -9,6 +9,7 @@ import { parseTar } from "./tar";
 
 const MAX_DECOMPRESSED_BYTES = 512 * 1024 * 1024;
 const MAX_COMPRESSION_RATIO = 1_000;
+const DECLARED_SIZE_TOLERANCE = 1024 * 1024;
 
 function decompressionStream(file: File): ReadableStream<Uint8Array> {
   if (typeof DecompressionStream === "undefined") {
@@ -33,7 +34,12 @@ export async function parseGzipTar(
     throw new ViewerError("resource-limit", "压缩 TAR 的压缩比超过 1000:1 安全上限。");
   }
 
-  const sequential = new SequentialReader(decompressionStream(file).getReader(), signal, MAX_DECOMPRESSED_BYTES);
+  const maximumBytes = Math.min(
+    MAX_DECOMPRESSED_BYTES,
+    declaredSize + DECLARED_SIZE_TOLERANCE,
+    Math.max(1024 * 1024, file.size * MAX_COMPRESSION_RATIO),
+  );
+  const sequential = new SequentialReader(decompressionStream(file).getReader(), signal, maximumBytes);
   try {
     const tar = await parseTar(sequential, format);
     return {

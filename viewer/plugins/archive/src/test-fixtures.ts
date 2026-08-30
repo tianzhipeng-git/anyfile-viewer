@@ -153,6 +153,11 @@ export function tarFixture() {
   return { bytes, payload: { start: payloadStart, end: payloadStart + payload.length } };
 }
 
+export function largeTarFixture(payloadBytes: number): Uint8Array {
+  const payload = new Uint8Array(payloadBytes);
+  return concatenate(tarHeader("large.bin", payload.length), padded(payload), new Uint8Array(1024));
+}
+
 export function gnuTarFixture(): Uint8Array {
   const longPath = `${"long-directory/".repeat(9)}file.txt`;
   const longName = concatenate(new TextEncoder().encode(longPath), Uint8Array.of(0));

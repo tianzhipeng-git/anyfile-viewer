@@ -12,6 +12,7 @@ const MAX_PATH_BYTES = 16 * 1024;
 const MAX_TOTAL_PATH_BYTES = 32 * 1024 * 1024;
 const MAX_ARRAY_BYTES = 2 * 1024 * 1024 * 1024;
 const MAX_COMPRESSION_RATIO = 1_000;
+const MAX_DECOMPRESSED_CACHE_BYTES = 2 * 1024 * 1024;
 
 export type NpzEntry = {
   readonly name: string;
@@ -102,6 +103,10 @@ function abortError() {
 
 class CompressedEntrySource implements ArrayByteSource {
   readonly size: number;
+  private reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
+  private produced = 0;
+  private cacheStart = 0;
+  private cache = new Uint8Array();
 
   constructor(
     private readonly file: File,
@@ -122,38 +127,60 @@ class CompressedEntrySource implements ArrayByteSource {
     if (typeof DecompressionStream === "undefined") {
       throw new ViewerError("unsupported-environment", "当前浏览器不支持 NPZ DEFLATE 流式解压。");
     }
-    const stream = this.file.slice(this.start, this.start + this.compressedSize).stream()
-      .pipeThrough(new DecompressionStream("deflate-raw"));
-    const reader = stream.getReader();
-    const result = new Uint8Array(length);
-    let outputOffset = 0;
-    let produced = 0;
-    const abort = () => { void reader.cancel().catch(() => undefined); };
+    if (start < this.cacheStart) await this.restart();
+    const cachedEnd = this.cacheStart + this.cache.length;
+    if (start >= this.cacheStart && end <= cachedEnd) {
+      return this.cache.slice(start - this.cacheStart, end - this.cacheStart);
+    }
+    if (!this.reader) this.openReader();
+    const abort = () => { void this.reader?.cancel().catch(() => undefined); };
     this.signal.addEventListener("abort", abort, { once: true });
     try {
-      while (outputOffset < length) {
+      while (this.produced < end) {
         if (this.signal.aborted) throw abortError();
-        const chunk = await reader.read();
+        const chunk = await this.reader!.read();
         if (chunk.done) invalid("DEFLATE 条目已截断");
-        const chunkStart = produced;
-        produced += chunk.value.byteLength;
-        if (produced > this.size) invalid("DEFLATE 输出超过条目声明大小");
-        const copyStart = Math.max(start, chunkStart);
-        const copyEnd = Math.min(end, produced);
-        if (copyStart < copyEnd) {
-          result.set(chunk.value.subarray(copyStart - chunkStart, copyEnd - chunkStart), copyStart - start);
-          outputOffset += copyEnd - copyStart;
+        this.produced += chunk.value.byteLength;
+        if (this.produced > this.size) invalid("DEFLATE 输出超过条目声明大小");
+        const combined = new Uint8Array(this.cache.length + chunk.value.length);
+        combined.set(this.cache);
+        combined.set(chunk.value, this.cache.length);
+        this.cache = combined;
+        const trimBefore = Math.min(start, this.produced - MAX_DECOMPRESSED_CACHE_BYTES);
+        if (trimBefore > this.cacheStart) {
+          this.cache = this.cache.slice(trimBefore - this.cacheStart);
+          this.cacheStart = trimBefore;
         }
       }
-      return result;
+      return this.cache.slice(start - this.cacheStart, end - this.cacheStart);
     } catch (error) {
       if (this.signal.aborted) throw abortError();
       if (error instanceof ViewerError) throw error;
       throw new ViewerError("invalid-file", "NPZ DEFLATE 条目已损坏。", { cause: error });
     } finally {
       this.signal.removeEventListener("abort", abort);
-      await reader.cancel().catch(() => undefined);
     }
+  }
+
+  async dispose() {
+    await this.restart();
+  }
+
+  private openReader() {
+    const stream = this.file.slice(this.start, this.start + this.compressedSize).stream()
+      .pipeThrough(new DecompressionStream("deflate-raw"));
+    this.reader = stream.getReader();
+    this.produced = 0;
+    this.cacheStart = 0;
+    this.cache = new Uint8Array();
+  }
+
+  private async restart() {
+    await this.reader?.cancel().catch(() => undefined);
+    this.reader = undefined;
+    this.produced = 0;
+    this.cacheStart = 0;
+    this.cache = new Uint8Array();
   }
 }
 
