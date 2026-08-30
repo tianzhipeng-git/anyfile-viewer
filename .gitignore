@@ -19,6 +19,7 @@ node_modules/
 /public/vendor/pdfjs/
 /public/vendor/libraw/
 /public/vendor/libheif/
+/public/vendor/ogv/
 
 # production
 /build

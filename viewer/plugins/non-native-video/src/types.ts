@@ -13,3 +13,8 @@ export interface MatroskaInspection {
   readonly tracks: readonly ProbeTrack[];
   readonly hasSeekIndex: boolean;
 }
+
+export interface MpegTsInspection {
+  readonly videoCodec: "avc" | "hevc";
+  readonly audioCodec: "aac" | "mp3" | null;
+}

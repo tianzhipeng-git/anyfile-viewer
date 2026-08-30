@@ -1,62 +1,17 @@
-import {
-  ViewerError,
-  type FileViewerPlugin,
-  type OpenViewerContext,
-  type ViewerController,
-} from "@anyfile/viewer-protocol";
-
-import { inspectMedia } from "./media-inspection";
+import type { FileViewerPlugin, OpenViewerContext } from "@anyfile/viewer-protocol";
 import { nonNativeVideoManifest } from "./manifest";
-import { PlaybackSession } from "./playback-session";
-import { abortError } from "./abort-error";
-import { createPlayerElements, playerCopy } from "./ui";
 
-async function openNonNativeVideo(context: OpenViewerContext): Promise<ViewerController> {
-  const { container, file, reportProgress, signal } = context;
-  let session: PlaybackSession | undefined;
-  let root: HTMLElement | undefined;
-  let inputToDispose: Awaited<ReturnType<typeof inspectMedia>>["input"] | undefined;
-  const dispose = async () => {
-    signal.removeEventListener("abort", onAbort);
-    await session?.dispose();
-    session = undefined;
-    inputToDispose?.dispose();
-    inputToDispose = undefined;
-    root?.remove();
-    root = undefined;
-  };
-  const onAbort = () => void dispose();
+function extensionOf(name: string) {
+  return name.slice(name.lastIndexOf(".")).toLowerCase();
+}
 
-  try {
-    if (signal.aborted) throw abortError();
-    signal.addEventListener("abort", onAbort, { once: true });
-    if (typeof VideoDecoder === "undefined") {
-      throw new ViewerError("unsupported-environment", "当前浏览器缺少视频 WebCodecs 解码能力。");
-    }
-    reportProgress({ stage: "reading", message: "正在读取 Matroska 轨道…", loaded: 0, total: file.size });
-    const media = await inspectMedia(file, signal);
-    inputToDispose = media.input;
-    if (media.audioTrack && typeof AudioContext === "undefined") {
-      throw new ViewerError("unsupported-environment", "当前浏览器缺少 Web Audio 能力。");
-    }
-    if (signal.aborted) throw abortError();
-    reportProgress({ stage: "decoding-first-frame", message: "正在解码首帧与主音轨…" });
-    const copy = playerCopy(context.locale);
-    const elements = createPlayerElements(file.name, media, copy);
-    root = elements.root;
-    container.append(root);
-    session = new PlaybackSession(media, elements, copy);
-    await session.initialize();
-    if (signal.aborted) throw abortError();
-    inputToDispose = undefined;
-    reportProgress({ stage: "ready", message: "视频已打开" });
-    return { dispose };
-  } catch (error) {
-    await dispose();
-    if (signal.aborted) throw abortError();
-    if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;
-    throw new ViewerError("invalid-file", "无法解码这个 Matroska 视频。", { cause: error });
+async function openNonNativeVideo(context: OpenViewerContext) {
+  if ([".ogv", ".ogg"].includes(extensionOf(context.file.name))) {
+    const { openOggVideo } = await import("./ogg-viewer");
+    return openOggVideo(context);
   }
+  const { openMediabunnyVideo } = await import("./mediabunny-viewer");
+  return openMediabunnyVideo(context);
 }
 
 export const nonNativeVideoViewer: FileViewerPlugin = {

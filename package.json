@@ -11,7 +11,8 @@
   "scripts": {
     "prepare:pdfjs": "node scripts/prepare-pdfjs-assets.mjs",
     "prepare:heif": "node scripts/prepare-heif-assets.mjs",
-    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif",
+    "prepare:ogv": "node scripts/prepare-ogv-assets.mjs",
+    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif && pnpm prepare:ogv",
     "dev": "pnpm prepare:assets && next dev",
     "build": "pnpm prepare:assets && next build --webpack && pnpm check:bundle",
     "check:bundle": "node scripts/check-view-bundle.mjs",

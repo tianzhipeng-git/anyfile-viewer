@@ -6,3 +6,5 @@ export const AUDIO_LOOKAHEAD_SECONDS = 1;
 
 export const SUPPORTED_VIDEO_CODECS = new Set(["avc", "hevc", "vp8", "vp9", "av1"]);
 export const SUPPORTED_AUDIO_CODECS = new Set(["aac", "opus", "vorbis", "mp3", "flac"]);
+export const SUPPORTED_MOV_VIDEO_CODECS = new Set(["avc", "hevc"]);
+export const SUPPORTED_MOV_AUDIO_CODECS = new Set(["pcm-s16", "pcm-s16be"]);

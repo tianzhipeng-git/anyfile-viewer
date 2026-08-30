@@ -107,6 +107,12 @@ const mediabunnyChunks = archiveChunkContents.filter(({ content }) => content.in
 if (mediabunnyChunks.length === 0) {
   throw new Error("Deferred Mediabunny implementation chunk was not found");
 }
+const ogvViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("OGV.js did not expose its runtime"));
+if (ogvViewerChunks.length === 0) throw new Error("Deferred OGV.js viewer chunk was not found");
+if (ogvViewerChunks.some(({ content }) => content.includes("videoTrack must be an InputVideoTrack"))
+  || mediabunnyChunks.some(({ content }) => content.includes("OGV.js did not expose its runtime"))) {
+  throw new Error("Mediabunny and OGV.js viewer implementations share a deferred chunk");
+}
 const mediabunnyPackage = JSON.parse(await readFile(join(
   projectRoot,
   "viewer/plugins/non-native-video/node_modules/mediabunny/package.json",
@@ -120,8 +126,28 @@ const mediabunnyLicense = await readFile(join(
 if (!mediabunnyLicense.includes("Mozilla Public License Version 2.0")) {
   throw new Error("Mediabunny MPL-2.0 license text is missing");
 }
+const ogvPackage = JSON.parse(await readFile(join(
+  projectRoot,
+  "viewer/plugins/non-native-video/node_modules/ogv/package.json",
+), "utf8"));
+const ogvRuntime = JSON.parse(await readFile(join(
+  projectRoot,
+  "viewer/plugins/non-native-video/ogv-runtime.json",
+), "utf8"));
+if (ogvRuntime.version !== ogvPackage.version) {
+  throw new Error(`OGV.js runtime version ${ogvRuntime.version} does not match installed version ${ogvPackage.version}`);
+}
+const ogvSupportRoot = join(projectRoot, "public/vendor/ogv", ogvRuntime.version);
+for (const asset of ogvRuntime.runtimeAssets) {
+  const content = await readFile(join(ogvSupportRoot, asset)).catch(() => undefined);
+  if (!content?.byteLength) throw new Error(`OGV.js runtime asset is missing: ${asset}`);
+}
+for (const { file, marker } of ogvRuntime.licenses) {
+  const license = await readFile(join(ogvSupportRoot, file), "utf8").catch(() => "");
+  if (!license.includes(marker)) throw new Error(`OGV.js license is missing or invalid: ${file}`);
+}
 console.log(
-  `Non-native video: lightweight probe isolated; Mediabunny ${mediabunnyPackage.version} deferred across ${mediabunnyChunks.length} chunk(s); MPL-2.0 retained`,
+  `Non-native video: lightweight probe isolated; Mediabunny ${mediabunnyPackage.version} and OGV.js ${ogvPackage.version} split across deferred paths; licenses retained`,
 );
 const archiveGzipBytes = archiveChunks.reduce(
   (total, { content }) => total + gzipSync(content, { level: 9 }).byteLength,

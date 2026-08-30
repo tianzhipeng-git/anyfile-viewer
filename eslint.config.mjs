@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
     "public/vendor/pdfjs/**",
     "public/vendor/libraw/**",
     "public/vendor/libheif/**",
+    "public/vendor/ogv/**",
     "third_party/heif-wasm/**",
     "next-env.d.ts",
   ]),

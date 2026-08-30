@@ -96,7 +96,10 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "video",
     icon: FileVideoIcon,
-    extensions: manifestExtensions(browserVideoManifest, nonNativeVideoManifest),
+    // `.ts` is far more commonly a TypeScript source file; the content probe still
+    // routes real MPEG-TS files to the video viewer.
+    extensions: manifestExtensions(browserVideoManifest, nonNativeVideoManifest)
+      .filter((extension) => extension !== ".ts"),
   },
   {
     kind: "presentation",

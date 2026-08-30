@@ -14,6 +14,8 @@ describe("getFileTypeKind", () => {
     ["slides.pptx", "presentation"],
     ["workbook.xlsx", "spreadsheet"],
     ["source.tsx", "code"],
+    ["source.ts", "code"],
+    ["capture.m2ts", "video"],
     ["records.parquet", "database"],
     ["scene.gltf", "model"],
     ["layout.fig", "design"],

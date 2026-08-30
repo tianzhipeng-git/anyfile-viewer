@@ -3,6 +3,8 @@ import {
   BlobSource,
   Input,
   MATROSKA,
+  MPEG_TS,
+  QTFF,
   type InputAudioTrack,
   type InputVideoTrack,
 } from "mediabunny";
@@ -13,12 +15,15 @@ import {
   MAX_CODED_PIXELS,
   MAX_TRACKS,
   SUPPORTED_AUDIO_CODECS,
+  SUPPORTED_MOV_AUDIO_CODECS,
+  SUPPORTED_MOV_VIDEO_CODECS,
   SUPPORTED_VIDEO_CODECS,
 } from "./playback-limits";
 import { abortError } from "./abort-error";
 
 export interface MediaDescription {
   readonly input: Input<BlobSource>;
+  readonly container: "Matroska" | "MPEG-TS" | "QuickTime";
   readonly videoTrack: InputVideoTrack;
   readonly audioTrack: InputAudioTrack | null;
   readonly videoCodec: string;
@@ -30,26 +35,44 @@ export interface MediaDescription {
   readonly duration: number;
 }
 
+function extensionOf(name: string) {
+  return name.slice(name.lastIndexOf(".")).toLowerCase();
+}
+
 export async function inspectMedia(file: File, signal: AbortSignal): Promise<MediaDescription> {
+  const extension = extensionOf(file.name);
+  const expectedFormat = [".mkv", ".mk3d"].includes(extension)
+    ? MATROSKA
+    : [".ts", ".mts", ".m2ts", ".m2t"].includes(extension) ? MPEG_TS
+      : [".mov", ".qt"].includes(extension) ? QTFF : null;
+  if (!expectedFormat) throw new ViewerError("invalid-file", "视频扩展名不在当前支持范围内。");
   const input = new Input({
     source: new BlobSource(file, { maxCacheSize: BLOB_CACHE_BYTES }),
-    formats: [MATROSKA],
+    formats: [expectedFormat],
   });
   const abort = () => input.dispose();
   signal.addEventListener("abort", abort, { once: true });
   try {
     if (signal.aborted) throw abortError();
-    if (!await input.canRead() || await input.getFormat() !== MATROSKA) {
-      throw new ViewerError("invalid-file", "文件不是有效的 Matroska 视频。");
+    if (!await input.canRead()) {
+      throw new ViewerError("invalid-file", "文件不是有效的非原生视频。");
+    }
+    const format = await input.getFormat();
+    if (format !== expectedFormat) {
+      throw new ViewerError("invalid-file", "视频内容与扩展名声明的容器不一致。");
     }
     const tracks = await input.getTracks();
-    if (tracks.length < 1 || tracks.length > MAX_TRACKS) {
+    if (tracks.length < 1) {
+      throw new ViewerError("invalid-file", "文件没有可播放的媒体轨道。");
+    }
+    if (tracks.length > MAX_TRACKS) {
       throw new ViewerError("resource-limit", "视频轨道数量超出安全限制。");
     }
     const videoTrack = await input.getPrimaryVideoTrack();
     if (!videoTrack) throw new ViewerError("invalid-file", "文件没有视频轨道。");
     const videoCodec = await videoTrack.getCodec();
-    if (!videoCodec || !SUPPORTED_VIDEO_CODECS.has(videoCodec)) {
+    const supportedVideoCodecs = format === QTFF ? SUPPORTED_MOV_VIDEO_CODECS : SUPPORTED_VIDEO_CODECS;
+    if (!videoCodec || !supportedVideoCodecs.has(videoCodec)) {
       throw new ViewerError("invalid-file", "视频编码不在当前支持范围内。");
     }
     const width = await videoTrack.getCodedWidth();
@@ -65,7 +88,8 @@ export async function inspectMedia(file: File, signal: AbortSignal): Promise<Med
       throw new ViewerError("invalid-file", "没有可与主视频配对的主音轨。");
     }
     const audioCodec = audioTrack ? await audioTrack.getCodec() : null;
-    if (audioTrack && (!audioCodec || !SUPPORTED_AUDIO_CODECS.has(audioCodec))) {
+    const supportedAudioCodecs = format === QTFF ? SUPPORTED_MOV_AUDIO_CODECS : SUPPORTED_AUDIO_CODECS;
+    if (audioTrack && (!audioCodec || !supportedAudioCodecs.has(audioCodec))) {
       throw new ViewerError("invalid-file", "主音频编码不在当前支持范围内。");
     }
     if (audioTrack && typeof AudioDecoder === "undefined") {
@@ -75,10 +99,10 @@ export async function inspectMedia(file: File, signal: AbortSignal): Promise<Med
       throw new ViewerError("unsupported-environment", "当前浏览器不能解码这个视频的主轨道。");
     }
 
-    const duration = await input.getDurationFromMetadata(
-      audioTrack ? [videoTrack, audioTrack] : [videoTrack],
-      { skipLiveWait: true },
-    );
+    const selectedTracks = audioTrack ? [videoTrack, audioTrack] : [videoTrack];
+    const duration = format === MATROSKA
+      ? await input.getDurationFromMetadata(selectedTracks, { skipLiveWait: true })
+      : await input.computeDuration(selectedTracks, { skipLiveWait: true });
     if (duration === null || !Number.isFinite(duration) || duration <= 0) {
       throw new ViewerError("invalid-file", "视频缺少可用的时长或 seek 索引。");
     }
@@ -93,6 +117,8 @@ export async function inspectMedia(file: File, signal: AbortSignal): Promise<Med
     }
     const result = {
       input,
+      container: format === MATROSKA ? "Matroska" as const
+        : format === MPEG_TS ? "MPEG-TS" as const : "QuickTime" as const,
       videoTrack,
       audioTrack,
       videoCodec,

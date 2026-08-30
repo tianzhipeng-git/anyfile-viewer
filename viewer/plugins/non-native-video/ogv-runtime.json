@@ -1,0 +1,38 @@
+{
+  "version": "1.9.0",
+  "runtimeAssets": [
+    "ogv.js",
+    "ogv-worker-audio.js",
+    "ogv-worker-video.js",
+    "ogv-demuxer-ogg-wasm.js",
+    "ogv-demuxer-ogg-wasm.wasm",
+    "ogv-decoder-audio-vorbis-wasm.js",
+    "ogv-decoder-audio-vorbis-wasm.wasm",
+    "ogv-decoder-audio-opus-wasm.js",
+    "ogv-decoder-audio-opus-wasm.wasm",
+    "ogv-decoder-video-theora-wasm.js",
+    "ogv-decoder-video-theora-wasm.wasm"
+  ],
+  "licenses": [
+    {
+      "file": "COPYING",
+      "marker": "Permission is hereby granted, free of charge"
+    },
+    {
+      "file": "COPYING-ogg.txt",
+      "marker": "Copyright (c) 2002, Xiph.org Foundation"
+    },
+    {
+      "file": "COPYING-vorbis.txt",
+      "marker": "Copyright (c) 2002-2018 Xiph.org Foundation"
+    },
+    {
+      "file": "COPYING-theora.txt",
+      "marker": "Copyright (C) 2002-2009 Xiph.org Foundation"
+    },
+    {
+      "file": "COPYING-opus.txt",
+      "marker": "Copyright 2001-2011 Xiph.Org, Skype Limited, Octasic"
+    }
+  ]
+}

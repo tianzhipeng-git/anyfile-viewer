@@ -1,6 +1,6 @@
 # 视频查看架构
 
-- 状态：阶段 0、阶段 1 与阶段 2 首批 Matroska 播放路径已验收
+- 状态：阶段 0、阶段 1 与阶段 2 已完成；Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 播放路径已验收
 - 适用范围：浏览器本地打开的视频文件
 - 不包含：独立音频、流媒体、DRM、编辑、转码和服务端处理
 
@@ -67,6 +67,7 @@ File
 完整插件
   ├── browser-video → Object URL → <video>
   ├── non-native-video → Mediabunny demux → WebCodecs → Canvas / Web Audio
+  │                    └→ OGV.js Ogg demux/Theora software decode → Canvas / Web Audio
   └── future professional video → 领域 demux/decoder → 专业播放管线
 ```
 
@@ -77,10 +78,10 @@ File
 | 插件族 | 目标范围 | 主要路径 |
 |---|---|---|
 | browser video | 浏览器可原生播放的 MP4/WebM 等具体组合 | `<video controls>` + Object URL |
-| non-native video | 浏览器不能原生播放、但用户价值明确的 Matroska、AVI、MPEG-PS/TS 等组合 | 容器 demuxer + 选定 decoder + 最小播放管线 |
+| non-native video | 浏览器不能原生播放、但用户价值明确的 Matroska、MPEG-TS、普通 MOV、Ogg 等组合 | 容器 demuxer + 选定 decoder + 最小播放管线 |
 | professional video | MOV/MXF 中的 ProRes、DNx、timecode 等 | 领域 demux/decoder + 专业交互 |
 
-这些边界是控制依赖和产品语义的规划工具，不是公共接口。阶段 1 使用 `browser-video`，阶段 2 的首批 Matroska 组合使用 `non-native-video`。
+这些边界是控制依赖和产品语义的规划工具，不是公共接口。阶段 1 使用 `browser-video`；阶段 2 的 Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 组合使用 `non-native-video`。
 
 不规划面向用户的 metadata-only 视频插件。容器和轨道解析只服务于 probe、错误诊断及实际播放管线；不能播放主要内容的候选返回 0，不以“可检查 metadata”占据视频查看器位置。
 
@@ -115,6 +116,7 @@ Probe 的目标是安全排序，不是完整媒体分析：
 - 只读取识别容器和主要轨道配置所需的有界分片；
 - MP4/MOV 不能假定 `moov` 一定在文件头，需要定义尾部分片或降级策略；
 - WebM/Matroska 使用有界 EBML 解析，限制元素尺寸、嵌套深度和轨道数量；
+- MPEG-TS 使用有界头部读取，校验 188/192/204-byte packet layout、PAT/PMT CRC、单 program、声明 stream type 与实际 PES 证据；
 - 不遍历全部 sample、cluster、fragment 或 packet；
 - 不初始化完整 demuxer、decoder、Worker 或 WASM；
 - 无法在预算内取得 codec 配置时，可以保守降级，不得根据扩展名返回虚假的高等级；
@@ -163,7 +165,7 @@ opening abort、active abort、切换文件和重复 dispose 必须走同一套�
 
 ## 11. 非原生播放管线的进入条件
 
-阶段 2 首批已交付 `.mkv`/`.mk3d` 的 Matroska 路径：Mediabunny 1.55.3 通过 `BlobSource` 分片读取和 demux，WebCodecs 解码主视频/音频，Canvas 输出画面，AudioContext 作为播放时钟。首批视频集合为 AVC、HEVC、VP8、VP9、AV1，主音频集合为 AAC、Opus、Vorbis、MP3、FLAC，并支持 video-only。
+阶段 2 已交付 `.mkv`/`.mk3d` Matroska、`.ts`/`.mts`/`.m2ts`/`.m2t` MPEG-TS、普通 `.mov`/`.qt` 与 `.ogv`/`.ogg` Theora。前三类由 Mediabunny 1.55.3 分片 demux、WebCodecs 解码并复用 Canvas/Web Audio 会话；Ogg 由独立延迟路径加载 OGV.js 1.9.0 的 Ogg demux 与 Theora/Vorbis/Opus Worker/WASM。软件音频同样只在用户操作后恢复 AudioContext。两套完整实现不共享动态 chunk，probe 不加载任一运行时。
 
 后续仍按用户价值逐个选择浏览器不能原生播放的容器与 codec 组合。WebCodecs 或 WASM decoder 不做万能 fallback；每个组合在进入实现前至少要有可行的：
 

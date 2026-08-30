@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "@anyfile/viewer-protocol": "workspace:*",
-    "mediabunny": "1.55.3"
+    "mediabunny": "1.55.3",
+    "ogv": "1.9.0"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*",

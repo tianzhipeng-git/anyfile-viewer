@@ -81,7 +81,7 @@ export function createPlayerElements(
   name.title = fileName;
   const meta = document.createElement("span");
   meta.className = "anyfile-non-native-video-viewer__meta";
-  meta.textContent = `Matroska · ${media.videoCodec.toUpperCase()} · ${media.audioCodec?.toUpperCase() ?? "video-only"} · ${media.width} × ${media.height}`;
+  meta.textContent = `${media.container} · ${media.videoCodec.toUpperCase()} · ${media.audioCodec?.toUpperCase() ?? "video-only"} · ${media.width} × ${media.height}`;
   meta.title = meta.textContent;
   header.append(name, meta);
 
@@ -107,7 +107,7 @@ export function createPlayerElements(
   const seek = document.createElement("input");
   seek.type = "range";
   seek.className = "anyfile-non-native-video-viewer__range";
-  seek.min = "0";
+  seek.min = String(media.startTimestamp);
   seek.max = String(media.duration);
   seek.step = "0.001";
   seek.setAttribute("aria-label", copy.seek);

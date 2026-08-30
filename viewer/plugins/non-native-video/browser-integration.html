@@ -33,12 +33,32 @@
         ["mkv-vp9-opus.mkv", "playable"],
         ["mkv-av1-mp3.mkv", "playable"],
         ["mkv-avc-video-only.mkv", "playable"],
+        ["ts-avc-aac.ts.fixture", "playable"],
+        ["ts-hevc-mp3.m2t", "playable"],
+        ["ts-avc-video-only.m2ts", "playable"],
+        ["mov-avc-pcm.mov", "playable"],
+        ["mov-hevc-video-only.qt", "playable"],
+        ["ogv-theora-vorbis.ogv", "playable"],
+        ["ogv-theora-opus.ogv", "playable"],
+        ["ogv-theora-video-only.ogg", "playable"],
         ["mkv-opus-audio-only.mkv", "rejected"],
         ["mkv-unsupported-mpeg4.mkv", "rejected"],
         ["mkv-no-cues.mkv", "rejected"],
         ["disguised-mp4.mkv", "rejected"],
         ["truncated.mkv", "rejected"],
         ["corrupt.mkv", "rejected"],
+        ["ts-aac-audio-only.ts.fixture", "rejected"],
+        ["ts-unsupported-mpeg2video.ts.fixture", "rejected"],
+        ["ts-unsupported-ac3.ts.fixture", "rejected"],
+        ["disguised-matroska.ts.fixture", "rejected"],
+        ["truncated.ts.fixture", "rejected"],
+        ["corrupt.ts.fixture", "rejected"],
+        ["mov-unsupported-aac.mov", "rejected"],
+        ["disguised-matroska.mov", "rejected"],
+        ["corrupt.mov", "rejected"],
+        ["ogv-vorbis-audio-only.ogg", "rejected"],
+        ["disguised-matroska.ogv", "rejected"],
+        ["corrupt.ogv", "rejected"],
       ];
       const viewer = document.querySelector("#viewer");
       const results = document.querySelector("#results");
@@ -46,6 +66,31 @@
       document.querySelector("#environment").textContent = `${navigator.userAgent} · ${navigator.platform}`;
       let decodedAudioPeak = 0;
       let scheduledAudioBuffers = 0;
+      let softwareAudioPeak = 0;
+      let softwareAudioCallbacks = 0;
+      let ogvPlayerConstructor;
+      Object.defineProperty(window, "OGVPlayer", {
+        configurable: true,
+        get() { return ogvPlayerConstructor; },
+        set(value) {
+          ogvPlayerConstructor = new Proxy(value, {
+            construct(target, args) {
+              const player = Reflect.construct(target, args);
+              player.onaudiofeedercreated = (feeder) => {
+                const originalBufferData = feeder.bufferData.bind(feeder);
+                feeder.bufferData = (channels) => {
+                  softwareAudioCallbacks += 1;
+                  for (const channel of channels) {
+                    for (const sample of channel) softwareAudioPeak = Math.max(softwareAudioPeak, Math.abs(sample));
+                  }
+                  return originalBufferData(channels);
+                };
+              };
+              return player;
+            },
+          });
+        },
+      });
       const originalStart = AudioBufferSourceNode.prototype.start;
       AudioBufferSourceNode.prototype.start = function (...args) {
         if (this.buffer) {
@@ -62,7 +107,7 @@
       async function loadFile(fileName) {
         const response = await fetch(`./examples/${fileName}`, { cache: "no-store" });
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        return new File([await response.blob()], fileName);
+        return new File([await response.blob()], fileName.replace(/\.fixture$/, ""));
       }
 
       async function waitUntil(predicate, message, timeout = 3000) {
@@ -74,7 +119,9 @@
       }
 
       function frameSignature(canvas) {
-        const data = canvas.getContext("2d").getImageData(0, 0, canvas.width, canvas.height).data;
+        const context = canvas.getContext("2d");
+        if (!context) return canvas.toDataURL();
+        const data = context.getImageData(0, 0, canvas.width, canvas.height).data;
         let signature = 0;
         for (let index = 0; index < data.length; index += 97) signature = (signature + data[index]) >>> 0;
         return signature;
@@ -88,6 +135,8 @@
         let controller;
         decodedAudioPeak = 0;
         scheduledAudioBuffers = 0;
+        softwareAudioPeak = 0;
+        softwareAudioCallbacks = 0;
         try {
           controller = await nonNativeVideoViewer.open({
             file, container: viewer, signal: abortController.signal, locale: "zh-CN",
@@ -97,30 +146,37 @@
           const button = viewer.querySelector("button");
           const seek = viewer.querySelector('input[aria-label="播放位置"]');
           if (!canvas || !button || !seek || button.textContent !== "播放") throw new Error("initial player state is invalid");
+          const start = Number(seek.min);
+          const end = Number(seek.max);
+          const position = (fraction) => start + (end - start) * fraction;
           const firstSignature = frameSignature(canvas);
           button.click();
-          await waitUntil(() => Number(seek.value) > 0.35, "continuous playback");
+          await waitUntil(() => Number(seek.value) > position(0.2), "continuous playback");
           const laterSignature = frameSignature(canvas);
           if (firstSignature === laterSignature) throw new Error("canvas frames did not change");
           button.click();
-          for (const value of ["0.25", "0.9", "0.4", "0.75"]) {
-            seek.value = value;
+          for (const fraction of [0.25, 0.9, 0.4, 0.75]) {
+            seek.value = String(position(fraction));
             seek.dispatchEvent(new Event("input", { bubbles: true }));
           }
-          await waitUntil(() => Math.abs(Number(seek.value) - 0.75) < 0.03, "rapid seek");
-          seek.value = "0.7";
+          await waitUntil(() => Math.abs(Number(seek.value) - position(0.75)) < 0.03, "rapid seek");
+          seek.value = String(position(0.7));
           seek.dispatchEvent(new Event("input", { bubbles: true }));
-          await waitUntil(() => Math.abs(Number(seek.value) - 0.7) < 0.03, "forward seek");
-          seek.value = "0.15";
+          await waitUntil(() => Math.abs(Number(seek.value) - position(0.7)) < 0.03, "forward seek");
+          seek.value = String(position(0.15));
           seek.dispatchEvent(new Event("input", { bubbles: true }));
-          await waitUntil(() => Math.abs(Number(seek.value) - 0.15) < 0.03, "backward seek");
+          await waitUntil(() => Math.abs(Number(seek.value) - position(0.15)) < 0.03, "backward seek");
           button.click();
           await waitUntil(() => button.textContent === "重播", "playback end", 4000);
           button.click();
-          await waitUntil(() => Number(seek.value) > 0.12 && button.textContent === "暂停", "replay");
+          await waitUntil(() => Number(seek.value) > position(0.08) && button.textContent === "暂停", "replay");
           button.click();
           const videoOnly = fileName.includes("video-only");
-          if (!videoOnly && (scheduledAudioBuffers < 1 || decodedAudioPeak < 0.001)) {
+          const softwareOgg = fileName.startsWith("ogv-");
+          const hasDecodedAudio = softwareOgg
+            ? softwareAudioCallbacks > 0 && softwareAudioPeak > 0.001
+            : scheduledAudioBuffers > 0 && decodedAudioPeak > 0.001;
+          if (!videoOnly && !hasDecodedAudio) {
             throw new Error("primary audio was missing or silent");
           }
           if (videoOnly && scheduledAudioBuffers !== 0) throw new Error("video-only scheduled audio");
@@ -134,7 +190,7 @@
           }
           return {
             classification: "playable",
-            evidence: `probe=${supportLevel} · frame-change · audioBuffers=${scheduledAudioBuffers} · audioPeak=${decodedAudioPeak.toFixed(3)} · seek/end/replay/resize · ${progress.at(-1)?.stage}`,
+            evidence: `probe=${supportLevel} · frame-change · audioBuffers=${softwareOgg ? softwareAudioCallbacks : scheduledAudioBuffers} · audioPeak=${(softwareOgg ? softwareAudioPeak : decodedAudioPeak).toFixed(3)} · seek/end/replay/resize · ${progress.at(-1)?.stage}`,
           };
         } catch (error) {
           return {
@@ -186,7 +242,7 @@
         results.replaceChildren();
         for (const [fileName, expected] of cases) {
           const row = results.insertRow();
-          row.insertCell().textContent = fileName;
+          row.insertCell().textContent = fileName.replace(/\.fixture$/, "");
           row.insertCell().textContent = expected;
           const resultCell = row.insertCell();
           const evidenceCell = row.insertCell();

@@ -14,12 +14,15 @@ const media = vi.hoisted(() => ({
   sourceStart: vi.fn(),
   drawImage: vi.fn(),
   getCanvas: vi.fn(),
+  format: "matroska" as "matroska" | "mpeg-ts" | "quicktime",
 }));
 
 vi.mock("mediabunny", () => {
   const MATROSKA = {};
+  const MPEG_TS = {};
+  const QTFF = {};
   const audioTrack = {
-    getCodec: async () => "aac",
+    getCodec: async () => media.format === "quicktime" ? "pcm-s16" : "aac",
     canDecode: async () => true,
     getFirstTimestamp: async () => 0,
   };
@@ -33,14 +36,18 @@ vi.mock("mediabunny", () => {
   };
   return {
     MATROSKA,
+    MPEG_TS,
+    QTFF,
     BlobSource: class BlobSource {},
     Input: class Input {
       canRead = async () => true;
-      getFormat = async () => MATROSKA;
+      getFormat = async () => media.format === "matroska" ? MATROSKA
+        : media.format === "mpeg-ts" ? MPEG_TS : QTFF;
       getTracks = async () => media.hasAudio ? [videoTrack, audioTrack] : [videoTrack];
       getPrimaryVideoTrack = async () => videoTrack;
       getAudioTracks = async () => media.hasAudio ? [audioTrack] : [];
       getDurationFromMetadata = async () => media.duration;
+      computeDuration = async () => media.duration;
       getFirstTimestamp = async () => 0;
       dispose = media.inputDispose;
     },
@@ -90,8 +97,8 @@ class MockAudioContext {
   }
 }
 
-function testContext() {
-  const result = createViewerTestContext(new File(["matroska"], "clip.mkv"));
+function testContext(name = "clip.mkv") {
+  const result = createViewerTestContext(new File(["video"], name));
   contexts.push(result);
   return result;
 }
@@ -103,6 +110,7 @@ beforeEach(() => {
   media.height = 90;
   media.duration = 1.2;
   media.videoStart = 0;
+  media.format = "matroska";
   media.getCanvas.mockImplementation(async (timestamp: number) => ({
     canvas: document.createElement("canvas"), timestamp, duration: 1 / 15,
   }));
@@ -153,6 +161,35 @@ describe("non-native video viewer protocol lifecycle", () => {
 
     await controller.dispose();
     expect(media.contextClose).toHaveBeenCalledOnce();
+  });
+
+  it("opens MPEG-TS through the shared playback session", async () => {
+    media.format = "mpeg-ts";
+    media.hasAudio = true;
+    const context = testContext("clip.ts");
+    const controller = await nonNativeVideoViewer.open(context.context);
+
+    expect(context.container.textContent).toContain("MPEG-TS · AVC · AAC · 160 × 90");
+    await controller.dispose();
+  });
+
+  it("opens QuickTime PCM through the shared playback session", async () => {
+    media.format = "quicktime";
+    media.hasAudio = true;
+    const context = testContext("clip.mov");
+    const controller = await nonNativeVideoViewer.open(context.context);
+
+    expect(context.container.textContent).toContain("QuickTime · AVC · PCM-S16 · 160 × 90");
+    await controller.dispose();
+  });
+
+  it("rejects container bytes disguised with another declared extension", async () => {
+    media.format = "matroska";
+    const context = testContext("disguised.ts");
+    await expect(nonNativeVideoViewer.open(context.context)).rejects.toMatchObject({
+      code: "invalid-file",
+    });
+    expect(media.inputDispose).toHaveBeenCalledOnce();
   });
 
   it("resumes the latest seek when an end seek is immediately superseded", async () => {

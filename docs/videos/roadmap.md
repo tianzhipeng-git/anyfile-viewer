@@ -1,6 +1,6 @@
 # 视频查看实施路线图
 
-- 状态：阶段 0、阶段 1 与阶段 2 首批 Matroska 实现已于 2026-08-30 完成基准环境验收；其他浏览器按支持矩阵逐环境持续验收
+- 状态：阶段 0、阶段 1 与阶段 2 已于 2026-08-30 完成基准环境验收；阶段 2 覆盖 Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora
 - 范围：浏览器本地打开的视频文件；包含文件内音频和字幕轨道，不包含独立音频文件
 - 产品结果：播放主要节目，不交付只能检查 metadata、轨道结构、封面或首帧的视频插件
 - 核心目标：在满足播放与资源安全底线后，优先扩大可播放的容器 × 视频 codec × 音频 codec 组合
@@ -132,11 +132,28 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 
 固定样例、生成命令和反例见 [`viewer/plugins/non-native-video/examples/`](../../viewer/plugins/non-native-video/examples/)。多轨选择、字幕、章节、HDR 精确输出和专业色彩语义仍是等级 3 的已知限制。
 
-### 候选方向
+### 第二批 MPEG-TS 实施结果（2026-08-30）
+
+- 同一插件新增 `.ts`、`.mts`、`.m2ts`、`.m2t`，没有复制播放器内核；`.ts` 与 TypeScript 同扩展名时由内容 probe 以等级 3/1 稳定竞争；
+- 独立 probe 最多读取 512 KiB 头部，识别 188-byte TS、192-byte M2TS 和 204-byte FEC 布局，校验 PAT/PMT CRC、单 program、单主视频、最多一条主音频及 PES 证据；不导入 Mediabunny；
+- 声明范围收敛为 AVC/HEVC + AAC/MP3 或 video-only；MPEG-1/2 Video、AC-3、audio-only、损坏、截断和伪装容器均返回 0，并由 `open()` 独立复验；
+- 完整实现复用既有 Blob cache、Canvas/Web Audio、播放时钟、背压、seek、结束/重播和清理路径；MPEG-TS 无 metadata duration 时由 Mediabunny 的有界 chunk seek 计算结束时间；
+- Chromium 151 / macOS 15.6.1 真实 smoke 已验证 AVC/AAC、HEVC/MP3 和 AVC video-only（含 192-byte M2TS）三条路径的首帧、连续画面、非静音音频、前后/连续 seek、结束、重播和窄窗口 resize；
+- MPEG-2 Video、AC-3、MPEG-PS 与多 program/multi-audio 仍不在声明范围，不用静默丢轨或软件 decoder workaround 扩大支持文案。
+
+### 阶段 2 收尾结果（2026-08-30）
+
+- 普通 QuickTime 增加 AVC/HEVC + PCM S16 或 video-only 路径，复用 Mediabunny/WebCodecs 播放会话，并与 `browser-video` 的 AVC/AAC MOV 通过精确 probe 分工；
+- Ogg 增加 Theora + Vorbis/Opus/video-only 软件播放路径，锁定 OGV.js 1.9.0，仅分发 Ogg 所需 Worker/WASM 与许可证；AudioContext 在用户播放手势后才恢复；
+- Ogg 与 Mediabunny 完整实现分别动态加载，manifest/probe、首包和无关格式均不包含软件 decoder；
+- AVI/MPEG-PS 与 MPEG-1/2/AC-3/DTS 已完成依赖 spike，但未形成满足体积、裁剪、许可和维护边界的 provider，明确转为按真实需求另立交付，不作为阶段 2 的虚假支持；
+- 阶段 2 至此完成，后续工作进入阶段 3 的体验/专业能力，或由新需求触发新的容器/provider 项目。
+
+### 阶段 2 之外的后续候选
 
 - Matroska 中尚未交付但需求明确的 codec 组合与容器语义；
 - AVI 中用户常见且 decoder 可控的 codec 子集；
-- MPEG-PS/TS 中 MPEG-1/2 Video、AVC、HEVC 与常见音频的代表组合；
+- MPEG-PS 中 MPEG-1/2 Video、AVC、HEVC 与常见音频的代表组合，以及 MPEG-TS 中尚未交付但需求明确的 codec/多 program 语义；
 - 原生路径未覆盖但仍有实际需求的 Ogg Video、3GPP 和 Flash Video 组合；
 - MOV 中原生路径未覆盖、但不需要专业工作流的明确组合。
 

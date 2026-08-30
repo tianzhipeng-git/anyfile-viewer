@@ -1,5 +1,13 @@
 # 阶段 2：通用非原生视频播放器
 
+## Delivery Status（2026-08-30，已完成）
+
+- 首批 Matroska 已完成：AVC/HEVC/VP8/VP9/AV1 + AAC/Opus/Vorbis/MP3/FLAC/video-only。
+- 第二批 MPEG-TS 已完成：单 program 的 AVC/HEVC + AAC/MP3/video-only，覆盖 188-byte TS 与 192-byte M2TS 真实播放证据。
+- 第三批普通 QuickTime 已完成：AVC + PCM S16LE、HEVC video-only；与原生 AVC/AAC MOV 按内容 probe 竞争。
+- 第四批 Ogg Video 已完成：OGV.js 1.9.0 软件解码 Theora + Vorbis/Opus/video-only，Worker/WASM 仅在 Ogg 完整路径加载。
+- AVI、MPEG-PS、MPEG-1/2 Video、AC-3/DTS 的依赖 spike 已闭环为后续按需求项目：Mediabunny 不提供对应 demux/decoder；libav.js 可行但 npm 完整包约 167 MB，需先产出受控裁剪 variant、来源与许可交付方案，不能作为本阶段万能 fallback。它们不是阶段 2 已声明范围，也不阻塞本阶段完成。
+
 ## Summary
 
 - 新增一个 `non-native-video` 插件，不为每种 codec 组合新建插件。
@@ -18,12 +26,13 @@ non-native-video
 │   └── 声明范围判定
 ├── container adapters
 │   ├── Matroska（第一批）
-│   ├── MPEG-TS（后续）
-│   ├── Ogg（后续）
+│   ├── MPEG-TS（已交付）
+│   ├── QuickTime（已交付普通组合）
+│   ├── Ogg（已交付软件解码）
 │   └── 其他容器（按需求增加）
 ├── decoder providers
 │   ├── WebCodecs（第一批、Chromium）
-│   └── 可选 WASM codec（未来按需动态注册）
+│   └── OGV.js Theora/Vorbis/Opus WASM（按 Ogg 路径加载）
 └── shared playback session
     ├── Canvas 视频输出
     ├── Web Audio 音频输出
@@ -76,9 +85,9 @@ non-native-video
 ## Expansion Strategy
 
 - Matroska 管线稳定后，新增格式主要是增加 container adapter、probe 识别和组合证据，不复制播放器：
-  1. MPEG-TS：优先 AVC/HEVC + AAC/MP3；
-  2. Ogg：Theora + Vorbis/Opus；若 WebCodecs 缺 Theora，再单独评估软件 decoder；
-  3. MOV 中原生不能播放但 WebCodecs 可解的普通组合；
+  1. MPEG-TS：AVC/HEVC + AAC/MP3 已完成；未声明 codec 与多 program/多音轨语义按需求继续扩展；
+  2. Ogg：Theora + Vorbis/Opus/video-only 已通过 OGV.js 软件解码交付；
+  3. MOV 中 AVC/HEVC + PCM S16 或 video-only 已交付；
   4. AVI、MPEG-PS：Mediabunny 当前不直接覆盖，先做依赖 spike，再决定新增 demuxer 或受控 FFmpeg/WASM；
   5. AC-3、DTS、Theora、MPEG-2 等 Chromium 原生 decoder 缺口，按使用价值增加独立延迟加载的 WASM provider。
 - 新增 codec provider不得进入其他 codec 的加载路径；例如打开 MKV/AVC/AAC 时不能下载 AC-3 或 MPEG-2 decoder。
@@ -97,5 +106,5 @@ non-native-video
 
 - 第一目标环境为 Chromium，运行时仍以实际 track decoder config 为准；缺少所需 WebCodecs 能力时返回 `unsupported-environment`。
 - 第一批追求“一个通用 MKV 播放管线覆盖多种 Chromium 可解 codec”，不是为每个组合复制实现。
-- 首期不自行构建 FFmpeg/WASM；遇到 Mediabunny 或 WebCodecs 不覆盖的容器/codec，先记录为后续 adapter/provider，而不是加入万能 fallback。
+- 不自行构建通用 FFmpeg/WASM；OGV.js 使用锁定的上游预构建 Ogg 专用资产。其余缺口先形成可审计 adapter/provider 决策，不加入万能 fallback。
 - Mediabunny 的 MPL-2.0 许可证与项目分发方式可接受，并保留版权与许可证要求。

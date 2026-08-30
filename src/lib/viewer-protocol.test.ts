@@ -206,6 +206,18 @@ describe("viewer protocol", () => {
     );
     expect(matroska.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["non-native-video", 3], ["hex-viewer", 1]]);
+
+    const transportStreamBytes = readFileSync(join(
+      process.cwd(),
+      "viewer/plugins/non-native-video/examples/ts-avc-aac.ts.fixture",
+    ));
+    const transportStream = await resolveViewerRegistrations(
+      new File([transportStreamBytes], "clip.ts"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(transportStream.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["non-native-video", 3], ["ace-code-text", 1], ["hex-viewer", 1]]);
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {
@@ -233,10 +245,16 @@ describe("viewer protocol", () => {
     expect(findViewerRegistrations("clip.webm", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-video", "hex-viewer"]);
     expect(findViewerRegistrations("clip.mov", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-video", "hex-viewer"]);
+      .toEqual(["browser-video", "non-native-video", "hex-viewer"]);
     expect(findViewerRegistrations("clip.3gp", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-video", "hex-viewer"]);
     expect(findViewerRegistrations("clip.mkv", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["non-native-video", "hex-viewer"]);
+    expect(findViewerRegistrations("clip.ts", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["non-native-video", "ace-code-text", "hex-viewer"]);
+    expect(findViewerRegistrations("clip.m2ts", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["non-native-video", "hex-viewer"]);
+    expect(findViewerRegistrations("clip.ogv", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["non-native-video", "hex-viewer"]);
     expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "hex-viewer"]);

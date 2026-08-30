@@ -40,9 +40,13 @@ export interface ProbeSlices {
   readonly tail?: Uint8Array;
 }
 
+export async function readProbeHead(file: File, signal: AbortSignal) {
+  return readBlob(file.slice(0, Math.min(file.size, PROBE_HEAD_BYTES)), signal);
+}
+
 export async function readProbeSlices(file: File, signal: AbortSignal): Promise<ProbeSlices> {
   const headEnd = Math.min(file.size, PROBE_HEAD_BYTES);
-  const head = await readBlob(file.slice(0, headEnd), signal);
+  const head = await readProbeHead(file, signal);
   if (file.size <= headEnd) return { head };
   const tailStart = Math.max(headEnd, file.size - PROBE_TAIL_BYTES);
   const tail = await readBlob(file.slice(tailStart), signal);

@@ -1,6 +1,6 @@
 # 视频格式支持矩阵
 
-- 状态：阶段 0、阶段 1 与阶段 2 首批 Matroska 播放路径已验收
+- 状态：阶段 0、阶段 1 与阶段 2 已完成；Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 路径已验收
 - 事实来源：固定真实样例、目标环境中的真实播放、自动协议测试和锁定依赖
 - 覆盖口径：以实际可播放的容器 × 视频 codec × 音频 codec 组合计数，不以扩展名数量或最高支持等级计数
 
@@ -63,16 +63,23 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | WebM | VP9 profile 0，8-bit 4:2:0 | 无 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；video-only 正常播放 |
 | WebM | AV1 | Opus | browser video / non-native video | 0 | planned | 3–4 | 原生可播进入阶段 1，否则按需求进入阶段 2 |
 | QuickTime/MOV，尾部 `moov` | AVC/H.264 Constrained Baseline L3.0 | AAC-LC，48 kHz，双声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；`canPlayType()` 假阴性但真实播放通过 |
-| QuickTime/MOV | HEVC 等其他组合 | AAC/PCM 等 | non-native video | 0 | planned | 3–4 | 未声明组合按阶段 2/3 评估 |
+| QuickTime/MOV，`sowt` | AVC/H.264 Baseline，8-bit 4:2:0 | PCM S16LE，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas、非静音音频、seek/end/replay 通过 |
+| QuickTime/MOV | HEVC Main，8-bit 4:2:0 | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only、seek 与 resize 通过 |
 | Matroska，有 Cues | AVC/H.264 Baseline，8-bit 4:2:0 | AAC，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
 | Matroska，有 Cues | HEVC Main，8-bit 4:2:0 | FLAC，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
 | Matroska，有 Cues | VP8 profile 0，8-bit 4:2:0 | Vorbis，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；独立轨道首时间戳恢复已验证 |
 | Matroska，有 Cues | VP9 profile 0，8-bit 4:2:0 | Opus，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
 | Matroska，有 Cues | AV1 Main，8-bit 4:2:0 | MP3，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
 | Matroska，有 Cues | AVC/H.264 Baseline，8-bit 4:2:0 | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only 正常播放且不创建 AudioContext |
-| AVI | 选定高频 codec | 选定高频音频 | non-native video | 0 | planned | 3 | 阶段 2 候选，不承诺整个 AVI 生态 |
-| MPEG-PS/TS | MPEG-1/2、AVC、HEVC 等选定组合 | 选定高频音频 | non-native video | 0 | planned | 3 | 阶段 2 候选，按时间轴可控子集实现 |
-| Ogg Video | Theora | Vorbis/Opus | browser video / non-native video | 0 | planned | 3–4 | 原生可播阶段 1，否则按需求阶段 2 |
+| MPEG-TS，188-byte，单 program | AVC/H.264 Baseline，8-bit 4:2:0 | AAC，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
+| MPEG-TS，188-byte，单 program | HEVC Main，8-bit 4:2:0 | MP3，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
+| M2TS，192-byte，单 program | AVC/H.264 Baseline，8-bit 4:2:0 | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only、seek 与 resize 通过 |
+| AVI | 选定高频 codec | 选定高频音频 | non-native video | 0 | deferred | 3 | 需受控 libav.js 裁剪 variant；不引入约 167 MB 完整 npm 分发 |
+| MPEG-PS | MPEG-1/2 等选定组合 | MP2/AC-3 等 | non-native video | 0 | deferred | 3 | Mediabunny 不覆盖；PL_MPEG 仅覆盖 MPEG-1+MP2，libav.js 需单独裁剪项目 |
+| MPEG-TS | MPEG-1/2 Video、AC-3、多 program/多主音频等未声明组合 | 对应音频 | non-native video | 0 | deferred | 3 | 需独立 decoder provider 或轨道语义，按真实需求另立交付 |
+| Ogg Video | Theora | Vorbis，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；OGV.js 软件解码，非静音 PCM 与 seek 通过 |
+| Ogg Video | Theora | Opus，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；OGV.js 软件解码 |
+| Ogg Video | Theora | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only 不创建 AudioContext |
 | 3GPP，尾部 `moov` | AVC/H.264 Constrained Baseline L1.3 | AAC-LC，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
 | 3GPP | H.263 等其他组合 | AMR 等 | non-native video | 0 | planned | 3–4 | 未声明组合按阶段 2 评估 |
 | Flash Video | Sorenson/VP6/AVC 等 | AAC/MP3 等 | non-native video | 0 | deferred | 3 | 阶段 2 低优先级，取决于真实需求 |
@@ -128,6 +135,21 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 - opening abort 与 active abort 均释放 Input、decoder、AudioContext、帧、回调和 DOM；重复 dispose 由自动协议测试覆盖；
 - probe 预算为 768 KiB，完整 Blob 缓存上限 8 MiB，Canvas pool 为 2，音频预排约 1 秒，编码尺寸上限为 8192、像素上限为 33,554,432；
 - 多视频/音频轨选择、字幕、章节、HDR 精确输出和专业色彩语义未声明；Safari、Firefox、Windows、Android 和 iOS 尚未复验。
+
+### 阶段 2 MPEG-TS 目标环境记录（2026-08-30）
+
+- 环境：Codex 应用内 Chromium 151，macOS 15.6.1（Apple Silicon）；实际插件入口为 Vite 直接导入 `non-native-video` probe 与完整实现；
+- AVC/AAC、HEVC/MP3 与 AVC video-only 三个声明样例均取得首帧、连续 Canvas 帧变化、前后与快速连续 seek、播放结束、重播和 260 × 180 窄容器 resize；两条含音频路径的解码样本峰值分别为 0.244、0.132，video-only 未创建音频源；
+- 188-byte TS 与 192-byte M2TS 已验证；probe 还识别 204-byte FEC packet layout，但尚无端到端固定样例，因此不单独写成 verified 组合；
+- audio-only、MPEG-2 Video、AC-3、截断、损坏和 Matroska 伪装为 `.ts` 均由 probe 返回 0，并由完整插件拒绝；`open()` 不依赖 probe，按扩展名再次约束真实容器；
+- probe 最多读取 512 KiB 头部；完整路径继续使用 8 MiB Blob cache、2 个 Canvas 帧槽和约 1 秒音频预排；MPEG-TS 的 duration/seek 使用 Mediabunny 5 MiB chunk 粗查与线性细化；
+- 单 program、单主视频、最多一条主音频是当前声明边界；MPEG-2 Video、AC-3、多 program、多音轨、字幕、HDR 精确输出和专业色彩语义未声明；Safari、Firefox、Windows、Android 和 iOS 尚未复验。
+
+### 阶段 2 QuickTime 与 Ogg 目标环境记录（2026-08-30）
+
+- QuickTime 的 AVC/PCM S16LE 与 HEVC video-only 均通过连续 Canvas 帧、前后/连续 seek、end/replay 和 260 × 180 resize；PCM 解码峰值 0.125；AAC QuickTime 留给原生插件，非原生 probe 不误接管。
+- Chromium 原生只能读取 Ogg Theora metadata、不能产生视频帧；`non-native-video` 因而按需加载 OGV.js 1.9.0 的 Ogg demux、Theora 与 Vorbis/Opus Worker/WASM。Theora/Vorbis 捕获 168 个非静音 PCM buffer、峰值 0.129；Theora video-only 不创建 AudioContext；Theora/Opus 使用独立固定样例复验。
+- Ogg audio-only、损坏和伪装容器均 probe 0；普通路径与 Ogg 路径的实现 chunk 分离，OGV.js 资产、MIT 及 codec 许可证由构建门禁检查。
 
 ## 7. 自动测试与构建证据
 
