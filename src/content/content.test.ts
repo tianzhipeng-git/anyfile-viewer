@@ -1,0 +1,66 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+import { PUBLISHED_LOCALES } from "../i18n/config";
+
+import { getCategory, getFormat, getPlugin, publishedCategories, publishedFormats, publishedPlugins, viewerManifests } from ".";
+
+const unique = (values: readonly string[]) => new Set(values).size === values.length;
+
+describe("published SEO content", () => {
+  it("maps every format to exact Manifest capabilities and a published category", () => {
+    for (const content of publishedFormats) {
+      const manifests = viewerManifests.filter((manifest) => manifest.formats.some(({ extensions }) => extensions.includes(`.${content.extension}`)));
+      expect(manifests.map(({ id }) => id), content.extension).not.toHaveLength(0);
+      expect(publishedCategories.some(({ slug }) => slug === content.categoryId), content.extension).toBe(true);
+      for (const locale of PUBLISHED_LOCALES) {
+        const format = getFormat(content.extension, locale)!;
+        expect(format.pluginIds).toEqual(manifests.map(({ id }) => id));
+        expect(format.title.trim()).not.toBe("");
+        expect(format.description.trim()).not.toBe("");
+        expect(format.introduction.trim()).not.toBe("");
+        expect(format.limitations.length).toBeGreaterThan(0);
+        expect(format.faq.length).toBeGreaterThan(0);
+        if (format.capability.typicalLevel <= 2) expect(format.alternatives?.length, content.extension).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("publishes complete categories and plugin pages with valid reverse links", () => {
+    expect(publishedPlugins.map(({ pluginId }) => pluginId).sort()).toEqual(viewerManifests.map(({ id }) => id).sort());
+    for (const locale of PUBLISHED_LOCALES) {
+      for (const { slug } of publishedCategories) {
+        const category = getCategory(slug, locale)!;
+        expect(category.extensions.length, slug).toBeGreaterThan(0);
+        expect(category.introduction.trim()).not.toBe("");
+        expect(category.faq.length).toBeGreaterThan(0);
+      }
+      for (const { pluginId } of publishedPlugins) {
+        const plugin = getPlugin(pluginId, locale)!;
+        expect(plugin.manifest.id).toBe(pluginId);
+        expect(plugin.summary.trim()).not.toBe("");
+        for (const format of plugin.formats) expect(format.pluginIds).toContain(pluginId);
+      }
+    }
+  });
+
+  it("keeps localized metadata and route keys unique", () => {
+    expect(unique(publishedFormats.map(({ extension }) => extension))).toBe(true);
+    expect(unique(publishedCategories.map(({ slug }) => slug))).toBe(true);
+    expect(unique(publishedPlugins.map(({ pluginId }) => pluginId))).toBe(true);
+    for (const locale of PUBLISHED_LOCALES) {
+      expect(unique(publishedFormats.map(({ extension }) => getFormat(extension, locale)!.title))).toBe(true);
+      expect(unique(publishedFormats.map(({ extension }) => getFormat(extension, locale)!.description))).toBe(true);
+      expect(unique(publishedCategories.map(({ slug }) => getCategory(slug, locale)!.title))).toBe(true);
+      expect(unique(publishedPlugins.map(({ pluginId }) => getPlugin(pluginId, locale)!.title))).toBe(true);
+    }
+  });
+
+  it("keeps the SEO Manifest inventory free of registrations and plugin implementations", () => {
+    const source = readFileSync(join(process.cwd(), "src/content/manifests.ts"), "utf8");
+    expect(source).not.toContain("viewer-registrations");
+    expect(source).not.toMatch(/from\s+["']@anyfile\/[\w-]+-viewer["']/);
+    expect(source).not.toContain("/probe");
+  });
+});

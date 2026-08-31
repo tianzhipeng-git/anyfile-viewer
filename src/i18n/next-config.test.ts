@@ -10,6 +10,7 @@ describe("localized routing configuration", () => {
       { source: "/view", destination: "/en/view", permanent: true },
       { source: "/categories/:slug", destination: "/en/categories/:slug", permanent: true },
       { source: "/formats/:extension", destination: "/en/formats/:extension", permanent: true },
+      { source: "/plugins/:pluginId", destination: "/en/plugins/:pluginId", permanent: true },
     ]));
   });
 

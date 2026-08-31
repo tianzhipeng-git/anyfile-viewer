@@ -1,11 +1,10 @@
-import { BoxIcon, BracesIcon, FileImageIcon, FileTextIcon, LayersIcon } from "lucide-react";
+import { BinaryIcon, BracesIcon, FileImageIcon, FileTextIcon } from "lucide-react";
 
 const iconByCategory = {
   "images-video": FileImageIcon,
   documents: FileTextIcon,
   "code-data": BracesIcon,
-  "3d": BoxIcon,
-  design: LayersIcon,
+  "developer-artifacts": BinaryIcon,
 };
 
 export function FormatGlyph({ category, extension }: { category: string; extension: string }) {
