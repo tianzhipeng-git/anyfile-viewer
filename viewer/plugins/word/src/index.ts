@@ -1,6 +1,7 @@
 import { renderAsync } from "docx-preview";
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -47,20 +48,20 @@ async function readBlob(blob: Blob, signal: AbortSignal): Promise<ArrayBuffer> {
   return bytes.buffer;
 }
 
-function getCopy(locale: string) {
-  return locale.toLowerCase().startsWith("zh") ? {
+function getCopy(locale: OpenViewerContext["locale"]) {
+  return selectMessages(locale, { "zh-CN": {
     reading: "正在读取 Word 文档…",
     rendering: "正在排版 Word 文档…",
     invalid: "文件内容不是有效的 DOCX 文档。",
     tooLarge: "Word 文档超过浏览器安全资源上限。",
     ready: "Word 文档已打开",
-  } : {
+  }, en: {
     reading: "Reading Word document…",
     rendering: "Rendering Word document…",
     invalid: "The file is not a valid DOCX document.",
     tooLarge: "The Word document exceeds the browser-safe resource limit.",
     ready: "Word document opened",
-  };
+  } });
 }
 
 function createViewerRoot(fileName: string) {

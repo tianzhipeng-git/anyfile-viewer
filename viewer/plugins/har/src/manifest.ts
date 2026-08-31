@@ -3,9 +3,9 @@ import { VIEWER_PROTOCOL_VERSION, type ViewerPluginManifest } from "@anyfile/vie
 export const harManifest = {
   protocolVersion: VIEWER_PROTOCOL_VERSION,
   id: "http-archive",
-  name: "HTTP Archive 查看器",
+  name: { en: "HTTP Archive viewer", "zh-CN": "HTTP Archive 查看器" },
   formats: [{
-    name: "HTTP Archive",
+    name: { en: "HTTP Archive", "zh-CN": "HTTP Archive" },
     extensions: [".har"],
     mimeTypes: ["application/json", "application/vnd.har+json"],
   }],

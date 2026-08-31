@@ -3,9 +3,9 @@ import { VIEWER_PROTOCOL_VERSION, type ViewerPluginManifest } from "@anyfile/vie
 export const pdfManifest = {
   protocolVersion: VIEWER_PROTOCOL_VERSION,
   id: "pdfjs-pdf",
-  name: "PDF.js 查看器",
+  name: { en: "PDF.js viewer", "zh-CN": "PDF.js 查看器" },
   formats: [{
-    name: "PDF 文档",
+    name: { en: "PDF document", "zh-CN": "PDF 文档" },
     extensions: [".pdf"],
     mimeTypes: ["application/pdf"],
   }],

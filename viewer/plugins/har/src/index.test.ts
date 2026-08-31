@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { validateManifest } from "@anyfile/viewer-protocol";
+import { validateManifest, type Locale } from "@anyfile/viewer-protocol";
 import { createDeferredFile, createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer-test";
 
 import { harViewer } from "./index";
@@ -40,7 +40,7 @@ function fixture(entries = 1) {
   });
 }
 
-function contextFor(contents: string, locale = "zh-CN") {
+function contextFor(contents: string, locale: Locale = "zh-CN") {
   const test = createViewerTestContext(new File([contents], "network.har", { type: "application/json" }));
   contexts.push(test);
   return { ...test, context: { ...test.context, locale } };

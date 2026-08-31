@@ -4,18 +4,22 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AlertCircleIcon, AlertTriangleIcon, FileSearchIcon, LoaderCircleIcon } from "lucide-react";
 import {
   ViewerError,
+  interpolate,
   isViewerAbortError,
+  manifestName,
   normalizeViewerError,
   resolveViewerRegistrations,
   validateLoadedPlugin,
   type ResolvedViewerRegistration,
   type ViewerController,
   type WorkspaceReader,
+  type Locale,
 } from "@anyfile/viewer-protocol";
 
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { viewerRegistrations } from "@/lib/viewer-registrations";
+import type { AppDictionary } from "@/i18n/types";
 
 type ViewerSession = { stop(): Promise<void> };
 type ViewerStatus = "idle" | "loading" | "active" | "error";
@@ -31,11 +35,15 @@ export function ViewerHost({
   header,
   relativePath,
   workspace,
+  locale,
+  dictionary,
 }: {
   file?: File;
   header: ReactNode;
   relativePath?: string;
   workspace?: WorkspaceReader;
+  locale: Locale;
+  dictionary: AppDictionary["viewer"];
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sessionRef = useRef<ViewerSession | undefined>(undefined);
@@ -63,15 +71,15 @@ export function ViewerHost({
       if (abortController.signal.aborted) return;
       setRoutingResult({ file, workspace, candidates: resolvedCandidates });
       setStatus(resolvedCandidates.length > 0 ? "loading" : "idle");
-      setMessage(resolvedCandidates.length > 0 ? "正在加载查看器…" : "");
+      setMessage(resolvedCandidates.length > 0 ? dictionary.loadingViewer : "");
     }).catch((error: unknown) => {
       if (abortController.signal.aborted || isViewerAbortError(error)) return;
-      const viewerError = normalizeViewerError(error, "无法检测这个文件的格式。");
+      const viewerError = normalizeViewerError(error, dictionary.detectionFailed);
       setRoutingResult({ file, workspace, candidates: [], error: viewerError.message });
     });
 
     return () => abortController.abort();
-  }, [file, workspace]);
+  }, [dictionary.detectionFailed, dictionary.loadingViewer, file, workspace]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -111,10 +119,10 @@ export function ViewerHost({
       if (abortController.signal.aborted) return;
       container.replaceChildren();
       setStatus("loading");
-      setMessage(`正在加载${registration.manifest.name}…`);
+      setMessage(interpolate(dictionary.loadingNamedViewer, { name: manifestName(registration.manifest, locale) }));
 
       if (registration.manifest.workspaceAccess === "required" && !workspace) {
-        throw new ViewerError("missing-related-file", "此查看器需要从文件夹工作区打开文件。");
+        throw new ViewerError("missing-related-file", dictionary.workspaceRequired);
       }
       const plugin = await registration.load();
       validateLoadedPlugin(registration, plugin);
@@ -125,7 +133,7 @@ export function ViewerHost({
         workspace,
         container,
         signal: abortController.signal,
-        locale: navigator.language || "zh-CN",
+        locale,
         reportProgress(progress) {
           if (!abortController.signal.aborted && sessionRef.current === session) {
             setStatus("loading");
@@ -140,7 +148,7 @@ export function ViewerHost({
       if (abortController.signal.aborted || isViewerAbortError(error)) return;
       container.replaceChildren();
       if (sessionRef.current === session) {
-        const viewerError = normalizeViewerError(error);
+        const viewerError = normalizeViewerError(error, dictionary.openFailedFallback);
         setStatus("error");
         setMessage(viewerError.message);
       }
@@ -149,7 +157,7 @@ export function ViewerHost({
     return () => {
       void session.stop();
     };
-  }, [file, registration, relativePath, workspace]);
+  }, [dictionary, file, locale, registration, relativePath, workspace]);
 
   const visibleStatus = !file
     ? "idle"
@@ -163,7 +171,7 @@ export function ViewerHost({
   const visibleMessage = visibleStatus === "idle"
     ? ""
     : isRouting
-      ? "正在检测文件格式并选择查看器…"
+      ? dictionary.detecting
       : currentRoutingResult?.error ?? message;
 
   return (
@@ -172,14 +180,14 @@ export function ViewerHost({
         {header}
         {candidates.length > 1 && (
           <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            查看器
+            {dictionary.viewerLabel}
             <select
               className="h-8 rounded-md border bg-background px-2 text-foreground"
               value={registration?.manifest.id ?? ""}
               onChange={(event) => setRegistrationId(event.target.value)}
             >
               {candidates.map(({ manifest }) => (
-                <option key={manifest.id} value={manifest.id}>{manifest.name}</option>
+                <option key={manifest.id} value={manifest.id}>{manifestName(manifest, locale)}</option>
               ))}
             </select>
           </label>
@@ -190,8 +198,8 @@ export function ViewerHost({
           <div className="flex-none p-3 sm:px-4">
             <Alert>
               <AlertTriangleIcon />
-              <AlertTitle>暂不支持此文件类型的专用预览</AlertTitle>
-              <AlertDescription>当前以十六进制展示文件的原始内容。</AlertDescription>
+              <AlertTitle>{dictionary.fallbackTitle}</AlertTitle>
+              <AlertDescription>{dictionary.fallbackDescription}</AlertDescription>
             </Alert>
           </div>
         )}
@@ -213,9 +221,9 @@ export function ViewerHost({
                 <EmptyMedia variant="icon">
                   {visibleStatus === "loading" ? <LoaderCircleIcon className="animate-spin" /> : visibleStatus === "error" ? <AlertCircleIcon /> : <FileSearchIcon />}
                 </EmptyMedia>
-                <EmptyTitle>{visibleStatus === "loading" ? "正在打开文件" : visibleStatus === "error" ? "查看器打开失败" : file ? "没有匹配的查看器" : "选择本地文件"}</EmptyTitle>
+                <EmptyTitle>{visibleStatus === "loading" ? dictionary.openingTitle : visibleStatus === "error" ? dictionary.failedTitle : file ? dictionary.noViewerTitle : dictionary.selectTitle}</EmptyTitle>
                 <EmptyDescription>
-                  {visibleMessage || (file ? `当前没有支持 ${file.name.split(".").pop()?.toLowerCase() || "未知"} 格式的插件。` : "选择 PDF、表格、代码、文本或结构化数据文件，内容只在浏览器本地处理。")}
+                  {visibleMessage || (file ? interpolate(dictionary.noPlugin, { extension: file.name.split(".").pop()?.toLowerCase() || "unknown" }) : dictionary.selectDescription)}
                 </EmptyDescription>
               </EmptyHeader>
             </Empty>

@@ -24,6 +24,7 @@
     "test:app": "vitest run"
   },
   "dependencies": {
+    "@anyfile/i18n": "workspace:*",
     "@anyfile/archive-metadata-viewer": "workspace:*",
     "@anyfile/browser-image-viewer": "workspace:*",
     "@anyfile/browser-audio-viewer": "workspace:*",

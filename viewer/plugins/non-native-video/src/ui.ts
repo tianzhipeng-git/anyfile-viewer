@@ -1,3 +1,5 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
 import type { MediaDescription } from "./media-inspection";
 
 export interface PlayerElements {
@@ -19,22 +21,22 @@ export interface PlayerCopy {
   readonly failed: string;
 }
 
-export function playerCopy(locale: string): PlayerCopy {
-  return locale.toLowerCase().startsWith("zh") ? {
+export function playerCopy(locale: Locale): PlayerCopy {
+  return selectMessages(locale, { "zh-CN": {
     play: "播放",
     pause: "暂停",
     replay: "重播",
     volume: "音量",
     seek: "播放位置",
     failed: "播放过程中发生解码错误。",
-  } : {
+  }, en: {
     play: "Play",
     pause: "Pause",
     replay: "Replay",
     volume: "Volume",
     seek: "Playback position",
     failed: "A decoding error occurred during playback.",
-  };
+  } });
 }
 
 function formatTime(seconds: number) {

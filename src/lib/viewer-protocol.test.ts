@@ -26,8 +26,8 @@ function manifest(
   return {
     protocolVersion: VIEWER_PROTOCOL_VERSION,
     id,
-    name: id,
-    formats: [{ name: id, extensions, fileNames }],
+    name: { en: id, "zh-CN": id },
+    formats: [{ name: { en: id, "zh-CN": id }, extensions, fileNames }],
     workspaceAccess: "none",
   };
 }
@@ -58,7 +58,7 @@ describe("viewer protocol", () => {
     expect(() => validateRegistrations([
       registration("duplicate", [".pdf"]),
       registration("duplicate", [".xlsx"]),
-    ])).toThrow(/重复注册/);
+    ])).toThrow(/registered more than once/);
   });
 
   it("matches compound extensions, wildcard viewers, and preserves registration order", () => {
@@ -305,7 +305,7 @@ describe("viewer protocol", () => {
       async open() { return { dispose() {} }; },
     };
 
-    expect(() => validateLoadedPlugin(registered, loaded)).toThrow(/不一致/);
+    expect(() => validateLoadedPlugin(registered, loaded)).toThrow(/does not match/);
   });
 
   it("preserves protocol errors and sanitizes unknown errors", () => {
@@ -313,7 +313,7 @@ describe("viewer protocol", () => {
     expect(normalizeViewerError(known)).toBe(known);
 
     const normalized = normalizeViewerError(new Error("internal path leaked"));
-    expect(normalized).toMatchObject({ code: "open-failed", message: "无法打开这个文件。" });
+    expect(normalized).toMatchObject({ code: "open-failed", message: "Unable to open this file." });
     expect(normalized.cause).toBeInstanceOf(Error);
   });
 

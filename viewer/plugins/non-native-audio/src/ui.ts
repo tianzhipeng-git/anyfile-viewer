@@ -1,12 +1,15 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
 import type { AudioDescription } from "./media-inspection";
 
 export interface PlayerCopy { readonly play: string; readonly pause: string; readonly replay: string; readonly seek: string; readonly volume: string; readonly failed: string }
 export interface PlayerElements { readonly root: HTMLDivElement; readonly play: HTMLButtonElement; readonly seek: HTMLInputElement; readonly time: HTMLSpanElement; readonly volume: HTMLInputElement; readonly status: HTMLDivElement }
 
-export function playerCopy(locale: string): PlayerCopy {
-  return locale.toLowerCase().startsWith("zh")
-    ? { play: "播放", pause: "暂停", replay: "重播", seek: "播放位置", volume: "音量", failed: "播放过程中发生解码错误。" }
-    : { play: "Play", pause: "Pause", replay: "Replay", seek: "Playback position", volume: "Volume", failed: "A decoding error occurred during playback." };
+export function playerCopy(locale: Locale): PlayerCopy {
+  return selectMessages(locale, {
+    en: { play: "Play", pause: "Pause", replay: "Replay", seek: "Playback position", volume: "Volume", failed: "A decoding error occurred during playback." },
+    "zh-CN": { play: "播放", pause: "暂停", replay: "重播", seek: "播放位置", volume: "音量", failed: "播放过程中发生解码错误。" },
+  });
 }
 
 function formatTime(seconds: number) {

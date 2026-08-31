@@ -1,3 +1,5 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
 import { displaySourcePath, findOriginalPosition, type SourceMapDocument } from "./parser";
 import { sourceMapStyles } from "./styles";
 
@@ -26,7 +28,11 @@ function table(headers: readonly string[], rows: readonly (readonly string[])[])
   return node;
 }
 
-export function createSourceMapView(fileName: string, document: SourceMapDocument) {
+export function createSourceMapView(fileName: string, document: SourceMapDocument, locale: Locale) {
+  const copy = selectMessages(locale, {
+    en: { description: "ECMA-426 mapping preview · external sources are not requested", target: "Target file", lines: "Generated lines", segments: "Mapping segments", mapped: "Mapped segments", warning: "An external source-map section was not loaded.", lookup: "Generated → Original lookup", line: "Generated line (starts at 1)", column: "Generated column (starts at 0)", submit: "Look up", prompt: "Enter a generated position to find its original location.", invalid: "Enter a valid non-negative position.", missing: "No original mapping is available for this generated position.", index: "Index", path: "Path", embedded: "Embedded source", ignored: "Ignored", no: "No", yes: "Yes", sourceLimit: `Only the first ${MAX_TABLE_ROWS} sources are listed; all sources remain available for position lookup.`, embeddedSources: "Embedded sources", chooseSource: "Choose embedded source", truncated: "… (preview truncated)", samples: "Mapping samples", generatedPosition: "Generated position", originalPosition: "Original position", name: "Name" },
+    "zh-CN": { description: "ECMA-426 映射预览 · 不请求外部 sources", target: "目标文件", lines: "生成行", segments: "映射段", mapped: "有效映射", warning: "未加载外部 section。", lookup: "Generated → Original 查询", line: "生成行（从 1 开始）", column: "生成列（从 0 开始）", submit: "查询", prompt: "输入生成位置以查询原始位置。", invalid: "请输入有效的非负位置。", missing: "该生成位置没有可用的原始映射。", index: "索引", path: "路径", embedded: "内嵌源码", ignored: "忽略", no: "否", yes: "是", sourceLimit: `仅列出前 ${MAX_TABLE_ROWS} 个 source；全部 source 仍可用于位置查询。`, embeddedSources: "内嵌源码", chooseSource: "选择内嵌源码", truncated: "…（预览已截断）", samples: "映射样本", generatedPosition: "生成位置", originalPosition: "原始位置", name: "名称" },
+  });
   const root = element("div");
   root.className = "anyfile-source-map-viewer";
   const style = element("style");
@@ -35,15 +41,15 @@ export function createSourceMapView(fileName: string, document: SourceMapDocumen
   header.className = "anyfile-source-map-viewer__header";
   const title = element("strong", fileName);
   title.title = fileName;
-  header.append(title, element("span", "ECMA-426 映射预览 · 不请求外部 sources"));
+  header.append(title, element("span", copy.description));
   const viewport = element("div");
   viewport.className = "anyfile-source-map-viewer__viewport";
   const summary = element("dl");
   summary.className = "anyfile-source-map-viewer__summary";
   const mapped = document.mappings.filter((mapping) => mapping.sourceIndex !== undefined).length;
   for (const [term, value] of [
-    ["目标文件", document.file ?? "—"], ["生成行", String(document.generatedLines)],
-    ["映射段", String(document.mappings.length)], ["有效映射", String(mapped)],
+    [copy.target, document.file ?? "—"], [copy.lines, String(document.generatedLines)],
+    [copy.segments, String(document.mappings.length)], [copy.mapped, String(mapped)],
     ["Sources", String(document.sources.length)], ["Names", String(document.names.length)],
     ["Indexed sections", String(document.sections)],
   ]) {
@@ -52,30 +58,30 @@ export function createSourceMapView(fileName: string, document: SourceMapDocumen
     summary.append(item);
   }
   viewport.append(summary);
-  for (const warning of document.warnings) {
-    const node = element("p", warning);
+  for (let index = 0; index < document.warnings.length; index += 1) {
+    const node = element("p", copy.warning);
     node.className = "anyfile-source-map-viewer__warning";
     viewport.append(node);
   }
 
-  viewport.append(element("h2", "Generated → Original 查询"));
+  viewport.append(element("h2", copy.lookup));
   const query = element("form");
   query.className = "anyfile-source-map-viewer__query";
-  const lineLabel = element("label", "生成行（从 1 开始）");
+  const lineLabel = element("label", copy.line);
   const lineInput = element("input");
   lineInput.type = "number";
   lineInput.min = "1";
   lineInput.value = "1";
   lineLabel.append(lineInput);
-  const columnLabel = element("label", "生成列（从 0 开始）");
+  const columnLabel = element("label", copy.column);
   const columnInput = element("input");
   columnInput.type = "number";
   columnInput.min = "0";
   columnInput.value = "0";
   columnLabel.append(columnInput);
-  const submit = element("button", "查询");
+  const submit = element("button", copy.submit);
   submit.type = "submit";
-  const result = element("p", "输入生成位置以查询原始位置。");
+  const result = element("p", copy.prompt);
   result.className = "anyfile-source-map-viewer__result";
   result.setAttribute("role", "status");
   query.append(lineLabel, columnLabel, submit, result);
@@ -84,12 +90,12 @@ export function createSourceMapView(fileName: string, document: SourceMapDocumen
     const line = Number(lineInput.value) - 1;
     const column = Number(columnInput.value);
     if (!Number.isSafeInteger(line) || line < 0 || !Number.isSafeInteger(column) || column < 0) {
-      result.textContent = "请输入有效的非负位置。";
+      result.textContent = copy.invalid;
       return;
     }
     const mapping = findOriginalPosition(document, line, column);
     if (!mapping || mapping.sourceIndex === undefined || mapping.originalLine === undefined || mapping.originalColumn === undefined) {
-      result.textContent = "该生成位置没有可用的原始映射。";
+      result.textContent = copy.missing;
       return;
     }
     const name = mapping.nameIndex === undefined ? "" : ` · ${document.names[mapping.nameIndex]}`;
@@ -98,20 +104,20 @@ export function createSourceMapView(fileName: string, document: SourceMapDocumen
   viewport.append(query);
 
   viewport.append(element("h2", "Sources"));
-  viewport.append(table(["索引", "路径", "内嵌源码", "忽略"], document.sources.slice(0, MAX_TABLE_ROWS).map((source, index) => [
-    String(index), displaySourcePath(source.path), source.content === null ? "否" : "是", source.ignored ? "是" : "否",
+  viewport.append(table([copy.index, copy.path, copy.embedded, copy.ignored], document.sources.slice(0, MAX_TABLE_ROWS).map((source, index) => [
+    String(index), displaySourcePath(source.path), source.content === null ? copy.no : copy.yes, source.ignored ? copy.yes : copy.no,
   ])));
   if (document.sources.length > MAX_TABLE_ROWS) {
-    const note = element("p", `仅列出前 ${MAX_TABLE_ROWS} 个 source；全部 source 仍可用于位置查询。`);
+    const note = element("p", copy.sourceLimit);
     note.className = "anyfile-source-map-viewer__muted";
     viewport.append(note);
   }
 
   const embedded = document.sources.map((source, index) => ({ source, index })).filter(({ source }) => source.content !== null);
   if (embedded.length > 0) {
-    viewport.append(element("h2", "内嵌源码"));
+    viewport.append(element("h2", copy.embeddedSources));
     const select = element("select");
-    select.setAttribute("aria-label", "选择内嵌源码");
+    select.setAttribute("aria-label", copy.chooseSource);
     for (const { source, index } of embedded) {
       const option = element("option", displaySourcePath(source.path));
       option.value = String(index);
@@ -122,7 +128,7 @@ export function createSourceMapView(fileName: string, document: SourceMapDocumen
     const renderPreview = () => {
       const content = document.sources[Number(select.value)].content ?? "";
       preview.textContent = content.length > MAX_PREVIEW_CHARACTERS
-        ? `${content.slice(0, MAX_PREVIEW_CHARACTERS)}\n…（预览已截断）`
+        ? `${content.slice(0, MAX_PREVIEW_CHARACTERS)}\n${copy.truncated}`
         : content;
     };
     select.addEventListener("change", renderPreview);
@@ -131,8 +137,8 @@ export function createSourceMapView(fileName: string, document: SourceMapDocumen
     viewport.append(select, preview);
   }
 
-  viewport.append(element("h2", "映射样本"));
-  viewport.append(table(["生成位置", "原始位置", "名称"], document.mappings.slice(0, 200).map((mapping) => {
+  viewport.append(element("h2", copy.samples));
+  viewport.append(table([copy.generatedPosition, copy.originalPosition, copy.name], document.mappings.slice(0, 200).map((mapping) => {
     const original = mapping.sourceIndex === undefined || mapping.originalLine === undefined || mapping.originalColumn === undefined
       ? "—"
       : `${displaySourcePath(document.sources[mapping.sourceIndex].path)}:${mapping.originalLine + 1}:${mapping.originalColumn}`;

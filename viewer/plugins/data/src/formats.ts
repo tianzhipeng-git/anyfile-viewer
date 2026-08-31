@@ -6,9 +6,11 @@ export type DataFileKind =
   | "arrow"
   | "database";
 
+import type { LocalizedText } from "@anyfile/viewer-protocol";
+
 export type DataFileFormat = {
   readonly kind: DataFileKind;
-  readonly name: string;
+  readonly name: LocalizedText;
   readonly extensions: readonly string[];
   readonly mimeTypes: readonly string[];
 };
@@ -16,19 +18,19 @@ export type DataFileFormat = {
 export const DATA_FILE_FORMATS: readonly DataFileFormat[] = [
   {
     kind: "csv",
-    name: "CSV 数据",
+    name: { en: "CSV data", "zh-CN": "CSV 数据" },
     extensions: [".csv", ".csv.gz", ".csv.zst"],
     mimeTypes: ["text/csv", "application/gzip", "application/zstd"],
   },
   {
     kind: "tsv",
-    name: "TSV 数据",
+    name: { en: "TSV data", "zh-CN": "TSV 数据" },
     extensions: [".tsv", ".tab", ".tsv.gz", ".tab.gz", ".tsv.zst", ".tab.zst"],
     mimeTypes: ["text/tab-separated-values", "application/gzip", "application/zstd"],
   },
   {
     kind: "json",
-    name: "JSON 数据",
+    name: { en: "JSON data", "zh-CN": "JSON 数据" },
     extensions: [
       ".json", ".jsonl", ".ndjson",
       ".json.gz", ".jsonl.gz", ".ndjson.gz",
@@ -38,19 +40,19 @@ export const DATA_FILE_FORMATS: readonly DataFileFormat[] = [
   },
   {
     kind: "parquet",
-    name: "Parquet 数据",
+    name: { en: "Parquet data", "zh-CN": "Parquet 数据" },
     extensions: [".parquet", ".parq", ".pq"],
     mimeTypes: ["application/vnd.apache.parquet", "application/x-parquet"],
   },
   {
     kind: "arrow",
-    name: "Arrow IPC 数据",
+    name: { en: "Arrow IPC data", "zh-CN": "Arrow IPC 数据" },
     extensions: [".arrow", ".arrows", ".ipc", ".feather"],
     mimeTypes: ["application/vnd.apache.arrow.file", "application/vnd.apache.arrow.stream"],
   },
   {
     kind: "database",
-    name: "DuckDB 数据库",
+    name: { en: "DuckDB database", "zh-CN": "DuckDB 数据库" },
     extensions: [".duckdb", ".ddb"],
     mimeTypes: ["application/vnd.duckdb", "application/x-duckdb"],
   },

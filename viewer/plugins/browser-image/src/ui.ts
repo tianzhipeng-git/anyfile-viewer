@@ -1,3 +1,5 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
 import type { ImageFileInfo } from "./format";
 
 export interface ImageViewerElements {
@@ -49,10 +51,13 @@ export function createImageViewerElements(
   info: ImageFileInfo,
   width: number,
   height: number,
-  locale: string,
+  locale: Locale,
   imageElement?: HTMLImageElement,
 ): ImageViewerElements {
-  const chinese = locale.toLowerCase().startsWith("zh");
+  const copy = selectMessages(locale, {
+    en: { tools: "Image viewing tools", frames: "frames", animated: "animated", alpha: "alpha", orientation: "orientation", zoomOut: "Zoom out", zoomIn: "Zoom in", fit: "Fit", actual: "Actual size", rotateLeft: "Rotate left", rotateRight: "Rotate right", canvas: "Image canvas, draggable and zoomable" },
+    "zh-CN": { tools: "图片查看工具", frames: "帧", animated: "动画", alpha: "透明通道", orientation: "方向", zoomOut: "缩小", zoomIn: "放大", fit: "适合窗口", actual: "实际大小", rotateLeft: "向左旋转", rotateRight: "向右旋转", canvas: "图片画布，可拖动和缩放" },
+  });
   const root = document.createElement("div");
   root.className = "anyfile-browser-image-viewer";
   const style = document.createElement("style");
@@ -61,7 +66,7 @@ export function createImageViewerElements(
   const toolbar = document.createElement("div");
   toolbar.className = "anyfile-browser-image-viewer__toolbar";
   toolbar.setAttribute("role", "toolbar");
-  toolbar.setAttribute("aria-label", chinese ? "图片查看工具" : "Image viewing tools");
+  toolbar.setAttribute("aria-label", copy.tools);
   const identity = document.createElement("div");
   identity.className = "anyfile-browser-image-viewer__identity";
   const name = document.createElement("strong");
@@ -71,29 +76,29 @@ export function createImageViewerElements(
   const metadata = document.createElement("span");
   metadata.className = "anyfile-browser-image-viewer__meta";
   const details = [info.format, `${width} × ${height}`];
-  if (info.animated) details.push(info.frameCount ? `${info.frameCount} ${chinese ? "帧" : "frames"}` : (chinese ? "动画" : "animated"));
-  if (info.hasAlpha) details.push(chinese ? "透明通道" : "alpha");
-  if (info.orientation && info.orientation !== 1) details.push(`EXIF ${chinese ? "方向" : "orientation"} ${info.orientation}`);
+  if (info.animated) details.push(info.frameCount ? `${info.frameCount} ${copy.frames}` : copy.animated);
+  if (info.hasAlpha) details.push(copy.alpha);
+  if (info.orientation && info.orientation !== 1) details.push(`EXIF ${copy.orientation} ${info.orientation}`);
   metadata.textContent = details.join(" · ");
   identity.append(name, metadata);
 
   const controls = document.createElement("div");
   controls.className = "anyfile-browser-image-viewer__controls";
-  const zoomOut = button(chinese ? "缩小" : "Zoom out", "−");
+  const zoomOut = button(copy.zoomOut, "−");
   const zoomValue = document.createElement("output");
   zoomValue.className = "anyfile-browser-image-viewer__zoom";
   zoomValue.setAttribute("aria-live", "polite");
-  const zoomIn = button(chinese ? "放大" : "Zoom in", "+");
-  const fit = button(chinese ? "适合窗口" : "Fit", chinese ? "适合" : "Fit");
-  const actual = button(chinese ? "实际大小" : "Actual size", "1:1");
-  const rotateLeft = button(chinese ? "向左旋转" : "Rotate left", "↺");
-  const rotateRight = button(chinese ? "向右旋转" : "Rotate right", "↻");
+  const zoomIn = button(copy.zoomIn, "+");
+  const fit = button(copy.fit, copy.fit);
+  const actual = button(copy.actual, "1:1");
+  const rotateLeft = button(copy.rotateLeft, "↺");
+  const rotateRight = button(copy.rotateRight, "↻");
   controls.append(zoomOut, zoomValue, zoomIn, fit, actual, rotateLeft, rotateRight);
 
   const viewport = document.createElement("div");
   viewport.className = "anyfile-browser-image-viewer__viewport";
   viewport.tabIndex = 0;
-  viewport.setAttribute("aria-label", chinese ? "图片画布，可拖动和缩放" : "Image canvas, draggable and zoomable");
+  viewport.setAttribute("aria-label", copy.canvas);
   const image = imageElement ?? document.createElement("img");
   image.className = "anyfile-browser-image-viewer__image";
   image.alt = fileName;

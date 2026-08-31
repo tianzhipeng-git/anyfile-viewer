@@ -6,9 +6,9 @@ import {
 export const safeSvgManifest: ViewerPluginManifest = {
   protocolVersion: VIEWER_PROTOCOL_VERSION,
   id: "safe-svg",
-  name: "安全 SVG 查看器",
+  name: { en: "Safe SVG viewer", "zh-CN": "安全 SVG 查看器" },
   formats: [{
-    name: "SVG 矢量图",
+    name: { en: "SVG vector image", "zh-CN": "SVG 矢量图" },
     extensions: [".svg", ".svgz"],
     mimeTypes: ["image/svg+xml"],
   }],

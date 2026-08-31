@@ -1,6 +1,7 @@
 import ace from "ace-builds";
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -16,9 +17,9 @@ function modeModule(mode: AceMode) {
   return aceModeModules[mode] ??= () => import(`ace-builds/src-noconflict/mode-${mode}.js`);
 }
 
-async function readText(file: File, signal: AbortSignal) {
+async function readText(file: File, signal: AbortSignal, tooLargeMessage: string) {
   if (file.size > MAX_FILE_BYTES) {
-    throw new ViewerError("resource-limit", "文件超过 256 MB，浏览器无法安全预览。", { cause: file.size });
+    throw new ViewerError("resource-limit", tooLargeMessage, { cause: file.size });
   }
   if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");
   const reader = file.stream().getReader();
@@ -59,6 +60,13 @@ function installStyles() {
 
 async function openCode(context: OpenViewerContext): Promise<ViewerController> {
   const { container, file, locale, reportProgress, signal } = context;
+  const copy = selectMessages(locale, { "zh-CN": {
+    tooLarge: "文件超过 256 MB，浏览器无法安全预览。", reading: "正在读取文本…",
+    loading: (mode: string) => `正在加载 ${mode}…`, ready: "代码文件已打开", failed: "无法打开代码或文本文件。",
+  }, en: {
+    tooLarge: "Files larger than 256 MB cannot be previewed safely in the browser.", reading: "Reading text…",
+    loading: (mode: string) => `Loading ${mode}…`, ready: "Code file opened", failed: "Unable to open this code or text file.",
+  } });
   const root = document.createElement("div");
   root.className = "anyfile-code-viewer";
   root.style.height = "100%";
@@ -74,11 +82,11 @@ async function openCode(context: OpenViewerContext): Promise<ViewerController> {
     removeStyles();
   };
   try {
-    reportProgress({ stage: "reading", message: locale.toLowerCase().startsWith("zh") ? "正在读取文本…" : "Reading text…", total: file.size });
-    const text = await readText(file, signal);
+    reportProgress({ stage: "reading", message: copy.reading, total: file.size });
+    const text = await readText(file, signal, copy.tooLarge);
     if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");
     const mode = modeForFileName(file.name);
-    reportProgress({ stage: "loading", message: `正在加载 ${mode}…` });
+    reportProgress({ stage: "loading", message: copy.loading(mode) });
     await import("ace-builds/src-noconflict/ext-searchbox");
     await modeModule(mode)();
     if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");
@@ -96,12 +104,12 @@ async function openCode(context: OpenViewerContext): Promise<ViewerController> {
     editor.session.setUseWrapMode(false);
     editor.renderer.setScrollMargin(8, 8, 0, 0);
     signal.addEventListener("abort", dispose, { once: true });
-    reportProgress({ stage: "ready", message: locale.toLowerCase().startsWith("zh") ? "代码文件已打开" : "Code file opened" });
+    reportProgress({ stage: "ready", message: copy.ready });
     return { dispose };
   } catch (error) {
     dispose();
     if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;
-    throw new ViewerError("open-failed", "无法打开代码或文本文件。", { cause: error });
+    throw new ViewerError("open-failed", copy.failed, { cause: error });
   }
 }
 

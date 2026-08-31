@@ -6,10 +6,10 @@ import {
 export const browserImageManifest: ViewerPluginManifest = {
   protocolVersion: VIEWER_PROTOCOL_VERSION,
   id: "browser-image",
-  name: "浏览器图片查看器",
+  name: { en: "Browser image viewer", "zh-CN": "浏览器图片查看器" },
   formats: [
     {
-      name: "浏览器原生图片",
+      name: { en: "Browser-native image", "zh-CN": "浏览器原生图片" },
       extensions: [
         ".jpg", ".jpeg", ".jpe", ".jfif", ".jif", ".jfi", ".pjpeg", ".pjp",
         ".png", ".apng", ".gif", ".webp", ".avif", ".heif", ".heifs", ".hif",

@@ -1,4 +1,4 @@
-import { ViewerError, type FileViewerPlugin, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
+import { ViewerError, selectMessages, type FileViewerPlugin, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
 import { MAX_RAW_SOURCE_BYTES, PROBE_BYTES } from "./limits";
 import { cameraRawManifest } from "./manifest";
 import { inspectRawHeader } from "./probe-format";
@@ -7,12 +7,12 @@ import { abortError, readBlob } from "./read-blob";
 import { createCameraRawElements, updateRawMetadata, type CameraRawElements } from "./ui";
 import { RawBitmapViewport } from "./viewport";
 
-function copyFor(locale: string) {
-  return locale.toLowerCase().startsWith("zh") ? {
-    reading: "正在读取相机 RAW…", opening: "正在初始化 RAW decoder…", developing: "正在执行基础 RAW 显影…", readyPreview: "当前显示内嵌预览", readyDeveloped: "当前显示基础 RAW 显影", failed: "基础 RAW 显影失败，保留内嵌预览。", invalid: "文件不是有效的受支持相机 RAW。", isolated: "RAW 显影需要启用跨源隔离的 /view 页面。",
-  } : {
-    reading: "Reading camera RAW…", opening: "Initializing RAW decoder…", developing: "Developing basic RAW image…", readyPreview: "Showing embedded preview", readyDeveloped: "Showing basic RAW development", failed: "Basic RAW development failed; embedded preview remains available.", invalid: "The file is not a valid supported camera RAW.", isolated: "RAW development requires a cross-origin-isolated /view page.",
-  };
+function copyFor(locale: OpenViewerContext["locale"]) {
+  return selectMessages(locale, { "zh-CN": {
+    reading: "正在读取相机 RAW…", opening: "正在初始化 RAW decoder…", developing: "正在执行基础 RAW 显影…", readyPreview: "当前显示内嵌预览", readyDeveloped: "当前显示基础 RAW 显影", failed: "基础 RAW 显影失败，保留内嵌预览。", invalid: "文件不是有效的受支持相机 RAW。", isolated: "RAW 显影需要启用跨源隔离的查看页面。", tooLarge: "RAW 文件超过 256 MiB 输入上限。", limit: "RAW 文件超过浏览器安全资源上限。",
+  }, en: {
+    reading: "Reading camera RAW…", opening: "Initializing RAW decoder…", developing: "Developing basic RAW image…", readyPreview: "Showing embedded preview", readyDeveloped: "Showing basic RAW development", failed: "Basic RAW development failed; embedded preview remains available.", invalid: "The file is not a valid supported camera RAW.", isolated: "RAW development requires a cross-origin-isolated viewer page.", tooLarge: "The RAW file exceeds the 256 MiB input limit.", limit: "The RAW file exceeds browser safety limits.",
+  } });
 }
 
 async function openCameraRaw(context: OpenViewerContext): Promise<ViewerController> {
@@ -47,7 +47,7 @@ async function openCameraRaw(context: OpenViewerContext): Promise<ViewerControll
     if (signal.aborted) throw abortError();
     if (globalThis.crossOriginIsolated !== true) throw new ViewerError("unsupported-environment", copy.isolated);
     if (file.size === 0) throw new ViewerError("invalid-file", copy.invalid);
-    if (file.size > MAX_RAW_SOURCE_BYTES) throw new ViewerError("resource-limit", "RAW 文件超过 256 MiB 输入上限。");
+    if (file.size > MAX_RAW_SOURCE_BYTES) throw new ViewerError("resource-limit", copy.tooLarge);
     reportProgress({ stage: "reading", message: copy.reading, loaded: 0, total: file.size });
     const header = await readBlob(file.slice(0, PROBE_BYTES), signal); const inspection = inspectRawHeader(header, file.name);
     if (!inspection) throw new ViewerError("invalid-file", copy.invalid);
@@ -61,8 +61,9 @@ async function openCameraRaw(context: OpenViewerContext): Promise<ViewerControll
     signal.addEventListener("abort", dispose, { once: true }); reportProgress({ stage: "ready", message: previewBitmap ? copy.readyPreview : copy.readyDeveloped }); return { dispose };
   } catch (error) {
     dispose();
-    if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;
-    throw new ViewerError("invalid-file", copy.invalid, { cause: error });
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    const code = error instanceof ViewerError ? error.code : "invalid-file";
+    throw new ViewerError(code, code === "resource-limit" ? copy.limit : code === "unsupported-environment" ? copy.isolated : copy.invalid, { cause: error });
   }
 }
 

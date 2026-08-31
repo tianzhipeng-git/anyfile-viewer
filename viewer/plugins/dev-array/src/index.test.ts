@@ -172,7 +172,7 @@ describe("dev array viewer", () => {
     document.body.append(view.root);
     const next = [...view.root.querySelectorAll("button")].find((button) => button.textContent === "下一页")!;
     next.click();
-    await vi.waitFor(() => expect(view.root.textContent).toContain("page read failed"));
+    await vi.waitFor(() => expect(view.root.textContent).toContain("无法读取这个数组"));
     expect(view.root.querySelector('[role="alert"]')).not.toBeNull();
     expect(next.disabled).toBe(false);
     view.dispose();

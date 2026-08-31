@@ -118,13 +118,14 @@ type FileTreeProps = {
   selectedId?: string;
   onSelect: (entry: WorkspaceTreeEntry) => void;
   onExpand: (entry: Extract<WorkspaceTreeEntry, { kind: "directory" }>) => Promise<void>;
+  ariaLabel: string;
 };
 
-export function FileTree({ entries, selectedId, onSelect, onExpand }: FileTreeProps) {
+export function FileTree({ entries, selectedId, onSelect, onExpand, ariaLabel }: FileTreeProps) {
   const nodes = useMemo(() => buildTree(entries), [entries]);
 
   return (
-    <div role="tree" aria-label="工作区文件">
+    <div role="tree" aria-label={ariaLabel}>
       {nodes.map((node) => (
         <TreeNode
           key={node.entry.id}

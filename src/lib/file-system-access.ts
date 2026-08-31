@@ -44,6 +44,7 @@ function isFileHandle(handle: FileSystemHandle): handle is FileSystemFileHandle 
 
 export async function directoryHandleEntries(
   root: FileSystemDirectoryHandle,
+  locale: Locale = "en",
 ): Promise<WorkspaceTreeEntry[]> {
   const rootEntry: WorkspaceTreeEntry = {
     id: `directory:${root.name}`,
@@ -56,11 +57,12 @@ export async function directoryHandleEntries(
     childrenLoaded: true,
   };
 
-  return [rootEntry, ...await directoryHandleChildren(rootEntry)];
+  return [rootEntry, ...await directoryHandleChildren(rootEntry, locale)];
 }
 
 export async function directoryHandleChildren(
   directory: Extract<WorkspaceTreeEntry, { kind: "directory" }>,
+  locale: Locale = "en",
 ): Promise<WorkspaceTreeEntry[]> {
   const children: Array<[string, FileSystemHandle]> = [];
   const result: WorkspaceTreeEntry[] = [];
@@ -72,7 +74,7 @@ export async function directoryHandleChildren(
 
   children.sort(([nameA, handleA], [nameB, handleB]) => {
     if (handleA.kind !== handleB.kind) return handleA.kind === "directory" ? -1 : 1;
-    return nameA.localeCompare(nameB, "zh-CN");
+    return compareText(nameA, nameB, locale);
   });
 
   for (const [name, handle] of children) {
@@ -107,3 +109,4 @@ export async function directoryHandleChildren(
 export function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError";
 }
+import { compareText, type Locale } from "@anyfile/i18n";

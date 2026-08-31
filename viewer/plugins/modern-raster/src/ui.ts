@@ -1,3 +1,5 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
 import type { ModernRasterInfo } from "./types";
 
 export interface ModernRasterElements {
@@ -35,8 +37,11 @@ function button(label: string, text: string) {
   return element;
 }
 
-export function createModernRasterElements(fileName: string, locale: string): ModernRasterElements {
-  const chinese = locale.toLowerCase().startsWith("zh");
+export function createModernRasterElements(fileName: string, locale: Locale): ModernRasterElements {
+  const copy = selectMessages(locale, {
+    en: { zoomOut: "Zoom out", zoomIn: "Zoom in", fit: "Fit", actual: "Actual size", rotateLeft: "Rotate left", rotateRight: "Rotate right", canvas: "Image canvas, draggable and zoomable" },
+    "zh-CN": { zoomOut: "缩小", zoomIn: "放大", fit: "适合窗口", actual: "实际大小", rotateLeft: "向左旋转", rotateRight: "向右旋转", canvas: "图片画布，可拖动和缩放" },
+  });
   const root = document.createElement("div"); root.className = "anyfile-modern-raster-viewer";
   const style = document.createElement("style"); style.textContent = styles;
   const toolbar = document.createElement("div"); toolbar.className = "anyfile-modern-raster-viewer__toolbar"; toolbar.setAttribute("role", "toolbar");
@@ -44,19 +49,19 @@ export function createModernRasterElements(fileName: string, locale: string): Mo
   const name = document.createElement("strong"); name.className = "anyfile-modern-raster-viewer__name"; name.textContent = fileName; name.title = fileName;
   const metadata = document.createElement("span"); metadata.className = "anyfile-modern-raster-viewer__meta"; identity.append(name, metadata);
   const controls = document.createElement("div"); controls.className = "anyfile-modern-raster-viewer__controls";
-  const zoomOut = button(chinese ? "缩小" : "Zoom out", "−"); const zoomValue = document.createElement("output"); zoomValue.className = "anyfile-modern-raster-viewer__zoom";
-  const zoomIn = button(chinese ? "放大" : "Zoom in", "+"); const fit = button(chinese ? "适合窗口" : "Fit", chinese ? "适合" : "Fit"); const actual = button(chinese ? "实际大小" : "Actual size", "1:1");
-  const rotateLeft = button(chinese ? "向左旋转" : "Rotate left", "↺"); const rotateRight = button(chinese ? "向右旋转" : "Rotate right", "↻");
+  const zoomOut = button(copy.zoomOut, "−"); const zoomValue = document.createElement("output"); zoomValue.className = "anyfile-modern-raster-viewer__zoom";
+  const zoomIn = button(copy.zoomIn, "+"); const fit = button(copy.fit, copy.fit); const actual = button(copy.actual, "1:1");
+  const rotateLeft = button(copy.rotateLeft, "↺"); const rotateRight = button(copy.rotateRight, "↻");
   const status = document.createElement("span"); status.className = "anyfile-modern-raster-viewer__status"; status.setAttribute("role", "status"); controls.append(zoomOut, zoomValue, zoomIn, fit, actual, rotateLeft, rotateRight, status);
-  const viewport = document.createElement("div"); viewport.className = "anyfile-modern-raster-viewer__viewport"; viewport.tabIndex = 0; viewport.setAttribute("aria-label", chinese ? "图片画布，可拖动和缩放" : "Image canvas, draggable and zoomable");
+  const viewport = document.createElement("div"); viewport.className = "anyfile-modern-raster-viewer__viewport"; viewport.tabIndex = 0; viewport.setAttribute("aria-label", copy.canvas);
   const canvas = document.createElement("canvas"); canvas.className = "anyfile-modern-raster-viewer__canvas"; viewport.append(canvas); toolbar.append(identity, controls); root.append(style, toolbar, viewport);
   return { root, viewport, canvas, metadata, status, zoomValue, rotateLeft, rotateRight, zoomIn, zoomOut, fit, actual };
 }
 
-export function updateModernMetadata(elements: ModernRasterElements, info: ModernRasterInfo, locale: string) {
-  const chinese = locale.toLowerCase().startsWith("zh");
+export function updateModernMetadata(elements: ModernRasterElements, info: ModernRasterInfo, locale: Locale) {
+  const copy = selectMessages(locale, { en: { frames: "frames" }, "zh-CN": { frames: "帧" } });
   const details = [info.format, `${info.width} × ${info.height}`];
-  if (info.animated) details.push(`${info.frameCount} ${chinese ? "帧" : "frames"}`);
+  if (info.animated) details.push(`${info.frameCount} ${copy.frames}`);
   if (info.note) details.push(info.note);
   elements.metadata.textContent = details.join(" · ");
 }

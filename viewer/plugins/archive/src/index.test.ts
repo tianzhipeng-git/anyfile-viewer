@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { gzipSync } from "fflate";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { validateManifest, ViewerError } from "@anyfile/viewer-protocol";
+import { validateManifest, ViewerError, type Locale } from "@anyfile/viewer-protocol";
 import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer-test";
 
 import { crc32 } from "./binary";
@@ -28,7 +28,7 @@ import {
 
 const contexts: ViewerTestContext[] = [];
 
-function contextFor(bytes: Uint8Array, name: string, locale = "zh-CN") {
+function contextFor(bytes: Uint8Array, name: string, locale: Locale = "zh-CN") {
   const context = createViewerTestContext(new File([bytes.slice().buffer as ArrayBuffer], name));
   contexts.push(context);
   return { ...context, context: { ...context.context, locale } };
@@ -402,10 +402,10 @@ describe("archive metadata viewer", () => {
   });
 
   it("trusts recognized magic over a wrong suffix", async () => {
-    const test = contextFor(wrapperFixtures["sample.gz"], "wrong.zip", "en-US");
+    const test = contextFor(wrapperFixtures["sample.gz"], "wrong.zip", "en");
     const controller = await archiveMetadataViewer.open(test.context);
     expect(test.container.textContent).toContain("gzip");
-    expect(test.container.textContent).toContain("不一致");
+    expect(test.container.textContent).toContain("Identified from the file signature and extension");
     await controller.dispose();
   });
 

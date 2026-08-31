@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { validateManifest } from "@anyfile/viewer-protocol";
+import { validateManifest, type Locale } from "@anyfile/viewer-protocol";
 import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer-test";
 
 import { createDuckDBSession } from "./duckdb-session";
@@ -17,7 +17,7 @@ beforeEach(() => {
   vi.stubGlobal("Worker", class Worker {});
 });
 
-function testContext(name = "people.csv", locale = "zh-CN") {
+function testContext(name = "people.csv", locale: Locale = "zh-CN") {
   const result = createViewerTestContext(new File(["name,age\nAda,36"], name));
   contexts.push(result);
   return { ...result, context: { ...result.context, locale } };
@@ -112,7 +112,7 @@ describe("DuckDB data viewer", () => {
 
   it("uses English controls when requested", async () => {
     mockedCreateSession.mockResolvedValue(mockSession());
-    const context = testContext("people.parquet", "en-US");
+    const context = testContext("people.parquet", "en");
     const controller = await dataViewer.open(context.context);
 
     expect(context.container.querySelector("[data-next]")?.textContent).toBe("Next");

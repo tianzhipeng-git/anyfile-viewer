@@ -1,4 +1,4 @@
-import { ViewerError, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
+import { ViewerError, selectMessages, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
 
 import { abortError } from "./abort-error";
 import { inspectOgg } from "./ogg-probe";
@@ -29,7 +29,7 @@ interface OgvGlobal {
 
 let runtimePromise: Promise<OgvGlobal> | undefined;
 
-function loadRuntime() {
+function loadRuntime(failedMessage: string) {
   if (runtimePromise) return runtimePromise;
   let script: HTMLScriptElement | undefined;
   const attempt = new Promise<OgvGlobal>((resolve, reject) => {
@@ -56,7 +56,7 @@ function loadRuntime() {
   const cached = attempt.catch((error) => {
     script?.remove();
     if (runtimePromise === cached) runtimePromise = undefined;
-    throw new ViewerError("open-failed", "Ogg 解码运行时加载失败，请重试。", { cause: error });
+    throw new ViewerError("open-failed", failedMessage, { cause: error });
   });
   runtimePromise = cached;
   return cached;
@@ -67,8 +67,7 @@ function formatTime(seconds: number) {
   return `${Math.floor(safe / 60)}:${Math.floor(safe % 60).toString().padStart(2, "0")}`;
 }
 
-function createUi(fileName: string, locale: string) {
-  const zh = locale.toLowerCase().startsWith("zh");
+function createUi(fileName: string, copy: { play: string; pause: string; replay: string; seek: string; volume: string }) {
   const root = document.createElement("div");
   root.className = "anyfile-non-native-video-viewer anyfile-non-native-video-viewer--ogg";
   root.innerHTML = `<style>
@@ -94,40 +93,49 @@ function createUi(fileName: string, locale: string) {
   const button = document.createElement("button");
   button.type = "button";
   button.className = "anyfile-non-native-video-viewer__button";
-  button.textContent = zh ? "播放" : "Play";
+  button.textContent = copy.play;
   const seek = document.createElement("input");
   seek.type = "range"; seek.min = "0"; seek.step = "0.001"; seek.value = "0";
   seek.className = "anyfile-non-native-video-viewer__range";
-  seek.setAttribute("aria-label", zh ? "播放位置" : "Playback position");
+  seek.setAttribute("aria-label", copy.seek);
   const time = document.createElement("span");
   time.className = "anyfile-non-native-video-viewer__time";
   const volume = document.createElement("input");
   volume.type = "range"; volume.min = "0"; volume.max = "1"; volume.step = "0.01"; volume.value = "1";
   volume.className = "anyfile-non-native-video-viewer__range anyfile-non-native-video-viewer__volume";
-  volume.setAttribute("aria-label", zh ? "音量" : "Volume");
+  volume.setAttribute("aria-label", copy.volume);
   header.append(name, meta); controls.append(button, seek, time, volume); root.append(header, stage, controls);
-  return { root, stage, meta, button, seek, time, volume, zh };
+  return { root, stage, meta, button, seek, time, volume };
 }
 
 export async function openOggVideo(context: OpenViewerContext): Promise<ViewerController> {
   const { container, file, reportProgress, signal } = context;
+  const copy = selectMessages(context.locale, { "zh-CN": {
+    runtime: "Ogg 解码运行时加载失败，请重试。", unsupported: "当前浏览器缺少 Ogg 软件解码所需能力。",
+    invalid: "文件不是受支持的 Ogg Theora 视频。", audioUnsupported: "当前浏览器缺少 Web Audio 能力。",
+    loading: "正在加载 Ogg Theora 解码器…", decoding: "正在软件解码 Theora 首帧…", ready: "视频已打开", failed: "无法解码这个 Ogg Theora 视频。", play: "播放", pause: "暂停", replay: "重播", seek: "播放位置", volume: "音量",
+  }, en: {
+    runtime: "The Ogg decoding runtime failed to load. Try again.", unsupported: "This browser lacks capabilities required for software Ogg decoding.",
+    invalid: "The file is not a supported Ogg Theora video.", audioUnsupported: "This browser does not provide Web Audio.",
+    loading: "Loading the Ogg Theora decoder…", decoding: "Software-decoding the first Theora frame…", ready: "Video opened", failed: "Unable to decode this Ogg Theora video.", play: "Play", pause: "Pause", replay: "Replay", seek: "Playback position", volume: "Volume",
+  } });
   if (typeof WebAssembly === "undefined" || typeof Worker === "undefined") {
-    throw new ViewerError("unsupported-environment", "当前浏览器缺少 Ogg 软件解码所需能力。");
+    throw new ViewerError("unsupported-environment", copy.unsupported);
   }
   if (signal.aborted) throw abortError();
   const validationHead = new Uint8Array(await file.slice(0, OGG_VALIDATION_BYTES).arrayBuffer());
   if (signal.aborted) throw abortError();
   const inspection = inspectOgg(validationHead);
   if (!inspection) {
-    throw new ViewerError("invalid-file", "文件不是受支持的 Ogg Theora 视频。");
+    throw new ViewerError("invalid-file", copy.invalid);
   }
   if (inspection.audioCodec && typeof AudioContext === "undefined") {
-    throw new ViewerError("unsupported-environment", "当前浏览器缺少 Web Audio 能力。");
+    throw new ViewerError("unsupported-environment", copy.audioUnsupported);
   }
-  reportProgress({ stage: "reading", message: "正在加载 Ogg Theora 解码器…", loaded: 0, total: file.size });
-  const runtime = await loadRuntime();
+  reportProgress({ stage: "reading", message: copy.loading, loaded: 0, total: file.size });
+  const runtime = await loadRuntime(copy.runtime);
   if (signal.aborted) throw abortError();
-  const ui = createUi(file.name, context.locale);
+  const ui = createUi(file.name, copy);
   const audioContext = inspection.audioCodec ? new AudioContext() : undefined;
   const player = new runtime.OGVPlayer({ wasm: true, worker: true, audioContext });
   player.setAttribute("aria-label", file.name);
@@ -139,8 +147,7 @@ export async function openOggVideo(context: OpenViewerContext): Promise<ViewerCo
   const update = () => {
     ui.seek.value = String(player.currentTime || 0);
     ui.time.textContent = `${formatTime(player.currentTime)} / ${formatTime(player.duration)}`;
-    ui.button.textContent = player.ended ? (ui.zh ? "重播" : "Replay")
-      : player.paused ? (ui.zh ? "播放" : "Play") : (ui.zh ? "暂停" : "Pause");
+    ui.button.textContent = player.ended ? copy.replay : player.paused ? copy.play : copy.pause;
   };
   const dispose = async () => {
     if (disposed) return;
@@ -154,7 +161,7 @@ export async function openOggVideo(context: OpenViewerContext): Promise<ViewerCo
   };
   signal.addEventListener("abort", onAbort, { once: true });
   try {
-    reportProgress({ stage: "decoding-first-frame", message: "正在软件解码 Theora 首帧…" });
+    reportProgress({ stage: "decoding-first-frame", message: copy.decoding });
     await new Promise<void>((resolve, reject) => {
       const ready = () => resolve();
       const failed = () => reject(new Error(player.error?.message ?? "Ogg decode failed."));
@@ -177,11 +184,11 @@ export async function openOggVideo(context: OpenViewerContext): Promise<ViewerCo
     ui.seek.addEventListener("input", () => { player.currentTime = Number(ui.seek.value); update(); });
     ui.volume.addEventListener("input", () => { player.volume = Number(ui.volume.value); });
     for (const event of ["timeupdate", "play", "pause", "ended"]) player.addEventListener(event, update);
-    reportProgress({ stage: "ready", message: "视频已打开" });
+    reportProgress({ stage: "ready", message: copy.ready });
     return { dispose };
   } catch (error) {
     await dispose();
     if (signal.aborted) throw abortError();
-    throw new ViewerError("invalid-file", "无法解码这个 Ogg Theora 视频。", { cause: error });
+    throw new ViewerError("invalid-file", copy.failed, { cause: error });
   }
 }

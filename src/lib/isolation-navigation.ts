@@ -1,4 +1,4 @@
-const ISOLATED_PATH = "/view";
+const ISOLATED_PATH = /^\/(?:en|zh-CN|es|de|fr|ja|pt|ru|ko|it)\/view\/?$/;
 
 function pathForHref(currentPathname: string, href: string) {
   if (href.startsWith("#") || href.startsWith("?")) return currentPathname;
@@ -6,5 +6,5 @@ function pathForHref(currentPathname: string, href: string) {
 }
 
 export function crossesIsolationBoundary(currentPathname: string, href: string) {
-  return (currentPathname === ISOLATED_PATH) !== (pathForHref(currentPathname, href) === ISOLATED_PATH);
+  return ISOLATED_PATH.test(currentPathname) !== ISOLATED_PATH.test(pathForHref(currentPathname, href));
 }

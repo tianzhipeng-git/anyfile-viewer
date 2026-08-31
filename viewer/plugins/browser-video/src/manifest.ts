@@ -6,15 +6,15 @@ import {
 export const browserVideoManifest: ViewerPluginManifest = {
   protocolVersion: VIEWER_PROTOCOL_VERSION,
   id: "browser-video",
-  name: "浏览器视频查看器",
+  name: { en: "Browser video viewer", "zh-CN": "浏览器视频查看器" },
   formats: [
     {
-      name: "ISO BMFF 视频",
+      name: { en: "ISO BMFF video", "zh-CN": "ISO BMFF 视频" },
       extensions: [".mp4", ".m4v", ".mov", ".qt", ".3gp", ".3g2"],
       mimeTypes: ["video/mp4", "video/quicktime", "video/3gpp"],
     },
     {
-      name: "WebM 视频",
+      name: { en: "WebM video", "zh-CN": "WebM 视频" },
       extensions: [".webm"],
       mimeTypes: ["video/webm"],
     },

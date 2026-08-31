@@ -1,5 +1,6 @@
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -12,18 +13,18 @@ import { abortError, IMAGE_HEADER_BYTES, readBlob } from "./read-blob";
 import { createImageViewerElements } from "./ui";
 import { ImageViewport } from "./viewport";
 
-function copyFor(locale: string) {
-  return locale.toLowerCase().startsWith("zh") ? {
+function copyFor(locale: OpenViewerContext["locale"]) {
+  return selectMessages(locale, { "zh-CN": {
     reading: "正在检查图片…",
     decoding: "正在使用浏览器解码图片…",
     ready: "图片已打开",
     invalid: "文件内容不是有效或完整的受支持图片。",
-  } : {
+  }, en: {
     reading: "Inspecting image…",
     decoding: "Decoding image in the browser…",
     ready: "Image opened",
     invalid: "The file is not a valid, complete supported image.",
-  };
+  } });
 }
 
 async function openBrowserImage(context: OpenViewerContext): Promise<ViewerController> {

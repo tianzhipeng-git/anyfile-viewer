@@ -1,5 +1,6 @@
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -24,11 +25,11 @@ type Copy = {
   queryFailed: string;
   invalid: string;
   tooLarge: string;
+  unsupported: string;
 };
 
-function getCopy(locale: string): Copy {
-  if (!locale.toLowerCase().startsWith("zh")) {
-    return {
+function getCopy(locale: OpenViewerContext["locale"]): Copy {
+  return selectMessages(locale, { en: {
       dataSet: "Choose table or data set",
       previous: "Previous",
       next: "Next",
@@ -40,9 +41,8 @@ function getCopy(locale: string): Copy {
       queryFailed: "Unable to read this page.",
       invalid: "The file is damaged or is not a supported data file.",
       tooLarge: "The data file exceeds this format's browser-safe resource limit.",
-    };
-  }
-  return {
+      unsupported: "This browser does not support DuckDB-Wasm.",
+    }, "zh-CN": {
     dataSet: "选择数据表或数据集",
     previous: "上一页",
     next: "下一页",
@@ -54,7 +54,8 @@ function getCopy(locale: string): Copy {
     queryFailed: "无法读取这一页数据。",
     invalid: "文件已损坏，或内容不是受支持的数据格式。",
     tooLarge: "数据文件超过该格式在浏览器中的安全资源上限。",
-  };
+    unsupported: "当前浏览器不支持 DuckDB-Wasm。",
+    } });
 }
 
 async function mountDataViewer(
@@ -107,7 +108,7 @@ async function openData(context: OpenViewerContext): Promise<ViewerController> {
 
   try {
     if (typeof Worker === "undefined" || typeof WebAssembly === "undefined") {
-      throw new ViewerError("unsupported-environment", "当前浏览器不支持 DuckDB-Wasm。");
+      throw new ViewerError("unsupported-environment", copy.unsupported);
     }
     reportProgress({ stage: "initializing", message: copy.initializing });
     session = await createDuckDBSession(file, signal);
@@ -121,11 +122,12 @@ async function openData(context: OpenViewerContext): Promise<ViewerController> {
     return { dispose };
   } catch (error) {
     await dispose();
-    if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) {
-      throw error;
-    }
-    if (error instanceof RangeError) {
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    if (error instanceof RangeError || error instanceof ViewerError && error.code === "resource-limit") {
       throw new ViewerError("resource-limit", copy.tooLarge, { cause: error });
+    }
+    if (error instanceof ViewerError && error.code === "unsupported-environment") {
+      throw new ViewerError("unsupported-environment", copy.unsupported, { cause: error });
     }
     throw new ViewerError("invalid-file", copy.invalid, { cause: error });
   }

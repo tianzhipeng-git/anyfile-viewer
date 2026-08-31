@@ -50,6 +50,9 @@ importers:
       '@anyfile/hex-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/hex
+      '@anyfile/i18n':
+        specifier: workspace:*
+        version: link:viewer/i18n
       '@anyfile/modern-raster-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/modern-raster
@@ -156,6 +159,8 @@ importers:
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/i18n: {}
 
   viewer/plugins/archive:
     dependencies:
@@ -611,7 +616,11 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
-  viewer/protocol: {}
+  viewer/protocol:
+    dependencies:
+      '@anyfile/i18n':
+        specifier: workspace:*
+        version: link:../i18n
 
   viewer/rendering:
     devDependencies:

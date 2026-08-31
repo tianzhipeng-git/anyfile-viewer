@@ -1,5 +1,6 @@
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -11,13 +12,15 @@ import { createRasterViewerElements, updateRasterMetadata, type RasterViewerElem
 import { RasterDecoderWorker } from "./worker-client";
 
 const messages = {
-  zh: {
+  "zh-CN": {
     reading: "正在检查栅格图片…",
     decoding: "正在 Worker 中解码图片…",
     ready: "图片已准备好",
     page: "正在解码页面…",
     pageError: "页面解码失败",
     unsupported: "当前浏览器缺少 Worker、ImageBitmap 或 Canvas 2D 能力。",
+    invalid: "图片文件无效或无法解码。",
+    limit: "图片超过浏览器安全资源上限。",
   },
   en: {
     reading: "Inspecting raster image…",
@@ -26,12 +29,14 @@ const messages = {
     page: "Decoding page…",
     pageError: "Page decoding failed",
     unsupported: "This browser lacks Worker, ImageBitmap, or Canvas 2D support.",
+    invalid: "The image is invalid or cannot be decoded.",
+    limit: "The image exceeds browser safety limits.",
   },
-} as const;
+};
 
 async function openGeneralRaster(context: OpenViewerContext): Promise<ViewerController> {
   const { file, container, signal, locale, reportProgress } = context;
-  const copy = locale.toLowerCase().startsWith("zh") ? messages.zh : messages.en;
+  const copy = selectMessages(locale, messages);
   let root: HTMLDivElement | undefined;
   let elements: RasterViewerElements | undefined;
   let viewport: CanvasRasterViewport | undefined;
@@ -92,8 +97,9 @@ async function openGeneralRaster(context: OpenViewerContext): Promise<ViewerCont
     return { dispose };
   } catch (error) {
     dispose();
-    if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;
-    throw new ViewerError("invalid-file", locale.toLowerCase().startsWith("zh") ? "图片文件无效或无法解码。" : "The image is invalid or cannot be decoded.", { cause: error });
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    const code = error instanceof ViewerError ? error.code : "invalid-file";
+    throw new ViewerError(code, code === "resource-limit" ? copy.limit : code === "unsupported-environment" ? copy.unsupported : copy.invalid, { cause: error });
   }
 }
 

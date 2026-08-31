@@ -1,5 +1,6 @@
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -100,23 +101,25 @@ function installStyles(root: HTMLElement) {
   root.append(style);
 }
 
-function createHeader(locale: string) {
-  const chinese = locale.toLowerCase().startsWith("zh");
+function createHeader(copy: { offset: string; text: string }) {
   const header = document.createElement("div");
   header.className = "anyfile-hex-viewer__header";
   const address = document.createElement("span");
-  address.textContent = chinese ? "位置" : "OFFSET";
+  address.textContent = copy.offset;
   const hex = document.createElement("span");
   hex.textContent = `${Array.from({ length: 8 }, (_, index) => index.toString(16).toUpperCase().padStart(2, "0")).join(" ")}  ${Array.from({ length: 8 }, (_, index) => (index + 8).toString(16).toUpperCase().padStart(2, "0")).join(" ")}`;
   const text = document.createElement("span");
-  text.textContent = chinese ? "文本" : "TEXT";
+  text.textContent = copy.text;
   header.append(address, hex, text);
   return header;
 }
 
 async function openHex(context: OpenViewerContext): Promise<ViewerController> {
   const { container, file, locale, reportProgress, signal } = context;
-  const chinese = locale.toLowerCase().startsWith("zh");
+  const copy = selectMessages(locale, {
+    en: { offset: "OFFSET", text: "TEXT", content: "Hexadecimal file content", empty: "This file is empty", readFailed: "Unable to read this part of the file.", reading: "Reading the first screen…", ready: "Hex preview opened", openFailed: "Unable to open the hex preview." },
+    "zh-CN": { offset: "位置", text: "文本", content: "十六进制文件内容", empty: "这是一个空文件", readFailed: "无法读取这个文件区域。", reading: "正在读取文件首屏…", ready: "十六进制预览已打开", openFailed: "无法打开十六进制预览。" },
+  });
   const root = document.createElement("div");
   root.className = "anyfile-hex-viewer";
   const addressDigits = Math.max(8, Math.ceil(Math.log2(Math.max(file.size, 1)) / 4));
@@ -126,10 +129,10 @@ async function openHex(context: OpenViewerContext): Promise<ViewerController> {
   const viewport = document.createElement("div");
   viewport.className = "anyfile-hex-viewer__viewport";
   viewport.tabIndex = 0;
-  viewport.setAttribute("aria-label", chinese ? "十六进制文件内容" : "Hexadecimal file content");
+  viewport.setAttribute("aria-label", copy.content);
   const surface = document.createElement("div");
   surface.className = "anyfile-hex-viewer__surface";
-  const header = createHeader(locale);
+  const header = createHeader(copy);
   const rows = document.createElement("div");
   rows.className = "anyfile-hex-viewer__rows";
   surface.append(header, rows);
@@ -163,7 +166,7 @@ async function openHex(context: OpenViewerContext): Promise<ViewerController> {
       rows.style.transform = `translateY(${HEADER_HEIGHT}px)`;
       const empty = document.createElement("div");
       empty.className = "anyfile-hex-viewer__empty";
-      empty.textContent = chinese ? "这是一个空文件" : "This file is empty";
+      empty.textContent = copy.empty;
       rows.replaceChildren(empty);
       return;
     }
@@ -205,7 +208,7 @@ async function openHex(context: OpenViewerContext): Promise<ViewerController> {
       const message = document.createElement("div");
       message.className = "anyfile-hex-viewer__error";
       message.setAttribute("role", "alert");
-      message.textContent = chinese ? "无法读取这个文件区域。" : "Unable to read this part of the file.";
+      message.textContent = copy.readFailed;
       rows.style.transform = `translateY(${viewport.scrollTop + HEADER_HEIGHT}px)`;
       rows.replaceChildren(message);
     }
@@ -224,7 +227,7 @@ async function openHex(context: OpenViewerContext): Promise<ViewerController> {
     }
     reportProgress({
       stage: "reading",
-      message: chinese ? "正在读取文件首屏…" : "Reading the first screen…",
+      message: copy.reading,
       loaded: 0,
       total: file.size,
     });
@@ -232,13 +235,13 @@ async function openHex(context: OpenViewerContext): Promise<ViewerController> {
     if (signal.aborted) throw abortError();
     reportProgress({
       stage: "ready",
-      message: chinese ? "十六进制预览已打开" : "Hex preview opened",
+      message: copy.ready,
     });
     return { dispose };
   } catch (error) {
     dispose();
     if (error instanceof DOMException && error.name === "AbortError") throw error;
-    throw new ViewerError("open-failed", chinese ? "无法打开十六进制预览。" : "Unable to open the hex preview.", { cause: error });
+    throw new ViewerError("open-failed", copy.openFailed, { cause: error });
   }
 }
 

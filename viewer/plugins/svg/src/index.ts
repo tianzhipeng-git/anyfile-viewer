@@ -1,5 +1,6 @@
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -10,16 +11,16 @@ import { abortError, readSvgBytes, SVG_INPUT_LIMIT } from "./read";
 import { sanitizeSvg } from "./sanitize";
 import { createSvgUi } from "./ui";
 
-function copyFor(locale: string) {
-  return locale.toLowerCase().startsWith("zh") ? {
+function copyFor(locale: OpenViewerContext["locale"]) {
+  return selectMessages(locale, { "zh-CN": {
     reading: "正在读取并清理 SVG…", rendering: "正在渲染安全 SVG…", ready: "SVG 已打开",
     invalid: "文件内容不是有效或完整的 SVG。", limit: `SVG 解压后的大小不能超过 ${SVG_INPUT_LIMIT / 1024 / 1024} MiB。`,
     unsupported: "当前浏览器无法解压 SVGZ。",
-  } : {
+  }, en: {
     reading: "Reading and sanitizing SVG…", rendering: "Rendering safe SVG…", ready: "SVG opened",
     invalid: "The file is not a valid, complete SVG.", limit: `The decompressed SVG must not exceed ${SVG_INPUT_LIMIT / 1024 / 1024} MiB.`,
     unsupported: "This browser cannot decompress SVGZ files.",
-  };
+  } });
 }
 
 async function decode(image: HTMLImageElement, source: string, signal: AbortSignal) {

@@ -1,7 +1,29 @@
-export const VIEWER_PROTOCOL_VERSION = 1 as const;
+import {
+  localizeText,
+  type Locale,
+  type LocalizedText,
+} from "@anyfile/i18n";
+
+export {
+  DEFAULT_LOCALE,
+  SUPPORTED_LOCALES,
+  compareText,
+  formatDate,
+  formatNumber,
+  interpolate,
+  isLocale,
+  localeNames,
+  localizeText,
+  normalizeLocale,
+  selectMessages,
+  type Locale,
+  type LocalizedText,
+} from "@anyfile/i18n";
+
+export const VIEWER_PROTOCOL_VERSION = 2 as const;
 
 export interface SupportedFormat {
-  readonly name: string;
+  readonly name: LocalizedText;
   readonly extensions: readonly string[];
   readonly fileNames?: readonly string[];
   readonly mimeTypes?: readonly string[];
@@ -10,7 +32,7 @@ export interface SupportedFormat {
 export interface ViewerPluginManifest {
   readonly protocolVersion: typeof VIEWER_PROTOCOL_VERSION;
   readonly id: string;
-  readonly name: string;
+  readonly name: LocalizedText;
   readonly formats: readonly SupportedFormat[];
   readonly workspaceAccess: "none" | "optional" | "required";
 }
@@ -39,7 +61,7 @@ export interface OpenViewerContext {
   readonly workspace?: WorkspaceReader;
   readonly container: HTMLElement;
   readonly signal: AbortSignal;
-  readonly locale: string;
+  readonly locale: Locale;
   readonly reportProgress: (progress: ViewerOpenProgress) => void;
 }
 
@@ -91,24 +113,28 @@ export class ViewerError extends Error {
 
 const PLUGIN_ID_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
+function validateLocalizedText(value: LocalizedText): boolean {
+  return typeof value === "object" && typeof value.en === "string" && value.en.trim().length > 0;
+}
+
 export function validateManifest(manifest: ViewerPluginManifest): void {
   if (manifest.protocolVersion !== VIEWER_PROTOCOL_VERSION) {
-    throw new ViewerError("unsupported-environment", `不支持查看器协议 v${manifest.protocolVersion}。`);
+    throw new ViewerError("unsupported-environment", `Unsupported viewer protocol v${manifest.protocolVersion}.`);
   }
   if (!PLUGIN_ID_PATTERN.test(manifest.id)) {
-    throw new ViewerError("open-failed", `查看器 ID “${manifest.id}” 不合法。`);
+    throw new ViewerError("open-failed", `Viewer ID “${manifest.id}” is invalid.`);
   }
-  if (!manifest.name.trim() || manifest.formats.length === 0) {
-    throw new ViewerError("open-failed", `查看器 “${manifest.id}” 的 Manifest 不完整。`);
+  if (!validateLocalizedText(manifest.name) || manifest.formats.length === 0) {
+    throw new ViewerError("open-failed", `Viewer “${manifest.id}” has an incomplete manifest.`);
   }
 
   for (const format of manifest.formats) {
-    if (!format.name.trim() || (format.extensions.length === 0 && !format.fileNames?.length)) {
-      throw new ViewerError("open-failed", `查看器 “${manifest.id}” 包含空格式声明。`);
+    if (!validateLocalizedText(format.name) || (format.extensions.length === 0 && !format.fileNames?.length)) {
+      throw new ViewerError("open-failed", `Viewer “${manifest.id}” contains an empty format declaration.`);
     }
     for (const fileName of format.fileNames ?? []) {
       if (!fileName.trim() || fileName.includes("/") || fileName.includes("\\")) {
-        throw new ViewerError("open-failed", `查看器 “${manifest.id}” 包含不合法的文件名声明。`);
+        throw new ViewerError("open-failed", `Viewer “${manifest.id}” contains an invalid file-name declaration.`);
       }
     }
     for (const extension of format.extensions) {
@@ -120,7 +146,7 @@ export function validateManifest(manifest: ViewerPluginManifest): void {
         /[\s/\\]/.test(extension)
       );
       if (invalidExtension) {
-        throw new ViewerError("open-failed", `扩展名 “${extension}” 必须为带点的小写形式。`);
+        throw new ViewerError("open-failed", `Extension “${extension}” must be lowercase and start with a dot.`);
       }
     }
   }
@@ -131,7 +157,7 @@ export function validateRegistrations(registrations: readonly ViewerPluginRegist
   for (const registration of registrations) {
     validateManifest(registration.manifest);
     if (ids.has(registration.manifest.id)) {
-      throw new ViewerError("open-failed", `查看器 ID “${registration.manifest.id}” 重复注册。`);
+      throw new ViewerError("open-failed", `Viewer ID “${registration.manifest.id}” is registered more than once.`);
     }
     ids.add(registration.manifest.id);
   }
@@ -272,7 +298,7 @@ export function validateLoadedPlugin(
     plugin.manifest.id !== registration.manifest.id ||
     plugin.manifest.protocolVersion !== registration.manifest.protocolVersion
   ) {
-    throw new ViewerError("open-failed", `查看器 “${registration.manifest.id}” 的加载结果与注册信息不一致。`);
+    throw new ViewerError("open-failed", `Loaded viewer “${registration.manifest.id}” does not match its registration.`);
   }
 }
 
@@ -280,7 +306,11 @@ export function isViewerAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
 
-export function normalizeViewerError(error: unknown, message = "无法打开这个文件。"): ViewerError {
+export function normalizeViewerError(error: unknown, message = "Unable to open this file."): ViewerError {
   if (error instanceof ViewerError) return error;
   return new ViewerError("open-failed", message, { cause: error });
+}
+
+export function manifestName(manifest: ViewerPluginManifest, locale: Locale): string {
+  return localizeText(manifest.name, locale);
 }

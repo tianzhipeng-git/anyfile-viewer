@@ -1,5 +1,6 @@
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -11,8 +12,8 @@ import { MediaLoadError, waitForFirstFrame } from "./media-load";
 import { abortError } from "./read-blob";
 import { createVideoViewerElements, updateVideoMetadata } from "./ui";
 
-function copyFor(locale: string) {
-  return locale.toLowerCase().startsWith("zh") ? {
+function copyFor(locale: OpenViewerContext["locale"]) {
+  return selectMessages(locale, { "zh-CN": {
     reading: "正在检查视频容器与编码…",
     loading: "正在使用浏览器加载视频…",
     ready: "视频已打开",
@@ -20,7 +21,7 @@ function copyFor(locale: string) {
     noVideo: "文件没有可播放的视频轨道。",
     unsupported: "当前浏览器或系统不能播放这个视频编码组合。",
     failed: "浏览器无法加载这个视频。",
-  } : {
+  }, en: {
     reading: "Inspecting the video container and codecs…",
     loading: "Loading the video in the browser…",
     ready: "Video opened",
@@ -28,7 +29,7 @@ function copyFor(locale: string) {
     noVideo: "The file does not contain a playable video track.",
     unsupported: "This browser or system cannot play the video's codec combination.",
     failed: "The browser could not load this video.",
-  };
+  } });
 }
 
 function mapMediaError(error: MediaLoadError, copy: ReturnType<typeof copyFor>) {

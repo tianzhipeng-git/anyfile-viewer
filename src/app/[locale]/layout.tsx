@@ -1,0 +1,46 @@
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { PUBLISHED_LOCALES, alternateLanguages, isPublishedLocale, siteUrl } from "@/i18n/config";
+import { getDictionary } from "@/i18n/server";
+
+import "../globals.css";
+
+export const dynamicParams = false;
+
+export function generateStaticParams() {
+  return PUBLISHED_LOCALES.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale: candidate } = await params;
+  if (!isPublishedLocale(candidate)) return {};
+  const dictionary = await getDictionary(candidate);
+  return {
+    metadataBase: siteUrl(),
+    title: { default: dictionary.metadata.siteTitle, template: `%s — Anyfile` },
+    description: dictionary.metadata.siteDescription,
+    alternates: { canonical: `/${candidate}`, languages: alternateLanguages() },
+  };
+}
+
+export default async function LocaleLayout({
+  children,
+  params,
+}: Readonly<{ children: React.ReactNode; params: Promise<{ locale: string }> }>) {
+  const { locale } = await params;
+  if (!isPublishedLocale(locale)) notFound();
+  const dictionary = await getDictionary(locale);
+
+  return (
+    <html lang={locale} className="h-full antialiased">
+      <body className="flex min-h-full flex-col">
+        <SiteHeader locale={locale} dictionary={dictionary} />
+        <main className="flex flex-1 flex-col">{children}</main>
+        <SiteFooter locale={locale} dictionary={dictionary} />
+      </body>
+    </html>
+  );
+}

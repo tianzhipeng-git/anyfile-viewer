@@ -3,9 +3,9 @@ import { VIEWER_PROTOCOL_VERSION, type ViewerPluginManifest } from "@anyfile/vie
 export const excelManifest = {
   protocolVersion: VIEWER_PROTOCOL_VERSION,
   id: "excel-workbook",
-  name: "Excel 查看器",
+  name: { en: "Excel viewer", "zh-CN": "Excel 查看器" },
   formats: [{
-    name: "电子表格",
+    name: { en: "Spreadsheet", "zh-CN": "电子表格" },
     extensions: [
       ".xlsx", ".xlsm", ".xlsb", ".xls", ".xlw", ".xml",
       ".ods", ".fods", ".numbers", ".et", ".csv", ".tsv", ".txt",

@@ -1,6 +1,7 @@
 import { PptxViewer, RECOMMENDED_ZIP_LIMITS } from "@aiden0z/pptx-renderer";
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -47,20 +48,20 @@ async function readBlob(blob: Blob, signal: AbortSignal): Promise<ArrayBuffer> {
   return bytes.buffer;
 }
 
-function getCopy(locale: string) {
-  return locale.toLowerCase().startsWith("zh") ? {
+function getCopy(locale: OpenViewerContext["locale"]) {
+  return selectMessages(locale, { "zh-CN": {
     reading: "正在读取 PowerPoint 演示文稿…",
     rendering: "正在渲染幻灯片…",
     invalid: "文件内容不是有效的 PPTX 演示文稿。",
     tooLarge: "PowerPoint 演示文稿超过浏览器安全资源上限。",
     ready: "PowerPoint 演示文稿已打开",
-  } : {
+  }, en: {
     reading: "Reading PowerPoint presentation…",
     rendering: "Rendering slides…",
     invalid: "The file is not a valid PPTX presentation.",
     tooLarge: "The PowerPoint presentation exceeds the browser-safe resource limit.",
     ready: "PowerPoint presentation opened",
-  };
+  } });
 }
 
 function createViewerRoot(fileName: string) {

@@ -1,3 +1,5 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
 import type { HarDocument, HarEntry, HarNameValue } from "./types";
 
 const PAGE_SIZE = 100;
@@ -5,9 +7,8 @@ const PREVIEW_LIMIT = 32 * 1024;
 
 type Copy = ReturnType<typeof copyFor>;
 
-function copyFor(locale: string) {
-  const zh = locale.toLowerCase().startsWith("zh");
-  return zh ? {
+function copyFor(locale: Locale) {
+  return selectMessages(locale, { "zh-CN": {
     requests: "请求", pages: "页面", totalTime: "总耗时", transferred: "传输大小",
     filter: "筛选方法、状态、URL 或类型", previous: "上一页", next: "下一页", empty: "没有匹配的请求",
     overview: "概览", requestHeaders: "请求头", responseHeaders: "响应头", query: "查询参数",
@@ -15,7 +16,7 @@ function copyFor(locale: string) {
     method: "方法", url: "URL", status: "状态", type: "类型", duration: "耗时", size: "大小",
     started: "开始时间", protocol: "协议", server: "服务器地址", connection: "连接", redirect: "重定向",
     encoded: "正文使用 Base64 编码；以下为原始编码文本。", truncated: "预览已截断。",
-  } : {
+  }, en: {
     requests: "Requests", pages: "Pages", totalTime: "Total time", transferred: "Transferred",
     filter: "Filter method, status, URL, or type", previous: "Previous", next: "Next", empty: "No matching requests",
     overview: "Overview", requestHeaders: "Request headers", responseHeaders: "Response headers", query: "Query parameters",
@@ -23,7 +24,7 @@ function copyFor(locale: string) {
     method: "Method", url: "URL", status: "Status", type: "Type", duration: "Time", size: "Size",
     started: "Started", protocol: "Protocol", server: "Server address", connection: "Connection", redirect: "Redirect",
     encoded: "The body is Base64-encoded; raw encoded text is shown below.", truncated: "Preview truncated.",
-  };
+  } });
 }
 
 function node<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string, text?: string) {
@@ -153,7 +154,7 @@ function styles() {
   return style;
 }
 
-export function createHarView(fileName: string, document: HarDocument, locale: string) {
+export function createHarView(fileName: string, document: HarDocument, locale: Locale) {
   const copy = copyFor(locale);
   const root = node("div", "anyfile-har-viewer");
   const toolbar = node("div", "anyfile-har-viewer__toolbar");

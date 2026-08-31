@@ -126,7 +126,7 @@ describe("Excel viewer protocol compliance", () => {
 
   it("uses the requested locale for viewer controls", async () => {
     const context = testContext(validWorkbook());
-    const controller = await excelViewer.open({ ...context.context, locale: "en-US" });
+    const controller = await excelViewer.open({ ...context.context, locale: "en" });
 
     expect(context.container.querySelector("[data-next]")?.textContent).toBe("Next");
     expect(context.container.querySelector("[data-sheet]")?.getAttribute("aria-label")).toBe("Choose worksheet");

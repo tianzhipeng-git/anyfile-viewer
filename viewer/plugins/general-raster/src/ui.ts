@@ -1,3 +1,5 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
 import type { DecodedRaster } from "./types";
 
 export interface RasterViewerElements {
@@ -51,8 +53,11 @@ function button(label: string, text: string) {
   return element;
 }
 
-export function createRasterViewerElements(fileName: string, locale: string): RasterViewerElements {
-  const chinese = locale.toLowerCase().startsWith("zh");
+export function createRasterViewerElements(fileName: string, locale: Locale): RasterViewerElements {
+  const copy = selectMessages(locale, {
+    en: { tools: "Raster image viewing tools", page: "Page", selectPage: "Select TIFF page", zoomOut: "Zoom out", zoomIn: "Zoom in", fit: "Fit", actual: "Actual size", rotateLeft: "Rotate left", rotateRight: "Rotate right", canvas: "Raster image canvas, draggable and zoomable" },
+    "zh-CN": { tools: "栅格图片查看工具", page: "页面", selectPage: "选择 TIFF 页面", zoomOut: "缩小", zoomIn: "放大", fit: "适合窗口", actual: "实际大小", rotateLeft: "向左旋转", rotateRight: "向右旋转", canvas: "栅格图片画布，可拖动和缩放" },
+  });
   const root = document.createElement("div");
   root.className = "anyfile-general-raster-viewer";
   const style = document.createElement("style");
@@ -60,7 +65,7 @@ export function createRasterViewerElements(fileName: string, locale: string): Ra
   const toolbar = document.createElement("div");
   toolbar.className = "anyfile-general-raster-viewer__toolbar";
   toolbar.setAttribute("role", "toolbar");
-  toolbar.setAttribute("aria-label", chinese ? "栅格图片查看工具" : "Raster image viewing tools");
+  toolbar.setAttribute("aria-label", copy.tools);
   const identity = document.createElement("div");
   identity.className = "anyfile-general-raster-viewer__identity";
   const name = document.createElement("strong");
@@ -75,19 +80,19 @@ export function createRasterViewerElements(fileName: string, locale: string): Ra
   controls.className = "anyfile-general-raster-viewer__controls";
   const pageLabel = document.createElement("label");
   pageLabel.className = "anyfile-general-raster-viewer__page";
-  pageLabel.textContent = chinese ? "页面" : "Page";
+  pageLabel.textContent = copy.page;
   const pageSelect = document.createElement("select");
-  pageSelect.setAttribute("aria-label", chinese ? "选择 TIFF 页面" : "Select TIFF page");
+  pageSelect.setAttribute("aria-label", copy.selectPage);
   pageLabel.append(pageSelect);
-  const zoomOut = button(chinese ? "缩小" : "Zoom out", "−");
+  const zoomOut = button(copy.zoomOut, "−");
   const zoomValue = document.createElement("output");
   zoomValue.className = "anyfile-general-raster-viewer__zoom";
   zoomValue.setAttribute("aria-live", "polite");
-  const zoomIn = button(chinese ? "放大" : "Zoom in", "+");
-  const fit = button(chinese ? "适合窗口" : "Fit", chinese ? "适合" : "Fit");
-  const actual = button(chinese ? "实际大小" : "Actual size", "1:1");
-  const rotateLeft = button(chinese ? "向左旋转" : "Rotate left", "↺");
-  const rotateRight = button(chinese ? "向右旋转" : "Rotate right", "↻");
+  const zoomIn = button(copy.zoomIn, "+");
+  const fit = button(copy.fit, copy.fit);
+  const actual = button(copy.actual, "1:1");
+  const rotateLeft = button(copy.rotateLeft, "↺");
+  const rotateRight = button(copy.rotateRight, "↻");
   const status = document.createElement("span");
   status.className = "anyfile-general-raster-viewer__status";
   status.setAttribute("role", "status");
@@ -96,7 +101,7 @@ export function createRasterViewerElements(fileName: string, locale: string): Ra
   const viewport = document.createElement("div");
   viewport.className = "anyfile-general-raster-viewer__viewport";
   viewport.tabIndex = 0;
-  viewport.setAttribute("aria-label", chinese ? "栅格图片画布，可拖动和缩放" : "Raster image canvas, draggable and zoomable");
+  viewport.setAttribute("aria-label", copy.canvas);
   const canvas = document.createElement("canvas");
   canvas.className = "anyfile-general-raster-viewer__canvas";
   viewport.append(canvas);
@@ -105,14 +110,14 @@ export function createRasterViewerElements(fileName: string, locale: string): Ra
   return { root, viewport, canvas, metadata, zoomValue, pageLabel, pageSelect, status, rotateLeft, rotateRight, zoomIn, zoomOut, fit, actual };
 }
 
-export function updateRasterMetadata(elements: RasterViewerElements, raster: DecodedRaster, locale: string) {
-  const chinese = locale.toLowerCase().startsWith("zh");
+export function updateRasterMetadata(elements: RasterViewerElements, raster: DecodedRaster, locale: Locale) {
+  const copy = selectMessages(locale, { en: { alpha: "alpha", tiled: "tiled", orientation: "orientation", icc: "ICC not applied" }, "zh-CN": { alpha: "透明通道", tiled: "分块", orientation: "方向", icc: "ICC 未应用" } });
   const details = [raster.format, `${raster.width} × ${raster.height}`, `${raster.bitDepth} bit`];
-  if (raster.hasAlpha) details.push(chinese ? "透明通道" : "alpha");
+  if (raster.hasAlpha) details.push(copy.alpha);
   if (raster.compression) details.push(raster.compression);
-  if (raster.tiled) details.push(chinese ? "分块" : "tiled");
-  if (raster.orientation !== 1) details.push(`${chinese ? "方向" : "orientation"} ${raster.orientation}`);
-  if (raster.icc === "preserved-not-applied") details.push(chinese ? "ICC 未应用" : "ICC not applied");
+  if (raster.tiled) details.push(copy.tiled);
+  if (raster.orientation !== 1) details.push(`${copy.orientation} ${raster.orientation}`);
+  if (raster.icc === "preserved-not-applied") details.push(copy.icc);
   elements.metadata.textContent = details.join(" · ");
   elements.pageLabel.hidden = raster.pageCount <= 1;
   if (elements.pageSelect.options.length !== raster.pageCount) {

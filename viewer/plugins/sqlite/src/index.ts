@@ -1,5 +1,6 @@
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -23,11 +24,11 @@ type Copy = {
   page: (first: number, last: number, more: boolean) => string;
   invalid: string;
   tooLarge: string;
+  unsupported: string;
 };
 
-function getCopy(locale: string): Copy {
-  if (!locale.toLowerCase().startsWith("zh")) {
-    return {
+function getCopy(locale: OpenViewerContext["locale"]): Copy {
+  return selectMessages(locale, { en: {
       table: "Choose table",
       previous: "Previous",
       next: "Next",
@@ -39,9 +40,8 @@ function getCopy(locale: string): Copy {
       page: (first, last, more) => `${first}–${last}${more ? " · More rows available" : ""}`,
       invalid: "The file is damaged or is not a supported SQLite database.",
       tooLarge: "The SQLite database exceeds the browser-safe resource limit.",
-    };
-  }
-  return {
+      unsupported: "This browser does not support WebAssembly.",
+    }, "zh-CN": {
     table: "选择数据表",
     previous: "上一页",
     next: "下一页",
@@ -53,7 +53,8 @@ function getCopy(locale: string): Copy {
     page: (first, last, more) => `${first}–${last}${more ? " · 还有更多行" : ""}`,
     invalid: "文件已损坏，或内容不是受支持的 SQLite 数据库。",
     tooLarge: "SQLite 数据库超过浏览器安全资源上限。",
-  };
+    unsupported: "当前浏览器不支持 WebAssembly。",
+    } });
 }
 
 async function mount(fileName: string, session: SQLiteSession, signal: AbortSignal, copy: Copy) {
@@ -100,7 +101,7 @@ async function openSQLite(context: OpenViewerContext): Promise<ViewerController>
   const abort = () => void dispose();
   try {
     if (typeof WebAssembly === "undefined") {
-      throw new ViewerError("unsupported-environment", "当前浏览器不支持 WebAssembly。");
+      throw new ViewerError("unsupported-environment", copy.unsupported);
     }
     reportProgress({ stage: "initializing", message: copy.initializing });
     session = await createSQLiteSession(file, signal);
@@ -113,9 +114,12 @@ async function openSQLite(context: OpenViewerContext): Promise<ViewerController>
     return { dispose };
   } catch (error) {
     await dispose();
-    if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;
-    if (error instanceof RangeError) {
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    if (error instanceof RangeError || error instanceof ViewerError && error.code === "resource-limit") {
       throw new ViewerError("resource-limit", copy.tooLarge, { cause: error });
+    }
+    if (error instanceof ViewerError && error.code === "unsupported-environment") {
+      throw new ViewerError("unsupported-environment", copy.unsupported, { cause: error });
     }
     throw new ViewerError("invalid-file", copy.invalid, { cause: error });
   }

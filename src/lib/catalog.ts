@@ -1,3 +1,5 @@
+import type { PublishedLocale } from "@/i18n/config";
+
 export type FileFormat = {
   extension: string;
   name: string;
@@ -101,14 +103,44 @@ export const categories: FileCategory[] = [
   { slug: "design", name: "设计文件", eyebrow: "创意文件，也能本地打开", description: "查看常见设计格式的画布、图层与元信息。", extensions: ["psd", "ai", "fig"] },
 ];
 
-export function getCategory(slug: string) {
-  return categories.find((category) => category.slug === slug);
+const englishCategories = {
+  "images-video": { name: "Images & media", eyebrow: "See and hear every detail", description: "View images, video and audio with native browser features or local decoders." },
+  documents: { name: "Documents", eyebrow: "Read without waiting", description: "Open documents, spreadsheets and presentations locally without an upload queue." },
+  "code-data": { name: "Code & data", eyebrow: "Make structure visible", description: "Inspect text, code and structured data for quick debugging and validation." },
+  "developer-artifacts": { name: "Developer artifacts", eyebrow: "Understand build outputs", description: "Inspect arrays, packages and toolchain artifacts locally without executing their code." },
+  "3d": { name: "3D", eyebrow: "Explore models in your browser", description: "Browse meshes, materials and scenes with WebGL and WebGPU." },
+  design: { name: "Design files", eyebrow: "Open creative files locally", description: "Inspect canvases, layers and metadata in common design formats." },
+} as const;
+
+function localizeCategory(category: FileCategory, locale: PublishedLocale): FileCategory {
+  if (locale === "zh-CN") return category;
+  return { ...category, ...englishCategories[category.slug as keyof typeof englishCategories] };
 }
 
-export function getFormat(extension: string) {
-  return formats.find((format) => format.extension === extension.toLowerCase());
+function localizeFormat(format: FileFormat, locale: PublishedLocale): FileFormat {
+  if (locale === "zh-CN") return format;
+  const extension = format.extension.toUpperCase();
+  return {
+    ...format,
+    name: `${extension} file`,
+    description: `Preview .${format.extension} files locally in your browser without uploading.`,
+  };
 }
 
-export function getCategoryFormats(slug: string) {
-  return formats.filter((format) => format.category === slug);
+export function getCategories(locale: PublishedLocale) {
+  return categories.map((category) => localizeCategory(category, locale));
+}
+
+export function getCategory(slug: string, locale: PublishedLocale = "en") {
+  const category = categories.find((candidate) => candidate.slug === slug);
+  return category && localizeCategory(category, locale);
+}
+
+export function getFormat(extension: string, locale: PublishedLocale = "en") {
+  const format = formats.find((candidate) => candidate.extension === extension.toLowerCase());
+  return format && localizeFormat(format, locale);
+}
+
+export function getCategoryFormats(slug: string, locale: PublishedLocale = "en") {
+  return formats.filter((format) => format.category === slug).map((format) => localizeFormat(format, locale));
 }

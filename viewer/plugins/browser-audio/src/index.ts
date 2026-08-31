@@ -1,5 +1,6 @@
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -11,14 +12,14 @@ import { browserAudioManifest } from "./manifest";
 import { MediaLoadError, waitForAudioData } from "./media-load";
 import { createAudioViewerElements, updateAudioMetadata } from "./ui";
 
-function copyFor(locale: string) {
-  return locale.toLowerCase().startsWith("zh") ? {
+function copyFor(locale: OpenViewerContext["locale"]) {
+  return selectMessages(locale, { "zh-CN": {
     reading: "正在检查音频容器与编码…", loading: "正在使用浏览器加载音频…", ready: "音频已打开",
     invalid: "文件不是有效、完整且受支持的音频。", unsupported: "当前浏览器或系统不能播放这个音频组合。", failed: "浏览器无法加载这个音频。",
-  } : {
+  }, en: {
     reading: "Inspecting the audio container and codec…", loading: "Loading the audio in the browser…", ready: "Audio opened",
     invalid: "The file is not valid, complete supported audio.", unsupported: "This browser or system cannot play this audio combination.", failed: "The browser could not load this audio.",
-  };
+  } });
 }
 
 async function openBrowserAudio(context: OpenViewerContext): Promise<ViewerController> {

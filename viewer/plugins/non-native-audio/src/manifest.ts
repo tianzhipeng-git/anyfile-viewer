@@ -3,9 +3,9 @@ import { VIEWER_PROTOCOL_VERSION, type ViewerPluginManifest } from "@anyfile/vie
 export const nonNativeAudioManifest: ViewerPluginManifest = {
   protocolVersion: VIEWER_PROTOCOL_VERSION,
   id: "non-native-audio",
-  name: "非原生音频查看器",
+  name: { en: "Non-native audio viewer", "zh-CN": "非原生音频查看器" },
   formats: [{
-    name: "Matroska 音频",
+    name: { en: "Matroska audio", "zh-CN": "Matroska 音频" },
     extensions: [".mka"],
     mimeTypes: ["audio/x-matroska"],
   }],

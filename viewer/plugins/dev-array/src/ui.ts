@@ -1,3 +1,5 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
 import type { NpyDescriptor, ArrayPage } from "./npy";
 import { arrayPageSize, readArrayPage, readNpyDescriptor } from "./npy";
 import type { ArrayByteSource } from "./source";
@@ -21,21 +23,23 @@ type Copy = {
   readonly objectWarning: string;
   readonly loading: string;
   readonly error: string;
+  readonly count: (count: number) => string;
+  readonly metadata: readonly [string, string, string, string];
+  readonly bytes: string;
 };
 
-function copyFor(locale: string): Copy {
-  if (!locale.toLowerCase().startsWith("zh")) {
-    return {
+function copyFor(locale: Locale): Copy {
+  return selectMessages(locale, { en: {
       array: "Array", previous: "Previous", next: "Next", empty: "This NPZ contains no NPY arrays.",
       objectWarning: "Object dtype is inspection-only. Embedded Pickle data was not deserialized.",
-      loading: "Reading array page…", error: "This array could not be read.",
-    };
-  }
-  return {
+      loading: "Reading array page…", error: "This array could not be read.", count: (count) => `${count} arrays`,
+      metadata: ["NPY version", "Storage order", "Element count", "Element size"], bytes: "bytes",
+    }, "zh-CN": {
     array: "数组", previous: "上一页", next: "下一页", empty: "这个 NPZ 中没有 NPY 数组。",
     objectWarning: "对象 dtype 仅提供结构检查；未反序列化其中的 Pickle 数据。",
-    loading: "正在读取数组页…", error: "无法读取这个数组。",
-  };
+    loading: "正在读取数组页…", error: "无法读取这个数组。", count: (count) => `${count} 个数组`,
+    metadata: ["NPY 版本", "存储顺序", "元素数量", "元素大小"], bytes: "字节",
+    } });
 }
 
 function element<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string) {
@@ -55,14 +59,14 @@ function shapeText(shape: readonly number[]) {
   return shape.length ? `(${shape.join(", ")}${shape.length === 1 ? "," : ""})` : "()";
 }
 
-function metadataRows(descriptor: NpyDescriptor) {
+function metadataRows(descriptor: NpyDescriptor, copy: Copy, locale: Locale) {
   return [
-    ["NPY 版本", descriptor.version],
+    [copy.metadata[0], descriptor.version],
     ["dtype", descriptor.dtype.source],
     ["shape", shapeText(descriptor.shape)],
-    ["存储顺序", descriptor.fortranOrder ? "Fortran" : "C"],
-    ["元素数量", descriptor.elementCount.toLocaleString()],
-    ["元素大小", `${descriptor.dtype.itemSize.toLocaleString()} 字节`],
+    [copy.metadata[1], descriptor.fortranOrder ? "Fortran" : "C"],
+    [copy.metadata[2], descriptor.elementCount.toLocaleString(locale)],
+    [copy.metadata[3], `${descriptor.dtype.itemSize.toLocaleString(locale)} ${copy.bytes}`],
   ] as const;
 }
 
@@ -86,7 +90,7 @@ function renderPage(table: HTMLTableElement, page: ArrayPage) {
 export async function createArrayView(
   fileName: string,
   choices: readonly ArrayChoice[],
-  locale: string,
+  locale: Locale,
   signal: AbortSignal,
 ) {
   const copy = copyFor(locale);
@@ -97,7 +101,7 @@ export async function createArrayView(
   const header = element("header", "anyfile-array-viewer__header");
   const title = text(header, "strong", fileName);
   title.title = fileName;
-  text(header, "span", choices.length === 1 ? choices[0].name : `${choices.length} 个数组`);
+  text(header, "span", choices.length === 1 ? choices[0].name : copy.count(choices.length));
   const controls = element("div", "anyfile-array-viewer__controls");
   const label = text(controls, "label", copy.array);
   const select = element("select");
@@ -148,7 +152,7 @@ export async function createArrayView(
   const showDescriptor = () => {
     metadata.replaceChildren();
     if (!descriptor) return;
-    for (const [term, value] of metadataRows(descriptor)) {
+    for (const [term, value] of metadataRows(descriptor, copy, locale)) {
       const item = element("div");
       text(item, "dt", term);
       text(item, "dd", value);
@@ -179,7 +183,7 @@ export async function createArrayView(
 
   const showPageError = (error: unknown) => {
     if (disposed || signal.aborted || (error instanceof DOMException && error.name === "AbortError")) return;
-    status.textContent = error instanceof Error ? error.message : copy.error;
+    status.textContent = copy.error;
     status.hidden = false;
     status.setAttribute("role", "alert");
   };
@@ -206,7 +210,7 @@ export async function createArrayView(
       source = undefined;
       if (disposed || signal.aborted || (error instanceof DOMException && error.name === "AbortError")) return;
       if (!surfaceError) throw error;
-      status.textContent = error instanceof Error ? error.message : copy.error;
+      status.textContent = copy.error;
       status.hidden = false;
       status.setAttribute("role", "alert");
       select.disabled = false;

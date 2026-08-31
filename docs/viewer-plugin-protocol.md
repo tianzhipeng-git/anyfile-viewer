@@ -1,4 +1,4 @@
-# 格式查看器插件协议 v1
+# 格式查看器插件协议 v2
 
 ## 1. 目标
 
@@ -107,9 +107,9 @@ Lit 只是复杂插件的可选开发建议，不是协议依赖，也不要求�
 
 ```ts
 export interface ViewerPluginManifest {
-  readonly protocolVersion: 1
+  readonly protocolVersion: 2
   readonly id: string
-  readonly name: string
+  readonly name: LocalizedText
   readonly formats: readonly SupportedFormat[]
   readonly workspaceAccess:
     | "none"
@@ -118,7 +118,7 @@ export interface ViewerPluginManifest {
 }
 
 export interface SupportedFormat {
-  readonly name: string
+  readonly name: LocalizedText
   readonly extensions: readonly string[]
   readonly fileNames?: readonly string[]
   readonly mimeTypes?: readonly string[]
@@ -129,12 +129,12 @@ export interface SupportedFormat {
 
 ```ts
 export const manifest: ViewerPluginManifest = {
-  protocolVersion: 1,
+  protocolVersion: 2,
   id: "browser-image",
-  name: "浏览器图片查看器",
+  name: { en: "Browser image viewer", "zh-CN": "浏览器图片查看器" },
   formats: [
     {
-      name: "浏览器原生图片",
+      name: { en: "Browser-native image", "zh-CN": "浏览器原生图片" },
       extensions: [
         ".png",
         ".jpg",
@@ -164,6 +164,8 @@ Manifest 规则：
 - `"*"` 表示支持任意扩展名，适合十六进制查看器等通用插件。
 - `mimeTypes` 只用于页面展示，不参与插件选择。
 - 同一插件即使有多条规则匹配，也只在候选列表中出现一次。
+- `LocalizedText` 的英语名称必填，其他合法语言可选并回退英语；所有已注册插件还必须提供非空简体中文名称。
+- Manifest 是纯数据，不能为了翻译导入完整插件、运行时字典、Worker、WASM 或浏览器全局。
 
 网站外壳的目录树图标不是协议字段，但会复用轻量 Manifest 进行文件类型分类。给现有插件增加 `extensions` 或 `fileNames` 时，图标通常会自动跟随；新增插件时，维护者必须同时在 `src/components/file-type-icon.tsx` 中把该 Manifest 加入对应语义类别，新增语义类别时还需指定新的 Lucide 图标。`src/components/file-type-icon.test.ts` 会检查所有已注册的非通配扩展名均能取得明确类别，不能通过删除或放宽该检查来绕过缺失映射。
 
@@ -228,9 +230,9 @@ export type ViewerSupportLevel = 0 | 1 | 2 | 3 | 4 | 5
 - 默认插件打开失败时展示错误，不自动回退到下一个插件。
 - 用户切换插件时，先取消并销毁当前插件，再打开目标插件。
 - `open()` 仍需严格校验文件；probe 只负责排序，不能取代打开阶段的安全和完整性检查。
-- v1 不记录用户上次选择，也不自动调整插件顺序。
+- v2 不记录用户上次选择，也不自动调整插件顺序。
 
-该设计有意保留扩展名路由边界：没有匹配文件名或扩展名的专用插件不会进入候选，只会保留声明 `"*"` 的通用插件。无扩展名和错误扩展名的全局格式识别不属于 v1。
+该设计有意保留扩展名路由边界：没有匹配文件名或扩展名的专用插件不会进入候选，只会保留声明 `"*"` 的通用插件。无扩展名和错误扩展名的全局格式识别不属于 v2。
 
 ## 6. Probe 与延迟加载
 
@@ -309,13 +311,15 @@ export interface OpenViewerContext {
   readonly workspace?: WorkspaceReader
   readonly container: HTMLElement
   readonly signal: AbortSignal
-  readonly locale: string
+  readonly locale: Locale
 
   readonly reportProgress: (
     progress: ViewerOpenProgress,
   ) => void
 }
 ```
+
+`Locale` 由 `@anyfile/i18n` 统一定义。插件必须以 `context.locale` 生成所有用户可见的进度、错误、按钮、表头、占位符、ARIA、标题和空状态；不得读取 `navigator.language` 或自行判断语言前缀。合法但尚未翻译的 locale 回退英语。
 
 ### 8.1 `file`
 
@@ -470,6 +474,7 @@ export interface ViewerOpenProgress {
 - `reportProgress()` 只报告当前 `open()` 尚未完成的工作。`open()` resolve、reject 或插件开始清理后不得再调用。
 - `stage` 是插件定义的稳定诊断标识，例如 `"parsing"`；宿主只能展示或记录它，不能根据某个字符串切换遮罩、生命周期或交互状态。
 - `message` 是可供用户阅读的说明。
+- `message` 必须由当前插件按 `OpenViewerContext.locale` 本地化，不能把协议校验诊断直接展示给用户。
 - 只有能准确计算时才提供 `loaded` 和 `total`。
 - `loaded` 和 `total` 必须使用同一单位，并满足 `0 <= loaded <= total`；未知总量时两者都省略。
 - `open()` 完成前，网站展示统一加载遮罩，插件根节点不能接收用户操作。
@@ -550,7 +555,7 @@ container.replaceChildren()
 
 ## 13. 查看器控制器
 
-v1 控制器只负责释放资源：
+v2 控制器只负责释放资源：
 
 ```ts
 export interface ViewerController {
@@ -558,7 +563,7 @@ export interface ViewerController {
 }
 ```
 
-v1 不增加 `reload()`、`resize()`、`focus()`、`save()`、`getState()` 或插件间通信：
+v2 不增加 `reload()`、`resize()`、`focus()`、`save()`、`getState()` 或插件间通信：
 
 - 尺寸变化使用 `ResizeObserver`。
 - 焦点使用标准 DOM API。
@@ -623,6 +628,7 @@ open-failed
 - `open()` 成功后的错误不再抛给宿主：导致当前内容整体不可继续的后台失败由插件在根节点内展示完整错误状态，仍可使用时的页面、字体、缩略图、子资源或部分解码失败在对应局部展示。
 - 插件内用户取消不是错误。插件负责关闭交互 UI，并提供重试、降级或返回稳定状态；宿主不改变文件选择和查看器生命周期。
 - 错误信息不得包含文件内容或敏感本地路径。
+- 用户可见的 `ViewerError.message` 必须由插件按当前 locale 生成；协议校验错误保持稳定英文，仅用于开发诊断。
 
 所有权汇总：
 
@@ -716,7 +722,7 @@ Lit、PDF.js、Three.js 等插件专属库不进入公共协议包。
 ## 18. 协议版本
 
 ```ts
-export const VIEWER_PROTOCOL_VERSION = 1 as const
+export const VIEWER_PROTOCOL_VERSION = 2 as const
 ```
 
 规则：
@@ -736,6 +742,7 @@ Manifest
 ├── id 合法且唯一
 ├── 扩展名为小写
 ├── 复合扩展名合法
+├── 英语和简体中文名称非空
 └── protocolVersion 正确
 
 Routing
@@ -771,7 +778,7 @@ Large file
 
 具体测试实现将在测试设计中确定，本节只定义协议要求。
 
-## 20. v1 明确不包含
+## 20. v2 明确不包含
 
 - 文件编辑和保存。
 - 格式转换和导出。

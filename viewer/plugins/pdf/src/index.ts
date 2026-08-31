@@ -1,5 +1,6 @@
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -12,8 +13,8 @@ import { pdfManifest } from "./manifest";
 import { probePdf } from "./probe";
 import { abortError } from "./read-blob";
 
-function getCopy(locale: string) {
-  return locale.toLowerCase().startsWith("zh") ? {
+function getCopy(locale: OpenViewerContext["locale"]) {
+  return selectMessages(locale, { "zh-CN": {
     checking: "正在检查 PDF 文件…",
     fitWidth: "适合宽度",
     invalid: "文件内容不是有效的 PDF 文档。",
@@ -29,7 +30,7 @@ function getCopy(locale: string) {
     renderFailed: "部分页面渲染失败，请尝试调整缩放或重新打开文件。",
     zoomIn: "放大",
     zoomOut: "缩小",
-  } : {
+  }, en: {
     checking: "Checking the PDF file…",
     fitWidth: "Fit width",
     invalid: "The file is not a valid PDF document.",
@@ -45,7 +46,7 @@ function getCopy(locale: string) {
     renderFailed: "Some pages could not be rendered. Try changing the zoom or reopening the file.",
     zoomIn: "Zoom in",
     zoomOut: "Zoom out",
-  };
+  } });
 }
 
 function isInvalidPdfError(error: unknown) {

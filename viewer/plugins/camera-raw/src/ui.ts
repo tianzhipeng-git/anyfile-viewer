@@ -1,3 +1,5 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
 import type { RawMetadataSummary } from "./raw-decoder";
 
 export interface CameraRawElements {
@@ -16,12 +18,15 @@ const styles = `
 
 function button(label: string, text = label) { const element = document.createElement("button"); element.type = "button"; element.setAttribute("aria-label", label); element.title = label; element.textContent = text; return element; }
 
-export function createCameraRawElements(fileName: string, locale: string): CameraRawElements {
-  const zh = locale.toLowerCase().startsWith("zh"); const root = document.createElement("div"); root.className = "anyfile-camera-raw-viewer"; const style = document.createElement("style"); style.textContent = styles;
+export function createCameraRawElements(fileName: string, locale: Locale): CameraRawElements {
+  const copy = selectMessages(locale, {
+    en: { preview: "Embedded preview", developed: "Basic RAW development", zoomOut: "Zoom out", zoomIn: "Zoom in", fit: "Fit", actual: "Actual size", rotateLeft: "Rotate left", rotateRight: "Rotate right" },
+    "zh-CN": { preview: "内嵌预览", developed: "基础 RAW 显影", zoomOut: "缩小", zoomIn: "放大", fit: "适合窗口", actual: "实际大小", rotateLeft: "向左旋转", rotateRight: "向右旋转" },
+  }); const root = document.createElement("div"); root.className = "anyfile-camera-raw-viewer"; const style = document.createElement("style"); style.textContent = styles;
   const toolbar = document.createElement("div"); toolbar.className = "anyfile-camera-raw-viewer__toolbar"; toolbar.setAttribute("role", "toolbar"); const identity = document.createElement("div"); identity.className = "anyfile-camera-raw-viewer__identity";
   const name = document.createElement("strong"); name.className = "anyfile-camera-raw-viewer__name"; name.textContent = fileName; name.title = fileName; const metadata = document.createElement("span"); metadata.className = "anyfile-camera-raw-viewer__meta"; identity.append(name, metadata);
-  const controls = document.createElement("div"); controls.className = "anyfile-camera-raw-viewer__controls"; const preview = button(zh ? "内嵌预览" : "Embedded preview"); const developed = button(zh ? "基础 RAW 显影" : "Basic RAW development"); preview.hidden = true; developed.hidden = true;
-  const zoomOut = button(zh ? "缩小" : "Zoom out", "−"); const zoomValue = document.createElement("output"); zoomValue.className = "anyfile-camera-raw-viewer__zoom"; const zoomIn = button(zh ? "放大" : "Zoom in", "+"); const fit = button(zh ? "适合窗口" : "Fit", zh ? "适合" : "Fit"); const actual = button(zh ? "实际大小" : "Actual size", "1:1"); const rotateLeft = button(zh ? "向左旋转" : "Rotate left", "↺"); const rotateRight = button(zh ? "向右旋转" : "Rotate right", "↻"); const status = document.createElement("span"); status.className = "anyfile-camera-raw-viewer__status"; status.setAttribute("role", "status"); controls.append(preview, developed, zoomOut, zoomValue, zoomIn, fit, actual, rotateLeft, rotateRight, status);
+  const controls = document.createElement("div"); controls.className = "anyfile-camera-raw-viewer__controls"; const preview = button(copy.preview); const developed = button(copy.developed); preview.hidden = true; developed.hidden = true;
+  const zoomOut = button(copy.zoomOut, "−"); const zoomValue = document.createElement("output"); zoomValue.className = "anyfile-camera-raw-viewer__zoom"; const zoomIn = button(copy.zoomIn, "+"); const fit = button(copy.fit, copy.fit); const actual = button(copy.actual, "1:1"); const rotateLeft = button(copy.rotateLeft, "↺"); const rotateRight = button(copy.rotateRight, "↻"); const status = document.createElement("span"); status.className = "anyfile-camera-raw-viewer__status"; status.setAttribute("role", "status"); controls.append(preview, developed, zoomOut, zoomValue, zoomIn, fit, actual, rotateLeft, rotateRight, status);
   const viewport = document.createElement("div"); viewport.className = "anyfile-camera-raw-viewer__viewport"; viewport.tabIndex = 0; const canvas = document.createElement("canvas"); canvas.className = "anyfile-camera-raw-viewer__canvas"; viewport.append(canvas); toolbar.append(identity, controls); root.append(style, toolbar, viewport);
   return { root, viewport, canvas, metadata, status, preview, developed, zoomValue, rotateLeft, rotateRight, zoomIn, zoomOut, fit, actual };
 }

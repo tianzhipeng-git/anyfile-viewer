@@ -1,6 +1,7 @@
 import { read, utils, type WorkBook, type WorkSheet } from "xlsx";
 import {
   ViewerError,
+  selectMessages,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -54,9 +55,8 @@ type ExcelCopy = {
   ready: string;
 };
 
-function getCopy(locale: string): ExcelCopy {
-  if (!locale.toLowerCase().startsWith("zh")) {
-    return {
+function getCopy(locale: OpenViewerContext["locale"]): ExcelCopy {
+  return selectMessages(locale, { en: {
       chooseSheet: "Choose worksheet",
       previous: "Previous",
       next: "Next",
@@ -72,9 +72,7 @@ function getCopy(locale: string): ExcelCopy {
       reading: "Reading the Excel workbook…",
       parsing: "Parsing worksheets…",
       ready: "Excel workbook opened",
-    };
-  }
-  return {
+    }, "zh-CN": {
     chooseSheet: "选择工作表",
     previous: "上一页",
     next: "下一页",
@@ -90,7 +88,7 @@ function getCopy(locale: string): ExcelCopy {
     reading: "正在读取 Excel 工作簿…",
     parsing: "正在解析工作表…",
     ready: "Excel 工作簿已打开",
-  };
+    } });
 }
 
 function columnLabel(index: number) {

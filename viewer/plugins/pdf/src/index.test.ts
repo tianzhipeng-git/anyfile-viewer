@@ -130,7 +130,7 @@ describe("PDF viewer protocol compliance", () => {
 
   it("uses the requested locale for user-facing errors", async () => {
     const context = testContext(new File(["not a pdf"], "broken.pdf"));
-    const localizedContext = { ...context.context, locale: "en-US" };
+    const localizedContext = { ...context.context, locale: "en" as const };
 
     await expect(pdfViewer.open(localizedContext)).rejects.toMatchObject({
       code: "invalid-file",

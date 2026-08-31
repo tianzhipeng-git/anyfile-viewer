@@ -1,5 +1,6 @@
 packages:
   - viewer/dev-binary-core
+  - viewer/i18n
   - viewer/protocol
   - viewer/rendering
   - viewer/testing

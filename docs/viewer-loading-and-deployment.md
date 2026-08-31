@@ -4,12 +4,12 @@
 
 ## 1. SSG 与 SSR 支持
 
-当前 `/view` 在生产构建中可以静态预渲染。以后即使页面因为读取请求数据、Cookie 等原因改为请求时 SSR，查看器架构也不需要改变。
+当前已发布的 `/en/view` 与 `/zh-CN/view` 在生产构建中按 locale 静态预渲染。`src/app/[locale]/layout.tsx` 只为 `PUBLISHED_LOCALES` 生成静态参数并禁用动态参数；未发布语言不生成页面。以后即使页面因为读取请求数据、Cookie 等原因改为请求时 SSR，查看器架构也不需要改变。
 
 渲染边界如下：
 
 ```text
-Next.js Server Component: src/app/view/page.tsx
+Next.js Server Component: src/app/[locale]/view/page.tsx
                 │
                 ▼
 Client Component: FileWorkspace / ViewerHost
@@ -28,6 +28,7 @@ Client Component: FileWorkspace / ViewerHost
 - File System Access API、文件 probe、Worker、WASM 和 DOM 操作只能发生在浏览器事件处理、effect、注册项 `probe()` 或插件 `open()` 中。
 - 不要从 Server Component、layout、page 或网站外壳静态导入插件根入口。
 - Server Component 传给 Client Component 的 props 必须可序列化；本地 `File` 和 `FileSystemHandle` 只能由浏览器取得并保留在客户端。
+- 页面字典由 Server Component 按 locale 动态导入；插件运行时文案只随被选中的完整插件实现加载，不能进入 manifest 或未选择插件的首包。
 
 遵守这些规则时：
 
@@ -37,11 +38,11 @@ Client Component: FileWorkspace / ViewerHost
 
 ### 静态预渲染不等于静态导出
 
-当前生产命令是普通 `next build`，由 Next.js/Vercel 运行构建产物。`/view` 虽然在构建期生成静态 HTML，部署时仍保留 Next.js 路由层，因此 `next.config.ts` 中的 `headers()` 会作用于页面和静态资源响应。这是“静态预渲染”，不是 `output: "export"`。
+当前生产命令是普通 `next build`，由 Next.js/Vercel 运行构建产物。语言前缀查看页虽然在构建期生成静态 HTML，部署时仍保留 Next.js 路由层，因此 `next.config.ts` 中的 `headers()` 会作用于页面和静态资源响应。这是“静态预渲染”，不是 `output: "export"`。
 
-只有显式配置 `output: "export"` 并把 `out/` 交给通用静态服务器时，才属于真正的静态导出。静态导出不执行 Next.js 的响应头路由逻辑；部署服务器、对象存储或 CDN 必须为 `/view`、Worker、WASM 和其他相关资产配置本文规定的 COOP、COEP、CORP、CORS、CSP 和 MIME 响应头。不能因为构建产生了 HTML 文件，就假定 `next.config.ts` 的响应头已经包含在文件中。
+只有显式配置 `output: "export"` 并把 `out/` 交给通用静态服务器时，才属于真正的静态导出。静态导出不执行 Next.js 的响应头路由逻辑；部署服务器、对象存储或 CDN 必须为所有 `/{locale}/view`、Worker、WASM 和其他相关资产配置本文规定的 COOP、COEP、CORP、CORS、CSP 和 MIME 响应头。不能因为构建产生了 HTML 文件，就假定 `next.config.ts` 的响应头已经包含在文件中。
 
-`/view` 只承载相同的页面外壳和浏览器本地文件处理，当前应继续使用静态预渲染。SSG、SSR 和 ISR 决定页面何时生成以及是否使用服务端计算，不决定浏览器下载的静态资源由谁承担流量；大体积运行时的流量策略见第 3 节。
+`/{locale}/view` 只承载对应语言的页面外壳和浏览器本地文件处理，当前应继续使用静态预渲染。SSG、SSR 和 ISR 决定页面何时生成以及是否使用服务端计算，不决定浏览器下载的静态资源由谁承担流量；大体积运行时的流量策略见第 3 节。
 
 ## 2. 插件级按需加载
 
@@ -62,7 +63,7 @@ Probe 必须保持轻量。它可以分片读取必要文件头或容器结构�
 
 SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 DuckDB 或 Apache Arrow。DuckDB 数据插件处理 CSV、TSV、JSON、Parquet、Arrow 和 DuckDB 数据库，不包含 SQLite 路径。
 
-`browser-video` 同样保持三段加载边界：manifest 只包含格式声明；候选扩展名命中后才加载纯字节、有界且无 DOM 副作用的 ISO BMFF/WebM probe；只有插件被选中后才加载 DOM、Object URL 和媒体生命周期实现。构建门禁同时检查 `/view` 首包不含 probe/parser 或完整播放器，并检查 probe chunk 不带入完整播放器 UI。
+`browser-video` 同样保持三段加载边界：manifest 只包含格式声明；候选扩展名命中后才加载纯字节、有界且无 DOM 副作用的 ISO BMFF/WebM probe；只有插件被选中后才加载 DOM、Object URL、当前 locale 的运行时文案和媒体生命周期实现。构建门禁同时检查 `/en/view` 首包不含 probe/parser、插件运行时字典或完整播放器，并检查 probe chunk 不带入完整播放器 UI。
 
 新增插件时必须：
 
@@ -108,7 +109,7 @@ PDF 插件实现保持动态加载。`pnpm dev` 和 `pnpm build` 会先运行
 
 不在 Vercel 前再叠加 Cloudflare 反向代理作为常规部署方式。Cloudflare 可以继续负责 DNS，并通过独立资产域名提供 R2/CDN；应用域名直接使用 Vercel CDN。这样避免双层 CDN 的缓存、失效和诊断边界，同时让高流量的大型二进制不经过 Vercel 应用域名。
 
-静态预渲染和 Vercel CDN 命中可以减少服务端计算与源站访问，但用户实际下载的页面和静态文件仍产生 CDN 数据传输。降低运行时流量成本的主要手段是按需加载、压缩、长期不可变缓存，以及把大型公共二进制放到官方 CDN 或受控资产域名，而不是把 `/view` 改成 SSR。
+静态预渲染和 Vercel CDN 命中可以减少服务端计算与源站访问，但用户实际下载的页面和静态文件仍产生 CDN 数据传输。降低运行时流量成本的主要手段是按需加载、压缩、长期不可变缓存，以及把大型公共二进制放到官方 CDN 或受控资产域名，而不是把 `/{locale}/view` 改成 SSR。
 
 ### 加载与回退顺序
 
@@ -154,11 +155,11 @@ worker-src 'self' blob:
 
 具体 CSP 应与整站已有策略合并，并在目标浏览器上验证 Worker 和 WASM。完全离线或 CDN 被阻断时会使用本站资源，但应用自身的静态资源仍需可访问或由 Service Worker 缓存。
 
-`/view` 已经启用 COOP/COEP。当前 DuckDB 仍使用 MVP/EH 单线程资源；如果以后启用多线程 COI bundle，需要同步给 fallback 增加 COI WASM、主 Worker 和 pthread Worker，并继续保留经验证的单线程 bundle 作为浏览器能力 fallback。SSG/SSR 本身不受这一变化影响。
+`/{locale}/view` 已经启用 COOP/COEP。当前 DuckDB 仍使用 MVP/EH 单线程资源；如果以后启用多线程 COI bundle，需要同步给 fallback 增加 COI WASM、主 Worker 和 pthread Worker，并继续保留经验证的单线程 bundle 作为浏览器能力 fallback。SSG/SSR 本身不受这一变化影响。
 
 ### 外部资源边界
 
-`/view` 是受控的本地文件计算环境，不是能够嵌入任意网站和远程资源的通用浏览器。插件默认不得因为用户文件中包含 URL，就自动加载远程图片、字体、媒体、tile、脚本或 iframe。
+`/{locale}/view` 是受控的本地文件计算环境，不是能够嵌入任意网站和远程资源的通用浏览器。插件默认不得因为用户文件中包含 URL，就自动加载远程图片、字体、媒体、tile、脚本或 iframe。
 
 确有格式语义需要加载远程子资源时，接入评审必须逐项确认：
 
@@ -206,19 +207,19 @@ public/vendor/<dependency>/<version>/     不提交的部署资源
 
 `pnpm build` 会在 Next.js 构建后执行 `scripts/check-view-bundle.mjs`：
 
-- 从 `/view` 的预渲染 HTML 读取真实初始脚本列表。
+- 从 `/en/view` 的预渲染 HTML 读取真实初始脚本列表。
 - 分别计算传输时的 gzip 体积。
 - 当前上限为 225 KiB。
 - 检查 Ace、DuckDB、SQLite、PDF、Word、Excel 和 PowerPoint 实现标记没有进入初始 JavaScript。
 - 检查新增 probe 及其解析依赖没有进入初始 JavaScript；probe chunk 也不能静态带入完整插件实现。
 - 检查 PDF.js Worker 已产出，且版本化 CMap、标准字体、ICC、WASM 和 JavaScript 解码回退齐全。
-- 检查 JXL 与 RAW 的 Worker/WASM 没有进入 `/view` 初始 JavaScript，并且只在对应插件完整入口加载。
+- 检查 JXL 与 RAW 的 Worker/WASM 没有进入 `/en/view` 初始 JavaScript，并且只在对应插件完整入口加载。
 
-### `/view` 统一计算环境的跨源隔离
+### `/{locale}/view` 统一计算环境的跨源隔离
 
-`/view` 当前被设计为统一、受控的本地文件计算环境。它从页面进入时就启用跨源隔离，以支持 `libraw-wasm@1.6.0` 的 pthread 构建，并为未来 FFmpeg、推理、数据库、图像处理等 threaded WASM 留出一致的执行环境。隔离只作用于查看环境，不要求首页、格式介绍页等整个网站采用相同策略。
+十种合法 locale 的 `/{locale}/view` 都被识别为统一、受控的本地文件计算环境。它从页面进入时就启用跨源隔离，以支持 `libraw-wasm@1.6.0` 的 pthread 构建，并为未来 FFmpeg、推理、数据库、图像处理等 threaded WASM 留出一致的执行环境。首批发布的 `/en/view` 与 `/zh-CN/view` 必须返回隔离头；隔离不作用于首页、格式介绍页等营销页面。
 
-`/view` 返回：
+`/{locale}/view` 返回：
 
 ```text
 Cross-Origin-Opener-Policy: same-origin
@@ -232,22 +233,22 @@ Cross-Origin-Embedder-Policy: require-corp
 Cross-Origin-Resource-Policy: same-origin
 ```
 
-部署层不得丢弃这些响应头。Worker 是独立执行上下文，仅给 `/view` 加 COEP 不足以启动 LibRaw pthread。启用或调整 CSP 时还需要允许同源 Worker 和 WebAssembly；同时回归 DuckDB 的 jsDelivr 与 fallback 资源能在 COEP 下加载。
+部署层不得丢弃这些响应头。Worker 是独立执行上下文，仅给 `/{locale}/view` 加 COEP 不足以启动 LibRaw pthread。启用或调整 CSP 时还需要允许同源 Worker 和 WebAssembly；同时回归 DuckDB 的 jsDelivr 与 fallback 资源能在 COEP 下加载。
 
 页面级隔离是当前有意选择的执行环境及其代价，不等于所有插件都必须使用多线程，也不应被表述成不可修改的永久协议。优先采用上游提供的 feature detection 和单线程 fallback；只有实测性能或功能需要时才选择 threaded bundle。若未来确实需要同时支持非隔离查看环境，再评审协议能力声明，例如 `crossOriginIsolation: "required" | "preferred" | "none"`。在宿主尚未提供多个执行环境前，不把该字段加入 v1 manifest，避免产生不能兑现的路由承诺。
 
 普通同源 iframe 不能在非隔离顶层页面内单独成为隔离岛。若未来拆分执行环境，必须使用真正的顶层文档边界，并同时解决本地 `File` 跨导航保留和统一选择体验；当前不采用该复杂方案。
 
-### `/view` 的文档导航边界
+### `/{locale}/view` 的文档导航边界
 
 COOP/COEP 在顶层文档响应时生效，客户端路由切换不会因为 pathname 变化而重新建立或撤销跨源隔离。因此：
 
-- 从普通页面进入 `/view` 必须执行完整文档导航，不能只使用 Next.js 客户端 `<Link>`；
-- 从 `/view` 返回非隔离页面也必须执行完整文档导航；
-- `/view` 内部切换文件、目录和插件继续使用客户端状态，不得为此刷新页面；
-- 发布前必须从首页实际点击进入 `/view`，断言 `crossOriginIsolated === true`，不能只测试直接访问或刷新 `/view`。
+- 从普通页面进入同语言 `/{locale}/view` 必须执行完整文档导航，不能只使用 Next.js 客户端 `<Link>`；
+- 从查看页返回非隔离页面也必须执行完整文档导航；
+- 查看页内部切换文件、目录和插件继续使用客户端状态，不得为此刷新页面；切换 locale 则完整导航，并清空本地文件选择；
+- 发布前必须从两种语言首页实际点击进入对应查看页，断言 `crossOriginIsolated === true`，不能只测试直接访问或刷新。
 
-站内导航统一通过 `IsolationBoundaryLink` 表达该边界：进入或离开 `/view` 时渲染原生 `<a>`，同一侧的普通站内导航继续使用 Next.js `<Link>`。新增导航入口不得绕过该组件。
+站内导航统一通过 `IsolationBoundaryLink` 表达该边界：进入或离开任一合法 locale 的查看页时渲染原生 `<a>`，同一侧的普通站内导航继续使用 Next.js `<Link>`。新增导航入口不得绕过该组件。
 
 JXL 的打包 Worker 和 WASM 位于 `/_next/static/:path*`，该路径同样返回上述 COEP/CORP 头。如果未来用 `assetPrefix` 将 Next 静态资源迁移到独立 CDN，CDN 必须保留等价响应头，否则 JXL Worker 会在加载前被浏览器拦截。
 
@@ -265,9 +266,9 @@ HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实
 
 - 使用 `pnpm install --frozen-lockfile` 从 lockfile 安装。
 - `pnpm test`、`pnpm lint`、`pnpm build` 全部通过。
-- `/view` 仍能完成 SSG 构建；若改为 SSR，服务端日志中没有 CDN、Worker 或 WASM 初始化。
+- `/en/view` 与 `/zh-CN/view` 都能完成 SSG 构建；若改为 SSR，服务端日志中没有 CDN、Worker 或 WASM 初始化。
 - 确认当前部署不是把“静态预渲染”误当成 `output: "export"`；如果使用静态导出，逐项验证部署服务器提供本文要求的响应头。
-- 从非隔离首页通过真实入口完整导航到 `/view`，确认 `crossOriginIsolated === true`；再完整导航离开，确认普通页面不继承查看环境。
+- 从两种语言的非隔离首页通过真实入口完整导航到对应查看页，确认 `crossOriginIsolated === true`；再完整导航离开，确认普通页面不继承查看环境。
 - 候选插件的 probe 只在用户选择文件后加载，完成顺序不影响支持等级排序。
 - 不带 probe 的插件不会产生额外请求，并以默认支持等级 1 排序。
 - 分别打开 SQLite 和 DuckDB 文件，确认只请求对应插件资源。

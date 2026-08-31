@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { formatNumber, interpolate } from "@anyfile/i18n";
 import {
   AlertCircleIcon,
   FileIcon,
@@ -32,18 +33,20 @@ import {
   type WorkspaceTreeEntry,
 } from "@/lib/file-system-access";
 import { createWorkspaceReader } from "@/lib/workspace-reader";
+import type { PublishedLocale } from "@/i18n/config";
+import type { AppDictionary } from "@/i18n/types";
 
-function formatBytes(bytes: number) {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 ** 2) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / 1024 ** 2).toFixed(1)} MB`;
+function formatBytes(bytes: number, locale: PublishedLocale) {
+  if (bytes < 1024) return `${formatNumber(bytes, locale)} B`;
+  if (bytes < 1024 ** 2) return `${formatNumber(bytes / 1024, locale, { maximumFractionDigits: 1 })} KB`;
+  return `${formatNumber(bytes / 1024 ** 2, locale, { maximumFractionDigits: 1 })} MB`;
 }
 
-export function FileWorkspace() {
+export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale; dictionary: AppDictionary }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const readRequestId = useRef(0);
   const [entries, setEntries] = useState<WorkspaceTreeEntry[]>([]);
-  const [workspaceName, setWorkspaceName] = useState("文件");
+  const [workspaceName, setWorkspaceName] = useState(dictionary.workspace.files);
   const [rootDirectory, setRootDirectory] = useState<FileSystemDirectoryHandle>();
   const [selectedEntry, setSelectedEntry] = useState<WorkspaceTreeEntry>();
   const [selectedFile, setSelectedFile] = useState<File>();
@@ -68,9 +71,9 @@ export function FileWorkspace() {
       if (requestId !== readRequestId.current) return;
       setSelectedFile(file);
 
-    } catch (readError) {
+    } catch {
       if (requestId === readRequestId.current) {
-        setError(readError instanceof Error ? readError.message : "无法读取所选文件。请重新授权后再试。");
+        setError(dictionary.workspace.readFileFailed);
       }
     } finally {
       if (requestId === readRequestId.current) setBusy(false);
@@ -82,7 +85,7 @@ export function FileWorkspace() {
     setRootDirectory(undefined);
     const nextEntries = fileHandleEntries(handles);
     setEntries(nextEntries);
-    setWorkspaceName(handles.length === 1 ? handles[0].name : `${handles.length} 个文件`);
+    setWorkspaceName(handles.length === 1 ? handles[0].name : interpolate(dictionary.workspace.fileCount, { count: formatNumber(handles.length, locale) }));
     if (nextEntries[0]) await selectEntry(nextEntries[0]);
   }
 
@@ -91,7 +94,7 @@ export function FileWorkspace() {
     setRootDirectory(undefined);
     const nextEntries = browserFileEntries(files);
     setEntries(nextEntries);
-    setWorkspaceName(files.length === 1 ? files[0].name : `${files.length} 个文件`);
+    setWorkspaceName(files.length === 1 ? files[0].name : interpolate(dictionary.workspace.fileCount, { count: formatNumber(files.length, locale) }));
     if (nextEntries[0]) await selectEntry(nextEntries[0]);
   }
 
@@ -102,14 +105,14 @@ export function FileWorkspace() {
     setBusy(true);
     setError("");
     try {
-      const nextEntries = await directoryHandleEntries(handle);
+      const nextEntries = await directoryHandleEntries(handle, locale);
       setRootDirectory(handle);
       setEntries(nextEntries);
       setWorkspaceName(handle.name);
       const firstFile = nextEntries.find((entry) => entry.kind === "file");
       if (firstFile) await selectEntry(firstFile);
-    } catch (directoryError) {
-      setError(directoryError instanceof Error ? directoryError.message : "无法读取所选文件夹。请重新授权后再试。");
+    } catch {
+      setError(dictionary.workspace.readFolderFailed);
     } finally {
       setBusy(false);
     }
@@ -117,7 +120,7 @@ export function FileWorkspace() {
 
   async function expandDirectory(entry: Extract<WorkspaceTreeEntry, { kind: "directory" }>) {
     try {
-      const children = await directoryHandleChildren(entry);
+      const children = await directoryHandleChildren(entry, locale);
       setEntries((currentEntries) => {
         const directoryIndex = currentEntries.findIndex(
           (current) => current.id === entry.id && current.kind === "directory" && current.handle === entry.handle,
@@ -131,14 +134,14 @@ export function FileWorkspace() {
           ...currentEntries.slice(directoryIndex + 1),
         ];
       });
-    } catch (directoryError) {
-      setError(directoryError instanceof Error ? directoryError.message : "无法读取所选文件夹。请重新授权后再试。");
+    } catch {
+      setError(dictionary.workspace.readFolderFailed);
     }
   }
 
   function checkSecureContext() {
     if (!window.isSecureContext) {
-      setError("File System Access API 只能在安全上下文中使用。请通过 HTTPS 或 localhost 访问。");
+      setError(dictionary.workspace.secureContext);
       return false;
     }
     return true;
@@ -151,14 +154,14 @@ export function FileWorkspace() {
   async function openDirectory() {
     if (!checkSecureContext()) return;
     if (typeof window.showDirectoryPicker !== "function") {
-      setError("当前浏览器不支持打开文件夹, 仅可打开单个文件。请使用最新版 Chrome 或其他兼容浏览器。");
+      setError(dictionary.workspace.folderUnsupported);
       return;
     }
     try {
       const handle = await window.showDirectoryPicker({ id: "anyfile-workspace", mode: "read" });
       await loadDirectoryHandle(handle);
     } catch (pickerError) {
-      if (!isAbortError(pickerError)) setError(pickerError instanceof Error ? pickerError.message : "无法打开文件夹选择器。");
+      if (!isAbortError(pickerError)) setError(dictionary.workspace.pickerFailed);
     }
   }
 
@@ -167,7 +170,7 @@ export function FileWorkspace() {
     if (!itemList.every((item) => typeof item.getAsFileSystemHandle === "function")) {
       const files = itemList.map((item) => item.getAsFile()).filter((file): file is File => Boolean(file));
       if (files.length) await loadBrowserFiles(files);
-      else setError("拖放内容中没有可读取的文件。");
+      else setError(dictionary.workspace.droppedEmpty);
       return;
     }
     if (!checkSecureContext()) return;
@@ -182,7 +185,7 @@ export function FileWorkspace() {
     }
     const files = handles.filter((handle): handle is FileSystemFileHandle => handle.kind === "file");
     if (files.length) await loadFileHandles(files);
-    else setError("拖放内容中没有可读取的文件。");
+    else setError(dictionary.workspace.droppedEmpty);
   }
 
   return (
@@ -190,7 +193,7 @@ export function FileWorkspace() {
       {error && (
         <Alert variant="destructive">
           <AlertCircleIcon />
-          <AlertTitle>无法访问本地文件</AlertTitle>
+          <AlertTitle>{dictionary.workspace.accessErrorTitle}</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
@@ -217,8 +220,8 @@ export function FileWorkspace() {
               <Button
                 size="icon-sm"
                 variant="ghost"
-                aria-label="收起文件栏"
-                title="收起文件栏"
+                aria-label={dictionary.workspace.collapseSidebar}
+                title={dictionary.workspace.collapseSidebar}
                 onClick={() => setSidebarOpen(false)}
               >
                 <PanelLeftCloseIcon />
@@ -232,7 +235,7 @@ export function FileWorkspace() {
               type="file"
               multiple
               className="sr-only"
-              aria-label="选择本地文件"
+              aria-label={dictionary.workspace.chooseLocalFile}
               onChange={(event) => {
                 const files = Array.from(event.currentTarget.files ?? []);
                 event.currentTarget.value = "";
@@ -241,11 +244,11 @@ export function FileWorkspace() {
             />
             <Button size="sm" disabled={busy} onClick={() => void openFiles()}>
               <FileIcon data-icon="inline-start" />
-              打开文件
+              {dictionary.common.openFile}
             </Button>
             <Button size="sm" variant="outline" disabled={busy} onClick={() => void openDirectory()}>
               <FolderOpenIcon data-icon="inline-start" />
-              打开文件夹
+              {dictionary.common.openFolder}
             </Button>
           </div>
           <div className="min-h-0 flex-1 overflow-auto px-2 pb-3">
@@ -255,13 +258,14 @@ export function FileWorkspace() {
                 selectedId={selectedEntry?.id}
                 onSelect={(entry) => void selectEntry(entry)}
                 onExpand={expandDirectory}
+                ariaLabel={dictionary.workspace.workspaceFiles}
               />
             ) : (
               <Empty>
                 <EmptyHeader>
                   <EmptyMedia variant="icon"><FolderOpenIcon /></EmptyMedia>
-                  <EmptyTitle>尚未打开工作区</EmptyTitle>
-                  <EmptyDescription>授权文件或文件夹后，这里会显示句柄树。</EmptyDescription>
+                  <EmptyTitle>{dictionary.workspace.unopenedTitle}</EmptyTitle>
+                  <EmptyDescription>{dictionary.workspace.unopenedDescription}</EmptyDescription>
                 </EmptyHeader>
               </Empty>
             )}
@@ -271,6 +275,8 @@ export function FileWorkspace() {
         <section className="flex min-h-0 min-w-0 flex-col">
           <div className="relative flex flex-1 items-stretch overflow-hidden bg-muted/30">
             <ViewerHost
+              locale={locale}
+              dictionary={dictionary.viewer}
               file={selectedFile}
               relativePath={selectedEntry?.relativePath}
               workspace={workspace}
@@ -280,16 +286,16 @@ export function FileWorkspace() {
                     <Button
                       size="icon-sm"
                       variant="ghost"
-                      aria-label="展开文件栏"
-                      title="展开文件栏"
+                      aria-label={dictionary.workspace.expandSidebar}
+                      title={dictionary.workspace.expandSidebar}
                       onClick={() => setSidebarOpen(true)}
                     >
                       <PanelLeftOpenIcon />
                     </Button>
                   )}
                   <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold">{selectedEntry?.displayPath ?? "预览区"}</p>
-                    {selectedFile && <p className="text-xs text-muted-foreground">{formatBytes(selectedFile.size)} · {selectedFile.type || "未知类型"}</p>}
+                    <p className="truncate text-sm font-semibold">{selectedEntry?.displayPath ?? dictionary.workspace.preview}</p>
+                    {selectedFile && <p className="text-xs text-muted-foreground">{formatBytes(selectedFile.size, locale)} · {selectedFile.type || dictionary.workspace.unknownType}</p>}
                   </div>
                 </div>
               )}

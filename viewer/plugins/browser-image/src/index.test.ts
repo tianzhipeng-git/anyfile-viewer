@@ -118,7 +118,7 @@ describe("browser image viewer protocol compliance", () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledOnce();
 
     const invalidContext = testContext(fixture("corrupt.png"));
-    await expect(browserImageViewer.open({ ...invalidContext.context, locale: "en-US" }))
+    await expect(browserImageViewer.open({ ...invalidContext.context, locale: "en" }))
       .rejects.toMatchObject({
         code: "invalid-file",
         message: "The file is not a valid, complete supported image.",

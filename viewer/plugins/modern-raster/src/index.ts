@@ -1,4 +1,4 @@
-import { ViewerError, type FileViewerPlugin, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
+import { ViewerError, selectMessages, type FileViewerPlugin, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
 import { HeifDecoderWorker } from "./heif-worker-client";
 import { checkDimensions, MAX_JXL_FRAMES, MAX_MODERN_RASTER_SOURCE_BYTES } from "./limits";
 import { modernRasterManifest } from "./manifest";
@@ -12,12 +12,12 @@ import { JxlDecoderWorker } from "./worker-client";
 
 const PROBE_BYTES = 1024 * 1024;
 
-function copyFor(locale: string) {
-  return locale.toLowerCase().startsWith("zh") ? {
-    reading: "正在检查现代图片…", decoding: "正在解码图片…", ready: "图片已打开", invalid: "文件不是有效的 JPEG XL 或 HEIC 图片。", primary: "仅主图像", native: "原生解码", wasm: "WASM 回退", colorUnknown: "颜色空间未知", icc: "ICC 未应用", hdr: "HDR 已降为 SDR",
-  } : {
-    reading: "Inspecting modern image…", decoding: "Decoding image…", ready: "Image opened", invalid: "The file is not a valid JPEG XL or HEIC image.", primary: "primary image only", native: "native decode", wasm: "WASM fallback", colorUnknown: "unknown color space", icc: "ICC not applied", hdr: "HDR mapped to SDR",
-  };
+function copyFor(locale: OpenViewerContext["locale"]) {
+  return selectMessages(locale, { "zh-CN": {
+    reading: "正在检查现代图片…", decoding: "正在解码图片…", ready: "图片已打开", invalid: "文件不是有效的 JPEG XL 或 HEIC 图片。", tooLarge: "图片文件超过 256 MiB 输入上限。", frameLimit: "JPEG XL 动画超过 4096 帧上限。", frameFailed: "动画帧解码失败", workerInvalid: "JPEG XL Worker 返回了无效响应。", primary: "仅主图像", native: "原生解码", wasm: "WASM 回退", colorUnknown: "颜色空间未知", icc: "ICC 未应用", hdr: "HDR 已降为 SDR",
+  }, en: {
+    reading: "Inspecting modern image…", decoding: "Decoding image…", ready: "Image opened", invalid: "The file is not a valid JPEG XL or HEIC image.", tooLarge: "The image exceeds the 256 MiB input limit.", frameLimit: "JPEG XL animations are limited to 4096 frames.", frameFailed: "Animation frame failed", workerInvalid: "The JPEG XL worker returned an invalid response.", primary: "primary image only", native: "native decode", wasm: "WASM fallback", colorUnknown: "unknown color space", icc: "ICC not applied", hdr: "HDR mapped to SDR",
+  } });
 }
 
 async function bitmapFromPng(png: Uint8Array) {
@@ -61,7 +61,7 @@ async function openModernRaster(context: OpenViewerContext): Promise<ViewerContr
         frameIndex = (frameIndex + 1) % frameCount;
         timer = setTimeout(() => void next(), frame.durationMs);
       } catch {
-        if (elements && !disposed) elements.status.textContent = context.locale.startsWith("zh") ? "动画帧解码失败" : "Animation frame failed";
+        if (elements && !disposed) elements.status.textContent = copy.frameFailed;
       }
     };
     timer = setTimeout(() => void next(), 0);
@@ -69,7 +69,7 @@ async function openModernRaster(context: OpenViewerContext): Promise<ViewerContr
 
   try {
     if (signal.aborted) throw abortError();
-    if (file.size > MAX_MODERN_RASTER_SOURCE_BYTES) throw new ViewerError("resource-limit", "图片文件超过 256 MiB 输入上限。");
+    if (file.size > MAX_MODERN_RASTER_SOURCE_BYTES) throw new ViewerError("resource-limit", copy.tooLarge);
     reportProgress({ stage: "reading", message: copy.reading });
     const format = inspectModernHeader(await readBlob(file.slice(0, PROBE_BYTES), signal), file.size);
     if (!format) throw new ViewerError("invalid-file", copy.invalid);
@@ -106,7 +106,7 @@ async function openModernRaster(context: OpenViewerContext): Promise<ViewerContr
     } else {
       native = await NativeImageSequence.open(file, ["image/jxl"]);
       if (native) {
-        if (native.frameCount > MAX_JXL_FRAMES) throw new ViewerError("resource-limit", "JPEG XL 动画超过 4096 帧上限。");
+        if (native.frameCount > MAX_JXL_FRAMES) throw new ViewerError("resource-limit", copy.frameLimit);
         const frame = await native.render(0);
         checkDimensions(frame.bitmap.width, frame.bitmap.height);
         viewport.setBitmap(frame.bitmap);
@@ -115,7 +115,7 @@ async function openModernRaster(context: OpenViewerContext): Promise<ViewerContr
       } else {
         worker = new JxlDecoderWorker(signal);
         const opened = await worker.open(file);
-        if (opened.type !== "opened") throw new ViewerError("open-failed", "JPEG XL Worker 返回了无效响应。");
+        if (opened.type !== "opened") throw new ViewerError("open-failed", copy.workerInvalid);
         const bitmap = await bitmapFromPng(opened.png);
         viewport.setBitmap(bitmap);
         info = { format: "JPEG XL", width: opened.width, height: opened.height, animated: opened.frameCount > 1, frameCount: opened.frameCount, loops: opened.loops };
@@ -133,8 +133,9 @@ async function openModernRaster(context: OpenViewerContext): Promise<ViewerContr
     return { dispose };
   } catch (error) {
     dispose();
-    if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;
-    throw new ViewerError("invalid-file", copy.invalid, { cause: error });
+    if (error instanceof DOMException && error.name === "AbortError") throw error;
+    const code = error instanceof ViewerError ? error.code : "invalid-file";
+    throw new ViewerError(code, code === "resource-limit" ? copy.tooLarge : copy.invalid, { cause: error });
   }
 }
 

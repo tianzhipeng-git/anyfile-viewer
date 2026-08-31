@@ -3,9 +3,9 @@ import { VIEWER_PROTOCOL_VERSION, type ViewerPluginManifest } from "@anyfile/vie
 export const wordManifest = {
   protocolVersion: VIEWER_PROTOCOL_VERSION,
   id: "word-document",
-  name: "Word 查看器",
+  name: { en: "Word viewer", "zh-CN": "Word 查看器" },
   formats: [{
-    name: "Word Open XML 文档",
+    name: { en: "Word Open XML document", "zh-CN": "Word Open XML 文档" },
     extensions: [".docx"],
     mimeTypes: [
       "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
