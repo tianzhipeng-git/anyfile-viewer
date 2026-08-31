@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowRightIcon, CheckIcon, CircleAlertIcon, LockKeyholeIcon } from "lucide-react";
 
 import { JsonLd } from "@/components/json-ld";
@@ -9,12 +9,12 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCategory, getFormat, getPlugin, publishedFormats } from "@/content";
+import { getCategory, getFormat, getPlugin, publishedFormatRoutes, publishedFormats } from "@/content";
 import { alternateLanguages, isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
 
 export const dynamicParams = false;
-export function generateStaticParams() { return publishedFormats.map(({ extension }) => ({ extension })); }
+export function generateStaticParams() { return publishedFormatRoutes.map((extension) => ({ extension })); }
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string; extension: string }> }): Promise<Metadata> {
   const { locale, extension } = await params;
@@ -31,6 +31,7 @@ export default async function FormatPage({ params }: { params: Promise<{ locale:
   const dictionary = await getDictionary(locale);
   const format = getFormat(extension, locale);
   if (!format) notFound();
+  if (extension.toLowerCase() !== format.extension) permanentRedirect(localePath(locale, `/formats/${format.extension}`));
   const category = getCategory(format.categoryId, locale);
   if (!category) notFound();
   const plugins = format.pluginIds.map((id) => getPlugin(id, locale)).filter((item) => item !== undefined);

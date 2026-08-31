@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const pdfFormat = defineFormat("pdf", "documents", 4,
+    { name: "PDF document", title: "Open PDF Documents Online", description: "Read PDF pages locally with PDF.js without uploading the document.", introduction: "PDF preserves a fixed page layout for reports, manuals and forms. Anyfile loads the selected document into PDF.js in this browser tab and renders pages on demand.", canShow: ["Page layout, text and common embedded images", "Page navigation and zoom", "Password prompt for supported encrypted documents"], limitations: ["Form filling, annotation editing and saving are not available", "The text layer used for selection is not enabled"], faq: [{ question: "Can Anyfile modify or sign a PDF?", answer: "No. The PDF viewer is read-only and does not save changes or create signatures." }] },
+    { name: "PDF 文档", title: "在线打开 PDF 文档", description: "使用 PDF.js 在本地阅读 PDF 页面，无需上传文档。", introduction: "PDF 为报告、手册和表单保留固定页面版式。Anyfile 在当前浏览器标签页中把所选文档交给 PDF.js，并按需渲染页面。", canShow: ["页面版式、文字与常见内嵌图片", "页面导航与缩放", "受支持加密文档的密码提示"], limitations: ["不提供表单填写、批注编辑或保存", "未启用用于选择文字的文本层"], faq: [{ question: "Anyfile 能修改或签署 PDF 吗？", answer: "不能。PDF 查看器是只读的，不保存修改，也不创建签名。" }] });
+

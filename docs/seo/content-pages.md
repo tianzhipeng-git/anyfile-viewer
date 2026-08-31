@@ -7,7 +7,7 @@ Anyfile 为每个已发布的文件格式、格式类别和查看器插件提供
 页面采用“一个页面类型一个 TSX、一个实体一份内容数据”的方式实现：
 
 ```text
-一个格式一个 URL       != 一个格式一个 page.tsx
+一个'格式'一个 URL       != 一个格式一个 page.tsx
 一个类别一个 URL       != 一个类别一个 page.tsx
 一个插件一个 URL       != 一个插件一个 page.tsx
 ```
@@ -36,7 +36,25 @@ Anyfile 为每个已发布的文件格式、格式类别和查看器插件提供
 - `how to open {extension}`；
 - 音视频格式对应的 `{extension} player online`。
 
-每个已发布格式拥有一个主 URL。扩展名别名只有在存在独立搜索意图和足够独特内容时才生成独立页面；否则重定向到主扩展名，或声明指向主扩展名页面的 canonical。例如 `.jpeg` 通常可以归一到 `/formats/jpg`，不能让两个近乎相同的页面互相竞争。
+每个已发布格式实体拥有一个主 URL，但“Manifest 中出现一个扩展名”不等于“应生成一个页面”。同一格式的大小写、历史写法或等价扩展名应归一到一个主扩展名。例如 `.jpeg` 通常归一到 `/formats/jpg`，不能让两个近乎相同的页面互相竞争。没有独立内容的别名 URL 优先使用永久重定向；只有因兼容或产品交互必须保留可访问页面时，才使用指向主 URL 的 canonical，并把别名排除在导航和 sitemap 之外。
+
+不同扩展名即使共用同一个查看器，只要对应不同格式规范、容器、用途、限制或明确搜索意图，仍可分别发布。例如 CSV 与 TSV 可以共用表格基础设施，但分隔规则、常见问题和用户任务不同。反过来，扩展名不同但内容与能力说明实质相同，不应为了增加 URL 数量拆成多个页面。
+
+格式从 `draft` 变为 `published` 前必须同时通过两道门槛：
+
+**能力门槛：**
+
+- Manifest 能准确识别该格式，并存在真实的格式感知查看能力；
+- 页面承诺已经通过代表性样例验证，且支持范围、子格式和环境条件可被准确说明；
+- 只有通用十六进制兜底时，不能包装成对应格式查看器；如确有字节检查需求，应明确以结构或字节检查为页面意图；
+- 页面至少映射到一个真实负责该格式的已注册插件。
+
+**内容门槛：**
+
+- 用户对该格式存在可解释的独立任务或搜索意图，而不只是扩展名清单中存在这一项；
+- 能提供格式专属的用途、能力、限制、相似格式差异和常见问题；
+- 正文不是只替换扩展名、标题、关键词或少量同义句的模板副本；
+- 即使搜索量较低，只要内容真实、独特且对用户有用，也可以发布；搜索量用于决定优先级，不作为唯一发布条件。
 
 一个可索引格式页至少应包含：
 
@@ -50,7 +68,7 @@ Anyfile 为每个已发布的文件格式、格式类别和查看器插件提供
 8. 与该格式直接相关的常见问题；
 9. 需要时提供专业软件或其他工具建议。
 
-不得只替换扩展名、标题和一两句话来批量制造页面。正文必须反映该格式的真实用途和 Anyfile 的实际能力。尚无足够独特、准确内容的页面可以保留为草稿，但不得进入静态参数、导航或 sitemap。
+不得只替换扩展名、标题和一两句话来批量制造页面。页面数量本身不是完成目标，也不会机械增加站点权重；更多高质量页面的作用是覆盖更多真实查询。正文必须反映该格式的真实用途和 Anyfile 的实际能力。尚无足够独特、准确内容的页面可以保留为草稿，但不得进入静态参数、导航或 sitemap。
 
 ### 2.2 类别页面：聚合与内链枢纽
 
@@ -141,6 +159,7 @@ type PublishStatus = "draft" | "published"
 
 type FormatContent = {
   extension: string
+  // 只记录应永久重定向或 canonical 到主扩展名的等价写法
   aliases?: readonly string[]
   categoryId: string
   pluginIds: readonly string[]
@@ -184,7 +203,9 @@ type PluginContent = {
 
 `pluginIds` 必须通过构建期派生或校验与注册 Manifest 一致。`typicalLevel` 是对外内容摘要，不替代运行时 probe，也不能参与插件路由。
 
-内容较短时可使用类型安全的 TypeScript 数据。格式介绍和 FAQ 增长后，可以把长正文迁移到 Markdown/MDX，但路由、能力映射和发布状态仍应保留为可校验的结构化数据。不因为“每页独立”而复制页面组件。
+内容较短时使用类型安全的 TypeScript 数据。随着格式数量增长，优先把单一大文件拆成“一格式一 TS 内容模块”，由一个显式的 `index.ts` 聚合；不要仅因为条目变多就迁移到 JSON。TypeScript 的 `satisfies`、联合类型和编译检查用于保证 locale、发布状态、能力字段和别名规则完整，JSON 只有在引入独立 schema 校验或非开发者内容工作流后才有实际收益。
+
+格式介绍和 FAQ 明显增长后，可以只把长正文迁移到 Markdown/MDX；主扩展名、aliases、路由键、能力映射和发布状态仍应保留为可校验的 TypeScript 结构化数据。不因为“每页独立”而复制页面组件。
 
 建议目录形态：
 
@@ -206,7 +227,7 @@ src/app/[locale]/
 └── plugins/[pluginId]/page.tsx
 ```
 
-这是目标边界示例，不要求为了目录形式而拆出大量只有几行的文件。文件拆分应服务于内容审阅和维护，不制造新的抽象层。
+这是目标边界示例，不要求为了目录形式而拆出大量只有几行的文件。当单文件已经影响人工审阅、并行修改或 diff 可读性，或准备批量增加格式时，应在继续扩充前完成按实体拆分。文件拆分应服务于内容审阅和维护，不制造新的抽象层，也不使用运行时目录扫描代替清晰的静态聚合。
 
 ## 6. SSG、CDN 与路由约束
 
@@ -222,6 +243,8 @@ export function generateStaticParams() {
 
 - locale 只来自 `PUBLISHED_LOCALES`；
 - 未列入静态参数的实体返回 404；
+- 等价扩展名别名优先永久重定向到同 locale 的主扩展名 URL；
+- 必须保留页面的别名从单独的 alias inventory 生成静态页面，使用主 URL canonical，且不作为主格式进入导航或 sitemap；
 - 不在请求时从 CMS 或第三方 API 获取正文；
 - `generateMetadata()` 只读取同一份构建期内容；
 - 普通介绍页不启用 `/view` 的 COOP/COEP；
@@ -265,16 +288,18 @@ export function generateStaticParams() {
 
 新增或修改可索引内容时应自动验证：
 
-1. 每个 published 格式至少映射到一个已注册插件 Manifest；
-2. 格式声明的扩展名与 Manifest 一致，别名归一规则没有冲突；
-3. 每个 published 格式属于一个已发布类别；
-4. 每个 published 插件页对应一个真实注册插件；
-5. 每个插件页列出的格式反向链接到该插件；
-6. 每种已发布语言都有完整 title、description 和主要正文；
-7. title、description、canonical 和页面 URL 在同一 locale 下唯一；
-8. draft、计划中或只有虚假能力映射的实体不进入 sitemap；
-9. sitemap、静态参数和导航使用同一份 published inventory；
-10. SEO 内容没有静态带入 probe、插件实现、Worker 或 WASM。
+1. 每个 published 格式至少映射到一个已注册插件 Manifest，且不是只有通用 hex fallback；
+2. 格式声明的主扩展名与 Manifest 一致；
+3. alias 不能被多个主格式占用，也不能同时作为另一个 published 格式的主扩展名；
+4. alias URL 永久重定向或 canonical 到同 locale 的主 URL，且不进入 sitemap；
+5. 每个 published 格式属于一个已发布类别；
+6. 每个 published 插件页对应一个真实注册插件；
+7. 每个插件页列出的格式反向链接到该插件；
+8. 每种已发布语言都有完整 title、description 和主要正文；
+9. published 主格式页的 title、description、canonical 和页面 URL 在同一 locale 下唯一；
+10. draft、计划中、只有虚假能力映射或未通过内容门槛的实体不进入 sitemap；
+11. sitemap、主页面静态参数和导航使用同一份 published inventory；需要保留的 alias 静态参数只来自单独的 alias inventory；
+12. SEO 内容没有静态带入 probe、插件实现、Worker 或 WASM。
 
 发布前还应人工抽查：
 
@@ -297,6 +322,7 @@ export function generateStaticParams() {
 
 ### 阶段二：补强格式与类别页面
 
+- 在继续扩大格式清单前，把影响审阅的单一内容大文件拆成按实体聚合的 TypeScript 模块；
 - 优先完善已有真实支持、搜索意图明确的格式；
 - 加入能力、限制、相关格式、FAQ 和必要的替代软件；
 - 加强类别页的介绍、对比和内链；

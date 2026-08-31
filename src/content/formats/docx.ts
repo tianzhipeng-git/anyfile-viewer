@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const docxFormat = defineFormat("docx", "documents", 3,
+    { name: "Word document", title: "Open DOCX Documents Online", description: "Render Word Open XML documents locally for read-only review.", introduction: "DOCX packages document XML, styles and media in a ZIP-based container. Anyfile parses the selected package with docx-preview and reconstructs a read-only browser layout.", canShow: ["Paragraphs, headings, tables and common images", "Common page and text styling", "Headers, footers and lists when represented by the renderer"], limitations: ["Complex pagination, fields and desktop fonts may render differently", "Macros, editing and tracked-change workflows are not supported"], faq: [{ question: "Why can a DOCX look different from Microsoft Word?", answer: "Browser layout, available fonts and the renderer do not implement every Word pagination and field behavior." }] },
+    { name: "Word 文档", title: "在线打开 DOCX 文档", description: "在本地渲染 Word Open XML 文档，用于只读审阅。", introduction: "DOCX 在 ZIP 容器中打包文档 XML、样式与媒体。Anyfile 使用 docx-preview 解析所选软件包，并在浏览器中重建只读版式。", canShow: ["段落、标题、表格与常见图片", "常见页面与文字样式", "渲染器可表达的页眉、页脚与列表"], limitations: ["复杂分页、字段和桌面字体可能呈现不同", "不支持宏、编辑与修订工作流"], faq: [{ question: "为什么 DOCX 可能与 Microsoft Word 中不同？", answer: "浏览器排版、可用字体和当前渲染器没有实现 Word 的全部分页与字段行为。" }] });
+

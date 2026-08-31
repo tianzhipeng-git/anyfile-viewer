@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const pngFormat = defineFormat("png", "images-video", 4,
+    { name: "PNG image", title: "Open PNG Images Online", description: "View PNG images and transparency locally in your browser without uploading.", introduction: "PNG is a lossless raster format widely used for screenshots, diagrams and graphics with transparency. Anyfile hands the selected file to the browser image decoder and presents the decoded dimensions and pixels.", canShow: ["Lossless image pixels", "Alpha transparency", "Browser-supported color profiles"], limitations: ["Viewing does not expose every ancillary PNG chunk", "Extremely large dimensions may exceed browser canvas limits"], faq: [{ question: "Can Anyfile open animated PNG files?", answer: "Use the APNG format entry when animation is important; this PNG page describes ordinary still PNG viewing." }] },
+    { name: "PNG 图片", title: "在线打开 PNG 图片", description: "无需上传，在浏览器本地查看 PNG 图片与透明通道。", introduction: "PNG 是常用于截图、图示和透明图形的无损栅格格式。Anyfile 将所选文件交给浏览器图片解码器，并展示解码后的尺寸与像素。", canShow: ["无损图片像素", "Alpha 透明通道", "浏览器支持的色彩配置"], limitations: ["查看界面不会展示每一种 PNG 辅助数据块", "超大尺寸可能超过浏览器 Canvas 限制"], faq: [{ question: "Anyfile 能打开动画 PNG 吗？", answer: "动画是重点时应参考 APNG 格式；本页描述普通静态 PNG 的查看能力。" }] });
+

@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const wasmFormat = defineFormat("wasm", "developer-artifacts", 5,
+    { name: "WebAssembly module", title: "Inspect WebAssembly Modules Online", description: "Read WASM sections, imports, exports and function sizes without instantiating the module.", introduction: "A WebAssembly binary contains typed sections that describe code, memory and linking. Anyfile validates the module structure and builds a navigable inspection view without running its start function or imports.", canShow: ["Types, imports and exports", "Memory, table and global declarations", "Function body sizes and section summaries"], limitations: ["Instructions are summarized rather than decompiled to source", "Runtime behavior cannot be inferred from structure alone"], faq: [{ question: "Is the WASM module executed during inspection?", answer: "No. The viewer parses bytes and never calls WebAssembly.instantiate." }] },
+    { name: "WebAssembly 模块", title: "在线检查 WebAssembly 模块", description: "不实例化模块，读取 WASM 段、导入导出与函数体大小。", introduction: "WebAssembly 二进制由描述代码、内存与链接关系的类型化段组成。Anyfile 校验模块结构并生成可导航检查视图，不运行 start 函数或导入。", canShow: ["类型、导入与导出", "内存、表与全局声明", "函数体大小与段摘要"], limitations: ["指令以摘要呈现，不反编译为源码", "仅凭结构无法推断完整运行时行为"], faq: [{ question: "检查时会执行 WASM 模块吗？", answer: "不会。查看器只解析字节，绝不会调用 WebAssembly.instantiate。" }] });
+

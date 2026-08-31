@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const mp3Format = defineFormat("mp3", "images-video", 4,
+    { name: "MP3 audio", title: "Play MP3 Audio Online", description: "Play CBR and common VBR MP3 audio directly from local storage.", introduction: "MP3 remains a common compressed audio format for music, speech and podcasts. Anyfile probes the stream and uses the browser audio element for local playback, including common Xing and VBRI variable-bitrate files.", canShow: ["CBR and common VBR streams", "Duration, seeking, volume and playback controls", "Browser-decoded audio"], limitations: ["Damaged frame sequences may stop playback", "The viewer does not edit tags or audio"], faq: [{ question: "Is the MP3 uploaded for playback?", answer: "No. The selected File is exposed to the local browser player through an object URL and is not sent to Anyfile servers." }] },
+    { name: "MP3 音频", title: "在线播放 MP3 音频", description: "直接从本地存储播放 CBR 与常见 VBR MP3 音频。", introduction: "MP3 仍是音乐、语音与播客常见的压缩音频格式。Anyfile 会探测音频流，并使用浏览器音频元素在本地播放，包括常见 Xing 与 VBRI 可变码率文件。", canShow: ["CBR 与常见 VBR 音频流", "时长、定位、音量与播放控制", "浏览器解码后的音频"], limitations: ["帧序列损坏可能导致播放停止", "查看器不编辑标签或音频"], faq: [{ question: "播放时会上传 MP3 吗？", answer: "不会。所选 File 通过对象 URL 交给本地浏览器播放器，不会发送到 Anyfile 服务器。" }] });
+

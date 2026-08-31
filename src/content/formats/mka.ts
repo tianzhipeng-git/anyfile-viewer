@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const mkaFormat = defineFormat("mka", "images-video", 3,
+    { name: "Matroska audio", title: "Play MKA Audio Online", description: "Demux and play supported Matroska audio tracks on the current device.", introduction: "MKA is the audio-oriented Matroska container. Anyfile reads the container locally, selects a supported primary audio track and sends decoded samples through Web Audio.", canShow: ["One supported primary audio track", "Local duration and playback controls", "Common Matroska audio metadata needed for playback"], limitations: ["Multi-track selection is not available", "Unsupported codecs or channel layouts cannot be played"], faq: [{ question: "Which MKA files can Anyfile play?", answer: "Files need a supported primary codec and channel layout; the extension alone is not enough to guarantee playback." }] },
+    { name: "Matroska 音频", title: "在线播放 MKA 音频", description: "在当前设备解封装并播放受支持的 Matroska 音轨。", introduction: "MKA 是偏向音频用途的 Matroska 容器。Anyfile 在本地读取容器，选择受支持的主音轨，并通过 Web Audio 输出解码后的采样。", canShow: ["一条受支持的主音轨", "本地时长与播放控制", "播放所需的常见 Matroska 音频元数据"], limitations: ["暂不提供多轨选择", "不支持的 codec 或声道布局无法播放"], faq: [{ question: "Anyfile 能播放哪些 MKA 文件？", answer: "文件需要包含受支持的主 codec 与声道布局，仅凭扩展名不能保证可播放。" }] }, { possibleLevels: [3] });
+

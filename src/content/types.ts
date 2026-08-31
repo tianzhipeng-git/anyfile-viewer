@@ -16,6 +16,7 @@ export type FormatCopy = {
 
 export type FormatContent = {
   extension: string;
+  aliases?: readonly string[];
   categoryId: string;
   status: PublishStatus;
   capability: {

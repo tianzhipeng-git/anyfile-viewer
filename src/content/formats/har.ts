@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const harFormat = defineFormat("har", "code-data", 5,
+    { name: "HTTP Archive", title: "Open HAR Network Archives Online", description: "Inspect requests, responses, headers, sizes and timing from HAR files locally.", introduction: "HAR records browser network activity as structured JSON. Anyfile validates the archive and presents request-oriented navigation without replaying network traffic or executing captured content.", canShow: ["Request URLs, methods and status codes", "Request and response headers", "Transfer sizes and timing phases"], limitations: ["Captured secrets may be visible to anyone using this device", "The viewer does not replay requests or render response bodies as active pages"], faq: [{ question: "Will viewing a HAR resend its network requests?", answer: "No. Anyfile only reads the saved archive and does not contact the recorded hosts." }] },
+    { name: "HTTP Archive", title: "在线打开 HAR 网络归档", description: "在本地检查 HAR 中的请求、响应、标头、大小与耗时。", introduction: "HAR 使用结构化 JSON 记录浏览器网络活动。Anyfile 校验归档并提供面向请求的导航，不重放网络流量，也不执行捕获内容。", canShow: ["请求 URL、方法与状态码", "请求与响应标头", "传输大小与耗时阶段"], limitations: ["捕获的秘密信息可能对使用当前设备的人可见", "查看器不会重放请求，也不把响应正文作为活动页面渲染"], faq: [{ question: "查看 HAR 会重新发送其中网络请求吗？", answer: "不会。Anyfile 只读取保存的归档，不联系其中记录的主机。" }] });
+

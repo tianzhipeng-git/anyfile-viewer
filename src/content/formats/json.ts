@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const jsonFormat = defineFormat("json", "code-data", 4,
+    { name: "JSON data", title: "Open JSON Data Online", description: "Inspect JSON as highlighted source or paged structured data locally.", introduction: "JSON represents objects and arrays as portable text. Anyfile can show exact syntax in the code viewer or parse record-oriented data through DuckDB for a paged table view.", canShow: ["Syntax-highlighted JSON source", "Tabular records and inferred columns", "Paged rows for supported JSON structures"], limitations: ["Deeply nested or heterogeneous values may not flatten cleanly", "Invalid JSON remains readable as text but cannot become a data table"], faq: [{ question: "Which JSON viewer will open by default?", answer: "Registered viewers probe the selected file; the best supported view is chosen, and other matching viewers remain available." }] },
+    { name: "JSON 数据", title: "在线打开 JSON 数据", description: "在本地以高亮源码或分页结构化数据方式检查 JSON。", introduction: "JSON 使用可移植文本表示对象与数组。Anyfile 可在代码查看器中展示精确语法，也可通过 DuckDB 解析面向记录的数据并提供分页表格。", canShow: ["语法高亮 JSON 源码", "表格记录与推断列", "受支持 JSON 结构的分页行"], limitations: ["深层嵌套或异构值可能无法自然展平", "无效 JSON 仍可作为文本阅读，但不能转为数据表"], faq: [{ question: "默认会打开哪个 JSON 查看器？", answer: "已注册查看器会探测所选文件，选择支持程度最高的视图，其他匹配查看器仍可切换。" }] });
+

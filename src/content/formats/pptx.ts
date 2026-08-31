@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const pptxFormat = defineFormat("pptx", "documents", 3,
+    { name: "PowerPoint presentation", title: "Open PPTX Presentations Online", description: "Render PowerPoint Open XML slides locally for quick review.", introduction: "PPTX packages slides, themes and media as Office Open XML. Anyfile parses the local package and renders supported slide elements into a read-only browser presentation.", canShow: ["Slides, text, common shapes and images", "Theme-based colors and basic layout", "Slide-by-slide navigation"], limitations: ["Animations, transitions and embedded applications are not played", "Advanced effects and uncommon fonts can differ from PowerPoint"], faq: [{ question: "Can Anyfile present PPTX animations?", answer: "No. It renders a static review view of supported slide content rather than reproducing the PowerPoint playback engine." }] },
+    { name: "PowerPoint 演示文稿", title: "在线打开 PPTX 演示文稿", description: "在本地渲染 PowerPoint Open XML 幻灯片，用于快速审阅。", introduction: "PPTX 以 Office Open XML 打包幻灯片、主题与媒体。Anyfile 解析本地软件包，并把受支持的幻灯片元素渲染为只读浏览器演示。", canShow: ["幻灯片、文字、常见形状与图片", "基于主题的颜色和基础布局", "逐页幻灯片导航"], limitations: ["不播放动画、切换效果或内嵌应用", "高级效果和少见字体可能与 PowerPoint 不同"], faq: [{ question: "Anyfile 能播放 PPTX 动画吗？", answer: "不能。它为受支持的幻灯片内容渲染静态审阅视图，不复现 PowerPoint 播放引擎。" }] });
+

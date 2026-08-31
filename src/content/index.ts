@@ -6,11 +6,13 @@ import { manifestsForExtension, viewerManifests } from "./manifests";
 import { pluginContents } from "./plugins";
 
 export const publishedFormats = formatContents.filter(({ status }) => status === "published");
+export const publishedFormatRoutes = publishedFormats.flatMap(({ extension, aliases = [] }) => [extension, ...aliases]);
 export const publishedCategories = categoryContents.filter(({ status }) => status === "published");
 export const publishedPlugins = pluginContents.filter(({ status }) => status === "published");
 
 export function getFormat(extension: string, locale: PublishedLocale) {
-  const content = publishedFormats.find((item) => item.extension === extension.toLowerCase());
+  const normalized = extension.toLowerCase();
+  const content = publishedFormats.find((item) => item.extension === normalized || item.aliases?.includes(normalized));
   if (!content) return undefined;
   return { ...content, ...content.copy[locale], pluginIds: manifestsForExtension(content.extension).map(({ id }) => id) };
 }

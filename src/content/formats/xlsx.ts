@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const xlsxFormat = defineFormat("xlsx", "documents", 3,
+    { name: "Excel workbook", title: "Open XLSX Spreadsheets Online", description: "Browse worksheets, values and common formatting locally without editing.", introduction: "XLSX stores workbook data and formatting in an Open XML package. Anyfile parses the selected workbook with SheetJS and presents its sheets in a read-only grid.", canShow: ["Worksheet names, cells and computed cached values", "Common number formats and basic styling", "Multiple-sheet navigation"], limitations: ["Macros and external data connections are not executed", "Charts, advanced conditional formatting and editing are incomplete or unavailable"], faq: [{ question: "Does Anyfile recalculate XLSX formulas?", answer: "It primarily displays values stored in the workbook; it is not a full Excel calculation environment." }] },
+    { name: "Excel 表格", title: "在线打开 XLSX 表格", description: "无需编辑，在本地浏览工作表、数值与常见格式。", introduction: "XLSX 在 Open XML 软件包中保存工作簿数据与格式。Anyfile 使用 SheetJS 解析所选工作簿，并以只读网格呈现其中工作表。", canShow: ["工作表名称、单元格与已缓存计算值", "常见数字格式和基础样式", "多工作表导航"], limitations: ["不会执行宏和外部数据连接", "图表、高级条件格式与编辑能力不完整或不可用"], faq: [{ question: "Anyfile 会重新计算 XLSX 公式吗？", answer: "主要展示工作簿中已存储的值；它不是完整的 Excel 计算环境。" }] });
+

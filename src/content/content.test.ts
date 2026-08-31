@@ -4,7 +4,8 @@ import { describe, expect, it } from "vitest";
 
 import { PUBLISHED_LOCALES } from "../i18n/config";
 
-import { getCategory, getFormat, getPlugin, publishedCategories, publishedFormats, publishedPlugins, viewerManifests } from ".";
+import { getCategory, getFormat, getPlugin, publishedCategories, publishedFormatRoutes, publishedFormats, publishedPlugins, viewerManifests } from ".";
+import { manifestsForExtension } from "./manifests";
 
 const unique = (values: readonly string[]) => new Set(values).size === values.length;
 
@@ -23,6 +24,20 @@ describe("published SEO content", () => {
         expect(format.limitations.length).toBeGreaterThan(0);
         expect(format.faq.length).toBeGreaterThan(0);
         if (format.capability.typicalLevel <= 2) expect(format.alternatives?.length, content.extension).toBeGreaterThan(0);
+      }
+    }
+  });
+
+  it("publishes content for every concrete Manifest format declaration", () => {
+    const routes = new Set(publishedFormatRoutes.map((extension) => `.${extension}`));
+    for (const manifest of viewerManifests) {
+      for (const format of manifest.formats) {
+        const extensions = format.extensions.filter((extension) => extension !== "*");
+        if (extensions.length === 0) continue;
+        expect(
+          extensions.some((extension) => routes.has(extension)),
+          `${manifest.id}: ${format.name.en}`,
+        ).toBe(true);
       }
     }
   });
@@ -49,6 +64,14 @@ describe("published SEO content", () => {
     expect(unique(publishedFormats.map(({ extension }) => extension))).toBe(true);
     expect(unique(publishedCategories.map(({ slug }) => slug))).toBe(true);
     expect(unique(publishedPlugins.map(({ pluginId }) => pluginId))).toBe(true);
+    expect(unique(publishedFormatRoutes)).toBe(true);
+    for (const { extension, aliases = [] } of publishedFormats) {
+      expect(aliases).not.toContain(extension);
+      for (const alias of aliases) {
+        expect(manifestsForExtension(alias).length, alias).toBeGreaterThan(0);
+        expect(getFormat(alias, "en")?.extension).toBe(extension);
+      }
+    }
     for (const locale of PUBLISHED_LOCALES) {
       expect(unique(publishedFormats.map(({ extension }) => getFormat(extension, locale)!.title))).toBe(true);
       expect(unique(publishedFormats.map(({ extension }) => getFormat(extension, locale)!.description))).toBe(true);

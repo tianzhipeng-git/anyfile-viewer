@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const npyFormat = defineFormat("npy", "developer-artifacts", 5,
+    { name: "NumPy array", title: "Open NumPy NPY Arrays Online", description: "Inspect NPY dtype, shape and paged values without Python or object deserialization.", introduction: "NPY is NumPy's binary format for one array. Anyfile parses the header, validates the data layout and exposes numeric, boolean, string and structured values in bounded pages.", canShow: ["Array shape, dtype and byte order", "Paged primitive and structured values", "Fortran- or C-order metadata"], limitations: ["Object arrays are not deserialized for safety", "Very high-dimensional arrays are flattened into an inspection-oriented view"], faq: [{ question: "Does Anyfile execute Python pickle data in an NPY file?", answer: "No. Object deserialization is intentionally rejected; the viewer handles safe array layouts only." }] },
+    { name: "NumPy 数组", title: "在线打开 NumPy NPY 数组", description: "无需 Python，也不反序列化对象，检查 NPY dtype、形状与分页数值。", introduction: "NPY 是 NumPy 保存单个数组的二进制格式。Anyfile 解析文件头、校验数据布局，并以有界分页展示数值、布尔、字符串与结构化值。", canShow: ["数组形状、dtype 与字节序", "分页基础类型与结构化值", "Fortran 或 C 顺序元数据"], limitations: ["出于安全考虑，不反序列化对象数组", "超高维数组会展平为面向检查的视图"], faq: [{ question: "Anyfile 会执行 NPY 中的 Python pickle 数据吗？", answer: "不会。对象反序列化会被明确拒绝；查看器只处理安全数组布局。" }] });
+

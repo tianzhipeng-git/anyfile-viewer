@@ -221,7 +221,11 @@ export function ViewerHost({
                 <EmptyMedia variant="icon">
                   {visibleStatus === "loading" ? <LoaderCircleIcon className="animate-spin" /> : visibleStatus === "error" ? <AlertCircleIcon /> : <FileSearchIcon />}
                 </EmptyMedia>
-                <EmptyTitle>{visibleStatus === "loading" ? dictionary.openingTitle : visibleStatus === "error" ? dictionary.failedTitle : file ? dictionary.noViewerTitle : dictionary.selectTitle}</EmptyTitle>
+                {file ? (
+                  <EmptyTitle>{visibleStatus === "loading" ? dictionary.openingTitle : visibleStatus === "error" ? dictionary.failedTitle : dictionary.noViewerTitle}</EmptyTitle>
+                ) : (
+                  <h1 className="font-heading text-sm font-medium tracking-tight">{dictionary.selectTitle}</h1>
+                )}
                 <EmptyDescription>
                   {visibleMessage || (file ? interpolate(dictionary.noPlugin, { extension: file.name.split(".").pop()?.toLowerCase() || "unknown" }) : dictionary.selectDescription)}
                 </EmptyDescription>

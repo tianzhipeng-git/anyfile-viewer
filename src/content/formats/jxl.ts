@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const jxlFormat = defineFormat("jxl", "images-video", 3,
+    { name: "JPEG XL image", title: "Open JPEG XL Files Online", description: "Decode JPEG XL images locally with a dedicated browser viewer.", introduction: "JPEG XL is a modern image format designed for efficient still and animated imagery. Anyfile first uses native browser support when available, then can decode supported files with local WebAssembly.", canShow: ["Decoded still images", "Animation when supported by the active decoder", "Image dimensions and frame progress"], limitations: ["Decoder availability and memory determine the largest usable image", "Some advanced metadata is not presented"], faq: [{ question: "Why does JPEG XL need WebAssembly?", answer: "Most browsers do not consistently expose native JPEG XL decoding, so Anyfile can load a local decoder for the selected file." }] },
+    { name: "JPEG XL 图片", title: "在线打开 JPEG XL 文件", description: "使用专用浏览器查看器，在本地解码 JPEG XL 图片。", introduction: "JPEG XL 是面向高效静态与动画图像的现代格式。Anyfile 会优先使用可用的浏览器原生能力，否则通过本地 WebAssembly 解码受支持文件。", canShow: ["解码后的静态图像", "当前解码器支持时的动画", "图片尺寸与帧进度"], limitations: ["解码器可用性和内存决定可处理的最大图片", "不会展示部分高级元数据"], faq: [{ question: "为什么 JPEG XL 需要 WebAssembly？", answer: "多数浏览器尚未稳定提供 JPEG XL 原生解码，因此 Anyfile 可为所选文件加载本地解码器。" }] }, { possibleLevels: [2, 3, 4] });
+
