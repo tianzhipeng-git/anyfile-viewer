@@ -37,6 +37,7 @@ import { harFormat } from "./har";
 import { heicFormat } from "./heic";
 import { icoFormat } from "./ico";
 import { inspFormat } from "./insp";
+import { insvFormat } from "./insv";
 import { ipaFormat } from "./ipa";
 import { jarFormat } from "./jar";
 import { jmodFormat } from "./jmod";
@@ -156,6 +157,7 @@ export const formatContents: readonly FormatContent[] = [
   heicFormat,
   icoFormat,
   inspFormat,
+  insvFormat,
   ipaFormat,
   jarFormat,
   jmodFormat,

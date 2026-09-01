@@ -101,10 +101,11 @@ export class PanoramaRenderer {
   private readonly buffer: WebGLBuffer;
   private readonly textures: readonly [WebGLTexture, WebGLTexture];
   private frame?: number;
-  private videoFrame?: number;
-  private videoFrameKind?: "video" | "animation";
+  private readonly videoFrames: Array<number | undefined> = [undefined, undefined];
+  private readonly videoFrameKinds: Array<"video" | "animation" | undefined> = [undefined, undefined];
   private uploadVideoOnFrame = false;
   private video?: VideoWithFrameCallback;
+  private secondVideo?: VideoWithFrameCallback;
   private layout: "dual" | "sbs" = "dual";
   private yaw = 0;
   private pitch = 0;
@@ -117,7 +118,7 @@ export class PanoramaRenderer {
     private readonly viewport: HTMLElement,
     private readonly unsupportedMessage: string,
     private readonly resourceMessage: string,
-    onFatalError: (error: ViewerError) => void,
+    private readonly onFatalError: (error: ViewerError) => void,
   ) {
     const gl = canvas.getContext("webgl", { alpha: false, antialias: true });
     if (!gl) throw new ViewerError("unsupported-environment", unsupportedMessage);
@@ -183,14 +184,21 @@ export class PanoramaRenderer {
     this.ensureTextureSize(width, height);
     this.layout = "sbs";
     this.video = video;
-    const redraw = () => this.schedule(true);
-    this.resources.listen(video, "loadeddata", redraw);
-    this.resources.listen(video, "seeked", redraw);
-    this.resources.listen(video, "play", () => this.startVideoFrames());
-    this.resources.listen(video, "pause", redraw);
-    this.resources.listen(video, "ended", redraw);
+    this.bindVideoFrames(video, 0);
     this.schedule(true);
-    this.startVideoFrames();
+    this.startVideoFrames(0);
+  }
+
+  setDualVideos(first: HTMLVideoElement, second: HTMLVideoElement, width: number, height: number) {
+    this.ensureTextureSize(width, height);
+    this.layout = "dual";
+    this.video = first;
+    this.secondVideo = second;
+    this.bindVideoFrames(first, 0);
+    this.bindVideoFrames(second, 1);
+    this.schedule(true);
+    this.startVideoFrames(0);
+    this.startVideoFrames(1);
   }
 
   reset() {
@@ -205,13 +213,16 @@ export class PanoramaRenderer {
     this.disposed = true;
     this.resources.dispose();
     if (this.frame !== undefined) cancelAnimationFrame(this.frame);
-    if (this.videoFrame !== undefined) {
-      if (this.videoFrameKind === "video") this.video?.cancelVideoFrameCallback?.(this.videoFrame);
-      else cancelAnimationFrame(this.videoFrame);
+    for (const index of [0, 1] as const) {
+      const frame = this.videoFrames[index];
+      if (frame === undefined) continue;
+      const video = index === 0 ? this.video : this.secondVideo;
+      if (this.videoFrameKinds[index] === "video") video?.cancelVideoFrameCallback?.(frame);
+      else cancelAnimationFrame(frame);
+      this.videoFrames[index] = undefined;
+      this.videoFrameKinds[index] = undefined;
     }
     this.frame = undefined;
-    this.videoFrame = undefined;
-    this.videoFrameKind = undefined;
     this.gl.deleteTexture(this.textures[0]);
     this.gl.deleteTexture(this.textures[1]);
     this.gl.deleteBuffer(this.buffer);
@@ -260,29 +271,44 @@ export class PanoramaRenderer {
       this.frame = undefined;
       const shouldUploadVideo = this.uploadVideoOnFrame;
       this.uploadVideoOnFrame = false;
-      if (shouldUploadVideo && this.video?.readyState && this.video.videoWidth) this.upload(0, this.video);
-      this.draw();
+      try {
+        if (shouldUploadVideo && this.video?.readyState && this.video.videoWidth) this.upload(0, this.video);
+        if (shouldUploadVideo && this.secondVideo?.readyState && this.secondVideo.videoWidth) this.upload(1, this.secondVideo);
+        this.draw();
+      } catch (error) {
+        this.onFatalError(error instanceof ViewerError ? error : new ViewerError("open-failed", this.resourceMessage, { cause: error }));
+      }
     });
   }
 
-  private startVideoFrames() {
-    if (this.disposed || !this.video || this.video.paused || this.video.ended || this.videoFrame !== undefined) return;
-    if (this.video.requestVideoFrameCallback) {
-      this.videoFrameKind = "video";
-      this.videoFrame = this.video.requestVideoFrameCallback(() => {
-        this.videoFrame = undefined;
-        this.videoFrameKind = undefined;
+  private bindVideoFrames(video: VideoWithFrameCallback, index: 0 | 1) {
+    const redraw = () => this.schedule(true);
+    this.resources.listen(video, "loadeddata", redraw);
+    this.resources.listen(video, "seeked", redraw);
+    this.resources.listen(video, "play", () => this.startVideoFrames(index));
+    this.resources.listen(video, "pause", redraw);
+    this.resources.listen(video, "ended", redraw);
+  }
+
+  private startVideoFrames(index: 0 | 1) {
+    const video = index === 0 ? this.video : this.secondVideo;
+    if (this.disposed || !video || video.paused || video.ended || this.videoFrames[index] !== undefined) return;
+    if (video.requestVideoFrameCallback) {
+      this.videoFrameKinds[index] = "video";
+      this.videoFrames[index] = video.requestVideoFrameCallback(() => {
+        this.videoFrames[index] = undefined;
+        this.videoFrameKinds[index] = undefined;
         this.schedule(true);
-        this.startVideoFrames();
+        this.startVideoFrames(index);
       });
       return;
     }
-    this.videoFrameKind = "animation";
-    this.videoFrame = requestAnimationFrame(() => {
-      this.videoFrame = undefined;
-      this.videoFrameKind = undefined;
+    this.videoFrameKinds[index] = "animation";
+    this.videoFrames[index] = requestAnimationFrame(() => {
+      this.videoFrames[index] = undefined;
+      this.videoFrameKinds[index] = undefined;
       this.schedule(true);
-      this.startVideoFrames();
+      this.startVideoFrames(index);
     });
   }
 
@@ -322,7 +348,7 @@ export class PanoramaRenderer {
 
   private onPointerMove(event: PointerEvent) {
     if (!this.drag || event.pointerId !== this.drag.pointerId) return;
-    this.yaw -= (event.clientX - this.drag.x) * 0.005;
+    this.yaw += (event.clientX - this.drag.x) * 0.005;
     this.pitch = clamp(this.pitch + (event.clientY - this.drag.y) * 0.005, -Math.PI / 2, Math.PI / 2);
     this.drag = { pointerId: event.pointerId, x: event.clientX, y: event.clientY };
     this.schedule();

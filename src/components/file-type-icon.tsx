@@ -110,7 +110,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     // `.ts` is far more commonly a TypeScript source file; the content probe still
     // routes real MPEG-TS files to the video viewer.
     extensions: [
-      ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".lrv"),
+      ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".lrv" || extension === ".insv"),
       ...manifestExtensions(browserVideoManifest, nonNativeVideoManifest)
         .filter((extension) => extension !== ".ts"),
     ],

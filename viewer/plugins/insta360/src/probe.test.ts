@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { inspectInsta360File } from "./inspection";
 import { probeInsta360 } from "./probe";
-import { x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
+import { x3InsvBytes, x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
 
 function context(file: File, signal = new AbortController().signal) {
   return { file, signal };
@@ -45,6 +45,17 @@ describe("Insta360 X3 probe", () => {
       { start: fixture.moovOffset, end: fixture.moovOffset + 16 },
       { start: fixture.moovOffset, end: fixture.moovOffset + fixture.moovBytes },
     ]);
+  });
+
+  it("accepts only strictly named X3 single-lens INSV files", async () => {
+    const fixture = x3InsvBytes();
+    const front = new File([fixture.bytes], "VID_20230813_194503_00_713.insv");
+    await expect(inspectInsta360File(context(front))).resolves.toMatchObject({
+      kind: "video", layout: "single", role: "00", width: 2880, height: 2880,
+    });
+    await expect(probeInsta360(context(front))).resolves.toBe(3);
+    await expect(probeInsta360(context(new File([fixture.bytes], "unrelated.insv")))).resolves.toBe(0);
+    await expect(probeInsta360(context(new File([x3LrvBytes().bytes], "VID_20230813_194503_10_713.insv")))).resolves.toBe(0);
   });
 
   it("preserves standard AbortError cancellation", async () => {

@@ -4,6 +4,7 @@ import {
 } from "@anyfile/browser-video-viewer/container-inspection";
 
 import { readBlob } from "./read-blob";
+import { parseInsvName, type InsvRole } from "./pairing";
 
 const HEADER_BYTES = 64 * 1024;
 const BOX_HEADER_BYTES = 16;
@@ -11,8 +12,10 @@ const MAX_MOOV_BYTES = 16 * 1024 * 1024;
 
 export interface Insta360VideoInspection {
   readonly kind: "video";
-  readonly width: 1024;
-  readonly height: 512;
+  readonly width: 1024 | 2880;
+  readonly height: 512 | 2880;
+  readonly layout: "sbs" | "single";
+  readonly role?: InsvRole;
   readonly media: VideoFileInspection;
   readonly moovOffset: number;
 }
@@ -49,7 +52,7 @@ function locateMoovAfterMdat(head: Uint8Array, fileSize: number) {
   return undefined;
 }
 
-function isSupportedX3Lrv(media: VideoFileInspection) {
+function hasSupportedTracks(media: VideoFileInspection, width: number, height: number) {
   const video = media.videoTracks[0];
   const audio = media.audioTracks[0];
   return media.container === "MP4"
@@ -57,8 +60,8 @@ function isSupportedX3Lrv(media: VideoFileInspection) {
     && media.videoTracks.length === 1
     && media.audioTracks.length === 1
     && video.codec === "AVC/H.264"
-    && video.width === 1024
-    && video.height === 512
+    && video.width === width
+    && video.height === height
     && audio.codec === "AAC-LC"
     && audio.sampleRate === 48000
     && audio.channels === 2;
@@ -77,8 +80,16 @@ export async function inspectInsta360Video(file: File, signal: AbortSignal): Pro
   if (!moovSize || moovSize > MAX_MOOV_BYTES || moovOffset + moovSize > file.size) return undefined;
   const moov = await readBlob(file.slice(moovOffset, moovOffset + moovSize), signal);
   const media = inspectIsoBmff({ head, tail: moov, tailOffset: moovOffset });
-  if (!media || !isSupportedX3Lrv(media)) return undefined;
-  return { kind: "video", width: 1024, height: 512, media, moovOffset };
+  if (!media) return undefined;
+  const extension = file.name.slice(file.name.lastIndexOf(".")).toLowerCase();
+  if (extension === ".lrv" && hasSupportedTracks(media, 1024, 512)) {
+    return { kind: "video", width: 1024, height: 512, layout: "sbs", media, moovOffset };
+  }
+  const name = parseInsvName(file.name);
+  if (extension === ".insv" && name && hasSupportedTracks(media, 2880, 2880)) {
+    return { kind: "video", width: 2880, height: 2880, layout: "single", role: name.role, media, moovOffset };
+  }
+  return undefined;
 }
 
 export const INSTA360_VIDEO_PROBE_BUDGET = HEADER_BYTES + BOX_HEADER_BYTES + MAX_MOOV_BYTES;

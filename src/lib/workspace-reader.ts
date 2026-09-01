@@ -90,3 +90,52 @@ export function createWorkspaceReader(
     },
   };
 }
+
+export function duplicateWorkspaceFileName(entries: readonly WorkspaceTreeEntry[]) {
+  const names = new Set<string>();
+  for (const entry of entries) {
+    if (entry.kind !== "file") continue;
+    const normalized = entry.name.toLocaleLowerCase("en-US");
+    if (names.has(normalized)) return entry.name;
+    names.add(normalized);
+  }
+  return undefined;
+}
+
+export function createMemoryWorkspaceReader(
+  entries: readonly WorkspaceTreeEntry[],
+  currentFile: WorkspaceTreeEntry | undefined,
+): WorkspaceReader | undefined {
+  if (entries.length < 2 || currentFile?.kind !== "file") return undefined;
+  if (duplicateWorkspaceFileName(entries)) return undefined;
+
+  const files = new Map(
+    entries
+      .filter((entry): entry is Extract<WorkspaceTreeEntry, { kind: "file" }> => entry.kind === "file")
+      .map((entry) => [entry.name, entry]),
+  );
+  if (!files.has(currentFile.name)) return undefined;
+
+  return {
+    async open(relativePath, options) {
+      abortIfRequested(options?.signal);
+      validateRelativePath(relativePath, false);
+      if (relativePath.includes("/")) return null;
+      const entry = files.get(relativePath);
+      if (!entry) return null;
+      const file = entry.file ?? await entry.handle.getFile();
+      abortIfRequested(options?.signal);
+      return file;
+    },
+
+    async *list(relativeDirectory = "", options) {
+      abortIfRequested(options?.signal);
+      validateRelativePath(relativeDirectory, true);
+      if (relativeDirectory) return;
+      for (const entry of files.values()) {
+        abortIfRequested(options?.signal);
+        yield { name: entry.name, relativePath: entry.name, kind: "file" as const };
+      }
+    },
+  };
+}

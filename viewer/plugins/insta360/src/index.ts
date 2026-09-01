@@ -10,8 +10,10 @@ import { decodeX3Photo } from "./image-source";
 import { inspectInsta360File } from "./inspection";
 import { insta360Manifest } from "./manifest";
 import { MediaLoadError, waitForFirstFrame } from "./media-source";
+import { findInsvPair } from "./pairing";
 import { PanoramaRenderer } from "./panorama-renderer";
 import { abortError } from "./read-blob";
+import { inspectInsta360Video } from "./video-inspection";
 import {
   bindVideoControls,
   createInsta360ViewerElements,
@@ -21,8 +23,8 @@ import {
 
 function copyFor(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, {
-    en: { reading: "Inspecting the Insta360 file…", decoding: "Decoding the panorama…", loading: "Loading the 360° video…", ready: "Panorama opened", invalid: "This is not a valid supported Insta360 X3 file.", unsupported: "This browser cannot provide the WebGL or media features required for this panorama.", resource: "This panorama exceeds the current device's safe graphics limits.", failed: "The panorama could not be opened." },
-    "zh-CN": { reading: "正在检查 Insta360 文件…", decoding: "正在解码全景照片…", loading: "正在加载 360° 视频…", ready: "全景已打开", invalid: "文件不是有效且受支持的 Insta360 X3 文件。", unsupported: "当前浏览器缺少此全景所需的 WebGL 或媒体能力。", resource: "此全景超过当前设备的安全图形资源限制。", failed: "无法打开此全景。" },
+    en: { reading: "Inspecting the Insta360 file…", pairing: "Finding the paired Insta360 video…", decoding: "Decoding the panorama…", loading: "Loading the 360° video…", ready: "Panorama opened", invalid: "This is not a valid supported Insta360 X3 file.", missingPair: "Select both matching INSV files together, or open the folder that contains them.", unsupported: "This browser cannot provide the WebGL or media features required for this panorama.", resource: "This panorama exceeds the current device's safe graphics limits.", failed: "The panorama could not be opened." },
+    "zh-CN": { reading: "正在检查 Insta360 文件…", pairing: "正在查找成对的 Insta360 视频…", decoding: "正在解码全景照片…", loading: "正在加载 360° 视频…", ready: "全景已打开", invalid: "文件不是有效且受支持的 Insta360 X3 文件。", missingPair: "请同时选择成对的 INSV 文件，或打开包含它们的整个文件夹。", unsupported: "当前浏览器缺少此全景所需的 WebGL 或媒体能力。", resource: "此全景超过当前设备的安全图形资源限制。", failed: "无法打开此全景。" },
   });
 }
 
@@ -32,28 +34,27 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
   let elements: Insta360ViewerElements | undefined;
   let renderer: PanoramaRenderer | undefined;
   let bitmaps: readonly [ImageBitmap, ImageBitmap] | undefined;
-  let objectUrl: string | undefined;
+  const objectUrls: string[] = [];
   let disposeControls: (() => void) | undefined;
   let resetListener: (() => void) | undefined;
-  let mediaErrorListener: (() => void) | undefined;
+  const mediaErrorListeners: Array<{ video: HTMLVideoElement; listener: () => void }> = [];
   let disposed = false;
 
   const releaseRenderResources = () => {
     disposeControls?.();
     disposeControls = undefined;
-    if (mediaErrorListener && elements?.video) elements.video.removeEventListener("error", mediaErrorListener);
-    mediaErrorListener = undefined;
-    if (elements?.video) {
-      try { elements.video.pause(); } catch { /* Detached test media may not implement pause. */ }
-      elements.video.removeAttribute("src");
-      try { elements.video.load(); } catch { /* Detached test media may not implement load. */ }
+    for (const { video, listener } of mediaErrorListeners.splice(0)) video.removeEventListener("error", listener);
+    for (const video of [elements?.video, elements?.secondVideo]) {
+      if (!video) continue;
+      try { video.pause(); } catch { /* Detached test media may not implement pause. */ }
+      video.removeAttribute("src");
+      try { video.load(); } catch { /* Detached test media may not implement load. */ }
     }
     renderer?.dispose();
     renderer = undefined;
     bitmaps?.forEach((bitmap) => bitmap.close());
     bitmaps = undefined;
-    if (objectUrl) URL.revokeObjectURL(objectUrl);
-    objectUrl = undefined;
+    for (const objectUrl of objectUrls.splice(0)) URL.revokeObjectURL(objectUrl);
   };
 
   const failActive = (message: string) => {
@@ -81,6 +82,13 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
     if (!inspection) throw new ViewerError("invalid-file", copy.invalid);
     if (signal.aborted) throw abortError();
 
+    let pair: Awaited<ReturnType<typeof findInsvPair>> = undefined;
+    if (inspection.kind === "video" && inspection.layout === "single") {
+      reportProgress({ stage: "finding-pair", message: copy.pairing });
+      pair = await findInsvPair(file, inspection, context.workspace, signal, inspectInsta360Video);
+      if (!pair) throw new ViewerError("missing-related-file", copy.missingPair);
+    }
+
     elements = createInsta360ViewerElements(file.name, inspection, context.locale);
     container.append(elements.root);
     signal.addEventListener("abort", dispose, { once: true });
@@ -96,17 +104,43 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
       const video = elements.video;
       if (!video) throw new ViewerError("open-failed", copy.failed);
       reportProgress({ stage: "loading-media", message: copy.loading });
-      objectUrl = URL.createObjectURL(file.slice(0, file.size, "video/mp4"));
-      video.src = objectUrl;
-      const loading = waitForFirstFrame(video, signal);
-      video.load();
-      await loading;
-      if (signal.aborted) throw abortError();
-      if (video.videoWidth !== 1024 || video.videoHeight !== 512) throw new ViewerError("invalid-file", copy.invalid);
-      renderer.setSbsVideo(video, 1024, 512);
+      if (pair) {
+        const secondVideo = elements.secondVideo;
+        if (!secondVideo) throw new ViewerError("open-failed", copy.failed);
+        video.muted = false;
+        secondVideo.muted = true;
+        objectUrls.push(
+          URL.createObjectURL(pair.front.slice(0, pair.front.size, "video/mp4")),
+          URL.createObjectURL(pair.back.slice(0, pair.back.size, "video/mp4")),
+        );
+        video.src = objectUrls[0];
+        secondVideo.src = objectUrls[1];
+        const loading = Promise.all([waitForFirstFrame(video, signal), waitForFirstFrame(secondVideo, signal)]);
+        video.load();
+        secondVideo.load();
+        await loading;
+        if (signal.aborted) throw abortError();
+        if (video.videoWidth !== 2880 || video.videoHeight !== 2880 || secondVideo.videoWidth !== 2880 || secondVideo.videoHeight !== 2880) {
+          throw new ViewerError("invalid-file", copy.invalid);
+        }
+        renderer.setDualVideos(video, secondVideo, 2880, 2880);
+      } else {
+        objectUrls.push(URL.createObjectURL(file.slice(0, file.size, "video/mp4")));
+        video.src = objectUrls[0];
+        const loading = waitForFirstFrame(video, signal);
+        video.load();
+        await loading;
+        if (signal.aborted) throw abortError();
+        if (video.videoWidth !== 1024 || video.videoHeight !== 512) throw new ViewerError("invalid-file", copy.invalid);
+        renderer.setSbsVideo(video, 1024, 512);
+      }
       disposeControls = bindVideoControls(elements, context.locale);
-      mediaErrorListener = () => failActive(video.error?.code === 4 ? copy.unsupported : copy.failed);
-      video.addEventListener("error", mediaErrorListener);
+      for (const media of [video, elements.secondVideo]) {
+        if (!media) continue;
+        const listener = () => failActive(media.error?.code === 4 ? copy.unsupported : copy.failed);
+        media.addEventListener("error", listener);
+        mediaErrorListeners.push({ video: media, listener });
+      }
     }
 
     if (signal.aborted) throw abortError();

@@ -18,6 +18,11 @@ export const insta360Manifest: ViewerPluginManifest = {
       extensions: [".lrv"],
       mimeTypes: ["video/mp4"],
     },
+    {
+      name: { en: "Insta360 X3 paired video", "zh-CN": "Insta360 X3 成对全景视频" },
+      extensions: [".insv"],
+      mimeTypes: ["video/mp4"],
+    },
   ],
   workspaceAccess: "optional",
 };

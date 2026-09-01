@@ -86,9 +86,13 @@ function extendedMdat(payloadBytes: number) {
   return result;
 }
 
-export function x3LrvBytes(options: { padding?: number; width?: number } = {}) {
+export function x3LrvBytes(options: { padding?: number; width?: number; height?: number } = {}) {
   const ftyp = box("ftyp", concatenate(encoder.encode("avc1"), new Uint8Array(4), encoder.encode("avc1isom")));
   const mdat = extendedMdat(options.padding ?? 96 * 1024);
-  const moov = box("moov", concatenate(track("vide", videoEntry(options.width)), track("soun", audioEntry())));
+  const moov = box("moov", concatenate(track("vide", videoEntry(options.width, options.height)), track("soun", audioEntry())));
   return { bytes: concatenate(ftyp, mdat, moov, box("free")), moovOffset: ftyp.length + mdat.length, moovBytes: moov.length };
+}
+
+export function x3InsvBytes(options: { padding?: number; width?: number } = {}) {
+  return x3LrvBytes({ padding: options.padding, width: options.width ?? 2880, height: 2880 });
 }

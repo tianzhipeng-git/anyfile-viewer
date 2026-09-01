@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 import type { WorkspaceTreeEntry } from "./file-system-access";
-import { createWorkspaceReader } from "./workspace-reader";
+import { createMemoryWorkspaceReader, createWorkspaceReader, duplicateWorkspaceFileName } from "./workspace-reader";
 
 function fileEntry(relativePath: string, contents: string): WorkspaceTreeEntry {
   const file = new File([contents], relativePath.split("/").at(-1)!);
@@ -103,5 +103,25 @@ describe("workspace reader", () => {
 
   it("is unavailable for files not opened from a directory workspace", () => {
     expect(createWorkspaceReader(undefined, { ...current, relativePath: undefined })).toBeUndefined();
+  });
+
+  it("exposes one multi-file selection as a flat read-only workspace", async () => {
+    const first = { ...fileEntry("front.insv", "front"), file: new File(["front"], "front.insv"), handle: undefined } as WorkspaceTreeEntry;
+    const second = { ...fileEntry("back.insv", "back"), file: new File(["back"], "back.insv"), handle: undefined } as WorkspaceTreeEntry;
+    const reader = createMemoryWorkspaceReader([first, second], first)!;
+
+    await expect(reader.open("back.insv")).resolves.toMatchObject({ name: "back.insv" });
+    await expect(reader.open("nested/back.insv")).resolves.toBeNull();
+    const listed = [];
+    for await (const entry of reader.list()) listed.push(entry);
+    expect(listed.map((entry) => entry.name)).toEqual(["front.insv", "back.insv"]);
+  });
+
+  it("does not create a memory workspace for one file or ambiguous names", () => {
+    const first = fileEntry("clip.insv", "first");
+    const duplicate = fileEntry("CLIP.INSV", "second");
+    expect(createMemoryWorkspaceReader([first], first)).toBeUndefined();
+    expect(duplicateWorkspaceFileName([first, duplicate])).toBe("CLIP.INSV");
+    expect(createMemoryWorkspaceReader([first, duplicate], first)).toBeUndefined();
   });
 });

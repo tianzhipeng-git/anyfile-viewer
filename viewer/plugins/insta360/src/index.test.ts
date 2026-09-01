@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer-test";
 
 import { insta360Viewer } from "./index";
-import { x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
+import { x3InsvBytes, x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
 
 const activeContexts: ViewerTestContext[] = [];
 
@@ -29,9 +29,19 @@ function fakeGl(maximumTextureSize = 4096) {
     createBuffer: vi.fn(object), bindBuffer: vi.fn(), bufferData: vi.fn(), deleteBuffer: vi.fn(),
     createTexture: vi.fn(object), bindTexture: vi.fn(), texParameteri: vi.fn(), deleteTexture: vi.fn(),
     useProgram: vi.fn(), getAttribLocation: vi.fn(() => 0), enableVertexAttribArray: vi.fn(), vertexAttribPointer: vi.fn(),
-    getUniformLocation: vi.fn(object), uniform1i: vi.fn(), uniform1f: vi.fn(), activeTexture: vi.fn(),
+    getUniformLocation: vi.fn((_program: unknown, name: string) => name), uniform1i: vi.fn(), uniform1f: vi.fn(), activeTexture: vi.fn(),
     texImage2D: vi.fn(), getError: vi.fn(() => 0), getParameter: vi.fn(() => maximumTextureSize),
     viewport: vi.fn(), drawArrays: vi.fn(),
+  };
+}
+
+function memoryWorkspace(files: readonly File[]) {
+  const byName = new Map(files.map((file) => [file.name, file]));
+  return {
+    async open(relativePath: string) { return byName.get(relativePath) ?? null; },
+    async *list() {
+      for (const file of files) yield { name: file.name, relativePath: file.name, kind: "file" as const };
+    },
   };
 }
 
@@ -81,6 +91,12 @@ describe("Insta360 viewer protocol lifecycle", () => {
     expect(context.outside.dataset.viewerTestOutside).toBe("untouched");
     expect(close[0]).toHaveBeenCalledOnce();
 
+    const viewport = context.container.querySelector<HTMLElement>('[aria-label^="360 度全景"]')!;
+    viewport.dispatchEvent(new PointerEvent("pointerdown", { pointerId: 1, button: 0, clientX: 100, clientY: 100 }));
+    viewport.dispatchEvent(new PointerEvent("pointermove", { pointerId: 1, clientX: 140, clientY: 100 }));
+    await vi.waitFor(() => expect(gl.uniform1f).toHaveBeenCalledWith("uYaw", 0.2));
+    expect(gl.uniform1f).toHaveBeenCalledWith("uPitch", 0);
+
     await controller.dispose();
     await controller.dispose();
     expect(context.container.childElementCount).toBe(0);
@@ -118,6 +134,77 @@ describe("Insta360 viewer protocol lifecycle", () => {
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalledOnce();
     expect(URL.revokeObjectURL).toHaveBeenCalledOnce();
     await controller.dispose();
+  });
+
+  it("opens a strict INSV pair with _00 as the only audible master", async () => {
+    const gl = fakeGl();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(gl as unknown as WebGLRenderingContext);
+    Object.defineProperty(HTMLVideoElement.prototype, "videoWidth", { configurable: true, get: () => 2880 });
+    Object.defineProperty(HTMLVideoElement.prototype, "videoHeight", { configurable: true, get: () => 2880 });
+    vi.mocked(URL.createObjectURL).mockReturnValueOnce("blob:front").mockReturnValueOnce("blob:back");
+    const fixture = x3InsvBytes();
+    const front = new File([fixture.bytes], "VID_20230813_194503_00_713.insv");
+    const back = new File([fixture.bytes], "VID_20230813_194503_10_713.insv");
+    const context = testContext(back);
+
+    const controller = await insta360Viewer.open({ ...context.context, workspace: memoryWorkspace([front, back]) });
+    const videos = Array.from(context.container.querySelectorAll("video"));
+    expect(videos).toHaveLength(2);
+    expect(videos[0].src).toBe("blob:front");
+    expect(videos[0].muted).toBe(false);
+    expect(videos[1].src).toBe("blob:back");
+    expect(videos[1].muted).toBe(true);
+    expect(context.container.textContent).toContain("X3 高清视频 · 成对双鱼眼");
+    const seek = context.container.querySelector<HTMLInputElement>('[aria-label="视频进度"]')!;
+    Object.defineProperty(videos[0], "duration", { configurable: true, value: 30 });
+    Object.defineProperty(videos[1], "duration", { configurable: true, value: 29.5 });
+    videos[0].dispatchEvent(new Event("durationchange"));
+    expect(seek.max).toBe("29.5");
+    seek.value = "12.5";
+    seek.dispatchEvent(new Event("input"));
+    expect(videos.map((video) => video.currentTime)).toEqual([12.5, 12.5]);
+    Object.defineProperty(videos[0], "paused", { configurable: true, value: false });
+    videos[0].currentTime = 5;
+    videos[1].currentTime = 5.1;
+    videos[0].dispatchEvent(new Event("seeked"));
+    expect(videos[1].playbackRate).toBe(0.97);
+    videos[1].currentTime = 5.4;
+    videos[0].dispatchEvent(new Event("seeked"));
+    expect(videos[1].currentTime).toBe(5);
+    expect(videos[1].playbackRate).toBe(1);
+    Object.defineProperty(videos[0], "paused", { configurable: true, value: true });
+    context.container.querySelector<HTMLButtonElement>('[aria-label="播放"]')!.click();
+    await vi.waitFor(() => expect(HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(2));
+    Object.defineProperty(videos[1], "ended", { configurable: true, value: true });
+    videos[1].dispatchEvent(new Event("ended"));
+    const replay = context.container.querySelector<HTMLButtonElement>('[aria-label="重播"]')!;
+    expect(replay).not.toBeNull();
+    replay.click();
+    await vi.waitFor(() => expect(HTMLMediaElement.prototype.play).toHaveBeenCalledTimes(4));
+    expect(videos.map((video) => video.currentTime)).toEqual([0, 0]);
+
+    await controller.dispose();
+    expect(URL.revokeObjectURL).toHaveBeenCalledTimes(2);
+    expect(context.container.childElementCount).toBe(0);
+  });
+
+  it("tells the user to select both INSV files or open their folder when the pair is missing", async () => {
+    const fixture = x3InsvBytes();
+    const context = testContext(new File([fixture.bytes], "VID_20230813_194503_00_713.insv"));
+    await expect(insta360Viewer.open(context.context)).rejects.toMatchObject({
+      code: "missing-related-file",
+      message: "请同时选择成对的 INSV 文件，或打开包含它们的整个文件夹。",
+    });
+    expect(context.container.childElementCount).toBe(0);
+  });
+
+  it("does not pair INSV files from different recordings", async () => {
+    const fixture = x3InsvBytes();
+    const front = new File([fixture.bytes], "VID_20230813_194503_00_713.insv");
+    const otherBack = new File([fixture.bytes], "VID_20230813_194504_10_713.insv");
+    const context = testContext(front);
+    await expect(insta360Viewer.open({ ...context.context, workspace: memoryWorkspace([front, otherBack]) }))
+      .rejects.toMatchObject({ code: "missing-related-file" });
   });
 
   it("maps insufficient GPU capacity to resource-limit and cleans partial image state", async () => {

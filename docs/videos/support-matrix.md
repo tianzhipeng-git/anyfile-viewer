@@ -82,6 +82,7 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | Ogg Video | Theora | Opus，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；OGV.js 软件解码 |
 | Ogg Video | Theora | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only 不创建 AudioContext |
 | 3GPP，尾部 `moov` | AVC/H.264 Constrained Baseline L1.3 | AAC-LC，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
+| Insta360 X3 成对 INSV，严格匹配 `_00`/`_10`，每文件单鱼眼 2880×2880 | AVC/H.264 Main，8-bit 4:2:0，full range，29.97 fps | AAC-LC，48 kHz，双声道；仅 `_00` 输出声音 | insta360 | 3 | verified | 3 | Chrome 152.0.7977.65 / macOS 15.6.1；双视频连续播放、同步 seek、较短时长、结束与重播通过；无 gyro/FlowState |
 | 3GPP | H.263 等其他组合 | AMR 等 | FFmpeg video fallback | 0 | planned | 3–4 | 阶段 3 按真实需求和固定样例评估 |
 | Flash Video | Sorenson/VP6/AVC 等 | AAC/MP3 等 | FFmpeg video fallback | 0 | deferred | 3 | 阶段 3 后续批次，取决于真实需求 |
 | QuickTime/MOV | ProRes | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 4，先播放再增加专业能力；不能因阶段 3 decoder 存在而自动宣称支持 |
@@ -151,6 +152,14 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 - QuickTime 的 AVC/PCM S16LE 与 HEVC video-only 均通过连续 Canvas 帧、前后/连续 seek、end/replay 和 260 × 180 resize；PCM 解码峰值 0.125；AAC QuickTime 留给原生插件，非原生 probe 不误接管。
 - Chromium 原生只能读取 Ogg Theora metadata、不能产生视频帧；`non-native-video` 因而按需加载 OGV.js 1.9.0 的 Ogg demux、Theora 与 Vorbis/Opus Worker/WASM。Theora/Vorbis 捕获 168 个非静音 PCM buffer、峰值 0.129；Theora video-only 不创建 AudioContext；Theora/Opus 使用独立固定样例复验。
 - Ogg audio-only、损坏和伪装容器均 probe 0；普通路径与 Ogg 路径的实现 chunk 分离，OGV.js 资产、MIT 及 codec 许可证由构建门禁检查。
+
+### Insta360 X3 成对 INSV 目标环境记录（2026-09-02）
+
+- 环境：Google Chrome 152.0.7977.65，macOS 15.6.1（Apple Silicon）；通过实际 `/zh-CN/view` 页面一次多选两段真实 X3 INSV；
+- 两路 2880×2880 H.264/AAC 媒体均进入 `readyState=4` 并连续推进；`_00` 保持非静音主时钟，`_10` 永久静音；
+- 验证完整约 30.7 秒连续播放、前后 seek、连续快速 seek、小漂移 `playbackRate` 修正、较短 `_10` 结束、重播和替换为单文件后的双媒体清理；
+- 严格文件名与组号配对；单独打开或不同录像组合返回 `missing-related-file`，提示同时选择成对文件或打开整个文件夹；
+- 出厂精确校准、gyro、FlowState、其他机型和 Safari/Firefox/Windows/Android/iOS 未在本轮声明或验证。
 
 ## 7. 自动测试与构建证据
 

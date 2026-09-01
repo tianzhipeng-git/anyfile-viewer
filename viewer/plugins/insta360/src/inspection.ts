@@ -22,6 +22,6 @@ export async function inspectInsta360File(
     const bytes = await readBlob(file.slice(0, Math.min(file.size, JPEG_INSPECTION_BYTES)), signal);
     return inspectInsta360Photo(bytes);
   }
-  if (extension === ".lrv") return inspectInsta360Video(file, signal);
+  if (extension === ".lrv" || extension === ".insv") return inspectInsta360Video(file, signal);
   return undefined;
 }

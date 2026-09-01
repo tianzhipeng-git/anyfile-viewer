@@ -9,6 +9,7 @@ export interface Insta360ViewerElements {
   readonly canvas: HTMLCanvasElement;
   readonly reset: HTMLButtonElement;
   readonly video?: HTMLVideoElement;
+  readonly secondVideo?: HTMLVideoElement;
   readonly play?: HTMLButtonElement;
   readonly seek?: HTMLInputElement;
   readonly volume?: HTMLInputElement;
@@ -43,8 +44,8 @@ const styles = `
 
 function copyFor(locale: Locale) {
   return selectMessages(locale, {
-    en: { tools: "Panorama viewing tools", reset: "Reset view", canvas: "360 degree panorama; drag to look around and use the mouse wheel to zoom", photo: "X3 photo · side-by-side dual fisheye", video: "X3 proxy video · side-by-side dual fisheye", play: "Play", pause: "Pause", replay: "Replay", seek: "Seek video", volume: "Volume", ready: "Ready", playbackFailed: "Playback could not start." },
-    "zh-CN": { tools: "全景查看工具", reset: "重置视角", canvas: "360 度全景；拖动环视，使用滚轮缩放", photo: "X3 照片 · 左右双鱼眼", video: "X3 代理视频 · 左右双鱼眼", play: "播放", pause: "暂停", replay: "重播", seek: "视频进度", volume: "音量", ready: "就绪", playbackFailed: "无法开始播放。" },
+    en: { tools: "Panorama viewing tools", reset: "Reset view", canvas: "360 degree panorama; drag to look around and use the mouse wheel to zoom", photo: "X3 photo · side-by-side dual fisheye", proxyVideo: "X3 proxy video · side-by-side dual fisheye", pairedVideo: "X3 HD video · paired dual fisheye", play: "Play", pause: "Pause", replay: "Replay", seek: "Seek video", volume: "Volume", ready: "Ready", playbackFailed: "Playback could not start." },
+    "zh-CN": { tools: "全景查看工具", reset: "重置视角", canvas: "360 度全景；拖动环视，使用滚轮缩放", photo: "X3 照片 · 左右双鱼眼", proxyVideo: "X3 代理视频 · 左右双鱼眼", pairedVideo: "X3 高清视频 · 成对双鱼眼", play: "播放", pause: "暂停", replay: "重播", seek: "视频进度", volume: "音量", ready: "就绪", playbackFailed: "无法开始播放。" },
   });
 }
 
@@ -76,7 +77,7 @@ export function createInsta360ViewerElements(
   name.title = fileName;
   const metadata = document.createElement("span");
   metadata.className = "anyfile-insta360-viewer__meta";
-  metadata.textContent = `${inspection.width} × ${inspection.height} · ${inspection.kind === "photo" ? copy.photo : copy.video}`;
+  metadata.textContent = `${inspection.width} × ${inspection.height} · ${inspection.kind === "photo" ? copy.photo : inspection.layout === "single" ? copy.pairedVideo : copy.proxyVideo}`;
   identity.append(name, metadata);
   const status = document.createElement("span");
   status.className = "anyfile-insta360-viewer__status";
@@ -104,6 +105,12 @@ export function createInsta360ViewerElements(
   video.controls = false;
   video.preload = "auto";
   video.playsInline = true;
+  let secondVideo: HTMLVideoElement | undefined;
+  if (inspection.layout === "single") {
+    secondVideo = video.cloneNode() as HTMLVideoElement;
+    secondVideo.muted = true;
+    secondVideo.defaultMuted = true;
+  }
   const controls = document.createElement("div");
   controls.className = "anyfile-insta360-viewer__controls";
   const play = document.createElement("button");
@@ -130,39 +137,58 @@ export function createInsta360ViewerElements(
   volume.value = "1";
   volume.setAttribute("aria-label", copy.volume);
   viewport.append(video);
+  if (secondVideo) viewport.append(secondVideo);
   controls.append(play, seek, time, volume);
   root.append(controls);
-  return { root, viewport, canvas, reset, status, video, play, seek, volume, time };
+  return { root, viewport, canvas, reset, status, video, secondVideo, play, seek, volume, time };
 }
 
 export function bindVideoControls(elements: Insta360ViewerElements, locale: Locale) {
-  const { video, play, seek, volume, time, viewport, status } = elements;
+  const { video, secondVideo, play, seek, volume, time, viewport, status } = elements;
   if (!video || !play || !seek || !volume || !time) return () => undefined;
   const copy = copyFor(locale);
   const resources = new ResourceScope();
   const update = () => {
-    const duration = Number.isFinite(video.duration) ? video.duration : 0;
+    const durations = [video.duration, secondVideo?.duration].filter((value): value is number => Number.isFinite(value));
+    const duration = durations.length ? Math.min(...durations) : 0;
+    if (secondVideo && !video.paused && video.currentTime >= duration) {
+      video.pause();
+      secondVideo.pause();
+    }
     seek.max = String(duration);
     seek.value = String(Math.min(duration, video.currentTime || 0));
     time.textContent = `${formatTime(video.currentTime)} / ${formatTime(duration)}`;
-    const label = video.ended ? copy.replay : video.paused ? copy.play : copy.pause;
+    const ended = video.ended || secondVideo?.ended || duration > 0 && video.currentTime >= duration;
+    const label = ended ? copy.replay : video.paused ? copy.play : copy.pause;
     play.textContent = label;
     play.setAttribute("aria-label", label);
   };
   const toggle = async () => {
-    if (!video.paused && !video.ended) video.pause();
+    const duration = Math.min(video.duration, secondVideo?.duration ?? video.duration);
+    if (!video.paused && !video.ended) {
+      video.pause();
+      secondVideo?.pause();
+    }
     else {
-      if (video.ended) video.currentTime = 0;
+      if (video.ended || secondVideo?.ended || video.currentTime >= duration) {
+        video.currentTime = 0;
+        if (secondVideo) secondVideo.currentTime = 0;
+      }
       try {
-        await video.play();
+        await Promise.all([video.play(), secondVideo?.play()]);
       } catch {
+        video.pause();
+        secondVideo?.pause();
         status.textContent = copy.playbackFailed;
       }
     }
     update();
   };
   resources.listen(play, "click", () => void toggle());
-  resources.listen(seek, "input", () => { video.currentTime = Number(seek.value); });
+  resources.listen(seek, "input", () => {
+    video.currentTime = Number(seek.value);
+    if (secondVideo) secondVideo.currentTime = Number(seek.value);
+  });
   resources.listen(volume, "input", () => { video.volume = Number(volume.value); });
   resources.listen(video, "loadedmetadata", update);
   resources.listen(video, "durationchange", update);
@@ -170,6 +196,33 @@ export function bindVideoControls(elements: Insta360ViewerElements, locale: Loca
   resources.listen(video, "play", update);
   resources.listen(video, "pause", update);
   resources.listen(video, "ended", update);
+  if (secondVideo) {
+    const synchronize = () => {
+      if (video.paused) {
+        secondVideo.pause();
+        secondVideo.playbackRate = 1;
+        return;
+      }
+      const drift = secondVideo.currentTime - video.currentTime;
+      if (Math.abs(drift) > 0.18) {
+        secondVideo.currentTime = video.currentTime;
+        secondVideo.playbackRate = 1;
+      } else if (Math.abs(drift) > 0.025) {
+        secondVideo.playbackRate = drift > 0 ? 0.97 : 1.03;
+      } else {
+        secondVideo.playbackRate = 1;
+      }
+    };
+    const interval = window.setInterval(synchronize, 100);
+    resources.add(() => window.clearInterval(interval));
+    resources.listen(video, "pause", synchronize);
+    resources.listen(video, "seeked", synchronize);
+    resources.listen(secondVideo, "timeupdate", update);
+    resources.listen(secondVideo, "ended", () => {
+      video.pause();
+      update();
+    });
+  }
   resources.listen(viewport, "keydown", (event) => {
     const keyboard = event as KeyboardEvent;
     if (keyboard.key !== " ") return;
@@ -182,6 +235,7 @@ export function bindVideoControls(elements: Insta360ViewerElements, locale: Loca
 
 export function showFatalError(elements: Insta360ViewerElements, message: string) {
   elements.video?.pause();
+  elements.secondVideo?.pause();
   elements.reset.disabled = true;
   const alert = document.createElement("div");
   alert.className = "anyfile-insta360-viewer__error";
