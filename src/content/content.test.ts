@@ -59,6 +59,17 @@ describe("published SEO content", () => {
     }
   });
 
+  it("publishes the audited licenses and source notices for browser runtimes", () => {
+    expect(getPlugin("word-document", "en")!.upstreamProjects[0]?.license).toBe("Apache-2.0");
+    expect(getPlugin("powerpoint-presentation", "en")!.upstreamProjects[0]?.license).toBe("Apache-2.0");
+    expect(getPlugin("camera-raw", "en")!.upstreamProjects[0]).toMatchObject({
+      license: "ISC; bundled LibRaw distributed under CDDL-1.0",
+      noticeUrl: "/vendor/libraw/1.6.0/SOURCE.md",
+    });
+    expect(getPlugin("non-native-video", "en")!.upstreamProjects[0]?.noticeUrl)
+      .toBe("/vendor/licenses/mediabunny/1.55.3/SOURCE.md");
+  });
+
   it("keeps localized metadata and route keys unique", () => {
     expect(unique(publishedFormats.map(({ extension }) => extension))).toBe(true);
     expect(unique(publishedCategories.map(({ slug }) => slug))).toBe(true);

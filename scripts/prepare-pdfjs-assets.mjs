@@ -27,7 +27,22 @@ for (const fileName of [
 const librawRoot = join(projectRoot, "node_modules/libraw-wasm");
 const librawPackage = JSON.parse(await readFile(join(librawRoot, "package.json"), "utf8"));
 const librawTarget = join(projectRoot, "public/vendor/libraw", librawPackage.version);
+const librawLicenseRoot = join(projectRoot, "licenses/libraw-wasm", librawPackage.version);
 await mkdir(librawTarget, { recursive: true });
 for (const fileName of ["index.js", "worker.js", "libraw.js", "libraw.wasm"]) {
   await cp(join(librawRoot, "dist", fileName), join(librawTarget, fileName));
+}
+for (const fileName of [
+  "COPYRIGHT.LibRaw",
+  "LICENSE.Emscripten",
+  "LICENSE.LibRaw-CDDL-1.0",
+  "LICENSE.Little-CMS-MIT",
+  "LICENSE.libpng",
+  "LICENSE.libraw-wasm-ISC",
+  "LICENSE.zlib",
+  "NOTICE.IJG-libjpeg",
+  "SOURCE.md",
+  "THIRD_PARTY_NOTICES.md",
+]) {
+  await cp(join(librawLicenseRoot, fileName), join(librawTarget, fileName));
 }

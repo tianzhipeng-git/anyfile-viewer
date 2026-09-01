@@ -73,6 +73,8 @@ public/vendor/<dependency>/<version>/
 
 例如当前 PDF.js 与 LibRaw 资产属于这种模式，不需要复制到 `third_party/`。
 
+若普通 registry 包没有随运行产物提供完整的上游许可证或源码获取说明，审核材料保存在 `licenses/<package>/<version>/`，由 prepare 复制到对应的版本化 `public/vendor` 目录。该目录只补充合规材料，不复制运行二进制，也不把普通 registry 包伪装成项目自建产物。
+
 只有项目自己生成、且无法由 `pnpm install --frozen-lockfile` 中的受信任上游包恢复的二进制，才把审核后的产物放入 `third_party/`。不要同时把同一份产物既作为 registry 依赖又提交到 `third_party/`。
 
 ## 4. 版本命名与锁定
@@ -92,6 +94,7 @@ public/vendor/<dependency>/<version>/
 - 上游版本变化时更新 `<upstream-version>`；
 - adapter、构建参数、工具链或 patch 改变但上游版本不变时递增 `<build-revision>`；
 - 插件运行时 URL、prepare 目标、构建检查和文档必须引用同一个精确产物版本；
+- 已发布的 artifact version URL 必须保持字节不变；任何产物内容变化都必须产生新的 `<artifact-version>`，不得用同一路径覆盖旧内容；
 - 不使用 `latest`、浮动 URL、未锁定容器 tag 或只记录 branch 名。
 
 `build-info.json` 至少记录：
@@ -182,5 +185,5 @@ public/vendor/<dependency>/<version>/
 - 插件运行时 URL 与准备的产物版本一致；
 - 必需 Worker/WASM/glue/许可证文件存在且哈希正确；
 - 重型依赖未进入 `/view` 初始包、manifest、probe 或无关插件 chunk；
-- 版本化静态资源具有部署所需响应头；
+- 版本化静态资源返回 `Cache-Control: public, max-age=31536000, immutable`，并具有对应 MIME、COEP/CORP 等部署所需响应头；
 - 产物体积变化超过既有基线时构建失败或要求显式评审。

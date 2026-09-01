@@ -23,4 +23,13 @@ describe("localized routing configuration", () => {
       { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
     ]));
   });
+
+  it("caches versioned vendor assets as immutable", async () => {
+    const headers = await nextConfig.headers?.();
+    const vendorHeaders = headers?.find(({ source }) => source === "/vendor/:dependency/:version/:path*");
+    expect(vendorHeaders?.headers).toContainEqual({
+      key: "Cache-Control",
+      value: "public, max-age=31536000, immutable",
+    });
+  });
 });

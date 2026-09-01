@@ -144,6 +144,14 @@ Cache-Control: public, max-age=31536000, immutable
 
 WASM 必须使用 `application/wasm`，JavaScript 和 Worker 必须使用正确的 JavaScript MIME。公开资产使用内容不可变的版本路径；升级时发布新路径，不覆盖旧对象。
 
+应用域名下由 prepare 生成的版本化 `/vendor/<dependency>/<version>/...` 资源同样返回：
+
+```text
+Cache-Control: public, max-age=31536000, immutable
+```
+
+prepare 可以在每次开发或生产构建时删除并重新生成本地 `public/vendor`，这不会破坏长期缓存：npm 资产由 lockfile 中的精确包版本恢复，源码构建资产由 `third_party` 中的精确产物版本和 SHA-256 恢复。已经发布的版本 URL 必须保持字节不变；上游版本、adapter、patch、构建参数或工具链导致产物变化时，必须升级依赖版本或递增 `-anyfile.<build-revision>`，不能在旧 URL 下覆盖内容。
+
 ### 部署头与网络策略
 
 如果部署 CSP，需要至少验证以下来源：
@@ -179,6 +187,8 @@ worker-src 'self' blob:
 
 内部 `@anyfile/*` 依赖使用 `workspace:*`，只能解析到当前 pnpm workspace 中的包，不会从 registry 获取任意版本。
 
+根 `package.json` 通过 `engines.node` 固定生产和 CI 使用 Node.js `24.x`，并通过 `packageManager` 固定 pnpm `10.32.1`。Vercel 项目的 Node.js Version 必须保持为 `24.x`；其他 CI 也必须显式使用同一 Node.js 主版本，不能依赖平台默认版本漂移。
+
 生产环境和 CI 必须使用：
 
 ```bash
@@ -202,6 +212,8 @@ public/vendor/<dependency>/<version>/     不提交的部署资源
 ```
 
 具体进入条件、版本、升级、patch、独立仓库门槛、安全与许可证要求见 [源码构建型第三方依赖规范](viewer-source-built-dependencies.md)。能够由锁定的 npm 上游包恢复的 PDF.js、LibRaw 等现有资产继续直接从 `node_modules` 准备，不重复 vendoring。
+
+`libraw-wasm@1.6.0` 的 npm 包只携带运行文件，因此项目把审核过的许可证、版权声明和精确源码说明保存在 `licenses/libraw-wasm/1.6.0/`。prepare 必须把这些材料与 JS/WASM 一起复制到同一版本化 `/vendor/libraw/1.6.0/` 目录；构建门禁同时校验必需文件和源码 commit。当前分发明确为 LibRaw 选择 CDDL-1.0，不使用其 LGPL-2.1 备选许可证。
 
 ## 5. 首包体积门禁
 
@@ -264,6 +276,7 @@ HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实
 
 ## 6. 发布前检查清单
 
+- 确认生产和 CI 使用 Node.js `24.x`，Vercel 项目设置与根 `package.json#engines.node` 一致。
 - 使用 `pnpm install --frozen-lockfile` 从 lockfile 安装。
 - `pnpm test`、`pnpm lint`、`pnpm build` 全部通过。
 - `/en/view` 与 `/zh-CN/view` 都能完成 SSG 构建；若改为 SSR，服务端日志中没有 CDN、Worker 或 WASM 初始化。
@@ -276,6 +289,7 @@ HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实
 - 确认密码等交互在 `open()` 返回后的插件 UI 中完成，宿主不依赖进度 `stage` 切换遮罩。
 - 在正常网络下确认 DuckDB 使用带精确版本号的 jsDelivr URL。
 - 阻断 `cdn.jsdelivr.net` 后确认 DuckDB 可以使用本站资源打开文件。
+- 对同源版本化 `/vendor` 资源检查 MIME、COEP/CORP（适用时）和 `Cache-Control: public, max-age=31536000, immutable`。例如运行 `curl -I https://<domain>/vendor/libraw/1.6.0/libraw.wasm`。
 - 对所有外部 Worker/WASM 的最终 URL（包括重定向后 URL）检查 CORS、CORP、MIME 和不可变缓存头。
 - 若启用 Cloudflare R2 fallback，确认应用域名未通过 Cloudflare 再代理到 Vercel，并确认资产域名缓存命中时不回源 Vercel。
 - 部署 CSP 后，在 Chrome、Edge、Firefox 和 Safari 的目标版本验证 Worker/WASM。

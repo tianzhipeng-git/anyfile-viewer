@@ -5,6 +5,16 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+const rootPackage = JSON.parse(await readFile(join(projectRoot, "package.json"), "utf8"));
+if (rootPackage.license !== "Apache-2.0") throw new Error("The project license must remain Apache-2.0");
+const projectLicense = await readFile(join(projectRoot, "LICENSE"), "utf8").catch(() => "");
+if (!projectLicense.includes("Apache License") || !projectLicense.includes("Version 2.0")) {
+  throw new Error("The Apache-2.0 project license text is missing");
+}
+const thirdPartyNotices = await readFile(join(projectRoot, "THIRD_PARTY_NOTICES.md"), "utf8").catch(() => "");
+for (const marker of ["MPL-2.0", "CDDL-1.0", "LGPL-3.0-or-later", "libvips", "HEVC patent"]) {
+  if (!thirdPartyNotices.includes(marker)) throw new Error(`Third-party notices are missing ${marker}`);
+}
 const html = await readFile(join(projectRoot, ".next/server/app/en/view.html"), "utf8");
 const assets = [...new Set(
   [...html.matchAll(/src="\/_next\/(static\/chunks\/[^"?]+\.js)/g)].map((match) => decodeURIComponent(match[1])),
@@ -188,6 +198,16 @@ const mediabunnyLicense = await readFile(join(
 if (!mediabunnyLicense.includes("Mozilla Public License Version 2.0")) {
   throw new Error("Mediabunny MPL-2.0 license text is missing");
 }
+const mediabunnySourceNotice = await readFile(join(
+  projectRoot,
+  "public/vendor/licenses/mediabunny",
+  mediabunnyPackage.version,
+  "SOURCE.md",
+), "utf8").catch(() => "");
+if (!mediabunnySourceNotice.includes(mediabunnyPackage.version)
+  || !mediabunnySourceNotice.includes("16f8889e144f2bbeaa6a6788009abb4ecef19847")) {
+  throw new Error("Mediabunny exact source-availability notice is missing");
+}
 const ogvPackage = JSON.parse(await readFile(join(
   projectRoot,
   "viewer/plugins/non-native-video/node_modules/ogv/package.json",
@@ -257,9 +277,33 @@ if (librawRuntimeVersion !== librawPackage.version) {
   throw new Error(`LibRaw runtime URL version ${librawRuntimeVersion ?? "is missing"}; installed version is ${librawPackage.version}`);
 }
 const librawSupportRoot = join(projectRoot, "public/vendor/libraw", librawPackage.version);
-for (const asset of ["index.js", "worker.js", "libraw.js", "libraw.wasm"]) {
+for (const asset of [
+  "index.js",
+  "worker.js",
+  "libraw.js",
+  "libraw.wasm",
+  "COPYRIGHT.LibRaw",
+  "LICENSE.Emscripten",
+  "LICENSE.LibRaw-CDDL-1.0",
+  "LICENSE.Little-CMS-MIT",
+  "LICENSE.libpng",
+  "LICENSE.libraw-wasm-ISC",
+  "LICENSE.zlib",
+  "NOTICE.IJG-libjpeg",
+  "SOURCE.md",
+  "THIRD_PARTY_NOTICES.md",
+]) {
   const content = await readFile(join(librawSupportRoot, asset)).catch(() => undefined);
   if (!content?.byteLength) throw new Error(`LibRaw runtime asset is missing: ${asset}`);
+}
+const librawSourceNotice = await readFile(join(librawSupportRoot, "SOURCE.md"), "utf8");
+for (const marker of [
+  "32fd36a9883a10c1632bc20073f1ea88cc60487a",
+  "b860248a89d9082b8e0a1e202e516f46af9adb29",
+  "21c582a594fe5279f90c0b93437c398f93bf62b0",
+  "263db4cffa6f9fc2ec514a70abac81362ea41849",
+]) {
+  if (!librawSourceNotice.includes(marker)) throw new Error(`LibRaw source notice is missing commit ${marker}`);
 }
 const forbiddenZipAsset = staticMedia
   .filter((entry) => entry.isFile())

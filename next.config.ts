@@ -13,6 +13,12 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/vendor/:dependency/:version/:path*",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      {
         source: "/:locale(en|zh-CN|es|de|fr|ja|pt|ru|ko|it)/view",
         headers: [
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
