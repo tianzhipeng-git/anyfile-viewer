@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const rw2Format = defineFormat("rw2", "images-video", 2,
+  { name: "Panasonic RW2 RAW", title: "Open Panasonic RW2 RAW Files Online", description: "Inspect Panasonic Lumix RW2 metadata, previews and basic RAW pixels locally.", introduction: "RW2 is Panasonic's RAW format for Lumix camera sensor data and maker metadata. Anyfile uses embedded previews where available and LibRaw-Wasm for a representative local development.", canShow: ["Lumix camera, lens and exposure metadata", "Embedded preview or basic developed image"], limitations: ["Photo Styles and proprietary lens corrections are not reproduced", "Compressed or newer camera variants depend on decoder support"], faq: [{ question: "Will RW2 match the JPEG produced by the camera?", answer: "Not exactly. The camera JPEG includes Panasonic processing choices that are not reproduced by a neutral RAW development." }] },
+  { name: "Panasonic RW2 原片", title: "在线打开 Panasonic RW2 RAW 文件", description: "在本地检查 Panasonic Lumix RW2 元数据、预览与基础 RAW 像素。", introduction: "RW2 是 Panasonic Lumix 相机保存传感器数据与厂商元数据的 RAW 格式。Anyfile 优先使用内嵌预览，并通过 LibRaw-Wasm 生成代表性本地显影图。", canShow: ["Lumix 相机、镜头与曝光元数据", "内嵌预览或基础显影图"], limitations: ["不会复现 Photo Style 与专有镜头校正", "压缩或较新相机变体取决于解码器支持"], faq: [{ question: "RW2 会与相机生成的 JPEG 一样吗？", answer: "不会完全一样。相机 JPEG 包含 Panasonic 处理选项，中性 RAW 显影不会复现这些效果。" }] },
+  cameraRawCapability, cameraRawAlternatives);

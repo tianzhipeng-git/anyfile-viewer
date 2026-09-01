@@ -1,0 +1,7 @@
+import { androidStudioAlternative, archiveInspectionCapability } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const aabFormat = defineFormat("aab", "developer-artifacts", 2,
+  { name: "Android App Bundle", title: "Inspect AAB Package Contents Online", description: "Browse Android App Bundle modules and archive entries locally.", introduction: "AAB is an Android publishing bundle organized into modules from which an app store generates device-specific APKs. Anyfile lists its ZIP-derived package structure without generating, signing or installing APKs.", canShow: ["Module directories, resources and packaged assets", "Entry paths, sizes and compression methods"], limitations: ["The bundle is not converted into installable APKs", "Protocol-buffer manifests, signing and delivery configuration are not decoded"], faq: [{ question: "Can an AAB be installed directly on a phone?", answer: "No. An app store or Android bundle tooling must generate installable APKs from the publishing bundle." }] },
+  { name: "Android App Bundle", title: "在线检查 AAB 软件包内容", description: "在本地浏览 Android App Bundle 模块与归档条目。", introduction: "AAB 是按模块组织的 Android 发布包，应用商店会据此生成设备专属 APK。Anyfile 列出其 ZIP 派生软件包结构，不生成、不签名也不安装 APK。", canShow: ["模块目录、资源与打包资产", "条目路径、大小与压缩方式"], limitations: ["不会把 bundle 转换为可安装 APK", "不会解码 Protocol Buffer manifest、签名与分发配置"], faq: [{ question: "AAB 能直接安装到手机吗？", answer: "不能。应用商店或 Android bundle 工具必须先从发布包生成可安装 APK。" }] },
+  archiveInspectionCapability, androidStudioAlternative);

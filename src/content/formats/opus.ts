@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const opusFormat = defineFormat("opus", "images-video", 3,
+  { name: "Ogg Opus audio", title: "Play Opus Audio Online", description: "Play supported Opus audio in its Ogg container locally.", introduction: "Files ending in .opus normally store the Opus codec in an Ogg container with pre-skip and granule-position timing. Anyfile validates the audio-only stream and uses the browser playback path.", canShow: ["Verified Ogg Opus audio", "Duration, seeking, volume and playback controls"], limitations: ["This page does not imply support for every non-Ogg Opus wrapping", "Chained or unusual channel mappings may fail"], faq: [{ question: "Can an Opus codec stream appear outside an .opus file?", answer: "Yes. Opus can also appear in WebM, Matroska and other transports, which are handled according to their container." }] },
+  { name: "Ogg Opus 音频", title: "在线播放 Opus 音频", description: "在本地播放 Ogg 容器中的受支持 Opus 音频。", introduction: ".opus 文件通常在 Ogg 容器中保存 Opus codec，并用 pre-skip 与 granule position 表达时间。Anyfile 会验证纯音频流，再使用浏览器播放路径。", canShow: ["已验证的 Ogg Opus 音频", "时长、定位、音量与播放控制"], limitations: ["本页不代表支持所有非 Ogg 的 Opus 封装", "串联流或少见声道映射可能失败"], faq: [{ question: "Opus codec 会出现在 .opus 之外吗？", answer: "会。Opus 也可出现在 WebM、Matroska 等传输中，这些文件会按各自容器处理。" }] },
+  { possibleLevels: [3] });

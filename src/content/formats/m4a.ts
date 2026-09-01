@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const m4aFormat = defineFormat("m4a", "images-video", 3,
+  { name: "M4A audio", title: "Play M4A Audio Online", description: "Play verified AAC-LC audio-only MPEG-4 files locally.", introduction: "M4A commonly identifies an audio-only MPEG-4 container rather than a raw AAC stream. Anyfile checks that there is no main video program and plays the verified AAC-LC audio path in the browser.", canShow: ["AAC-LC audio in a supported MPEG-4 container", "Duration, seeking, volume and playback controls"], limitations: ["ALAC and HE-AAC are not currently declared", "Protected files and files with a main video track are rejected by the audio path"], faq: [{ question: "Is M4A the same as AAC?", answer: "M4A is usually a container holding AAC audio; a .aac file commonly uses raw ADTS framing instead." }] },
+  { name: "M4A 音频", title: "在线播放 M4A 音频", description: "在本地播放已验证的纯音频 AAC-LC MPEG-4 文件。", introduction: "M4A 通常表示纯音频 MPEG-4 容器，而不是裸 AAC 流。Anyfile 会确认文件没有主视频节目，再通过浏览器播放已验证的 AAC-LC 音频路径。", canShow: ["受支持 MPEG-4 容器中的 AAC-LC 音频", "时长、定位、音量与播放控制"], limitations: ["目前不声明支持 ALAC 与 HE-AAC", "受保护文件和包含主视频轨的文件会被音频路径拒绝"], faq: [{ question: "M4A 与 AAC 相同吗？", answer: "M4A 通常是承载 AAC 音频的容器；.aac 文件则常使用裸 ADTS 分帧。" }] },
+  { possibleLevels: [3] });

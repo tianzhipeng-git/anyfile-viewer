@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const rafFormat = defineFormat("raf", "images-video", 2,
+  { name: "Fujifilm RAF RAW", title: "Open Fujifilm RAF RAW Files Online", description: "Inspect RAF capture metadata, preview and basic developed pixels locally.", introduction: "RAF stores Fujifilm sensor data and camera metadata, including files from conventional Bayer and X-Trans sensors. Anyfile extracts a usable preview and asks LibRaw-Wasm for a basic local development where supported.", canShow: ["Fujifilm camera and exposure metadata", "Embedded preview or representative RAW rendering"], limitations: ["Film simulations and Fujifilm color profiles are not reproduced", "X-Trans demosaicing and compressed RAW support vary by camera"], faq: [{ question: "Will RAF look like the camera's JPEG?", answer: "Not exactly. The in-camera JPEG applies Fujifilm processing choices that a neutral LibRaw preview does not reproduce." }] },
+  { name: "Fujifilm RAF 原片", title: "在线打开 Fujifilm RAF RAW 文件", description: "在本地检查 RAF 拍摄元数据、预览与基础显影像素。", introduction: "RAF 保存 Fujifilm 传感器数据与相机元数据，覆盖传统 Bayer 与 X-Trans 传感器文件。Anyfile 提取可用预览，并在受支持时通过 LibRaw-Wasm 完成本地基础显影。", canShow: ["Fujifilm 相机与曝光元数据", "内嵌预览或代表性 RAW 显影"], limitations: ["不会复现胶片模拟与 Fujifilm 色彩配置", "X-Trans 去马赛克与压缩 RAW 支持随相机而异"], faq: [{ question: "RAF 会与相机 JPEG 看起来一样吗？", answer: "不会完全一样。机内 JPEG 应用了 Fujifilm 处理选项，中性 LibRaw 预览不会复现这些效果。" }] },
+  cameraRawCapability, cameraRawAlternatives);

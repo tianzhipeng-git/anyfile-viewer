@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const earFormat = defineFormat("ear", "developer-artifacts", 2,
+  { name: "Java enterprise archive", title: "Inspect EAR Package Contents Online", description: "Browse enterprise Java package modules locally without deploying them.", introduction: "EAR packages multiple Java EE or Jakarta EE modules, such as WAR and EJB JAR files, in one ZIP-derived deployment unit. Anyfile shows bounded entry metadata but does not resolve or run the application modules.", canShow: ["Top-level module and descriptor paths", "Entry sizes and compression information"], limitations: ["Nested modules are not deployed or executed", "Application dependencies and descriptor semantics are not validated"], faq: [{ question: "What is the difference between EAR and WAR?", answer: "A WAR packages one web application, while an EAR can assemble multiple enterprise modules into a larger deployment." }] },
+  { name: "Java 企业归档", title: "在线检查 EAR 软件包内容", description: "无需部署，在本地浏览企业 Java 软件包模块。", introduction: "EAR 把 WAR、EJB JAR 等多个 Java EE 或 Jakarta EE 模块放入一个 ZIP 派生部署单元。Anyfile 展示有界条目元数据，但不解析或运行应用模块。", canShow: ["顶层模块与描述符路径", "条目大小与压缩信息"], limitations: ["不会部署或执行嵌套模块", "不验证应用依赖与描述符语义"], faq: [{ question: "EAR 与 WAR 有何区别？", answer: "WAR 打包单个 Web 应用，而 EAR 可把多个企业模块组合为更大的部署。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const xpiFormat = defineFormat("xpi", "developer-artifacts", 2,
+  { name: "Mozilla extension package", title: "Inspect XPI Extension Packages Online", description: "Browse Firefox and Mozilla extension package entries locally.", introduction: "XPI is a ZIP-derived package used for Mozilla extensions and commonly contains manifest.json, scripts, locale files and assets. Anyfile lists its structure without installing the extension or executing JavaScript.", canShow: ["Manifest, script, locale and asset paths", "Entry sizes and compression information"], limitations: ["Permissions, signatures and compatibility are not validated", "Extension scripts and native components are never executed"], faq: [{ question: "Can an XPI affect my browser when opened here?", answer: "No. Anyfile does not pass the file to the extension manager and only reads archive metadata." }] },
+  { name: "Mozilla 扩展软件包", title: "在线检查 XPI 扩展软件包", description: "在本地浏览 Firefox 与 Mozilla 扩展软件包条目。", introduction: "XPI 是 Mozilla 扩展使用的 ZIP 派生软件包，通常包含 manifest.json、脚本、本地化文件与资产。Anyfile 列出结构，不安装扩展，也不执行 JavaScript。", canShow: ["Manifest、脚本、本地化与资产路径", "条目大小与压缩信息"], limitations: ["不验证权限、签名与兼容性", "绝不执行扩展脚本与原生组件"], faq: [{ question: "在这里打开 XPI 会影响浏览器吗？", answer: "不会。Anyfile 不会把文件交给扩展管理器，只读取归档元数据。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

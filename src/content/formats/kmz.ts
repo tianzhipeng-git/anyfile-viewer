@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const kmzFormat = defineFormat("kmz", "code-data", 2,
+  { name: "Compressed KML map package", title: "Inspect KMZ Map Package Contents Online", description: "Browse compressed KML and linked asset entries locally.", introduction: "KMZ packages a main KML document and optional icons, images or models in a ZIP archive for geographic visualization. Anyfile lists the package contents but does not place KML features on an interactive map.", canShow: ["KML document and bundled asset paths", "Entry sizes and archive compression"], limitations: ["Placemarks, tracks, overlays and network links are not rendered", "External URLs in KML are not fetched"], faq: [{ question: "Will a KMZ open as a map in Anyfile?", answer: "No. The viewer exposes package structure and deliberately does not request external map or network-link resources." }] },
+  { name: "压缩 KML 地图软件包", title: "在线检查 KMZ 地图软件包", description: "在本地浏览压缩 KML 与关联资产条目。", introduction: "KMZ 把主 KML 文档及可选图标、图片或模型打包进 ZIP 归档，用于地理可视化。Anyfile 列出软件包内容，但不把 KML 要素放到交互地图。", canShow: ["KML 文档与打包资产路径", "条目大小与归档压缩"], limitations: ["不渲染 placemark、轨迹、overlay 与 network link", "不获取 KML 中的外部 URL"], faq: [{ question: "KMZ 会在 Anyfile 中作为地图打开吗？", answer: "不会。查看器展示软件包结构，并刻意不请求外部地图或 network-link 资源。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

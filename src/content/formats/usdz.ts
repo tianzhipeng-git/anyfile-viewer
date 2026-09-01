@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const usdzFormat = defineFormat("usdz", "developer-artifacts", 2,
+  { name: "USDZ 3D package", title: "Inspect USDZ Package Contents Online", description: "Browse USDZ scene and asset entries locally without rendering the model.", introduction: "USDZ is an uncompressed ZIP-derived package for USD scene descriptions and their textures or other assets, commonly used in Apple AR workflows. Anyfile lists bounded entries but has no 3D scene renderer.", canShow: ["USD scene, texture and asset paths", "Stored entry sizes and package ordering"], limitations: ["Geometry, materials, animation and AR placement are not rendered", "USD references and schema semantics are not resolved"], faq: [{ question: "Can Anyfile preview the USDZ model in 3D?", answer: "Not currently. This capability inspects package structure; a USD-aware 3D viewer is required for the scene." }] },
+  { name: "USDZ 3D 软件包", title: "在线检查 USDZ 软件包内容", description: "无需渲染模型，在本地浏览 USDZ 场景与资产条目。", introduction: "USDZ 是用于 USD 场景描述及纹理等资产的无压缩 ZIP 派生软件包，常见于 Apple AR 工作流。Anyfile 有界列出条目，但没有 3D 场景渲染器。", canShow: ["USD 场景、纹理与资产路径", "已存储条目大小与软件包顺序"], limitations: ["不渲染几何、材质、动画与 AR 放置", "不解析 USD 引用与 schema 语义"], faq: [{ question: "Anyfile 能以 3D 预览 USDZ 模型吗？", answer: "目前不能。当前能力检查软件包结构；显示场景需要 USD-aware 3D 查看器。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

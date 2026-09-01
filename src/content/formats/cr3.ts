@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const cr3Format = defineFormat("cr3", "images-video", 2,
+  { name: "Canon CR3 RAW", title: "Open Canon CR3 RAW Files Online", description: "Inspect newer Canon CR3 captures locally with embedded preview and RAW decoding where supported.", introduction: "CR3 stores Canon camera data in an ISO Base Media-derived container rather than the TIFF structure used by CR2. Anyfile reads supported metadata and previews, then attempts a basic LibRaw development.", canShow: ["Supported Canon capture metadata", "Embedded preview or representative developed pixels"], limitations: ["Dual-pixel and Canon-specific editing metadata are not fully presented", "Support depends on the precise camera model and LibRaw decoder coverage"], faq: [{ question: "Why might a new Canon camera's CR3 not render?", answer: "RAW decoding depends on model-specific sensor layouts and metadata that must be recognized by the bundled decoder version." }] },
+  { name: "Canon CR3 原片", title: "在线打开 Canon CR3 RAW 文件", description: "在本地检查较新的 Canon CR3 拍摄文件、内嵌预览与受支持 RAW 解码。", introduction: "CR3 在 ISO Base Media 派生容器中保存 Canon 相机数据，不再使用 CR2 的 TIFF 结构。Anyfile 读取受支持元数据与预览，再尝试基础 LibRaw 显影。", canShow: ["受支持的 Canon 拍摄元数据", "内嵌预览或代表性显影像素"], limitations: ["不会完整展示双像素与 Canon 专用编辑元数据", "支持取决于具体相机型号和 LibRaw 解码覆盖"], faq: [{ question: "为什么新 Canon 相机的 CR3 可能无法显影？", answer: "RAW 解码依赖型号专属的传感器布局与元数据，必须被内置解码器版本识别。" }] },
+  cameraRawCapability, cameraRawAlternatives);

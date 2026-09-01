@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, libreOfficeAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const odpFormat = defineFormat("odp", "documents", 2,
+  { name: "OpenDocument presentation", title: "Inspect ODP Presentation Packages Online", description: "Browse OpenDocument presentation package entries locally.", introduction: "ODP packages slide content XML, styles, thumbnails and media assets using OpenDocument's ZIP layout. Anyfile exposes bounded package metadata but does not currently render or play the slides.", canShow: ["Slide XML, styles, thumbnails and media paths", "Entry sizes and compression methods"], limitations: ["Slides, transitions, animations and speaker notes are not rendered", "Linked or encrypted assets are unavailable"], faq: [{ question: "Can Anyfile present an ODP slideshow?", answer: "No. This page covers package inspection; use a presentation application for rendered slides and playback." }] },
+  { name: "OpenDocument 演示文稿", title: "在线检查 ODP 演示软件包", description: "在本地浏览 OpenDocument 演示文稿软件包条目。", introduction: "ODP 使用 OpenDocument ZIP 布局打包幻灯片内容 XML、样式、缩略图与媒体资产。Anyfile 展示有界软件包元数据，但目前不渲染或播放幻灯片。", canShow: ["幻灯片 XML、样式、缩略图与媒体路径", "条目大小与压缩方式"], limitations: ["不渲染幻灯片、切换、动画与演讲者备注", "链接或加密资产不可用"], faq: [{ question: "Anyfile 能播放 ODP 幻灯片吗？", answer: "不能。本页用于软件包检查；渲染与放映请使用演示应用。" }] },
+  archiveInspectionCapability, libreOfficeAlternative);

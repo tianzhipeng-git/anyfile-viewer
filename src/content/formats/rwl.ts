@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const rwlFormat = defineFormat("rwl", "images-video", 2,
+  { name: "Leica RWL RAW", title: "Open Leica RWL RAW Files Online", description: "Inspect supported Leica RWL metadata and representative RAW pixels locally.", introduction: "RWL is used by supported Leica cameras for sensor data, camera metadata and embedded previews. Anyfile reads the selected file with LibRaw-Wasm and presents the safe inspection data it can decode.", canShow: ["Supported Leica capture metadata", "Embedded preview or basic developed image"], limitations: ["Leica color rendering and lens profiles are not reproduced", "Results depend on the precise camera model recognized by LibRaw"], faq: [{ question: "Does RWL support mean every Leica RAW file works?", answer: "No. Leica has used multiple RAW conventions, and support is limited to models and layouts recognized by the bundled decoder." }] },
+  { name: "Leica RWL 原片", title: "在线打开 Leica RWL RAW 文件", description: "在本地检查受支持 Leica RWL 元数据与代表性 RAW 像素。", introduction: "RWL 由受支持 Leica 相机用于保存传感器数据、相机元数据与内嵌预览。Anyfile 通过 LibRaw-Wasm 读取所选文件并展示可安全解码的检查信息。", canShow: ["受支持的 Leica 拍摄元数据", "内嵌预览或基础显影图"], limitations: ["不会复现 Leica 色彩效果与镜头配置", "结果取决于 LibRaw 是否识别具体相机型号"], faq: [{ question: "支持 RWL 是否代表所有 Leica RAW 都能打开？", answer: "不是。Leica 使用过多种 RAW 约定，支持范围仅限内置解码器识别的型号与布局。" }] },
+  cameraRawCapability, cameraRawAlternatives);

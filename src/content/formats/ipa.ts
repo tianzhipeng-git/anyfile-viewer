@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, xcodeAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const ipaFormat = defineFormat("ipa", "developer-artifacts", 2,
+  { name: "iOS application archive", title: "Inspect IPA Package Contents Online", description: "Browse iOS application archive entries locally without installing the app.", introduction: "IPA is a ZIP-derived distribution archive that normally contains an iOS application bundle under Payload, plus code, resources and signing data. Anyfile lists bounded entries without installing or executing the app.", canShow: ["Payload paths, assets and embedded framework names", "Entry sizes and compression information"], limitations: ["Property lists, entitlements and signatures are not fully decoded or verified", "The application cannot run in the browser"], faq: [{ question: "Can opening an IPA install it on an iPhone?", answer: "No. The viewer only inspects local archive structure and does not interact with iOS installation services." }] },
+  { name: "iOS 应用归档", title: "在线检查 IPA 软件包内容", description: "无需安装应用，在本地浏览 iOS 应用归档条目。", introduction: "IPA 是 ZIP 派生分发归档，通常在 Payload 下包含 iOS 应用 bundle，以及代码、资源与签名数据。Anyfile 有界列出条目，不安装也不执行应用。", canShow: ["Payload 路径、资产与内嵌 framework 名称", "条目大小与压缩信息"], limitations: ["不会完整解码或验证 property list、entitlement 与签名", "应用无法在浏览器中运行"], faq: [{ question: "打开 IPA 会把它安装到 iPhone 吗？", answer: "不会。查看器只检查本地归档结构，不与 iOS 安装服务交互。" }] },
+  archiveInspectionCapability, xcodeAlternative);

@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const snupkgFormat = defineFormat("snupkg", "developer-artifacts", 2,
+  { name: "NuGet symbol package", title: "Inspect NuGet Symbol Packages Online", description: "Browse SNUPKG symbol and source-mapping entries locally.", introduction: "SNUPKG is NuGet's ZIP-derived symbol package, commonly carrying portable PDB files associated with a separately distributed library package. Anyfile shows its bounded archive structure without starting a debugger.", canShow: ["Portable PDB and package metadata paths", "Entry sizes and compression information"], limitations: ["Symbols are not matched to binaries or source servers", "PDB contents are not decoded into methods or sequence points"], faq: [{ question: "Is SNUPKG the same as a normal NUPKG?", answer: "No. It is a companion symbol package intended for debugging, while NUPKG distributes the main library assets." }] },
+  { name: "NuGet 符号软件包", title: "在线检查 NuGet Symbol 软件包", description: "在本地浏览 SNUPKG 符号与源码映射条目。", introduction: "SNUPKG 是 NuGet 的 ZIP 派生符号包，通常携带与独立库软件包关联的 portable PDB。Anyfile 展示有界归档结构，不启动调试器。", canShow: ["Portable PDB 与软件包元数据路径", "条目大小与压缩信息"], limitations: ["不会把符号匹配到二进制或源码服务器", "不会把 PDB 解码为方法与 sequence point"], faq: [{ question: "SNUPKG 与普通 NUPKG 相同吗？", answer: "不同。它是用于调试的 companion 符号包，而 NUPKG 分发主库资产。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

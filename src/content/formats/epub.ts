@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, calibreAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const epubFormat = defineFormat("epub", "documents", 2,
+  { name: "EPUB publication", title: "Inspect EPUB Package Contents Online", description: "Browse EPUB container entries locally without uploading the book.", introduction: "EPUB packages publication metadata, navigation, XHTML, styles, fonts and images in a constrained ZIP container. Anyfile currently inspects that package structure; it is not a paginated e-book reader.", canShow: ["Package, navigation and content-document paths", "Entry sizes, media assets and compression details"], limitations: ["Book text is not laid out as reflowable or fixed-layout pages", "DRM-protected publications cannot be decrypted"], faq: [{ question: "Can I read the whole EPUB like an e-book here?", answer: "Not currently. This viewer exposes package structure; use an e-book reader for navigation, typography and pagination." }] },
+  { name: "EPUB 电子出版物", title: "在线检查 EPUB 软件包内容", description: "无需上传图书，在本地浏览 EPUB 容器条目。", introduction: "EPUB 在受约束 ZIP 容器中打包出版元数据、导航、XHTML、样式、字体与图片。Anyfile 当前检查软件包结构，不是分页电子书阅读器。", canShow: ["软件包、导航与内容文档路径", "条目大小、媒体资产与压缩细节"], limitations: ["不会把图书正文排成流式或固定版式页面", "无法解密受 DRM 保护出版物"], faq: [{ question: "能像电子书一样在这里阅读全文吗？", answer: "目前不能。查看器展示软件包结构；导航、排版与分页请使用电子书阅读器。" }] },
+  archiveInspectionCapability, calibreAlternative);

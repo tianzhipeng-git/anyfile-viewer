@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const rawFormat = defineFormat("raw", "images-video", 2,
+  { name: "Generic camera RAW", title: "Inspect RAW Camera Files Online", description: "Probe generically named RAW captures for supported camera data and previews.", introduction: "The .raw extension does not identify one standard: cameras, scanners and scientific tools use it for different sensor or pixel layouts. Anyfile lets LibRaw-Wasm inspect the bytes and only renders files it can recognize.", canShow: ["Metadata from a LibRaw-recognized camera file", "Embedded preview or basic developed pixels when the layout is known"], limitations: ["Arbitrary headerless pixel dumps are not inferred from dimensions alone", "An extension match cannot guarantee a camera model or usable rendering"], faq: [{ question: "Why is RAW not one file format?", answer: "RAW describes minimally processed data, while each producer can define different headers, sensors, packing and metadata." }] },
+  { name: "通用相机 RAW", title: "在线检查 RAW 相机文件", description: "探测使用通用扩展名的 RAW 拍摄文件、受支持相机数据与预览。", introduction: ".raw 扩展名不代表单一标准：相机、扫描仪与科学工具会用它保存不同传感器或像素布局。Anyfile 让 LibRaw-Wasm 检查实际字节，只渲染可识别文件。", canShow: ["LibRaw 可识别相机文件的元数据", "布局已知时的内嵌预览或基础显影像素"], limitations: ["不会仅凭尺寸猜测任意无文件头像素数据", "扩展名匹配不能保证相机型号或可用显影结果"], faq: [{ question: "为什么 RAW 不是一种文件格式？", answer: "RAW 描述最低处理程度的数据，但每个生产者可定义不同文件头、传感器、打包与元数据。" }] },
+  cameraRawCapability, cameraRawAlternatives);

@@ -1,0 +1,7 @@
+import { androidStudioAlternative, archiveInspectionCapability } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const apkFormat = defineFormat("apk", "developer-artifacts", 2,
+  { name: "Android application package", title: "Inspect APK Package Contents Online", description: "Browse Android APK archive entries locally without installing the app.", introduction: "APK is Android's installable application package and uses a signed ZIP-derived layout for compiled code, resources, native libraries and a binary manifest. Anyfile lists bounded package entries without installing or executing them.", canShow: ["Paths and sizes for DEX, resources and native libraries", "Container compression and package structure"], limitations: ["The binary AndroidManifest.xml is not decoded into an app report", "Signatures, permissions and malicious behavior are not validated"], faq: [{ question: "Can opening an APK install or run it?", answer: "No. Anyfile only reads archive metadata in the browser and never hands the package to Android's installer." }] },
+  { name: "Android 应用软件包", title: "在线检查 APK 软件包内容", description: "无需安装应用，在本地浏览 Android APK 归档条目。", introduction: "APK 是 Android 可安装应用软件包，使用签名 ZIP 派生布局保存编译代码、资源、原生库与二进制 manifest。Anyfile 有界列出软件包条目，不安装也不执行。", canShow: ["DEX、资源与原生库的路径和大小", "容器压缩与软件包结构"], limitations: ["不会把二进制 AndroidManifest.xml 解码为应用报告", "不验证签名、权限与恶意行为"], faq: [{ question: "打开 APK 会安装或运行它吗？", answer: "不会。Anyfile 只在浏览器读取归档元数据，绝不把软件包交给 Android 安装器。" }] },
+  archiveInspectionCapability, androidStudioAlternative);

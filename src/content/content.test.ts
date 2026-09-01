@@ -28,16 +28,15 @@ describe("published SEO content", () => {
     }
   });
 
-  it("publishes content for every concrete Manifest format declaration", () => {
+  it("publishes every non-code Manifest extension", () => {
     const routes = new Set(publishedFormatRoutes.map((extension) => `.${extension}`));
     for (const manifest of viewerManifests) {
+      if (manifest.id === "ace-code-text") continue;
       for (const format of manifest.formats) {
-        const extensions = format.extensions.filter((extension) => extension !== "*");
-        if (extensions.length === 0) continue;
-        expect(
-          extensions.some((extension) => routes.has(extension)),
-          `${manifest.id}: ${format.name.en}`,
-        ).toBe(true);
+        for (const extension of format.extensions) {
+          if (extension === "*") continue;
+          expect(routes.has(extension), `${manifest.id}: ${extension}`).toBe(true);
+        }
       }
     }
   });
@@ -75,6 +74,8 @@ describe("published SEO content", () => {
     for (const locale of PUBLISHED_LOCALES) {
       expect(unique(publishedFormats.map(({ extension }) => getFormat(extension, locale)!.title))).toBe(true);
       expect(unique(publishedFormats.map(({ extension }) => getFormat(extension, locale)!.description))).toBe(true);
+      expect(unique(publishedFormats.map(({ extension }) => getFormat(extension, locale)!.introduction))).toBe(true);
+      expect(unique(publishedFormats.flatMap(({ extension }) => getFormat(extension, locale)!.faq.map(({ question }) => question)))).toBe(true);
       expect(unique(publishedCategories.map(({ slug }) => getCategory(slug, locale)!.title))).toBe(true);
       expect(unique(publishedPlugins.map(({ pluginId }) => getPlugin(pluginId, locale)!.title))).toBe(true);
     }

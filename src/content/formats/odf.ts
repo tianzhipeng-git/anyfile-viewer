@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, libreOfficeAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const odfFormat = defineFormat("odf", "documents", 2,
+  { name: "OpenDocument formula", title: "Inspect ODF Formula Packages Online", description: "Browse OpenDocument formula package entries locally.", introduction: "The .odf extension is used for OpenDocument Formula packages produced by Math-compatible office tools. Anyfile can inspect the ZIP package and locate formula XML and metadata, but it does not typeset the equation.", canShow: ["Formula content, settings and metadata paths", "Entry sizes and package compression"], limitations: ["MathML or OpenDocument formula markup is not rendered", "Embedded or encrypted resources are not interpreted"], faq: [{ question: "Is every .odf file the whole OpenDocument standard?", answer: "No. In this manifest the extension refers specifically to an OpenDocument Formula package." }] },
+  { name: "OpenDocument 公式", title: "在线检查 ODF 公式软件包", description: "在本地浏览 OpenDocument 公式软件包条目。", introduction: ".odf 扩展名用于 Math 兼容办公工具生成的 OpenDocument Formula 软件包。Anyfile 可检查 ZIP 软件包并定位公式 XML 与元数据，但不排版公式。", canShow: ["公式内容、设置与元数据路径", "条目大小与软件包压缩"], limitations: ["不渲染 MathML 或 OpenDocument 公式标记", "不解释内嵌或加密资源"], faq: [{ question: "每个 .odf 都代表整个 OpenDocument 标准吗？", answer: "不是。在当前 Manifest 中，该扩展名专指 OpenDocument Formula 软件包。" }] },
+  archiveInspectionCapability, libreOfficeAlternative);

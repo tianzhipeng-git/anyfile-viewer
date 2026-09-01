@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const eggFormat = defineFormat("egg", "developer-artifacts", 2,
+  { name: "Python Egg package", title: "Inspect Python Egg Contents Online", description: "Browse legacy Python Egg package modules and metadata locally.", introduction: "Egg is a legacy Python distribution format that often uses a ZIP archive containing packages and EGG-INFO metadata. Anyfile lists its entries without importing Python modules or processing setup hooks.", canShow: ["Python package and EGG-INFO paths", "Entry sizes and compression methods"], limitations: ["Dependencies, entry points and platform compatibility are not validated", "Python bytecode, native extensions and setup logic are never executed"], faq: [{ question: "How is an Egg different from a Wheel?", answer: "Egg is an older distribution convention; Wheel is the modern standardized built-package format used by current Python tooling." }] },
+  { name: "Python Egg 软件包", title: "在线检查 Python Egg 内容", description: "在本地浏览旧式 Python Egg 软件包模块与元数据。", introduction: "Egg 是旧式 Python 分发格式，通常使用包含 package 与 EGG-INFO 元数据的 ZIP 归档。Anyfile 列出条目，不导入 Python 模块，也不处理 setup hook。", canShow: ["Python package 与 EGG-INFO 路径", "条目大小与压缩方式"], limitations: ["不验证依赖、entry point 与平台兼容性", "绝不执行 Python bytecode、原生扩展与 setup 逻辑"], faq: [{ question: "Egg 与 Wheel 有何区别？", answer: "Egg 是较旧分发约定；Wheel 是当前 Python 工具使用的现代标准化构建包格式。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

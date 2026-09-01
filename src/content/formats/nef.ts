@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const nefFormat = defineFormat("nef", "images-video", 2,
+  { name: "Nikon NEF RAW", title: "Open Nikon NEF RAW Files Online", description: "Inspect Nikon NEF metadata, embedded previews and basic RAW pixels locally.", introduction: "NEF is Nikon's camera RAW family and typically stores sensor samples with maker metadata and JPEG previews in a TIFF-derived structure. Anyfile extracts supported information and performs a representative LibRaw development.", canShow: ["Nikon camera, lens and exposure metadata", "Embedded preview or basic developed image"], limitations: ["Nikon Picture Controls and exact Capture NX rendering are not reproduced", "Model-specific compression and encrypted maker data can limit results"], faq: [{ question: "What is an NRW file?", answer: "NRW is a Nikon RAW variant used by some compact cameras; this page covers it as part of the same Nikon inspection task." }] },
+  { name: "Nikon NEF 原片", title: "在线打开 Nikon NEF RAW 文件", description: "在本地检查 Nikon NEF 元数据、内嵌预览与基础 RAW 像素。", introduction: "NEF 是 Nikon 相机 RAW 家族，通常在 TIFF 派生结构中保存传感器采样、厂商元数据与 JPEG 预览。Anyfile 提取受支持信息并执行代表性 LibRaw 显影。", canShow: ["Nikon 相机、镜头与曝光元数据", "内嵌预览或基础显影图"], limitations: ["不会复现 Nikon Picture Control 与 Capture NX 精确效果", "型号专属压缩与加密 maker data 可能限制结果"], faq: [{ question: "NRW 文件是什么？", answer: "NRW 是部分 Nikon 便携相机使用的 RAW 变体，本页将其归入同一 Nikon 检查任务。" }] },
+  cameraRawCapability, cameraRawAlternatives, ["nrw"]);

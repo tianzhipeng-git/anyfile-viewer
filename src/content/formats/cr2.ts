@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const cr2Format = defineFormat("cr2", "images-video", 2,
+  { name: "Canon CR2 RAW", title: "Open Canon CR2 RAW Files Online", description: "Inspect Canon CR2 metadata, previews and a basic local RAW rendering.", introduction: "CR2 is Canon's TIFF-based camera RAW format and can contain sensor data, EXIF metadata and embedded JPEG previews. Anyfile extracts available previews and asks LibRaw-Wasm for a representative development.", canShow: ["Camera, lens and capture metadata", "Embedded preview or a basic developed image"], limitations: ["Canon picture styles and exact in-camera processing are not reproduced", "Unsupported cameras or compression variants may yield metadata only"], faq: [{ question: "Is CR2 the same format as newer CR3?", answer: "No. CR2 is TIFF-based, while CR3 uses an ISO Base Media container and has a different internal organization." }] },
+  { name: "Canon CR2 原片", title: "在线打开 Canon CR2 RAW 文件", description: "检查 Canon CR2 元数据、预览与基础本地 RAW 显影。", introduction: "CR2 是 Canon 基于 TIFF 的相机 RAW 格式，可包含传感器数据、EXIF 元数据与内嵌 JPEG 预览。Anyfile 会提取可用预览，并通过 LibRaw-Wasm 生成代表性显影图。", canShow: ["相机、镜头与拍摄元数据", "内嵌预览或基础显影图"], limitations: ["不会复现 Canon 照片风格与机内精确处理", "不支持的相机或压缩变体可能只能显示元数据"], faq: [{ question: "CR2 与较新的 CR3 是同一格式吗？", answer: "不是。CR2 基于 TIFF，而 CR3 使用 ISO Base Media 容器，内部组织不同。" }] },
+  cameraRawCapability, cameraRawAlternatives);

@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const whlFormat = defineFormat("whl", "developer-artifacts", 2,
+  { name: "Python wheel", title: "Inspect Python Wheel Contents Online", description: "Browse Python wheel package modules and metadata locally.", introduction: "A wheel is a ZIP-derived built distribution for Python, with a filename and dist-info metadata describing compatibility. Anyfile lists package entries without importing modules, installing dependencies or running setup code.", canShow: ["Python modules, native-extension and dist-info paths", "Entry sizes and compression methods"], limitations: ["Wheel tags, RECORD hashes and dependencies are not fully validated", "Python and native code are never imported or executed"], faq: [{ question: "Can inspecting a wheel run its Python code?", answer: "No. The archive viewer only reads entry metadata and never invokes Python or an installer." }] },
+  { name: "Python Wheel 软件包", title: "在线检查 Python Wheel 内容", description: "在本地浏览 Python wheel 软件包模块与元数据。", introduction: "Wheel 是 Python 的 ZIP 派生构建分发包，文件名与 dist-info 元数据描述兼容性。Anyfile 列出软件包条目，不导入模块、不安装依赖也不运行 setup 代码。", canShow: ["Python 模块、原生扩展与 dist-info 路径", "条目大小与压缩方式"], limitations: ["不会完整验证 wheel tag、RECORD 哈希与依赖", "绝不导入或执行 Python 与原生代码"], faq: [{ question: "检查 wheel 会运行其中 Python 代码吗？", answer: "不会。归档查看器只读取条目元数据，绝不调用 Python 或安装器。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

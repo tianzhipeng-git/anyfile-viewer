@@ -1,0 +1,6 @@
+import { defineFormat } from "./define-format";
+
+export const threeGpFormat = defineFormat("3gp", "images-video", 3,
+  { name: "3GPP video", title: "Play 3GP Videos Online", description: "Play supported 3GPP mobile video locally in the browser.", introduction: "3GP is an ISO Base Media container designed for mobile multimedia. Anyfile probes the tracks and plays the verified AVC video with AAC-LC audio subset without uploading the file.", canShow: ["Supported AVC video and AAC-LC audio", "Duration, seeking and browser playback controls"], limitations: ["H.263, AMR and other common 3GP combinations are not currently supported", "Playback still depends on the current browser and operating system"], faq: [{ question: "Why can an older 3GP file fail?", answer: "Many older phones used H.263 video or AMR audio, while the current viewer declares only the verified AVC and AAC-LC combination." }] },
+  { name: "3GPP 视频", title: "在线播放 3GP 视频", description: "在浏览器本地播放受支持的 3GPP 手机视频。", introduction: "3GP 是面向移动多媒体的 ISO Base Media 容器。Anyfile 会探测内部轨道，并在不上传文件的前提下播放已验证的 AVC 视频与 AAC-LC 音频子集。", canShow: ["受支持的 AVC 视频与 AAC-LC 音频", "时长、定位与浏览器播放控制"], limitations: ["目前不支持 H.263、AMR 等常见 3GP 组合", "播放仍取决于当前浏览器与操作系统"], faq: [{ question: "为什么旧 3GP 文件可能失败？", answer: "许多旧手机使用 H.263 视频或 AMR 音频，而当前查看器只声明已经验证的 AVC 与 AAC-LC 组合。" }] },
+  { possibleLevels: [3, 4] }, undefined, ["3g2"]);

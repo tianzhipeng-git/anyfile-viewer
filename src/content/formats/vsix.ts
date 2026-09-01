@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const vsixFormat = defineFormat("vsix", "developer-artifacts", 2,
+  { name: "Visual Studio extension", title: "Inspect VSIX Extension Packages Online", description: "Browse Visual Studio extension package entries locally without installing them.", introduction: "VSIX follows Open Packaging Conventions and normally includes a .vsixmanifest plus extension assemblies and assets. Anyfile lists the ZIP-derived package entries without registering or running the extension.", canShow: ["Manifest, assembly and asset paths", "Entry sizes and compression details"], limitations: ["The VSIX manifest and compatibility targets are not fully interpreted", "Assemblies, commands and installers are never executed"], faq: [{ question: "Will opening a VSIX install it in Visual Studio?", answer: "No. Anyfile only inspects package metadata and does not invoke the VSIX installer." }] },
+  { name: "Visual Studio 扩展", title: "在线检查 VSIX 扩展软件包", description: "无需安装，在本地浏览 Visual Studio 扩展软件包条目。", introduction: "VSIX 遵循 Open Packaging Conventions，通常包含 .vsixmanifest、扩展程序集与资产。Anyfile 列出 ZIP 派生软件包条目，不注册也不运行扩展。", canShow: ["Manifest、程序集与资产路径", "条目大小与压缩细节"], limitations: ["不会完整解释 VSIX manifest 与兼容性目标", "绝不执行程序集、命令与安装程序"], faq: [{ question: "打开 VSIX 会把它安装到 Visual Studio 吗？", answer: "不会。Anyfile 只检查软件包元数据，不调用 VSIX 安装器。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

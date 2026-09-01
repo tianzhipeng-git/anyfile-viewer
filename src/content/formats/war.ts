@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const warFormat = defineFormat("war", "developer-artifacts", 2,
+  { name: "Java web archive", title: "Inspect WAR Package Contents Online", description: "Browse Java web application package entries locally without deploying them.", introduction: "WAR is a ZIP-derived deployment package for Java web applications, typically containing WEB-INF metadata, classes, libraries and public assets. Anyfile reads bounded archive entries without starting a servlet container.", canShow: ["Entry paths, sizes and compression methods", "WEB-INF and packaged asset names when present"], limitations: ["The web application is not deployed or executed", "Class files, descriptors and nested libraries are not semantically analyzed"], faq: [{ question: "Can opening a WAR start its web application?", answer: "No. The viewer only lists package structure and never launches Java or an application server." }] },
+  { name: "Java Web 归档", title: "在线检查 WAR 软件包内容", description: "无需部署，在本地浏览 Java Web 应用软件包条目。", introduction: "WAR 是 Java Web 应用使用的 ZIP 派生部署包，通常包含 WEB-INF 元数据、类、库与公开资产。Anyfile 有界读取归档条目，不启动 servlet 容器。", canShow: ["条目路径、大小与压缩方式", "存在时的 WEB-INF 与打包资产名称"], limitations: ["不会部署或执行 Web 应用", "不会语义分析 class、描述符与嵌套库"], faq: [{ question: "打开 WAR 会启动其中 Web 应用吗？", answer: "不会。查看器只列出软件包结构，绝不启动 Java 或应用服务器。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

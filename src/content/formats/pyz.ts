@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const pyzFormat = defineFormat("pyz", "developer-artifacts", 2,
+  { name: "Python ZIP application", title: "Inspect Python PYZ Application Contents Online", description: "Browse Python ZIP application modules locally without running them.", introduction: "PYZ and PYZW files are executable Python ZIP applications that normally contain a __main__.py entry point plus modules and resources. Anyfile lists bounded entries and never invokes the Python interpreter.", canShow: ["__main__.py, module and resource paths", "Entry sizes and compression information"], limitations: ["Source, bytecode and native modules are not executed", "Import behavior and runtime dependencies are not resolved"], faq: [{ question: "Can inspecting a PYZ start the application?", answer: "No. The archive viewer does not call Python; PYZW is redirected here because it is the windowed variant of the same package task." }] },
+  { name: "Python ZIP 应用", title: "在线检查 Python PYZ 应用内容", description: "无需运行，在本地浏览 Python ZIP 应用模块。", introduction: "PYZ 与 PYZW 是可执行 Python ZIP 应用，通常包含 __main__.py 入口以及模块和资源。Anyfile 有界列出条目，绝不调用 Python 解释器。", canShow: ["__main__.py、模块与资源路径", "条目大小与压缩信息"], limitations: ["不执行源码、bytecode 与原生模块", "不解析 import 行为与运行时依赖"], faq: [{ question: "检查 PYZ 会启动应用吗？", answer: "不会。归档查看器不调用 Python；PYZW 是相同软件包任务的窗口化变体，因此重定向到这里。" }] },
+  archiveInspectionCapability, archiveToolAlternative, ["pyzw"]);

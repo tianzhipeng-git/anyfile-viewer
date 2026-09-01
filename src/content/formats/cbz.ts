@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const cbzFormat = defineFormat("cbz", "documents", 2,
+  { name: "Comic Book ZIP", title: "Inspect CBZ Comic Archives Online", description: "Browse comic archive image entries locally without uploading.", introduction: "CBZ is a ZIP archive whose ordered image files represent comic pages, sometimes with ComicInfo.xml metadata. Anyfile currently lists the page assets and archive metadata rather than presenting a comic-reading sequence.", canShow: ["Image-page filenames, sizes and compression", "ComicInfo.xml and other metadata paths when present"], limitations: ["Pages are not arranged in a dedicated comic reader", "Filename ordering and spread direction are not interpreted"], faq: [{ question: "Can I read a CBZ page by page here?", answer: "Not currently. The archive structure is inspectable, but a comic reader is needed for ordered pages, spreads and navigation." }] },
+  { name: "Comic Book ZIP", title: "在线检查 CBZ 漫画归档", description: "无需上传，在本地浏览漫画归档图片条目。", introduction: "CBZ 是以排序图片文件表示漫画页面的 ZIP 归档，有时还包含 ComicInfo.xml 元数据。Anyfile 当前列出页面资产与归档元数据，不提供漫画阅读序列。", canShow: ["图片页面文件名、大小与压缩方式", "存在时的 ComicInfo.xml 与其他元数据路径"], limitations: ["不会在专用漫画阅读器中排列页面", "不解释文件名顺序与跨页方向"], faq: [{ question: "能在这里逐页阅读 CBZ 吗？", answer: "目前不能。可以检查归档结构；排序页面、跨页与导航需要漫画阅读器。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

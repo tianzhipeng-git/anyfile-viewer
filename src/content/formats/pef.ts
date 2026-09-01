@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const pefFormat = defineFormat("pef", "images-video", 2,
+  { name: "Pentax PEF RAW", title: "Open Pentax PEF RAW Files Online", description: "Inspect Pentax PEF metadata, previews and a basic RAW rendering locally.", introduction: "PEF is Pentax's proprietary RAW format for sensor samples and camera metadata. Anyfile extracts supported EXIF and maker information, uses an embedded preview when available and attempts a LibRaw development.", canShow: ["Pentax camera, lens and exposure metadata", "Embedded or basic developed preview"], limitations: ["Pentax Custom Image settings are not reproduced", "Model-specific compression and metadata can reduce the available view"], faq: [{ question: "Is PEF interchangeable with DNG from a Pentax camera?", answer: "No. Both may represent the same capture intent, but their containers and metadata organization differ." }] },
+  { name: "Pentax PEF 原片", title: "在线打开 Pentax PEF RAW 文件", description: "在本地检查 Pentax PEF 元数据、预览与基础 RAW 显影。", introduction: "PEF 是 Pentax 用于保存传感器采样与相机元数据的专有 RAW 格式。Anyfile 提取受支持 EXIF 与 maker 信息，优先使用内嵌预览，并尝试 LibRaw 显影。", canShow: ["Pentax 相机、镜头与曝光元数据", "内嵌或基础显影预览"], limitations: ["不会复现 Pentax Custom Image 设置", "型号专属压缩与元数据可能减少可查看内容"], faq: [{ question: "PEF 与 Pentax 相机的 DNG 可以互换吗？", answer: "不可以。两者可能表达相同拍摄意图，但容器与元数据组织不同。" }] },
+  cameraRawCapability, cameraRawAlternatives);

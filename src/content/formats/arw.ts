@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const arwFormat = defineFormat("arw", "images-video", 2,
+  { name: "Sony ARW RAW", title: "Open Sony ARW RAW Files Online", description: "Inspect Sony Alpha RAW metadata, previews and basic developed pixels locally.", introduction: "ARW is Sony's TIFF-derived RAW family for Alpha cameras. Anyfile reads supported camera metadata and embedded previews, then uses LibRaw-Wasm for a neutral representative development.", canShow: ["Sony camera, lens and exposure metadata", "Embedded preview or basic RAW development"], limitations: ["Creative Looks and proprietary lens corrections are not reproduced", "Compressed and model-specific variants depend on decoder coverage"], faq: [{ question: "How are SR2 and SRF related to ARW?", answer: "They are older Sony RAW extensions with related user intent but different generations of camera data, redirected here for one maintained Sony RAW guide." }] },
+  { name: "Sony ARW 原片", title: "在线打开 Sony ARW RAW 文件", description: "在本地检查 Sony Alpha RAW 元数据、预览与基础显影像素。", introduction: "ARW 是 Sony Alpha 相机使用的 TIFF 派生 RAW 家族。Anyfile 读取受支持相机元数据与内嵌预览，再通过 LibRaw-Wasm 进行中性代表性显影。", canShow: ["Sony 相机、镜头与曝光元数据", "内嵌预览或基础 RAW 显影"], limitations: ["不会复现 Creative Look 与专有镜头校正", "压缩及型号专属变体取决于解码器覆盖"], faq: [{ question: "SR2、SRF 与 ARW 有何关系？", answer: "它们是较旧的 Sony RAW 扩展名，用户任务相同但数据代际不同，因此重定向到这一份持续维护的 Sony RAW 指南。" }] },
+  cameraRawCapability, cameraRawAlternatives, ["sr2", "srf"]);

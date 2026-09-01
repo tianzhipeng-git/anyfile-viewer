@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, libreOfficeAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const odtFormat = defineFormat("odt", "documents", 2,
+  { name: "OpenDocument text", title: "Inspect ODT Document Packages Online", description: "Browse OpenDocument text package entries locally.", introduction: "ODT stores text documents as an OpenDocument ZIP package containing content XML, styles, metadata and embedded assets. Anyfile currently lists the package structure rather than rendering the formatted document pages.", canShow: ["Content, style, metadata and embedded-asset paths", "Entry sizes and compression details"], limitations: ["Paragraphs, pages, fields and tracked changes are not rendered", "Encrypted documents cannot be decrypted"], faq: [{ question: "Will an ODT look like it does in LibreOffice?", answer: "No. The current capability is structural package inspection, not a full word-processing layout engine." }] },
+  { name: "OpenDocument 文本文档", title: "在线检查 ODT 文档软件包", description: "在本地浏览 OpenDocument 文本文档软件包条目。", introduction: "ODT 把文本文档保存为包含内容 XML、样式、元数据与内嵌资产的 OpenDocument ZIP 软件包。Anyfile 当前列出软件包结构，而不渲染格式化文档页面。", canShow: ["内容、样式、元数据与内嵌资产路径", "条目大小与压缩细节"], limitations: ["不渲染段落、页面、域与修订", "无法解密加密文档"], faq: [{ question: "ODT 会与 LibreOffice 中显示一样吗？", answer: "不会。当前能力是结构化软件包检查，不是完整文字处理排版引擎。" }] },
+  archiveInspectionCapability, libreOfficeAlternative);

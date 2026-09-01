@@ -1,0 +1,7 @@
+import { archiveInspectionCapability, archiveToolAlternative } from "./archive-shared";
+import { defineFormat } from "./define-format";
+
+export const nupkgFormat = defineFormat("nupkg", "developer-artifacts", 2,
+  { name: "NuGet package", title: "Inspect NuGet Package Contents Online", description: "Browse NuGet package files and framework folders locally.", introduction: "NUPKG is a ZIP-derived NuGet distribution package containing a nuspec manifest, libraries, build assets and other files. Anyfile lists bounded entries without restoring dependencies or loading assemblies.", canShow: ["nuspec, lib, ref, runtimes and build paths when present", "Entry sizes and compression methods"], limitations: ["Package metadata is not resolved into a dependency graph", "Assemblies and build scripts are not executed or decompiled"], faq: [{ question: "Can opening a NUPKG install it into a project?", answer: "No. The viewer only inspects package structure and never runs NuGet restore or package scripts." }] },
+  { name: "NuGet 软件包", title: "在线检查 NuGet 软件包内容", description: "在本地浏览 NuGet 软件包文件与 framework 目录。", introduction: "NUPKG 是 ZIP 派生 NuGet 分发包，包含 nuspec manifest、库、构建资产与其他文件。Anyfile 有界列出条目，不恢复依赖，也不加载程序集。", canShow: ["存在时的 nuspec、lib、ref、runtimes 与 build 路径", "条目大小与压缩方式"], limitations: ["不会把软件包元数据解析为依赖图", "不执行或反编译程序集与构建脚本"], faq: [{ question: "打开 NUPKG 会把它安装到项目吗？", answer: "不会。查看器只检查软件包结构，绝不运行 NuGet restore 或软件包脚本。" }] },
+  archiveInspectionCapability, archiveToolAlternative);

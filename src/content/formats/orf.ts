@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const orfFormat = defineFormat("orf", "images-video", 2,
+  { name: "Olympus ORF RAW", title: "Open Olympus ORF RAW Files Online", description: "Inspect Olympus and OM System ORF metadata and previews locally.", introduction: "ORF stores sensor data from Olympus and related Micro Four Thirds cameras with maker-specific metadata and previews. Anyfile uses LibRaw-Wasm for supported metadata extraction and representative development.", canShow: ["Camera, lens and capture metadata", "Embedded preview or basic developed image"], limitations: ["Art Filters, focus stacking and camera-specific corrections are not reconstructed", "New or uncommon model variants may be only partly recognized"], faq: [{ question: "Does ORF viewing apply Olympus Art Filters?", answer: "No. Those camera processing choices are not part of the neutral basic RAW development." }] },
+  { name: "Olympus ORF 原片", title: "在线打开 Olympus ORF RAW 文件", description: "在本地检查 Olympus 与 OM System ORF 元数据和预览。", introduction: "ORF 保存 Olympus 及相关 Micro Four Thirds 相机的传感器数据、厂商元数据与预览。Anyfile 使用 LibRaw-Wasm 提取受支持元数据并生成代表性显影图。", canShow: ["相机、镜头与拍摄元数据", "内嵌预览或基础显影图"], limitations: ["不会重建艺术滤镜、焦点堆栈与机型专属校正", "新型号或少见变体可能只能部分识别"], faq: [{ question: "查看 ORF 会应用 Olympus 艺术滤镜吗？", answer: "不会。这些机内处理选项不属于中性基础 RAW 显影。" }] },
+  cameraRawCapability, cameraRawAlternatives);

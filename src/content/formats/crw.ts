@@ -1,0 +1,7 @@
+import { cameraRawAlternatives, cameraRawCapability } from "./camera-raw-shared";
+import { defineFormat } from "./define-format";
+
+export const crwFormat = defineFormat("crw", "images-video", 2,
+  { name: "Canon CRW RAW", title: "Open Canon CRW RAW Files Online", description: "Inspect legacy Canon CRW metadata and a representative local preview.", introduction: "CRW is Canon's older CIFF-based RAW format, used before the TIFF-based CR2 family. Anyfile relies on LibRaw-Wasm to recognize supported cameras, recover metadata and produce a basic inspection image.", canShow: ["Legacy Canon capture metadata", "Embedded or developed preview when supported"], limitations: ["Older model variations are not uniformly decoded", "The rendering does not reproduce Canon's historical software processing"], faq: [{ question: "Should a CRW file be renamed to CR2?", answer: "No. They use different internal formats; changing the extension does not convert the sensor data." }] },
+  { name: "Canon CRW 原片", title: "在线打开 Canon CRW RAW 文件", description: "检查旧式 Canon CRW 元数据与代表性本地预览。", introduction: "CRW 是 Canon 早于 TIFF-based CR2 家族使用的 CIFF-based RAW 格式。Anyfile 通过 LibRaw-Wasm 识别受支持相机、读取元数据并生成基础检查图。", canShow: ["旧式 Canon 拍摄元数据", "受支持时的内嵌或显影预览"], limitations: ["不同旧型号并非都能一致解码", "显影结果不会复现 Canon 历史软件处理"], faq: [{ question: "可以把 CRW 直接改名为 CR2 吗？", answer: "不可以。两者内部格式不同，修改扩展名不会转换传感器数据。" }] },
+  cameraRawCapability, cameraRawAlternatives);
