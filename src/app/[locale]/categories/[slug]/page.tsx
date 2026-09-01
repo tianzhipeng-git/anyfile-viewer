@@ -11,8 +11,9 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCategory, getCategoryFormats, publishedCategories } from "@/content";
-import { alternateLanguages, isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
+import { isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
+import { localizedPageMetadata } from "@/lib/seo";
 
 export const dynamicParams = false;
 export function generateStaticParams() { return publishedCategories.map(({ slug }) => ({ slug })); }
@@ -22,8 +23,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!isPublishedLocale(locale)) return {};
   const category = getCategory(slug, locale);
   if (!category) return {};
+  const dictionary = await getDictionary(locale);
   const path = `/categories/${slug}`;
-  return { title: category.title, description: category.description, alternates: { canonical: localePath(locale, path), languages: alternateLanguages(path) } };
+  return localizedPageMetadata({ locale, path, title: category.title, description: `${category.description}${dictionary.category.localSuffix}` });
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {

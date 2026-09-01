@@ -1,0 +1,49 @@
+{
+  "methodology_version": "1.1",
+  "market": { "location_code": 2840, "language_code": "en" },
+  "settings": {
+    "suggestions_limit": 100,
+    "minimum_suggestion_volume": 10,
+    "max_keywords_per_candidate": 40,
+    "serp_depth": 10,
+    "trends_time_range": "past_12_months"
+  },
+  "candidates": [
+    {
+      "id": "psd", "format_name": "Adobe Photoshop Document", "extensions": ["psd"],
+      "aliases": ["photoshop document"], "suggestion_seeds": ["psd file"],
+      "seed_keywords": ["psd viewer online", "open psd file", "how to open psd file", "psd file viewer"],
+      "serp_context_groups": [["psd"], ["photoshop", "document"]]
+    },
+    {
+      "id": "psb", "format_name": "Adobe Photoshop Large Document", "extensions": ["psb"],
+      "aliases": ["photoshop large document"], "suggestion_seeds": ["psb file"],
+      "seed_keywords": ["psb viewer online", "open psb file", "how to open psb file", "psb file viewer"],
+      "serp_context_groups": [["psb"], ["photoshop", "large document"]]
+    },
+    {
+      "id": "ai", "format_name": "Adobe Illustrator Artwork", "extensions": ["ai"],
+      "aliases": ["illustrator artwork", "adobe illustrator file"], "suggestion_seeds": ["adobe illustrator file"],
+      "seed_keywords": ["adobe illustrator ai viewer online", "open ai file", "how to open ai file", "ai file viewer"],
+      "serp_context_groups": [["ai file"], ["adobe", "illustrator"]]
+    },
+    {
+      "id": "eps", "format_name": "Encapsulated PostScript", "extensions": ["eps"],
+      "aliases": ["encapsulated postscript"], "suggestion_seeds": ["eps file"],
+      "seed_keywords": ["eps viewer online", "open eps file", "how to open eps file", "eps file viewer"],
+      "serp_context_groups": [["eps"], ["encapsulated", "postscript"]]
+    },
+    {
+      "id": "dwg", "format_name": "AutoCAD Drawing", "extensions": ["dwg"],
+      "aliases": ["autocad drawing"], "suggestion_seeds": ["dwg file"],
+      "seed_keywords": ["dwg viewer online", "open dwg file", "how to open dwg file", "dwg file viewer"],
+      "serp_context_groups": [["dwg"], ["autocad", "drawing"]]
+    },
+    {
+      "id": "dxf", "format_name": "Drawing Exchange Format", "extensions": ["dxf"],
+      "aliases": ["drawing exchange format"], "suggestion_seeds": ["dxf file"],
+      "seed_keywords": ["dxf viewer online", "open dxf file", "how to open dxf file", "dxf file viewer"],
+      "serp_context_groups": [["dxf"], ["drawing exchange", "format"]]
+    }
+  ]
+}

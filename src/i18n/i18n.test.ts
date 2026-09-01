@@ -1,11 +1,11 @@
 import { readdir, readFile } from "node:fs/promises";
 import { join } from "node:path";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { SUPPORTED_LOCALES } from "@anyfile/i18n";
 
 import english from "./dictionaries/en";
 import chinese from "./dictionaries/zh-CN";
-import { PUBLISHED_LOCALES, alternateLanguages, localePath } from "./config";
+import { PUBLISHED_LOCALES, alternateLanguages, localePath, siteUrl } from "./config";
 import { viewerRegistrations } from "../lib/viewer-registrations";
 
 function leafKeys(value: unknown, prefix = ""): string[] {
@@ -62,6 +62,15 @@ describe("application i18n contract", () => {
       "zh-CN": "/zh-CN/formats/pdf",
       "x-default": "/en/formats/pdf",
     });
+  });
+
+  it("uses www.anyfile.top as the canonical production host", () => {
+    vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://anyfile.top");
+    try {
+      expect(siteUrl().toString()).toBe("https://www.anyfile.top/");
+    } finally {
+      vi.unstubAllEnvs();
+    }
   });
 
   it("keeps locale selection out of plugin business logic", async () => {

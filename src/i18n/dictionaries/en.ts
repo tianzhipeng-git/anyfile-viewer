@@ -2,10 +2,11 @@ import type { AppDictionary } from "../types";
 
 const dictionary = {
   metadata: {
-    siteTitle: "Anyfile — Local file viewer",
-    siteDescription: "Preview local files quickly and privately in your browser without uploading.",
-    viewerTitle: "Open a file",
-    viewerDescription: "Choose and preview a file locally in your browser.",
+    siteTitle: "Anyfile — Free online file viewer",
+    siteDescription: "Open documents, images, media, code and data with a fast, private online file viewer. Free to use, with no uploads or desktop software.",
+    viewerTitle: "Free online file viewer",
+    viewerDescription: "Open supported files instantly with a fast, private online viewer. Free to use; files stay on your device and are never uploaded.",
+    noUploadSuffix: " No upload required.",
   },
   common: {
     home: "Home", mainNavigation: "Main navigation", openFile: "Open file", openFolder: "Open folder",
@@ -13,14 +14,15 @@ const dictionary = {
     footerPrivacy: "Your files stay on your device. Anyfile reads and previews them using local browser capabilities only.",
     copyright: "© 2026 Anyfile. Local first, privacy always.", native: "Browser native", plugin: "Plugin",
     learnAndOpen: "Learn and open", browseFormats: "Browse supported formats", directOpen: "Open a file now", language: "Language",
+    about: "About", privacy: "Privacy policy", contact: "Contact", resources: "Anyfile", email: "Email", sourceCode: "Source code",
   },
   nav: {
-    imagesVideo: "Images & media", documents: "Documents", codeData: "Code & data",
-    developerArtifacts: "Developer artifacts", threeD: "3D", design: "Design",
+    imagesVideo: "Images & Media", documents: "Documents", codeData: "Data",
+    developerArtifacts: "Developer", threeD: "3D", design: "Design",
   },
   home: {
-    localFirst: "LOCAL-FIRST FILE VIEWER", title: "Open every file in one place.",
-    description: "No uploads. Use your browser to view images, documents, code, data and 3D files quickly and privately.",
+    localFirst: "FREE ONLINE FILE VIEWER", title: "Open files online without uploading.",
+    description: "Use a fast, private viewer for supported images, documents, media, code and data. It is free, and your files stay on your device.",
     selectFile: "Choose a local file", browse: "Browse supported formats", trust: "Local processing · No account · Free to use",
     privacyEyebrow: "PRIVACY BY DEFAULT", privacyTitle: "Your files belong to you.",
     privacyDescription: "Anyfile reads only the files you choose. Previewing, decoding and rendering all happen in this browser tab.",
@@ -32,12 +34,14 @@ const dictionary = {
     formatsEyebrow: "SUPPORTED FORMATS", formatsTitle: "Find the format you need.",
     formatsDescription: "Browser-native formats and dedicated viewer plugins, organized into clear categories.",
     browseCount: "Browse {count} formats",
+    popularFormatsTitle: "Popular file viewers",
+    popularFormatsDescription: "Go directly to practical guides, supported features and known limits for commonly opened formats.",
   },
   category: { home: "Home", viewerSuffix: " viewers", localSuffix: " Everything is processed on this device.", formats: "FORMATS", choose: "Choose a file format" },
   format: {
     viewerSuffix: " viewer", metadataDescription: "View {name} locally in your browser. {description}",
     browserNativeView: "Browser-native viewing", pluginView: "Dedicated plugin", headline: "Open {name} instantly.",
-    privacySuffix: " Your file is never uploaded; previewing happens only in your browser.", choose: "Choose a .{extension} file",
+    privacySuffix: " No upload required; processing stays in your browser.", choose: "Choose a .{extension} file",
     benefits: [
       { title: "Faster", description: "Skip file uploads and cloud processing queues." },
       { title: "More private", description: "File contents are never sent to Anyfile servers." },

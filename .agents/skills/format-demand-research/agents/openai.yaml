@@ -1,0 +1,4 @@
+interface:
+  display_name: "Format Demand Research"
+  short_description: "Rank candidate file formats with DataForSEO evidence"
+  default_prompt: "Use $format-demand-research to evaluate a user-approved set of candidate file formats."

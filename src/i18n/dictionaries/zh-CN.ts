@@ -2,8 +2,9 @@ import type { AppDictionary } from "../types";
 
 const dictionary = {
   metadata: {
-    siteTitle: "Anyfile — 本地文件查看器", siteDescription: "无需上传，在浏览器中快速、安全地预览各种格式的本地文件。",
-    viewerTitle: "打开文件", viewerDescription: "在浏览器本地选择并预览文件。",
+    siteTitle: "Anyfile — 免费在线文件查看器", siteDescription: "免费的在线文件查看器：快速、私密地打开文档、图片、音视频、代码与数据文件，无需上传、注册账户或安装软件。",
+    viewerTitle: "免费在线文件查看器", viewerDescription: "使用快速、私密的在线查看器打开受支持文件。完全免费，文件留在当前设备，无需上传。",
+    noUploadSuffix: " 无需上传。",
   },
   common: {
     home: "首页", mainNavigation: "主要导航", openFile: "打开文件", openFolder: "打开文件夹",
@@ -11,14 +12,15 @@ const dictionary = {
     footerPrivacy: "文件始终留在你的设备上。Anyfile 只使用浏览器本地能力完成读取与预览。",
     copyright: "© 2026 Anyfile. 本地优先，隐私始终如一。", native: "浏览器原生", plugin: "插件",
     learnAndOpen: "了解并打开", browseFormats: "浏览支持格式", directOpen: "直接打开文件", language: "语言",
+    about: "关于", privacy: "隐私政策", contact: "联系", resources: "Anyfile", email: "邮箱", sourceCode: "开源地址",
   },
   nav: {
-    imagesVideo: "图片与音视频", documents: "文档", codeData: "代码与数据",
-    developerArtifacts: "开发者产物", threeD: "3D", design: "设计",
+    imagesVideo: "图片与音视频", documents: "文档", codeData: "数据",
+    developerArtifacts: "开发者", threeD: "3D", design: "设计",
   },
   home: {
-    localFirst: "本地优先的文件查看器", title: "所有文件，一处打开。",
-    description: "无需上传。使用浏览器原生能力，在本地快速、安全地查看图片、文档、代码、数据与 3D 文件。",
+    localFirst: "免费在线文件查看器", title: "在线打开文件，无需上传。",
+    description: "快速、私密地查看受支持的图片、文档、音视频、代码与数据。完全免费，文件始终留在当前设备。",
     selectFile: "选择本地文件", browse: "浏览支持格式", trust: "本地处理 · 无需注册 · 免费使用",
     privacyEyebrow: "默认保护隐私", privacyTitle: "你的文件，只属于你。",
     privacyDescription: "Anyfile 直接读取你明确选择的本地文件。预览、解码与渲染全部发生在当前浏览器标签页中。",
@@ -29,12 +31,14 @@ const dictionary = {
     ],
     formatsEyebrow: "支持的格式", formatsTitle: "找到你要打开的格式。",
     formatsDescription: "从浏览器原生支持到专用查看器插件，统一在清晰的类别中。", browseCount: "浏览 {count} 种格式",
+    popularFormatsTitle: "常用文件查看器",
+    popularFormatsDescription: "直接查看常见格式的使用说明、已支持能力与已知限制。",
   },
   category: { home: "首页", viewerSuffix: "查看器", localSuffix: " 所有处理都在当前设备完成。", formats: "种格式", choose: "选择一种文件格式" },
   format: {
     viewerSuffix: "查看器", metadataDescription: "在浏览器本地查看 {name}。{description}",
     browserNativeView: "浏览器原生查看", pluginView: "专用插件查看", headline: "{name}，打开就看。",
-    privacySuffix: " 文件不上传，预览过程仅发生在你的浏览器中。", choose: "选择 .{extension} 文件",
+    privacySuffix: " 无需上传，处理仅在浏览器本地进行。", choose: "选择 .{extension} 文件",
     benefits: [
       { title: "更快", description: "跳过文件上传与云端处理队列。" },
       { title: "更私密", description: "文件内容不会发送到 Anyfile 服务器。" },

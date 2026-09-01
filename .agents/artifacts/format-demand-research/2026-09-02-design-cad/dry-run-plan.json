@@ -1,0 +1,37 @@
+{
+  "network_calls_made": 0,
+  "methodology_version": "1.0",
+  "market": {
+    "location_code": 2840,
+    "language_code": "en"
+  },
+  "candidates": [
+    "psd",
+    "psb",
+    "ai",
+    "eps",
+    "cdr",
+    "dwg",
+    "dxf",
+    "step",
+    "iges",
+    "ifc",
+    "rvt",
+    "skp",
+    "sldprt"
+  ],
+  "planned_calls": {
+    "keyword_suggestions": 13,
+    "keyword_overview_min": 1,
+    "keyword_overview_max": 1,
+    "serp_advanced": 13,
+    "trends_explore": 3
+  },
+  "settings": {
+    "suggestions_limit": 100,
+    "minimum_suggestion_volume": 10,
+    "max_keywords_per_candidate": 40,
+    "serp_depth": 10,
+    "trends_time_range": "past_12_months"
+  }
+}

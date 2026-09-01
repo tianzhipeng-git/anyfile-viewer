@@ -1,9 +1,10 @@
 export type AppDictionary = {
-  metadata: { siteTitle: string; siteDescription: string; viewerTitle: string; viewerDescription: string };
+  metadata: { siteTitle: string; siteDescription: string; viewerTitle: string; viewerDescription: string; noUploadSuffix: string };
   common: {
     home: string; mainNavigation: string; openFile: string; openFolder: string; categories: string;
     getStarted: string; footerPrivacy: string; copyright: string; native: string; plugin: string;
     learnAndOpen: string; browseFormats: string; directOpen: string; language: string;
+    about: string; privacy: string; contact: string; resources: string; email: string; sourceCode: string;
   };
   nav: { imagesVideo: string; documents: string; codeData: string; developerArtifacts: string; threeD: string; design: string };
   home: {
@@ -11,6 +12,7 @@ export type AppDictionary = {
     privacyEyebrow: string; privacyTitle: string; privacyDescription: string;
     principles: readonly { title: string; description: string }[];
     formatsEyebrow: string; formatsTitle: string; formatsDescription: string; browseCount: string;
+    popularFormatsTitle: string; popularFormatsDescription: string;
   };
   category: { home: string; viewerSuffix: string; localSuffix: string; formats: string; choose: string };
   format: {

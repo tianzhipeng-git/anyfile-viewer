@@ -1,0 +1,133 @@
+{
+  "methodology_version": "1.0",
+  "market": {
+    "location_code": 2840,
+    "language_code": "en"
+  },
+  "settings": {
+    "suggestions_limit": 100,
+    "minimum_suggestion_volume": 10,
+    "max_keywords_per_candidate": 40,
+    "serp_depth": 10,
+    "trends_time_range": "past_12_months"
+  },
+  "candidates": [
+    {
+      "id": "psd",
+      "format_name": "Adobe Photoshop Document",
+      "extensions": ["psd"],
+      "aliases": ["photoshop document"],
+      "suggestion_seeds": ["psd file"],
+      "seed_keywords": ["psd viewer online", "open psd file", "how to open psd file", "psd file viewer"],
+      "serp_context_terms": ["psd", "photoshop"]
+    },
+    {
+      "id": "psb",
+      "format_name": "Adobe Photoshop Large Document",
+      "extensions": ["psb"],
+      "aliases": ["photoshop large document"],
+      "suggestion_seeds": ["psb file"],
+      "seed_keywords": ["psb viewer online", "open psb file", "how to open psb file", "psb file viewer"],
+      "serp_context_terms": ["psb", "photoshop"]
+    },
+    {
+      "id": "ai",
+      "format_name": "Adobe Illustrator Artwork",
+      "extensions": ["ai"],
+      "aliases": ["illustrator artwork", "adobe illustrator file"],
+      "suggestion_seeds": ["adobe illustrator file"],
+      "seed_keywords": ["adobe illustrator ai viewer online", "open ai file", "how to open ai file", "ai file viewer"],
+      "serp_context_terms": ["ai file", "illustrator", "vector"]
+    },
+    {
+      "id": "eps",
+      "format_name": "Encapsulated PostScript",
+      "extensions": ["eps"],
+      "aliases": ["encapsulated postscript"],
+      "suggestion_seeds": ["eps file"],
+      "seed_keywords": ["eps viewer online", "open eps file", "how to open eps file", "eps file viewer"],
+      "serp_context_terms": ["eps", "postscript", "vector"]
+    },
+    {
+      "id": "cdr",
+      "format_name": "CorelDRAW Drawing",
+      "extensions": ["cdr"],
+      "aliases": ["coreldraw drawing", "coreldraw file"],
+      "suggestion_seeds": ["coreldraw file"],
+      "seed_keywords": ["cdr viewer online", "open cdr file", "how to open cdr file", "coreldraw file viewer"],
+      "serp_context_terms": ["cdr file", "coreldraw", "vector"]
+    },
+    {
+      "id": "dwg",
+      "format_name": "AutoCAD Drawing",
+      "extensions": ["dwg"],
+      "aliases": ["autocad drawing"],
+      "suggestion_seeds": ["dwg file"],
+      "seed_keywords": ["dwg viewer online", "open dwg file", "how to open dwg file", "dwg file viewer"],
+      "serp_context_terms": ["dwg", "autocad", "cad drawing"]
+    },
+    {
+      "id": "dxf",
+      "format_name": "Drawing Exchange Format",
+      "extensions": ["dxf"],
+      "aliases": ["drawing exchange format"],
+      "suggestion_seeds": ["dxf file"],
+      "seed_keywords": ["dxf viewer online", "open dxf file", "how to open dxf file", "dxf file viewer"],
+      "serp_context_terms": ["dxf", "cad", "drawing exchange"]
+    },
+    {
+      "id": "step",
+      "format_name": "STEP CAD Model",
+      "extensions": ["step", "stp"],
+      "aliases": ["standard for the exchange of product model data", "iso 10303 model"],
+      "suggestion_seeds": ["step cad file"],
+      "seed_keywords": ["step file viewer online", "open step file", "how to open stp file", "stp file viewer"],
+      "serp_context_terms": ["step file", "stp", "cad", "3d model"]
+    },
+    {
+      "id": "iges",
+      "format_name": "Initial Graphics Exchange Specification",
+      "extensions": ["iges", "igs"],
+      "aliases": ["initial graphics exchange specification"],
+      "suggestion_seeds": ["iges cad file"],
+      "seed_keywords": ["iges file viewer online", "open iges file", "how to open igs file", "igs file viewer"],
+      "serp_context_terms": ["iges", "igs file", "cad", "3d model"]
+    },
+    {
+      "id": "ifc",
+      "format_name": "Industry Foundation Classes",
+      "extensions": ["ifc"],
+      "aliases": ["industry foundation classes", "ifc bim model"],
+      "suggestion_seeds": ["ifc bim file"],
+      "seed_keywords": ["ifc viewer online", "open ifc file", "how to open ifc file", "ifc file viewer"],
+      "serp_context_terms": ["ifc file", "bim", "building model"]
+    },
+    {
+      "id": "rvt",
+      "format_name": "Autodesk Revit Project",
+      "extensions": ["rvt"],
+      "aliases": ["revit project", "revit model"],
+      "suggestion_seeds": ["revit rvt file"],
+      "seed_keywords": ["rvt viewer online", "open rvt file", "how to open rvt file", "revit file viewer"],
+      "serp_context_terms": ["rvt", "revit", "bim"]
+    },
+    {
+      "id": "skp",
+      "format_name": "SketchUp Model",
+      "extensions": ["skp"],
+      "aliases": ["sketchup model", "sketchup file"],
+      "suggestion_seeds": ["sketchup skp file"],
+      "seed_keywords": ["skp viewer online", "open skp file", "how to open skp file", "sketchup file viewer"],
+      "serp_context_terms": ["skp", "sketchup", "3d model"]
+    },
+    {
+      "id": "sldprt",
+      "format_name": "SolidWorks Part",
+      "extensions": ["sldprt"],
+      "aliases": ["solidworks part", "solidworks part file"],
+      "suggestion_seeds": ["solidworks part file"],
+      "seed_keywords": ["sldprt viewer online", "open sldprt file", "how to open sldprt file", "solidworks part viewer"],
+      "serp_context_terms": ["sldprt", "solidworks", "cad part"]
+    }
+  ]
+}

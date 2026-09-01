@@ -37,7 +37,7 @@ pnpm dev
 
 `viewer/ui` 是插件共享 UI 层。Excel、DuckDB 数据和 SQLite 查看器复用其中的分页表格渲染器；协议类型仍独立保留在 `viewer/protocol`。
 
-DuckDB 的 WASM 与 Worker 优先从官方 jsDelivr 固定版本资源加载；CDN 初始化失败时自动回退到构建产物中的同版本本地资源。其他格式可按 `viewer-plugin-protocol.md` 继续接入。
+DuckDB 的 WASM 与 Worker 优先从官方 jsDelivr 固定版本资源加载；初始化失败时依次回退到 `assets.anyfile.top` 上的 Cloudflare R2 同版本镜像和构建产物中的同版本本地资源。其他格式可按 `viewer-plugin-protocol.md` 继续接入。
 
 HEVC HEIF/HEIC 会先尝试浏览器原生解码，失败后在独立 Worker 中按需加载同源、可审计的 `libheif + libde265` WASM；用户文件仍不会上传。
 

@@ -59,6 +59,15 @@ describe("published SEO content", () => {
     }
   });
 
+  it("keeps data separate from developer code and artifacts", () => {
+    expect(getCategory("code-data", "en")!.name).toBe("Data");
+    expect(getCategory("developer-artifacts", "en")!.name).toBe("Developer");
+
+    for (const extension of ["md", "txt", "xml"]) {
+      expect(getFormat(extension, "en")!.categoryId, extension).toBe("developer-artifacts");
+    }
+  });
+
   it("publishes the audited licenses and source notices for browser runtimes", () => {
     expect(getPlugin("word-document", "en")!.upstreamProjects[0]?.license).toBe("Apache-2.0");
     expect(getPlugin("powerpoint-presentation", "en")!.upstreamProjects[0]?.license).toBe("Apache-2.0");

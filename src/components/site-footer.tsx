@@ -10,7 +10,7 @@ export function SiteFooter({ locale, dictionary }: { locale: PublishedLocale; di
   return (
     <footer className="bg-muted py-14">
       <div className="content-shell flex flex-col gap-10">
-        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr]">
+        <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1.35fr]">
           <div className="flex max-w-md flex-col gap-4">
             <BrandMark />
             <p className="text-sm leading-6 text-muted-foreground">{dictionary.common.footerPrivacy}</p>
@@ -26,6 +26,14 @@ export function SiteFooter({ locale, dictionary }: { locale: PublishedLocale; di
             <IsolationBoundaryLink href={localePath(locale, "/view")} className="text-muted-foreground hover:text-foreground">{dictionary.common.openFile}</IsolationBoundaryLink>
             <IsolationBoundaryLink href={localePath(locale, "/formats/pdf")} className="text-muted-foreground hover:text-foreground">PDF {dictionary.format.viewerSuffix}</IsolationBoundaryLink>
             <IsolationBoundaryLink href={localePath(locale, "/formats/json")} className="text-muted-foreground hover:text-foreground">JSON {dictionary.format.viewerSuffix}</IsolationBoundaryLink>
+          </div>
+          <div className="flex flex-col gap-3 text-sm">
+            <p className="font-semibold">{dictionary.common.resources}</p>
+            <IsolationBoundaryLink href={localePath(locale, "/about")} className="text-muted-foreground hover:text-foreground">{dictionary.common.about}</IsolationBoundaryLink>
+            <IsolationBoundaryLink href={localePath(locale, "/privacy")} className="text-muted-foreground hover:text-foreground">{dictionary.common.privacy}</IsolationBoundaryLink>
+            <IsolationBoundaryLink href={localePath(locale, "/contact")} className="text-muted-foreground hover:text-foreground">{dictionary.common.contact}</IsolationBoundaryLink>
+            <a href="mailto:support@anyfile.top" className="text-muted-foreground hover:text-foreground">{dictionary.common.email}: support@anyfile.top</a>
+            <a href="https://github.com/tianzhipeng-git/anyfile-viewer" rel="noreferrer" target="_blank" className="text-muted-foreground hover:text-foreground">{dictionary.common.sourceCode}</a>
           </div>
         </div>
         <Separator />
