@@ -306,7 +306,7 @@ const librawPackage = JSON.parse(
   await readFile(join(projectRoot, "node_modules/libraw-wasm/package.json"), "utf8"),
 );
 const librawDecoderSource = await readFile(
-  join(projectRoot, "viewer/plugins/camera-raw/src/raw-decoder.ts"),
+  join(projectRoot, "viewer/raw-decoder/src/index.ts"),
   "utf8",
 );
 const librawRuntimeVersion = librawDecoderSource.match(/\/vendor\/libraw\/([^/"']+)\/index\.js/)?.[1];

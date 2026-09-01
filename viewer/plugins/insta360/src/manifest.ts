@@ -14,6 +14,11 @@ export const insta360Manifest: ViewerPluginManifest = {
       mimeTypes: ["image/jpeg"],
     },
     {
+      name: { en: "Insta360 X3 RAW panorama", "zh-CN": "Insta360 X3 RAW 全景照片" },
+      extensions: [".dng"],
+      mimeTypes: ["image/x-adobe-dng"],
+    },
+    {
       name: { en: "Insta360 X3 low-resolution video", "zh-CN": "Insta360 X3 低分辨率视频" },
       extensions: [".lrv"],
       mimeTypes: ["video/mp4"],

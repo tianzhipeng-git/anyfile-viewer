@@ -353,7 +353,7 @@ describe("viewer protocol", () => {
     expect(findViewerRegistrations("photo.heif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "modern-raster", "hex-viewer"]);
     expect(findViewerRegistrations("photo.dng", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["camera-raw", "hex-viewer"]);
+      .toEqual(["insta360", "camera-raw", "hex-viewer"]);
     expect(findViewerRegistrations("photo.rw2", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["camera-raw", "hex-viewer"]);
     for (const extension of ["nrw", "sr2", "srf", "orf", "pef"]) {

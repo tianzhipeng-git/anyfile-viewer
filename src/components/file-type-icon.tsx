@@ -94,7 +94,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     kind: "image",
     icon: FileImageIcon,
     extensions: [
-      ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".insp"),
+      ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".insp" || extension === ".dng"),
       ...manifestExtensions(
       browserImageManifest,
       modernRasterManifest,

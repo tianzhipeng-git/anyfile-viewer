@@ -1,11 +1,12 @@
 import { ViewerError, selectMessages, type FileViewerPlugin, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
-import { MAX_RAW_SOURCE_BYTES, PROBE_BYTES } from "./limits";
+import { MAX_RAW_SOURCE_BYTES, RawDecoder } from "@anyfile/raw-decoder";
 import { cameraRawManifest } from "./manifest";
 import { inspectRawHeader } from "./probe-format";
-import { CameraRawDecoder } from "./raw-decoder";
 import { abortError, readBlob } from "./read-blob";
 import { createCameraRawElements, updateRawMetadata, type CameraRawElements } from "./ui";
 import { RawBitmapViewport } from "./viewport";
+
+const PROBE_BYTES = 1024 * 1024;
 
 function copyFor(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, { "zh-CN": {
@@ -18,7 +19,7 @@ function copyFor(locale: OpenViewerContext["locale"]) {
 async function openCameraRaw(context: OpenViewerContext): Promise<ViewerController> {
   const { file, signal, container, reportProgress } = context;
   const copy = copyFor(context.locale);
-  let root: HTMLElement | undefined; let elements: CameraRawElements | undefined; let viewport: RawBitmapViewport | undefined; let decoder: CameraRawDecoder | undefined;
+  let root: HTMLElement | undefined; let elements: CameraRawElements | undefined; let viewport: RawBitmapViewport | undefined; let decoder: RawDecoder | undefined;
   let previewBitmap: ImageBitmap | undefined; let developedBitmap: ImageBitmap | undefined; let disposed = false; let previewClick: (() => void) | undefined; let developedClick: (() => void) | undefined;
 
   const show = (kind: "preview" | "developed") => {
@@ -53,7 +54,7 @@ async function openCameraRaw(context: OpenViewerContext): Promise<ViewerControll
     if (!inspection) throw new ViewerError("invalid-file", copy.invalid);
     elements = createCameraRawElements(file.name, context.locale); root = elements.root; container.append(root); viewport = new RawBitmapViewport(elements);
     reportProgress({ stage: "decoding", message: copy.opening, loaded: Math.min(file.size, PROBE_BYTES), total: file.size });
-    const bytes = await readBlob(file, signal); decoder = new CameraRawDecoder(signal); await decoder.open(bytes); const metadata = await decoder.metadata(); updateRawMetadata(elements, inspection.format, metadata);
+    const bytes = await readBlob(file, signal); decoder = new RawDecoder(signal); await decoder.open(bytes); const metadata = await decoder.metadata(); updateRawMetadata(elements, inspection.format, metadata);
     previewBitmap = await decoder.thumbnail();
     previewClick = () => show("preview"); developedClick = () => show("developed"); elements.preview.addEventListener("click", previewClick); elements.developed.addEventListener("click", developedClick);
     if (previewBitmap) { elements.preview.hidden = false; show("preview"); void develop(); } else { await develop(); if (!developedBitmap) throw new ViewerError("invalid-file", copy.invalid); }

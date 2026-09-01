@@ -1,7 +1,8 @@
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
-import { PROBE_BYTES } from "./limits";
 import { inspectRawHeader } from "./probe-format";
 import { readBlob } from "./read-blob";
+
+const PROBE_BYTES = 1024 * 1024;
 
 export async function probeCameraRaw({ file, signal }: ProbeViewerContext): Promise<ViewerSupportLevel> {
   if (file.size === 0) return 0;

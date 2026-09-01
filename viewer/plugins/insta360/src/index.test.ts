@@ -1,8 +1,25 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer-test";
 
+const rawMocks = vi.hoisted(() => ({
+  open: vi.fn(),
+  metadata: vi.fn(),
+  developed: vi.fn(),
+  dispose: vi.fn(),
+}));
+
+vi.mock("@anyfile/raw-decoder", () => ({
+  MAX_RAW_SOURCE_BYTES: 256 * 1024 * 1024,
+  RawDecoder: class {
+    open = rawMocks.open;
+    metadata = rawMocks.metadata;
+    developed = rawMocks.developed;
+    dispose = rawMocks.dispose;
+  },
+}));
+
 import { insta360Viewer } from "./index";
-import { x3InsvBytes, x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
+import { x3DngBytes, x3InsvBytes, x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
 
 const activeContexts: ViewerTestContext[] = [];
 
@@ -46,6 +63,7 @@ function memoryWorkspace(files: readonly File[]) {
 }
 
 beforeEach(() => {
+  for (const mock of Object.values(rawMocks)) mock.mockReset();
   vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:insta360");
   vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
   vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
@@ -103,6 +121,46 @@ describe("Insta360 viewer protocol lifecycle", () => {
     expect(close[1]).toHaveBeenCalledOnce();
     expect(close[2]).toHaveBeenCalledOnce();
     expect(gl.deleteTexture).toHaveBeenCalledTimes(2);
+  });
+
+  it("develops, splits and renders an X3 DNG, then releases RAW and bitmap resources", async () => {
+    const gl = fakeGl();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(gl as unknown as WebGLRenderingContext);
+    vi.stubGlobal("crossOriginIsolated", true);
+    const close = [vi.fn(), vi.fn(), vi.fn()];
+    const developed = { width: 2976, height: 5952, close: close[0] };
+    const lenses = [
+      { width: 2976, height: 2976, close: close[1] },
+      { width: 2976, height: 2976, close: close[2] },
+    ];
+    rawMocks.metadata.mockResolvedValue({ make: "Arashi Vision", model: "Insta360 X3", width: 2976, height: 5952 });
+    rawMocks.developed.mockResolvedValue(developed);
+    vi.stubGlobal("createImageBitmap", vi.fn().mockResolvedValueOnce(lenses[0]).mockResolvedValueOnce(lenses[1]));
+    const context = testContext(new File([x3DngBytes()], "photo.dng"));
+
+    const controller = await insta360Viewer.open(context.context);
+    expect(rawMocks.open).toHaveBeenCalledOnce();
+    expect(rawMocks.developed).toHaveBeenCalledOnce();
+    expect(rawMocks.dispose).toHaveBeenCalledOnce();
+    expect(close[0]).toHaveBeenCalledOnce();
+    expect(context.container.textContent).toContain("2976 × 5952 · X3 RAW 照片 · 上下双鱼眼");
+    expect(gl.texImage2D).toHaveBeenCalledTimes(2);
+
+    await controller.dispose();
+    expect(close[1]).toHaveBeenCalledOnce();
+    expect(close[2]).toHaveBeenCalledOnce();
+  });
+
+  it("rejects a DNG when LibRaw metadata does not confirm the X3 layout", async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(fakeGl() as unknown as WebGLRenderingContext);
+    vi.stubGlobal("crossOriginIsolated", true);
+    vi.stubGlobal("createImageBitmap", vi.fn());
+    rawMocks.metadata.mockResolvedValue({ make: "Arashi Vision", model: "Insta360 X4", width: 2976, height: 5952 });
+    const context = testContext(new File([x3DngBytes()], "photo.dng"));
+
+    await expect(insta360Viewer.open(context.context)).rejects.toMatchObject({ code: "invalid-file" });
+    expect(rawMocks.dispose).toHaveBeenCalledOnce();
+    expect(context.container.childElementCount).toBe(0);
   });
 
   it("plays X3 LRV through one audible media element and custom controls", async () => {
@@ -245,7 +303,7 @@ describe("Insta360 viewer protocol lifecycle", () => {
     const context = testContext(new File([x3PhotoBytes()], "photo.insp"));
     await expect(insta360Viewer.open(context.context)).rejects.toMatchObject({
       code: "unsupported-environment",
-      message: "当前浏览器缺少此全景所需的 WebGL 或媒体能力。",
+      message: "当前浏览器缺少此全景所需的 WebGL、媒体或 RAW 解码能力。",
     });
     expect(context.container.childElementCount).toBe(0);
   });

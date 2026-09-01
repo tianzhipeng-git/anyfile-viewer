@@ -6,6 +6,7 @@ import {
   type ViewerController,
 } from "@anyfile/viewer-protocol";
 
+import { decodeX3Dng } from "./dng-source";
 import { decodeX3Photo } from "./image-source";
 import { inspectInsta360File } from "./inspection";
 import { insta360Manifest } from "./manifest";
@@ -23,8 +24,8 @@ import {
 
 function copyFor(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, {
-    en: { reading: "Inspecting the Insta360 file…", pairing: "Finding the paired Insta360 video…", decoding: "Decoding the panorama…", loading: "Loading the 360° video…", ready: "Panorama opened", invalid: "This is not a valid supported Insta360 X3 file.", missingPair: "Select both matching INSV files together, or open the folder that contains them.", unsupported: "This browser cannot provide the WebGL or media features required for this panorama.", resource: "This panorama exceeds the current device's safe graphics limits.", failed: "The panorama could not be opened." },
-    "zh-CN": { reading: "正在检查 Insta360 文件…", pairing: "正在查找成对的 Insta360 视频…", decoding: "正在解码全景照片…", loading: "正在加载 360° 视频…", ready: "全景已打开", invalid: "文件不是有效且受支持的 Insta360 X3 文件。", missingPair: "请同时选择成对的 INSV 文件，或打开包含它们的整个文件夹。", unsupported: "当前浏览器缺少此全景所需的 WebGL 或媒体能力。", resource: "此全景超过当前设备的安全图形资源限制。", failed: "无法打开此全景。" },
+    en: { reading: "Inspecting the Insta360 file…", pairing: "Finding the paired Insta360 video…", decoding: "Decoding the panorama…", developing: "Developing the Insta360 RAW panorama…", loading: "Loading the 360° video…", ready: "Panorama opened", invalid: "This is not a valid supported Insta360 X3 file.", missingPair: "Select both matching INSV files together, or open the folder that contains them.", unsupported: "This browser cannot provide the WebGL, media or RAW decoding features required for this panorama.", resource: "This panorama exceeds the current device's safe resource limits.", rawTooLarge: "The Insta360 RAW file exceeds the 256 MiB input limit.", failed: "The panorama could not be opened." },
+    "zh-CN": { reading: "正在检查 Insta360 文件…", pairing: "正在查找成对的 Insta360 视频…", decoding: "正在解码全景照片…", developing: "正在显影 Insta360 RAW 全景…", loading: "正在加载 360° 视频…", ready: "全景已打开", invalid: "文件不是有效且受支持的 Insta360 X3 文件。", missingPair: "请同时选择成对的 INSV 文件，或打开包含它们的整个文件夹。", unsupported: "当前浏览器缺少此全景所需的 WebGL、媒体或 RAW 解码能力。", resource: "此全景超过当前设备的安全资源限制。", rawTooLarge: "Insta360 RAW 文件超过 256 MiB 输入上限。", failed: "无法打开此全景。" },
   });
 }
 
@@ -96,9 +97,11 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
     resetListener = () => renderer?.reset();
     elements.reset.addEventListener("click", resetListener);
 
-    if (inspection.kind === "photo") {
-      reportProgress({ stage: "decoding-image", message: copy.decoding });
-      bitmaps = await decodeX3Photo(file, signal, copy.invalid, copy.unsupported);
+    if (inspection.kind === "photo" || inspection.kind === "raw") {
+      reportProgress({ stage: inspection.kind === "raw" ? "developing-raw" : "decoding-image", message: inspection.kind === "raw" ? copy.developing : copy.decoding });
+      bitmaps = inspection.kind === "raw"
+        ? await decodeX3Dng(file, signal, copy.invalid, copy.unsupported, copy.rawTooLarge, copy.resource, copy.failed)
+        : await decodeX3Photo(file, signal, copy.invalid, copy.unsupported);
       renderer.setDualSources(bitmaps[0], bitmaps[1], 2976, 2976);
     } else {
       const video = elements.video;

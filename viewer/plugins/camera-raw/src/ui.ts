@@ -1,6 +1,5 @@
 import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
-
-import type { RawMetadataSummary } from "./raw-decoder";
+import type { RawMetadataSummary } from "@anyfile/raw-decoder";
 
 export interface CameraRawElements {
   readonly root: HTMLDivElement; readonly viewport: HTMLDivElement; readonly canvas: HTMLCanvasElement; readonly metadata: HTMLSpanElement; readonly status: HTMLSpanElement;

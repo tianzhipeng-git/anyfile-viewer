@@ -2,7 +2,7 @@ export function abortError() {
   return new DOMException("Viewer operation aborted.", "AbortError");
 }
 
-export async function readBlob(blob: Blob, signal: AbortSignal): Promise<Uint8Array> {
+export async function readBlob(blob: Blob, signal: AbortSignal): Promise<Uint8Array<ArrayBuffer>> {
   if (signal.aborted) throw abortError();
   const reader = blob.stream().getReader();
   const chunks: Uint8Array[] = [];

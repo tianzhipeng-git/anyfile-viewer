@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { summarizeRawMetadata } from "./raw-decoder";
+
+import { summarizeRawMetadata } from "./index";
 
 describe("RAW metadata", () => {
   it("maps the camera fields exposed by libraw-wasm", () => {

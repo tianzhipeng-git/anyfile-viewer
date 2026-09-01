@@ -252,15 +252,15 @@ importers:
 
   viewer/plugins/camera-raw:
     dependencies:
+      '@anyfile/raw-decoder':
+        specifier: workspace:*
+        version: link:../../raw-decoder
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
       '@anyfile/viewer-rendering':
         specifier: workspace:*
         version: link:../../rendering
-      libraw-wasm:
-        specifier: 1.6.0
-        version: 1.6.0
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -460,6 +460,9 @@ importers:
       '@anyfile/browser-video-viewer':
         specifier: workspace:*
         version: link:../browser-video
+      '@anyfile/raw-decoder':
+        specifier: workspace:*
+        version: link:../../raw-decoder
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
@@ -652,6 +655,22 @@ importers:
       '@anyfile/i18n':
         specifier: workspace:*
         version: link:../i18n
+
+  viewer/raw-decoder:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      libraw-wasm:
+        specifier: 1.6.0
+        version: 1.6.0
+    devDependencies:
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
   viewer/rendering:
     devDependencies:

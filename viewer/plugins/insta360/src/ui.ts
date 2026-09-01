@@ -44,8 +44,8 @@ const styles = `
 
 function copyFor(locale: Locale) {
   return selectMessages(locale, {
-    en: { tools: "Panorama viewing tools", reset: "Reset view", canvas: "360 degree panorama; drag to look around and use the mouse wheel to zoom", photo: "X3 photo · side-by-side dual fisheye", proxyVideo: "X3 proxy video · side-by-side dual fisheye", pairedVideo: "X3 HD video · paired dual fisheye", play: "Play", pause: "Pause", replay: "Replay", seek: "Seek video", volume: "Volume", ready: "Ready", playbackFailed: "Playback could not start." },
-    "zh-CN": { tools: "全景查看工具", reset: "重置视角", canvas: "360 度全景；拖动环视，使用滚轮缩放", photo: "X3 照片 · 左右双鱼眼", proxyVideo: "X3 代理视频 · 左右双鱼眼", pairedVideo: "X3 高清视频 · 成对双鱼眼", play: "播放", pause: "暂停", replay: "重播", seek: "视频进度", volume: "音量", ready: "就绪", playbackFailed: "无法开始播放。" },
+    en: { tools: "Panorama viewing tools", reset: "Reset view", canvas: "360 degree panorama; drag to look around and use the mouse wheel to zoom", photo: "X3 photo · side-by-side dual fisheye", raw: "X3 RAW photo · top-bottom dual fisheye", proxyVideo: "X3 proxy video · side-by-side dual fisheye", pairedVideo: "X3 HD video · paired dual fisheye", play: "Play", pause: "Pause", replay: "Replay", seek: "Seek video", volume: "Volume", ready: "Ready", playbackFailed: "Playback could not start." },
+    "zh-CN": { tools: "全景查看工具", reset: "重置视角", canvas: "360 度全景；拖动环视，使用滚轮缩放", photo: "X3 照片 · 左右双鱼眼", raw: "X3 RAW 照片 · 上下双鱼眼", proxyVideo: "X3 代理视频 · 左右双鱼眼", pairedVideo: "X3 高清视频 · 成对双鱼眼", play: "播放", pause: "暂停", replay: "重播", seek: "视频进度", volume: "音量", ready: "就绪", playbackFailed: "无法开始播放。" },
   });
 }
 
@@ -77,7 +77,7 @@ export function createInsta360ViewerElements(
   name.title = fileName;
   const metadata = document.createElement("span");
   metadata.className = "anyfile-insta360-viewer__meta";
-  metadata.textContent = `${inspection.width} × ${inspection.height} · ${inspection.kind === "photo" ? copy.photo : inspection.layout === "single" ? copy.pairedVideo : copy.proxyVideo}`;
+  metadata.textContent = `${inspection.width} × ${inspection.height} · ${inspection.kind === "photo" ? copy.photo : inspection.kind === "raw" ? copy.raw : inspection.layout === "single" ? copy.pairedVideo : copy.proxyVideo}`;
   identity.append(name, metadata);
   const status = document.createElement("span");
   status.className = "anyfile-insta360-viewer__status";
@@ -97,7 +97,7 @@ export function createInsta360ViewerElements(
   canvas.className = "anyfile-insta360-viewer__canvas";
   viewport.append(canvas);
   root.append(style, toolbar, viewport);
-  if (inspection.kind === "photo") return { root, viewport, canvas, reset, status };
+  if (inspection.kind === "photo" || inspection.kind === "raw") return { root, viewport, canvas, reset, status };
 
   const video = document.createElement("video");
   video.className = "anyfile-insta360-viewer__video";

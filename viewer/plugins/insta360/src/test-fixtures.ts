@@ -42,6 +42,45 @@ export function x3PhotoBytes(model = "Insta360 X3") {
   return concatenate(new Uint8Array([0xff, 0xd8]), jpegSegment(0xe1, exif), jpegSegment(0xc0, sof), new Uint8Array([0xff, 0xda]));
 }
 
+export function x3DngBytes(options: { model?: string; width?: number; height?: number; dng?: boolean; directoryOffset?: number } = {}) {
+  const makeBytes = encoder.encode("Arashi Vision\0");
+  const modelBytes = encoder.encode(`${options.model ?? "Insta360 X3"}\0`);
+  const entries = options.dng === false ? 4 : 5;
+  const ifdBytes = 2 + entries * 12 + 4;
+  const directory = options.directoryOffset ?? 8;
+  const bytes = new Uint8Array(directory + ifdBytes + makeBytes.length + modelBytes.length);
+  const view = new DataView(bytes.buffer);
+  bytes.set(encoder.encode("II"), 0);
+  view.setUint16(2, 42, true);
+  view.setUint32(4, directory, true);
+  view.setUint16(directory, entries, true);
+  const writeLong = (offset: number, tag: number, value: number) => {
+    view.setUint16(offset, tag, true);
+    view.setUint16(offset + 2, 4, true);
+    view.setUint32(offset + 4, 1, true);
+    view.setUint32(offset + 8, value, true);
+  };
+  const writeAscii = (offset: number, tag: number, value: Uint8Array, valueOffset: number) => {
+    view.setUint16(offset, tag, true);
+    view.setUint16(offset + 2, 2, true);
+    view.setUint32(offset + 4, value.length, true);
+    view.setUint32(offset + 8, valueOffset, true);
+    bytes.set(value, valueOffset);
+  };
+  writeLong(directory + 2, 0x0100, options.width ?? 2976);
+  writeLong(directory + 14, 0x0101, options.height ?? 5952);
+  const values = directory + ifdBytes;
+  writeAscii(directory + 26, 0x010f, makeBytes, values);
+  writeAscii(directory + 38, 0x0110, modelBytes, values + makeBytes.length);
+  if (options.dng !== false) {
+    view.setUint16(directory + 50, 0xc612, true);
+    view.setUint16(directory + 52, 1, true);
+    view.setUint32(directory + 54, 4, true);
+    bytes.set([1, 3, 0, 0], directory + 58);
+  }
+  return bytes;
+}
+
 function box(type: string, payload = new Uint8Array()) {
   const result = new Uint8Array(8 + payload.length);
   new DataView(result.buffer).setUint32(0, result.length);

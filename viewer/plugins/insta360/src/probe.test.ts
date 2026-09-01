@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { inspectInsta360File } from "./inspection";
 import { probeInsta360 } from "./probe";
-import { x3InsvBytes, x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
+import { x3DngBytes, x3InsvBytes, x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
 
 function context(file: File, signal = new AbortController().signal) {
   return { file, signal };
@@ -16,6 +16,34 @@ describe("Insta360 X3 probe", () => {
     expect(await probeInsta360(context(valid))).toBe(3);
     expect(await probeInsta360(context(otherModel))).toBe(0);
     expect(await probeInsta360(context(new File([x3PhotoBytes()], "photo.jpg")))).toBe(0);
+  });
+
+  it("routes only the verified X3 top-bottom DNG layout", async () => {
+    const valid = new File([x3DngBytes()], "photo.dng");
+    await expect(inspectInsta360File(context(valid))).resolves.toEqual({
+      kind: "raw", width: 2976, height: 5952, make: "Arashi Vision", model: "Insta360 X3",
+    });
+    await expect(probeInsta360(context(valid))).resolves.toBe(3);
+    await expect(probeInsta360(context(new File([x3DngBytes({ model: "Other camera" })], "photo.dng")))).resolves.toBe(0);
+    await expect(probeInsta360(context(new File([x3DngBytes({ width: 3000 })], "photo.dng")))).resolves.toBe(0);
+    await expect(probeInsta360(context(new File([x3DngBytes({ dng: false })], "photo.dng")))).resolves.toBe(0);
+  });
+
+  it("uses the TIFF IFD offset for a bounded DNG directory read", async () => {
+    const directoryOffset = 128 * 1024;
+    const file = new File([x3DngBytes({ directoryOffset })], "photo.dng");
+    const originalSlice = file.slice.bind(file);
+    const reads: Array<{ start: number; end: number }> = [];
+    Object.defineProperty(file, "slice", { value(start = 0, end = file.size, type?: string) {
+      reads.push({ start: Number(start), end: Number(end) });
+      return originalSlice(start, end, type);
+    } });
+
+    await expect(probeInsta360(context(file))).resolves.toBe(3);
+    expect(reads).toEqual([
+      { start: 0, end: 8 },
+      { start: directoryOffset, end: file.size },
+    ]);
   });
 
   it("locates moov from the extended mdat size and validates tracks", async () => {

@@ -3,6 +3,7 @@ packages:
   - viewer/i18n
   - viewer/protocol
   - viewer/rendering
+  - viewer/raw-decoder
   - viewer/testing
   - viewer/ui
   - viewer/plugins/*
