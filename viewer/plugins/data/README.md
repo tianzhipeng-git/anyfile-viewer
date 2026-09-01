@@ -17,7 +17,7 @@
 ## 实现原理
 
 1. **运行时初始化**（`src/duckdb-runtime.ts`）
-   - 优先从 jsDelivr CDN 加载 DuckDB bundle，失败则回退到本地 `@duckdb/duckdb-wasm` 资源
+   - 优先从 jsDelivr CDN 加载 DuckDB bundle，失败后依次回退到 `assets.anyfile.top` 的 R2 同版本镜像和本地 `@duckdb/duckdb-wasm` 资源
    - 在 Web Worker 中实例化 WASM 引擎
 
 2. **会话建立**（`src/duckdb-session.ts`）

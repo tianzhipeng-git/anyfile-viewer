@@ -103,7 +103,7 @@ PDF 插件实现保持动态加载。`pnpm dev` 和 `pnpm build` 会先运行
 官方公共 CDN（当前为 jsDelivr）
 └── npm 上游已发布、版本锁定的大型 WASM / Worker
 
-受控资产域名（计划使用 Cloudflare R2 + CDN）
+受控资产域名（Cloudflare R2 + CDN，当前为 assets.anyfile.top）
 └── 自建产物和大型同版本 fallback
 ```
 
@@ -117,14 +117,60 @@ DuckDB JavaScript API 由应用自身打包。体积较大的 WASM 与 Worker �
 
 1. 使用 `getJsDelivrBundles()` 取得与已安装包版本一致的官方 jsDelivr URL。
 2. 使用 `selectBundle()` 按浏览器能力选择 MVP 或 EH 版本。
-3. 如果 CDN Worker 获取或 DuckDB 初始化失败，清理失败实例并使用构建产物中的同版本本地资源重试。
-4. 如果本地初始化也失败，才向查看器上层返回错误。
+3. 如果 jsDelivr Worker 获取或 DuckDB 初始化失败，清理失败实例并使用 `assets.anyfile.top` 上的同版本 Cloudflare R2 镜像重试。
+4. 如果 R2 Worker 获取或初始化也失败，再次清理失败实例并使用构建产物中的同版本本地资源重试。
+5. 如果本地初始化也失败，才向查看器上层返回错误。
 
 回退只处理引擎加载/初始化失败。文件损坏、格式不支持或查询失败不会触发 CDN 到本地的重复初始化。
 
-由于需要回退，当前部署产物仍会包含 DuckDB WASM 和 Worker。jsDelivr 减少正常流量对本站大文件分发的依赖，但不会缩小构建产物。迁移到 Cloudflare R2 前，本地回退继续保持同源；迁移后必须保留完全离线或 CDN 失败时的明确产品行为，不能静默变成无限重试。
+由于需要最终同源回退，当前部署产物仍会包含 DuckDB WASM 和 Worker。jsDelivr 与 R2 减少正常流量对 Vercel 大文件分发的依赖，但不会缩小构建产物。三个来源各只尝试一次；外部 CDN 都失败时明确使用同源资源，不会无限重试。
 
-项目的 local-first 含义保持不变：用户选择的文件不会上传到 jsDelivr 或应用服务器。jsDelivr 只收到公共 DuckDB 引擎资源的请求。
+项目的 local-first 含义保持不变：用户选择的文件不会上传到 jsDelivr、R2 或应用服务器。jsDelivr 与 R2 只收到公共 DuckDB 引擎资源的请求。
+
+### 当前 DuckDB R2 镜像
+
+生产 bucket 为 `anyfile-bucket`，公开资产域名为 `https://assets.anyfile.top`。DuckDB `1.32.0` 的 MVP/EH 单线程 WASM 与 Worker 保持 npm 包原文件名，发布在：
+
+```text
+https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-mvp.wasm
+https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-eh.wasm
+https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-browser-mvp.worker.js
+https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-browser-eh.worker.js
+```
+
+R2 bucket 配置公开只读 CORS（`GET`、`HEAD` 和 `Range`）；Cloudflare zone 为资产域名设置 `Cross-Origin-Resource-Policy: cross-origin`，并使用 Cache Rule 缓存所有文件类型、尊重对象的 immutable TTL。仅给对象写入 `Cache-Control` 不足以保证 WASM 被 Cloudflare 默认缓存；发布验收必须观察真实 GET 从 `CF-Cache-Status: MISS` 进入 `HIT`。
+
+`pnpm build` 不访问 R2，但会校验运行时中的 R2 版本路径与已安装 `@duckdb/duckdb-wasm` 精确版本一致，并确认四个 MVP/EH URL 存在于延迟加载的 DuckDB chunk。升级依赖时必须先上传新版本路径、验证响应头和 SHA-256，再修改运行时版本；不得覆盖旧版本对象。
+
+### 外部资产链路的量化门槛
+
+是否启用 jsDelivr、R2 不能按 `public/vendor/<dependency>` 整个目录的磁盘占用判断。目录可能包含大量互斥、按需请求的字体、CMap、许可证和解码回退；真正影响用户等待时间与 Vercel Fast Data Transfer 的是一次查看操作实际传输的响应。
+
+评估使用以下两个口径：
+
+- **单资源传输量**：生产响应在 Content-Encoding 之后实际传给浏览器的字节数；优先使用浏览器 Network 面板的 transferred size，无压缩响应可以使用 `Content-Length`。
+- **典型冷启动传输量**：清空浏览器缓存后，用代表性文件首次打开某个插件，汇总该插件为完成打开而请求的公共 Worker、WASM、glue、字体和支持资源；不计页面外壳、其他插件资源和用户本地文件本身。
+
+满足以下任一条件时，默认必须接入外部资产链路：
+
+1. 任一按需 Worker、WASM 或其他运行资源的单资源传输量不小于 **2 MiB**；
+2. 一个插件的典型冷启动传输量不小于 **4 MiB**；
+3. 即使低于上述体积，该资源或资源组的实测或预计月度 Vercel Fast Data Transfer 已达到当前套餐包含额度的 **10%**。
+
+链路选择遵守以下规则：
+
+- 上游提供官方发布、精确版本且真实 URL 满足 CORS、CORP、MIME 和缓存要求时，使用 `jsDelivr → R2 同版本镜像 → Vercel 同源`；
+- 自建产物或没有可靠官方公共 CDN 时，使用 `R2 → Vercel 同源`，不为凑齐三层而使用非官方 CDN；
+- 小于门槛的资源默认保持同源，避免为低收益资源增加上传、版本同步和跨源诊断成本；
+- 模块 Worker、pthread、相对导入链或其他运行约束确实要求同源时可以例外，但必须在对应架构文档记录原因、实际传输量和流量观察方式，不能只写“兼容性需要”。
+
+当前版本的判定结果如下：
+
+- PDF.js 的 `/vendor/pdfjs` 总目录约 3.7 MiB，但包含 192 个按需支持文件，最大单文件约 441 KiB，不代表一次打开会下载整个目录，继续同源；
+- libheif 的主要 WASM 约 1.17 MiB，低于门槛，继续同源；
+- LibRaw 的主要 WASM 约 1.38 MiB，低于门槛且存在 pthread/Worker 同源隔离约束，继续同源；
+- DuckDB MVP/EH WASM 单文件约 38 MiB/33 MiB，超过门槛，使用已经落地的三层链路；
+- 未来 FFmpeg 等大型运行时应在选型阶段按相同口径测量，预计达到门槛时先设计资产发布和回退，不等接入完成后再迁移。
 
 新增大体积运行时时，按以下顺序决策：
 
@@ -157,9 +203,11 @@ prepare 可以在每次开发或生产构建时删除并重新生成本地 `publ
 如果部署 CSP，需要至少验证以下来源：
 
 ```text
-connect-src 'self' https://cdn.jsdelivr.net
+connect-src 'self' https://cdn.jsdelivr.net https://assets.anyfile.top
 worker-src 'self' blob:
 ```
+
+`@duckdb/duckdb-wasm` 的 `createWorker()` 会获取跨源 Worker 后创建本地 Worker，因此 `worker-src` 仍保持允许 `'self'` 与 `blob:`；资产响应同时必须满足上述 CORS 与 CORP 要求。
 
 具体 CSP 应与整站已有策略合并，并在目标浏览器上验证 Worker 和 WASM。完全离线或 CDN 被阻断时会使用本站资源，但应用自身的静态资源仍需可访问或由 Service Worker 缓存。
 
@@ -288,8 +336,10 @@ HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实
 - 打开包含扫描图、复合字体、ICC 配置和密码保护的 PDF，确认支持资源按需加载且密码界面可用。
 - 确认密码等交互在 `open()` 返回后的插件 UI 中完成，宿主不依赖进度 `stage` 切换遮罩。
 - 在正常网络下确认 DuckDB 使用带精确版本号的 jsDelivr URL。
-- 阻断 `cdn.jsdelivr.net` 后确认 DuckDB 可以使用本站资源打开文件。
+- 阻断 `cdn.jsdelivr.net` 后确认 DuckDB 从 `assets.anyfile.top` 打开文件，并观察资产请求进入 Cloudflare cache HIT。
+- 同时阻断 `cdn.jsdelivr.net` 与 `assets.anyfile.top` 后确认 DuckDB 可以使用本站资源打开文件。
 - 对同源版本化 `/vendor` 资源检查 MIME、COEP/CORP（适用时）和 `Cache-Control: public, max-age=31536000, immutable`。例如运行 `curl -I https://<domain>/vendor/libraw/1.6.0/libraw.wasm`。
 - 对所有外部 Worker/WASM 的最终 URL（包括重定向后 URL）检查 CORS、CORP、MIME 和不可变缓存头。
-- 若启用 Cloudflare R2 fallback，确认应用域名未通过 Cloudflare 再代理到 Vercel，并确认资产域名缓存命中时不回源 Vercel。
+- 新增或升级运行时依赖时，记录单资源与典型冷启动实际传输量；达到 2 MiB/4 MiB 门槛或月度流量占套餐额度 10% 时，确认已按本节接入外部资产链路或记录同源例外依据。
+- 确认应用域名未通过 Cloudflare 再代理到 Vercel，并确认 `assets.anyfile.top` 缓存命中时不回源 Vercel。
 - 部署 CSP 后，在 Chrome、Edge、Firefox 和 Safari 的目标版本验证 Worker/WASM。

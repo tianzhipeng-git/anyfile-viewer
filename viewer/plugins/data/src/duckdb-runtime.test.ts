@@ -39,13 +39,27 @@ describe("DuckDB runtime loading", () => {
     expect(mocks.instantiate).toHaveBeenCalledWith("https://cdn.example/duckdb.wasm", null);
   });
 
-  it("falls back to local assets when CDN initialization fails", async () => {
-    mocks.instantiate.mockRejectedValueOnce(new Error("CDN unavailable"));
+  it("falls back to R2 when jsDelivr initialization fails", async () => {
+    mocks.instantiate.mockRejectedValueOnce(new Error("jsDelivr unavailable"));
 
     await createDuckDBRuntime(new AbortController().signal);
 
     expect(mocks.createWorker).toHaveBeenCalledTimes(2);
-    expect(mocks.createWorker.mock.calls[1]?.[0]).not.toContain("cdn.example");
+    expect(mocks.createWorker.mock.calls[1]?.[0])
+      .toBe("https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-browser-mvp.worker.js");
     expect(mocks.terminate).toHaveBeenCalledOnce();
+  });
+
+  it("falls back to local assets when jsDelivr and R2 initialization fail", async () => {
+    mocks.instantiate
+      .mockRejectedValueOnce(new Error("jsDelivr unavailable"))
+      .mockRejectedValueOnce(new Error("R2 unavailable"));
+
+    await createDuckDBRuntime(new AbortController().signal);
+
+    expect(mocks.createWorker).toHaveBeenCalledTimes(3);
+    expect(mocks.createWorker.mock.calls[2]?.[0]).not.toContain("cdn.example");
+    expect(mocks.createWorker.mock.calls[2]?.[0]).not.toContain("assets.anyfile.top");
+    expect(mocks.terminate).toHaveBeenCalledTimes(2);
   });
 });

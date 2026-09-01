@@ -128,6 +128,37 @@ if (dataProbeChunks.length === 0) throw new Error("Data probe chunk was not foun
 if (dataProbeChunks.some(({ content }) => content.includes("Starting DuckDB"))) {
   throw new Error("Data probe chunk contains the full DuckDB viewer implementation");
 }
+const duckdbPackage = JSON.parse(await readFile(join(
+  projectRoot,
+  "viewer/plugins/data/node_modules/@duckdb/duckdb-wasm/package.json",
+), "utf8"));
+const duckdbRuntimeSource = await readFile(
+  join(projectRoot, "viewer/plugins/data/src/duckdb-runtime.ts"),
+  "utf8",
+);
+const duckdbR2Root = duckdbRuntimeSource.match(/const R2_ASSET_ROOT = "([^"]+)"/)?.[1];
+const expectedDuckdbR2Root = `https://assets.anyfile.top/vendor/duckdb/${duckdbPackage.version}`;
+if (duckdbR2Root !== expectedDuckdbR2Root) {
+  throw new Error(
+    `DuckDB R2 root ${duckdbR2Root ?? "is missing"}; installed version requires ${expectedDuckdbR2Root}`,
+  );
+}
+for (const asset of [
+  "duckdb-mvp.wasm",
+  "duckdb-eh.wasm",
+  "duckdb-browser-mvp.worker.js",
+  "duckdb-browser-eh.worker.js",
+]) {
+  if (!duckdbRuntimeSource.includes(`\${R2_ASSET_ROOT}/${asset}`)) {
+    throw new Error(`DuckDB R2 bundle is missing ${asset}`);
+  }
+}
+const duckdbViewerChunks = archiveChunkContents.filter(({ content }) => (
+  content.includes("Unable to initialize DuckDB from jsDelivr, R2, or local assets")
+));
+if (duckdbViewerChunks.length === 0 || !duckdbViewerChunks.some(({ content }) => content.includes(expectedDuckdbR2Root))) {
+  throw new Error("Deferred DuckDB viewer chunk does not contain the version-locked R2 fallback");
+}
 const wasmViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-wasm-viewer__viewport"));
 if (wasmViewerChunks.length === 0) throw new Error("WASM viewer dynamic chunk was not found");
 const wasmProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_dev_wasm_probe_v1__"));
@@ -319,5 +350,6 @@ console.log(
 console.log(
   `PDF.js Worker: ${pdfWorkerAsset}; support assets prepared for ${pdfjsPackage.version}; viewer implementation remains deferred`,
 );
+console.log(`DuckDB ${duckdbPackage.version}: jsDelivr, R2 and same-origin bundles remain version-aligned and deferred`);
 console.log(`LibRaw ${librawPackage.version}: same-origin Worker, pthread and WASM assets prepared; runtime remains deferred`);
 console.log(`libheif ${heifRuntimeVersion}: verified same-origin JS/WASM and license assets; runtime remains deferred`);
