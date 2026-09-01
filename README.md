@@ -57,5 +57,4 @@ pnpm build
 pnpm --filter @anyfile/pdf-viewer test
 pnpm --filter @anyfile/word-viewer test
 pnpm --filter @anyfile/excel-viewer test
-pnpm --filter @anyfile/powerpoint-viewer test
 ```
