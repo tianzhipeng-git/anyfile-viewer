@@ -2,8 +2,9 @@ import type { AppDictionary } from "../types";
 
 const dictionary = {
   metadata: {
-    siteTitle: "Anyfile — 本地文件查看器", siteDescription: "直接在浏览器中打开并预览文档、图片、音视频、代码与数据文件，无需上传、注册账户或安装桌面软件。",
-    viewerTitle: "打开文件", viewerDescription: "直接在浏览器中打开受支持文件，进行私密的只读预览。文件始终留在当前设备，不会上传到服务器。",
+    siteTitle: "Anyfile — 免费在线文件查看器", siteDescription: "免费的在线文件查看器：快速、私密地打开文档、图片、音视频、代码与数据文件，无需上传、注册账户或安装软件。",
+    viewerTitle: "免费在线文件查看器", viewerDescription: "使用快速、私密的在线查看器打开受支持文件。完全免费，文件留在当前设备，无需上传。",
+    noUploadSuffix: " 无需上传。",
   },
   common: {
     home: "首页", mainNavigation: "主要导航", openFile: "打开文件", openFolder: "打开文件夹",
@@ -17,8 +18,8 @@ const dictionary = {
     developerArtifacts: "开发者", threeD: "3D", design: "设计",
   },
   home: {
-    localFirst: "本地优先的文件查看器", title: "在浏览器本地打开文件。",
-    description: "无需上传文件或安装桌面软件，即可预览受支持的图片、文档、音视频、代码与数据。",
+    localFirst: "免费在线文件查看器", title: "在线打开文件，无需上传。",
+    description: "快速、私密地查看受支持的图片、文档、音视频、代码与数据。完全免费，文件始终留在当前设备。",
     selectFile: "选择本地文件", browse: "浏览支持格式", trust: "本地处理 · 无需注册 · 免费使用",
     privacyEyebrow: "默认保护隐私", privacyTitle: "你的文件，只属于你。",
     privacyDescription: "Anyfile 直接读取你明确选择的本地文件。预览、解码与渲染全部发生在当前浏览器标签页中。",
@@ -36,7 +37,7 @@ const dictionary = {
   format: {
     viewerSuffix: "查看器", metadataDescription: "在浏览器本地查看 {name}。{description}",
     browserNativeView: "浏览器原生查看", pluginView: "专用插件查看", headline: "{name}，打开就看。",
-    privacySuffix: " 文件不上传，预览过程仅发生在你的浏览器中。", choose: "选择 .{extension} 文件",
+    privacySuffix: " 无需上传，处理仅在浏览器本地进行。", choose: "选择 .{extension} 文件",
     benefits: [
       { title: "更快", description: "跳过文件上传与云端处理队列。" },
       { title: "更私密", description: "文件内容不会发送到 Anyfile 服务器。" },

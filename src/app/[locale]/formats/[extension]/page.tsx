@@ -10,8 +10,9 @@ import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbP
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getCategory, getFormat, getPlugin, publishedFormatRoutes, publishedFormats } from "@/content";
-import { alternateLanguages, isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
+import { isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
+import { localizedPageMetadata } from "@/lib/seo";
 
 export const dynamicParams = false;
 export function generateStaticParams() { return publishedFormatRoutes.map((extension) => ({ extension })); }
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!format) return {};
   const dictionary = await getDictionary(locale);
   const path = `/formats/${format.extension}`;
-  return { title: format.title, description: `${format.description}${dictionary.format.privacySuffix}`, alternates: { canonical: localePath(locale, path), languages: alternateLanguages(path) } };
+  return localizedPageMetadata({ locale, path, title: format.title, description: `${format.description}${dictionary.format.privacySuffix}` });
 }
 
 export default async function FormatPage({ params }: { params: Promise<{ locale: string; extension: string }> }) {

@@ -2,18 +2,20 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
 import { FileWorkspace } from "@/components/file-workspace";
-import { alternateLanguages, isPublishedLocale, localePath } from "@/i18n/config";
+import { isPublishedLocale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
+import { localizedPageMetadata } from "@/lib/seo";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   if (!isPublishedLocale(locale)) return {};
   const dictionary = await getDictionary(locale);
-  return {
+  return localizedPageMetadata({
+    locale,
+    path: "/view",
     title: dictionary.metadata.viewerTitle,
     description: dictionary.metadata.viewerDescription,
-    alternates: { canonical: localePath(locale, "/view"), languages: alternateLanguages("/view") },
-  };
+  });
 }
 
 export default async function ViewerPage({ params }: { params: Promise<{ locale: string }> }) {

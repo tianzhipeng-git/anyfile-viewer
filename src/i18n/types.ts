@@ -1,5 +1,5 @@
 export type AppDictionary = {
-  metadata: { siteTitle: string; siteDescription: string; viewerTitle: string; viewerDescription: string };
+  metadata: { siteTitle: string; siteDescription: string; viewerTitle: string; viewerDescription: string; noUploadSuffix: string };
   common: {
     home: string; mainNavigation: string; openFile: string; openFolder: string; categories: string;
     getStarted: string; footerPrivacy: string; copyright: string; native: string; plugin: string;

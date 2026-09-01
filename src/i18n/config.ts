@@ -26,6 +26,8 @@ export function alternateLanguages(path = "/") {
 }
 
 export function siteUrl(): URL {
-  const host = process.env.VERCEL_PROJECT_PRODUCTION_URL ?? process.env.VERCEL_URL;
-  return new URL(process.env.NEXT_PUBLIC_SITE_URL ?? (host ? `https://${host}` : "http://localhost:3000"));
+  const fallback = process.env.NODE_ENV === "development" ? "http://localhost:3000" : "https://www.anyfile.top";
+  const url = new URL(process.env.NEXT_PUBLIC_SITE_URL ?? fallback);
+  if (url.hostname === "anyfile.top") url.hostname = "www.anyfile.top";
+  return url;
 }

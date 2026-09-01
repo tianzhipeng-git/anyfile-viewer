@@ -8,8 +8,9 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { getPlugin, publishedPlugins } from "@/content";
-import { alternateLanguages, isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
+import { isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
+import { localizedPageMetadata } from "@/lib/seo";
 
 export const dynamicParams = false;
 export function generateStaticParams() { return publishedPlugins.map(({ pluginId }) => ({ pluginId })); }
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!plugin) return {};
   const dictionary = await getDictionary(locale);
   const path = `/plugins/${pluginId}`;
-  return { title: plugin.title, description: `${plugin.description} ${dictionary.common.footerPrivacy}`, alternates: { canonical: localePath(locale, path), languages: alternateLanguages(path) } };
+  return localizedPageMetadata({ locale, path, title: plugin.title, description: `${plugin.description}${dictionary.metadata.noUploadSuffix}` });
 }
 
 export default async function PluginPage({ params }: { params: Promise<{ locale: string; pluginId: string }> }) {

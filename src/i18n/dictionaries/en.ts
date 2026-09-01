@@ -2,10 +2,11 @@ import type { AppDictionary } from "../types";
 
 const dictionary = {
   metadata: {
-    siteTitle: "Anyfile — Local file viewer",
-    siteDescription: "Open and preview documents, images, media, code and data files directly in your browser. No upload, account or desktop software required.",
-    viewerTitle: "Open a file",
-    viewerDescription: "Open a supported file directly in your browser for a private, read-only preview. Your file stays on your device and is never uploaded.",
+    siteTitle: "Anyfile — Free online file viewer",
+    siteDescription: "Open documents, images, media, code and data with a fast, private online file viewer. Free to use, with no uploads or desktop software.",
+    viewerTitle: "Free online file viewer",
+    viewerDescription: "Open supported files instantly with a fast, private online viewer. Free to use; files stay on your device and are never uploaded.",
+    noUploadSuffix: " No upload required.",
   },
   common: {
     home: "Home", mainNavigation: "Main navigation", openFile: "Open file", openFolder: "Open folder",
@@ -19,8 +20,8 @@ const dictionary = {
     developerArtifacts: "Developer", threeD: "3D", design: "Design",
   },
   home: {
-    localFirst: "LOCAL-FIRST FILE VIEWER", title: "Open local files in your browser.",
-    description: "Preview supported images, documents, media, code and data without uploading files or installing desktop software.",
+    localFirst: "FREE ONLINE FILE VIEWER", title: "Open files online without uploading.",
+    description: "Use a fast, private viewer for supported images, documents, media, code and data. It is free, and your files stay on your device.",
     selectFile: "Choose a local file", browse: "Browse supported formats", trust: "Local processing · No account · Free to use",
     privacyEyebrow: "PRIVACY BY DEFAULT", privacyTitle: "Your files belong to you.",
     privacyDescription: "Anyfile reads only the files you choose. Previewing, decoding and rendering all happen in this browser tab.",
@@ -39,7 +40,7 @@ const dictionary = {
   format: {
     viewerSuffix: " viewer", metadataDescription: "View {name} locally in your browser. {description}",
     browserNativeView: "Browser-native viewing", pluginView: "Dedicated plugin", headline: "Open {name} instantly.",
-    privacySuffix: " Your file is never uploaded; previewing happens only in your browser.", choose: "Choose a .{extension} file",
+    privacySuffix: " No upload required; processing stays in your browser.", choose: "Choose a .{extension} file",
     benefits: [
       { title: "Faster", description: "Skip file uploads and cloud processing queues." },
       { title: "More private", description: "File contents are never sent to Anyfile servers." },
