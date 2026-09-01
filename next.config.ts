@@ -8,6 +8,9 @@ const nextConfig: NextConfig = {
       { source: "/categories/:slug", destination: "/en/categories/:slug", permanent: true },
       { source: "/formats/:extension", destination: "/en/formats/:extension", permanent: true },
       { source: "/plugins/:pluginId", destination: "/en/plugins/:pluginId", permanent: true },
+      { source: "/about", destination: "/en/about", permanent: true },
+      { source: "/privacy", destination: "/en/privacy", permanent: true },
+      { source: "/contact", destination: "/en/contact", permanent: true },
     ];
   },
   async headers() {

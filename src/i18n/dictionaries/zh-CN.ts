@@ -12,6 +12,7 @@ const dictionary = {
     footerPrivacy: "文件始终留在你的设备上。Anyfile 只使用浏览器本地能力完成读取与预览。",
     copyright: "© 2026 Anyfile. 本地优先，隐私始终如一。", native: "浏览器原生", plugin: "插件",
     learnAndOpen: "了解并打开", browseFormats: "浏览支持格式", directOpen: "直接打开文件", language: "语言",
+    about: "关于", privacy: "隐私政策", contact: "联系", resources: "Anyfile", email: "邮箱", sourceCode: "开源地址",
   },
   nav: {
     imagesVideo: "图片与音视频", documents: "文档", codeData: "数据",

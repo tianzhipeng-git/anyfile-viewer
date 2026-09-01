@@ -14,6 +14,7 @@ const dictionary = {
     footerPrivacy: "Your files stay on your device. Anyfile reads and previews them using local browser capabilities only.",
     copyright: "© 2026 Anyfile. Local first, privacy always.", native: "Browser native", plugin: "Plugin",
     learnAndOpen: "Learn and open", browseFormats: "Browse supported formats", directOpen: "Open a file now", language: "Language",
+    about: "About", privacy: "Privacy policy", contact: "Contact", resources: "Anyfile", email: "Email", sourceCode: "Source code",
   },
   nav: {
     imagesVideo: "Images & Media", documents: "Documents", codeData: "Data",

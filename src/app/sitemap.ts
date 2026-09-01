@@ -2,12 +2,14 @@ import type { MetadataRoute } from "next";
 
 import { PUBLISHED_LOCALES, alternateLanguages, localePath, siteUrl } from "@/i18n/config";
 import { publishedCategories, publishedFormats, publishedPlugins } from "@/content";
+import { SITE_INFO_SLUGS } from "@/content/site-info";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const origin = siteUrl();
   const paths = [
     "/",
     "/view",
+    ...SITE_INFO_SLUGS.map((slug) => `/${slug}`),
     ...publishedCategories.map(({ slug }) => `/categories/${slug}`),
     ...publishedFormats.map(({ extension }) => `/formats/${extension}`),
     ...publishedPlugins.map(({ pluginId }) => `/plugins/${pluginId}`),
