@@ -21,8 +21,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!isPublishedLocale(locale)) return {};
   const format = getFormat(extension, locale);
   if (!format) return {};
+  const dictionary = await getDictionary(locale);
   const path = `/formats/${format.extension}`;
-  return { title: format.title, description: format.description, alternates: { canonical: localePath(locale, path), languages: alternateLanguages(path) } };
+  return { title: format.title, description: `${format.description}${dictionary.format.privacySuffix}`, alternates: { canonical: localePath(locale, path), languages: alternateLanguages(path) } };
 }
 
 export default async function FormatPage({ params }: { params: Promise<{ locale: string; extension: string }> }) {

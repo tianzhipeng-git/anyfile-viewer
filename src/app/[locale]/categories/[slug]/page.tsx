@@ -22,8 +22,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!isPublishedLocale(locale)) return {};
   const category = getCategory(slug, locale);
   if (!category) return {};
+  const dictionary = await getDictionary(locale);
   const path = `/categories/${slug}`;
-  return { title: category.title, description: category.description, alternates: { canonical: localePath(locale, path), languages: alternateLanguages(path) } };
+  return { title: category.title, description: `${category.description}${dictionary.category.localSuffix}`, alternates: { canonical: localePath(locale, path), languages: alternateLanguages(path) } };
 }
 
 export default async function CategoryPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {

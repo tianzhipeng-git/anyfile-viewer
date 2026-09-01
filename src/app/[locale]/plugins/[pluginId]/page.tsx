@@ -19,8 +19,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!isPublishedLocale(locale)) return {};
   const plugin = getPlugin(pluginId, locale);
   if (!plugin) return {};
+  const dictionary = await getDictionary(locale);
   const path = `/plugins/${pluginId}`;
-  return { title: plugin.title, description: plugin.description, alternates: { canonical: localePath(locale, path), languages: alternateLanguages(path) } };
+  return { title: plugin.title, description: `${plugin.description} ${dictionary.common.footerPrivacy}`, alternates: { canonical: localePath(locale, path), languages: alternateLanguages(path) } };
 }
 
 export default async function PluginPage({ params }: { params: Promise<{ locale: string; pluginId: string }> }) {

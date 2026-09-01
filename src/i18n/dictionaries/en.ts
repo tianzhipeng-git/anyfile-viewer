@@ -3,9 +3,9 @@ import type { AppDictionary } from "../types";
 const dictionary = {
   metadata: {
     siteTitle: "Anyfile — Local file viewer",
-    siteDescription: "Preview local files quickly and privately in your browser without uploading.",
+    siteDescription: "Open and preview documents, images, media, code and data files directly in your browser. No upload, account or desktop software required.",
     viewerTitle: "Open a file",
-    viewerDescription: "Choose and preview a file locally in your browser.",
+    viewerDescription: "Open a supported file directly in your browser for a private, read-only preview. Your file stays on your device and is never uploaded.",
   },
   common: {
     home: "Home", mainNavigation: "Main navigation", openFile: "Open file", openFolder: "Open folder",
@@ -15,12 +15,12 @@ const dictionary = {
     learnAndOpen: "Learn and open", browseFormats: "Browse supported formats", directOpen: "Open a file now", language: "Language",
   },
   nav: {
-    imagesVideo: "Images & media", documents: "Documents", codeData: "Code & data",
-    developerArtifacts: "Developer artifacts", threeD: "3D", design: "Design",
+    imagesVideo: "Images & Media", documents: "Documents", codeData: "Data",
+    developerArtifacts: "Developer", threeD: "3D", design: "Design",
   },
   home: {
-    localFirst: "LOCAL-FIRST FILE VIEWER", title: "Open every file in one place.",
-    description: "No uploads. Use your browser to view images, documents, code, data and 3D files quickly and privately.",
+    localFirst: "LOCAL-FIRST FILE VIEWER", title: "Open local files in your browser.",
+    description: "Preview supported images, documents, media, code and data without uploading files or installing desktop software.",
     selectFile: "Choose a local file", browse: "Browse supported formats", trust: "Local processing · No account · Free to use",
     privacyEyebrow: "PRIVACY BY DEFAULT", privacyTitle: "Your files belong to you.",
     privacyDescription: "Anyfile reads only the files you choose. Previewing, decoding and rendering all happen in this browser tab.",
@@ -32,6 +32,8 @@ const dictionary = {
     formatsEyebrow: "SUPPORTED FORMATS", formatsTitle: "Find the format you need.",
     formatsDescription: "Browser-native formats and dedicated viewer plugins, organized into clear categories.",
     browseCount: "Browse {count} formats",
+    popularFormatsTitle: "Popular file viewers",
+    popularFormatsDescription: "Go directly to practical guides, supported features and known limits for commonly opened formats.",
   },
   category: { home: "Home", viewerSuffix: " viewers", localSuffix: " Everything is processed on this device.", formats: "FORMATS", choose: "Choose a file format" },
   format: {

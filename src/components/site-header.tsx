@@ -11,8 +11,8 @@ export function SiteHeader({ locale, dictionary }: { locale: PublishedLocale; di
   const links = [
     { href: "/categories/images-video", label: dictionary.nav.imagesVideo },
     { href: "/categories/documents", label: dictionary.nav.documents },
-    { href: "/categories/code-data", label: dictionary.nav.codeData },
     { href: "/categories/developer-artifacts", label: dictionary.nav.developerArtifacts },
+    { href: "/categories/code-data", label: dictionary.nav.codeData },
   ];
   return (
     <header className="sticky top-0 z-20 border-b border-background/10 bg-foreground text-background">

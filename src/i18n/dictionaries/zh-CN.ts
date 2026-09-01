@@ -2,8 +2,8 @@ import type { AppDictionary } from "../types";
 
 const dictionary = {
   metadata: {
-    siteTitle: "Anyfile — 本地文件查看器", siteDescription: "无需上传，在浏览器中快速、安全地预览各种格式的本地文件。",
-    viewerTitle: "打开文件", viewerDescription: "在浏览器本地选择并预览文件。",
+    siteTitle: "Anyfile — 本地文件查看器", siteDescription: "直接在浏览器中打开并预览文档、图片、音视频、代码与数据文件，无需上传、注册账户或安装桌面软件。",
+    viewerTitle: "打开文件", viewerDescription: "直接在浏览器中打开受支持文件，进行私密的只读预览。文件始终留在当前设备，不会上传到服务器。",
   },
   common: {
     home: "首页", mainNavigation: "主要导航", openFile: "打开文件", openFolder: "打开文件夹",
@@ -13,12 +13,12 @@ const dictionary = {
     learnAndOpen: "了解并打开", browseFormats: "浏览支持格式", directOpen: "直接打开文件", language: "语言",
   },
   nav: {
-    imagesVideo: "图片与音视频", documents: "文档", codeData: "代码与数据",
-    developerArtifacts: "开发者产物", threeD: "3D", design: "设计",
+    imagesVideo: "图片与音视频", documents: "文档", codeData: "数据",
+    developerArtifacts: "开发者", threeD: "3D", design: "设计",
   },
   home: {
-    localFirst: "本地优先的文件查看器", title: "所有文件，一处打开。",
-    description: "无需上传。使用浏览器原生能力，在本地快速、安全地查看图片、文档、代码、数据与 3D 文件。",
+    localFirst: "本地优先的文件查看器", title: "在浏览器本地打开文件。",
+    description: "无需上传文件或安装桌面软件，即可预览受支持的图片、文档、音视频、代码与数据。",
     selectFile: "选择本地文件", browse: "浏览支持格式", trust: "本地处理 · 无需注册 · 免费使用",
     privacyEyebrow: "默认保护隐私", privacyTitle: "你的文件，只属于你。",
     privacyDescription: "Anyfile 直接读取你明确选择的本地文件。预览、解码与渲染全部发生在当前浏览器标签页中。",
@@ -29,6 +29,8 @@ const dictionary = {
     ],
     formatsEyebrow: "支持的格式", formatsTitle: "找到你要打开的格式。",
     formatsDescription: "从浏览器原生支持到专用查看器插件，统一在清晰的类别中。", browseCount: "浏览 {count} 种格式",
+    popularFormatsTitle: "常用文件查看器",
+    popularFormatsDescription: "直接查看常见格式的使用说明、已支持能力与已知限制。",
   },
   category: { home: "首页", viewerSuffix: "查看器", localSuffix: " 所有处理都在当前设备完成。", formats: "种格式", choose: "选择一种文件格式" },
   format: {

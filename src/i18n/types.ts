@@ -11,6 +11,7 @@ export type AppDictionary = {
     privacyEyebrow: string; privacyTitle: string; privacyDescription: string;
     principles: readonly { title: string; description: string }[];
     formatsEyebrow: string; formatsTitle: string; formatsDescription: string; browseCount: string;
+    popularFormatsTitle: string; popularFormatsDescription: string;
   };
   category: { home: string; viewerSuffix: string; localSuffix: string; formats: string; choose: string };
   format: {

@@ -1,9 +1,9 @@
-import { BinaryIcon, BracesIcon, FileImageIcon, FileTextIcon } from "lucide-react";
+import { BinaryIcon, DatabaseIcon, FileImageIcon, FileTextIcon } from "lucide-react";
 
 const iconByCategory = {
   "images-video": FileImageIcon,
   documents: FileTextIcon,
-  "code-data": BracesIcon,
+  "code-data": DatabaseIcon,
   "developer-artifacts": BinaryIcon,
 };
 
