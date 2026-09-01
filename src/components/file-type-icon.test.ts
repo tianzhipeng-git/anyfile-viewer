@@ -7,6 +7,8 @@ import { getFileTypeKind } from "./file-type-icon";
 describe("getFileTypeKind", () => {
   it.each([
     ["photo.HEIC", "image"],
+    ["panorama.insp", "image"],
+    ["proxy.lrv", "video"],
     ["clip.webm", "video"],
     ["movie.mkv", "video"],
     ["recording.flac", "audio"],

@@ -43,6 +43,7 @@
     "@anyfile/general-raster-viewer": "workspace:*",
     "@anyfile/har-viewer": "workspace:*",
     "@anyfile/hex-viewer": "workspace:*",
+    "@anyfile/insta360-viewer": "workspace:*",
     "@anyfile/modern-raster-viewer": "workspace:*",
     "@anyfile/non-native-video-viewer": "workspace:*",
     "@anyfile/non-native-audio-viewer": "workspace:*",

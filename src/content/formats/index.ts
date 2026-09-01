@@ -36,6 +36,7 @@ import { gzFormat } from "./gz";
 import { harFormat } from "./har";
 import { heicFormat } from "./heic";
 import { icoFormat } from "./ico";
+import { inspFormat } from "./insp";
 import { ipaFormat } from "./ipa";
 import { jarFormat } from "./jar";
 import { jmodFormat } from "./jmod";
@@ -45,6 +46,7 @@ import { jsonlFormat } from "./jsonl";
 import { jxlFormat } from "./jxl";
 import { kmzFormat } from "./kmz";
 import { lz4Format } from "./lz4";
+import { lrvFormat } from "./lrv";
 import { m2tsFormat } from "./m2ts";
 import { m4aFormat } from "./m4a";
 import { mapFormat } from "./map";
@@ -153,6 +155,7 @@ export const formatContents: readonly FormatContent[] = [
   harFormat,
   heicFormat,
   icoFormat,
+  inspFormat,
   ipaFormat,
   jarFormat,
   jmodFormat,
@@ -162,6 +165,7 @@ export const formatContents: readonly FormatContent[] = [
   jxlFormat,
   kmzFormat,
   lz4Format,
+  lrvFormat,
   m2tsFormat,
   m4aFormat,
   mapFormat,

@@ -11,6 +11,7 @@ import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
+import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
 import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
@@ -92,21 +93,27 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "image",
     icon: FileImageIcon,
-    extensions: manifestExtensions(
+    extensions: [
+      ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".insp"),
+      ...manifestExtensions(
       browserImageManifest,
       modernRasterManifest,
       cameraRawManifest,
       generalRasterManifest,
       safeSvgManifest,
-    ),
+      ),
+    ],
   },
   {
     kind: "video",
     icon: FileVideoIcon,
     // `.ts` is far more commonly a TypeScript source file; the content probe still
     // routes real MPEG-TS files to the video viewer.
-    extensions: manifestExtensions(browserVideoManifest, nonNativeVideoManifest)
-      .filter((extension) => extension !== ".ts"),
+    extensions: [
+      ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".lrv"),
+      ...manifestExtensions(browserVideoManifest, nonNativeVideoManifest)
+        .filter((extension) => extension !== ".ts"),
+    ],
   },
   {
     kind: "presentation",

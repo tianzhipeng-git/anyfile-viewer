@@ -59,6 +59,7 @@ const deferredImplementationMarkers = [
   "anyfile-modern-raster-viewer__canvas",
   "anyfile-camera-raw-viewer__canvas",
   "anyfile-browser-video-viewer__video",
+  "anyfile-insta360-viewer__canvas",
   "anyfile-non-native-video-viewer__controls",
   "anyfile-browser-audio-viewer__audio",
   "anyfile-non-native-audio-viewer__controls",
@@ -179,6 +180,11 @@ if (videoProbeChunks.length === 0) {
 }
 if (videoProbeChunks.some(({ content }) => content.includes("anyfile-browser-video-viewer__video"))) {
   throw new Error("Browser video probe chunk contains the full video viewer implementation");
+}
+const insta360ProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_insta360_probe_v1__"));
+if (insta360ProbeChunks.length === 0) throw new Error("Insta360 probe chunk was not found");
+if (insta360ProbeChunks.some(({ content }) => content.includes("anyfile-insta360-viewer__canvas"))) {
+  throw new Error("Insta360 probe chunk contains the full panorama viewer implementation");
 }
 const nonNativeVideoProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Non-native video probe read budget exceeded"));
 if (nonNativeVideoProbeChunks.length === 0) {
