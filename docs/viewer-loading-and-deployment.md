@@ -1,6 +1,6 @@
 # 查看器加载、渲染与部署约定
 
-本文记录查看器插件在 SSG、SSR、依赖锁定、jsDelivr 和构建体积方面的约定。修改插件注册、依赖或部署配置时，应同时检查本文列出的边界。需要从 C/C++/Rust 等上游源码自行生成 WASM、Worker 或 JavaScript glue 时，还必须遵守 [源码构建型第三方依赖规范](viewer-source-built-dependencies.md)。
+本文记录查看器插件在 SSG/SSR、按需加载、运行时资产准备与分发、依赖锁定和构建体积方面的约定。修改插件注册、依赖或部署配置时，应同时检查本文列出的边界。需要从 C/C++/Rust 等上游源码自行生成 WASM、Worker 或 JavaScript glue 时，还必须遵守 [源码构建型第三方依赖规范](viewer-source-built-dependencies.md)。
 
 ## 1. SSG 与 SSR 支持
 
@@ -73,22 +73,36 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 4. 注册顺序只作为同支持等级候选的稳定 tie-break；通用兜底插件仍放在末尾。
 5. 运行 `pnpm build`，确认首包体积检查通过。
 
-### PDF.js 支持资源
+## 3. 运行时资产的准备、分发与回退
 
-PDF 插件实现保持动态加载。`pnpm dev` 和 `pnpm build` 会先运行
-`scripts/prepare-pdfjs-assets.mjs`，把已锁定版本 `pdfjs-dist` 的以下官方资源复制到
-`public/vendor/pdfjs/<version>/`：
+插件代码是否动态加载，与 Worker、WASM、字体、色彩配置和解码数据等运行时资产如何分发，是两个独立问题。所有插件先遵守第 2 节的代码加载边界，再按本节为运行时资产选择来源和分发链路。
 
-- `cmaps/`：复合字体的字符映射；
-- `standard_fonts/`：PDF 标准字体的本地字体数据；
-- `iccs/`：ICC 色彩配置；
-- `wasm/`：JBIG2、OpenJPEG、QCMS 以及 PDF.js 官方 JavaScript 解码回退。
+### 统一资产生命周期
 
-这些资源保持 PDF.js 发布包中的目录与文件名，浏览器只在具体 PDF 用到相应能力时按需请求。
-资源与用户文件都走同源，不依赖 CDN；版本目录避免依赖升级后缓存混用。该目录是生成产物，
-不提交仓库，但生产构建必须包含准备步骤。
+每项运行时资产都必须明确以下四个阶段：
 
-## 3. 大体积运行时的 CDN 与回退
+```text
+上游 npm 包或审核过的源码构建产物
+                │
+                ▼ prepare：校验版本、文件和 SHA-256（适用时）
+版本化 public/vendor 路径或 Next.js 内容哈希产物
+                │
+                ▼ deploy：同源、官方 CDN 或受控资产域名
+插件被选中且实际需要时由浏览器按需加载
+```
+
+资产来源分为三类：
+
+- **npm 可恢复资产**：由 lockfile 中的精确包版本恢复，构建前复制到版本化同源目录；不重复提交到 `third_party`。
+- **源码构建资产**：由 `tools/<dependency>-build/` 的可重复配方生成，审核产物提交到 `third_party`，构建前校验并复制。
+- **打包资产**：能够被 bundler 正确拆分的 Worker/WASM 随插件 chunk 产出，但仍不得进入查看页首包。
+
+分发链路根据单次真实传输量、上游发布条件和浏览器运行约束决定：
+
+- 小型资产默认使用版本化同源路径；
+- 达到本节量化门槛且有可靠官方公共 CDN 的资产，使用“官方 CDN → 受控资产域名 → 同源”；
+- 达到门槛但没有可靠官方公共 CDN 的自建产物，使用“受控资产域名 → 同源”；
+- 模块 Worker、pthread 或相对导入链要求同源时，可以保留同源，但必须记录原因和传输量。
 
 ### 目标部署拓扑
 
@@ -111,36 +125,13 @@ PDF 插件实现保持动态加载。`pnpm dev` 和 `pnpm build` 会先运行
 
 静态预渲染和 Vercel CDN 命中可以减少服务端计算与源站访问，但用户实际下载的页面和静态文件仍产生 CDN 数据传输。降低运行时流量成本的主要手段是按需加载、压缩、长期不可变缓存，以及把大型公共二进制放到官方 CDN 或受控资产域名，而不是把 `/{locale}/view` 改成 SSR。
 
-### 加载与回退顺序
+### 外部链路的回退语义
 
-DuckDB JavaScript API 由应用自身打包。体积较大的 WASM 与 Worker 按以下顺序加载：
+使用外部资产链路时，每个来源只尝试一次。仅在资源获取、Worker 创建或引擎初始化失败时切换到下一来源；文件损坏、格式不支持、解码或查询失败不得触发整套运行时重新初始化。切换前必须清理失败实例，所有来源失败后才向查看器上层返回错误。
 
-1. 使用 `getJsDelivrBundles()` 取得与已安装包版本一致的官方 jsDelivr URL。
-2. 使用 `selectBundle()` 按浏览器能力选择 MVP 或 EH 版本。
-3. 如果 jsDelivr Worker 获取或 DuckDB 初始化失败，清理失败实例并使用 `assets.anyfile.top` 上的同版本 Cloudflare R2 镜像重试。
-4. 如果 R2 Worker 获取或初始化也失败，再次清理失败实例并使用构建产物中的同版本本地资源重试。
-5. 如果本地初始化也失败，才向查看器上层返回错误。
+外部来源、受控镜像和同源 fallback 必须是同一精确版本。保留同源 fallback 会降低正常流量对 Vercel 大文件分发的依赖，但不会缩小部署产物；如果某项资产有意不保留同源 fallback，必须在对应架构文档说明离线行为和失败 UI。
 
-回退只处理引擎加载/初始化失败。文件损坏、格式不支持或查询失败不会触发 CDN 到本地的重复初始化。
-
-由于需要最终同源回退，当前部署产物仍会包含 DuckDB WASM 和 Worker。jsDelivr 与 R2 减少正常流量对 Vercel 大文件分发的依赖，但不会缩小构建产物。三个来源各只尝试一次；外部 CDN 都失败时明确使用同源资源，不会无限重试。
-
-项目的 local-first 含义保持不变：用户选择的文件不会上传到 jsDelivr、R2 或应用服务器。jsDelivr 与 R2 只收到公共 DuckDB 引擎资源的请求。
-
-### 当前 DuckDB R2 镜像
-
-生产 bucket 为 `anyfile-bucket`，公开资产域名为 `https://assets.anyfile.top`。DuckDB `1.32.0` 的 MVP/EH 单线程 WASM 与 Worker 保持 npm 包原文件名，发布在：
-
-```text
-https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-mvp.wasm
-https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-eh.wasm
-https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-browser-mvp.worker.js
-https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-browser-eh.worker.js
-```
-
-R2 bucket 配置公开只读 CORS（`GET`、`HEAD` 和 `Range`）；Cloudflare zone 为资产域名设置 `Cross-Origin-Resource-Policy: cross-origin`，并使用 Cache Rule 缓存所有文件类型、尊重对象的 immutable TTL。仅给对象写入 `Cache-Control` 不足以保证 WASM 被 Cloudflare 默认缓存；发布验收必须观察真实 GET 从 `CF-Cache-Status: MISS` 进入 `HIT`。
-
-`pnpm build` 不访问 R2，但会校验运行时中的 R2 版本路径与已安装 `@duckdb/duckdb-wasm` 精确版本一致，并确认四个 MVP/EH URL 存在于延迟加载的 DuckDB chunk。升级依赖时必须先上传新版本路径、验证响应头和 SHA-256，再修改运行时版本；不得覆盖旧版本对象。
+项目的 local-first 含义保持不变：用户选择的文件不会上传到公共 CDN、R2 或应用服务器，外部服务只收到公共运行时资产的请求。
 
 ### 外部资产链路的量化门槛
 
@@ -164,21 +155,48 @@ R2 bucket 配置公开只读 CORS（`GET`、`HEAD` 和 `Range`）；Cloudflare z
 - 小于门槛的资源默认保持同源，避免为低收益资源增加上传、版本同步和跨源诊断成本；
 - 模块 Worker、pthread、相对导入链或其他运行约束确实要求同源时可以例外，但必须在对应架构文档记录原因、实际传输量和流量观察方式，不能只写“兼容性需要”。
 
-当前版本的判定结果如下：
-
-- PDF.js 的 `/vendor/pdfjs` 总目录约 3.7 MiB，但包含 192 个按需支持文件，最大单文件约 441 KiB，不代表一次打开会下载整个目录，继续同源；
-- libheif 的主要 WASM 约 1.17 MiB，低于门槛，继续同源；
-- LibRaw 的主要 WASM 约 1.38 MiB，低于门槛且存在 pthread/Worker 同源隔离约束，继续同源；
-- DuckDB MVP/EH WASM 单文件约 38 MiB/33 MiB，超过门槛，使用已经落地的三层链路；
-- 未来 FFmpeg 等大型运行时应在选型阶段按相同口径测量，预计达到门槛时先设计资产发布和回退，不等接入完成后再迁移。
-
-新增大体积运行时时，按以下顺序决策：
+接入或升级运行时时，按以下顺序决策：
 
 1. 优先使用上游官方、精确版本、可长期缓存的公共 CDN 资产。
 2. 对每个真实 URL 校验 CORS、CORP、Content-Type、缓存、重定向和区域可用性，不能只根据 CDN 品牌推断兼容。
 3. 上游 CDN 不满足要求时，把审核过的版本化产物放到受控资产域名；不能运行时代理任意用户 URL。
 4. 只有小型资源、必须同源的 Worker 或尚未迁移的 fallback 才进入 Vercel 部署产物。
 5. CDN 和 fallback 必须指向同一依赖版本，并由构建门禁交叉校验。
+
+未来 FFmpeg 等大型运行时应在选型阶段按相同口径测量；预计达到门槛时，先设计资产发布和回退，不等接入完成后再迁移。
+
+### 当前运行时资产实现
+
+当前实现统一记录如下。该表描述资产策略，不替代各格式架构文档中的解码和渲染设计。
+
+| 运行时 | 产物来源 | 实测规模 | 触发时机 | 分发链路 | 主要原因 |
+|---|---|---|---|---|---|
+| PDF.js 支持资源 | 锁定的 npm 包 | 总目录约 3.7 MiB；最大单文件约 441 KiB | PDF 实际需要对应字体、色彩或解码能力时 | 同源 | 192 个资源按需互斥加载，单次传输未达到门槛 |
+| DuckDB WASM / Worker | 锁定的 npm 包 | MVP/EH WASM 约 38/33 MiB | DuckDB 插件被选中并初始化时 | jsDelivr → R2 → 同源 | 单个 WASM 远超门槛 |
+| HEIF decoder / WASM | 审核过的源码构建产物 | 主要 WASM 约 1.17 MiB | 已识别为 HEVC 的 HEIF 原生解码失败后 | 同源 | 小于门槛，且只作为条件 fallback |
+| LibRaw Worker / WASM | 锁定的 npm 包及补充许可材料 | 主要 WASM 约 1.38 MiB | RAW 插件被选中时 | 同源 | 小于门槛，并有 pthread/Worker 同源隔离约束 |
+| JXL Worker / WASM | bundler 产物 | 构建时持续检查 | JXL 插件被选中时 | `/_next/static` | 可正确拆分并使用内容哈希路径 |
+
+新增或升级依赖时，如果没有引入新的资产类型、分发链路或运行边界，只更新本表和对应实现约束，不再新增散落的依赖专章。确实需要一套独立架构时，应建立对应架构文档，并从本表链接过去。
+
+以下三项还包含本节直接负责的 prepare 或外部部署操作；LibRaw 的许可证与准备约束见第 4 节，JXL 的响应头约束见第 5 节：
+
+- **PDF.js**：`pnpm dev` 和 `pnpm build` 先运行 `scripts/prepare-pdfjs-assets.mjs`，把锁定版本 `pdfjs-dist` 的 `cmaps/`、`standard_fonts/`、`iccs/` 和 `wasm/` 原目录复制到 `public/vendor/pdfjs/<version>/`。这些目录分别提供复合字体字符映射、标准字体、ICC 色彩配置，以及 JBIG2、OpenJPEG、QCMS 和官方 JavaScript 解码回退。目录是生成产物，不提交仓库；版本目录避免升级后缓存混用。
+- **DuckDB**：JavaScript API 由应用打包。运行时使用 `getJsDelivrBundles()` 取得与已安装包一致的官方 URL，用 `selectBundle()` 选择 MVP 或 EH，再按 jsDelivr、`assets.anyfile.top` 同版本镜像、构建产物中的同版本本地资源依次尝试。切换来源时遵守前述清理和失败分类规则。
+- **HEIF**：`pnpm prepare:heif` 校验 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json` 中的大小和 SHA-256，再把 decoder、WASM、许可证与源码说明复制到 `/vendor/libheif/1.23.2-anyfile.1/`，构建门禁交叉校验运行时 URL 与产物版本。probe 不导入这些资产；独立 Worker 只在原生实际解码失败后动态导入同源 glue 并加载 WASM。`/vendor/libheif/:path*` 返回与其他同源 Worker/WASM 一致的 COEP/CORP 头；CSP 只需允许同源 Worker 和 WebAssembly。
+
+DuckDB 当前生产 bucket 为 `anyfile-bucket`，公开资产域名为 `https://assets.anyfile.top`。`1.32.0` 的 MVP/EH 单线程 WASM 与 Worker 保持 npm 包原文件名，发布在：
+
+```text
+https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-mvp.wasm
+https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-eh.wasm
+https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-browser-mvp.worker.js
+https://assets.anyfile.top/vendor/duckdb/1.32.0/duckdb-browser-eh.worker.js
+```
+
+R2 bucket 配置公开只读 CORS（`GET`、`HEAD` 和 `Range`）；Cloudflare zone 为资产域名设置 `Cross-Origin-Resource-Policy: cross-origin`，并使用 Cache Rule 缓存所有文件类型、尊重对象的 immutable TTL。仅给对象写入 `Cache-Control` 不足以保证 WASM 被 Cloudflare 默认缓存；发布验收必须观察真实 GET 从 `CF-Cache-Status: MISS` 进入 `HIT`。
+
+`pnpm build` 不访问 R2，但会校验运行时中的 R2 版本路径与已安装 `@duckdb/duckdb-wasm` 精确版本一致，并确认四个 MVP/EH URL 存在于延迟加载的 DuckDB chunk。升级依赖时必须先上传新版本路径、验证响应头和 SHA-256，再修改运行时版本；不得覆盖旧版本对象。
 
 受控公共资产域名至少返回：
 
@@ -315,12 +333,6 @@ JXL 的打包 Worker 和 WASM 位于 `/_next/static/:path*`，该路径同样返
 生产构建显式使用 Next.js 支持的 `next build --webpack`。`libraw-wasm` 的 Emscripten pthread runtime 在当前 Next.js 16.3.3 Turbopack 生产构建中会停留在 chunk 生成阶段。构建前将其官方 `dist` 中的入口、Worker、pthread 脚本和 WASM 原样复制到版本化同源目录，RAW 插件打开文件时才通过 URL 动态导入。生产构建使用 Webpack，开发服务仍保留 Next.js 默认的 Turbopack。
 
 新增或升级插件不应通过提高上限来绕过失败。先检查是否误用了静态导入、顶层副作用或把实现代码放进了 manifest。
-
-### HEIF 的同源源码构建产物
-
-`pnpm prepare:heif` 校验 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json` 中的文件大小和 SHA-256，再把 decoder、WASM、许可证与对应源码说明复制到 `/vendor/libheif/1.23.2-anyfile.1/`。运行时 URL 与产物版本由构建门禁交叉校验。
-
-HEIF probe 不导入这些资产。只有已识别为 HEVC 的 HEIF 在原生实际解码失败后，独立 Worker 才动态导入同源 glue 并加载 WASM。`/vendor/libheif/:path*` 返回与其他本地 Worker/WASM 一致的 COEP/CORP 头；CSP 只需允许同源 Worker 和 WebAssembly，不新增 CDN 来源。
 
 ## 6. 发布前检查清单
 
