@@ -163,7 +163,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
+      .toEqual(["gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -318,6 +318,8 @@ describe("viewer protocol", () => {
   });
 
   it("keeps specialized viewers ahead of archive metadata and hex fallback", () => {
+    expect(findViewerRegistrations("capture.360", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["gopro-max", "hex-viewer"]);
     expect(findViewerRegistrations("photo.insp", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["insta360", "hex-viewer"]);
     expect(findViewerRegistrations("proxy.lrv", viewerRegistrations).map(({ manifest: item }) => item.id))
@@ -346,6 +348,8 @@ describe("viewer protocol", () => {
       .toEqual(["non-native-audio", "hex-viewer"]);
     expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "hex-viewer"]);
+    expect(findViewerRegistrations("photo.jpg", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["gopro-max", "browser-image", "hex-viewer"]);
     expect(findViewerRegistrations("photo.jxl", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["modern-raster", "hex-viewer"]);
     expect(findViewerRegistrations("photo.heic", viewerRegistrations).map(({ manifest: item }) => item.id))

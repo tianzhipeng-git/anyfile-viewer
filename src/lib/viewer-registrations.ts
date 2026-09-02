@@ -9,6 +9,7 @@ import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
+import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
 import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
@@ -27,6 +28,17 @@ import {
 } from "@anyfile/viewer-protocol";
 
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
+  {
+    manifest: goProMaxManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/gopro-max-viewer/probe");
+      return probePackage.probeGoProMax(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/gopro-max-viewer");
+      return viewerPackage.goProMaxViewer;
+    },
+  },
   {
     manifest: insta360Manifest,
     async probe(context) {

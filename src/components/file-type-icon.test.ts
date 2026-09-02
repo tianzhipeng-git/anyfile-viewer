@@ -8,6 +8,7 @@ describe("getFileTypeKind", () => {
   it.each([
     ["photo.HEIC", "image"],
     ["panorama.insp", "image"],
+    ["panorama.360", "video"],
     ["proxy.lrv", "video"],
     ["clip.webm", "video"],
     ["movie.mkv", "video"],

@@ -1,5 +1,6 @@
 import type { FormatContent } from "../types";
 
+import { goPro360Format } from "./360";
 import { lotus123Format } from "./123";
 import { threeGpFormat } from "./3gp";
 import { aacFormat } from "./aac";
@@ -120,6 +121,7 @@ import { zlibFormat } from "./zlib";
 import { zstFormat } from "./zst";
 
 export const formatContents: readonly FormatContent[] = [
+  goPro360Format,
   lotus123Format,
   threeGpFormat,
   aacFormat,

@@ -41,6 +41,7 @@
     "@anyfile/dev-wasm-viewer": "workspace:*",
     "@anyfile/excel-viewer": "workspace:*",
     "@anyfile/general-raster-viewer": "workspace:*",
+    "@anyfile/gopro-max-viewer": "workspace:*",
     "@anyfile/har-viewer": "workspace:*",
     "@anyfile/hex-viewer": "workspace:*",
     "@anyfile/insta360-viewer": "workspace:*",

@@ -83,6 +83,8 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | Ogg Video | Theora | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only 不创建 AudioContext |
 | 3GPP，尾部 `moov` | AVC/H.264 Constrained Baseline L1.3 | AAC-LC，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
 | Insta360 X3 成对 INSV，严格匹配 `_00`/`_10`，每文件单鱼眼 2880×2880 | AVC/H.264 Main，8-bit 4:2:0，full range，29.97 fps | AAC-LC，48 kHz，双声道；仅 `_00` 输出声音 | insta360 | 3 | verified | 3 | Chrome 152.0.7977.65 / macOS 15.6.1；双视频连续播放、同步 seek、较短时长、结束与重播通过；无 gyro/FlowState |
+| GoPro MAX `.360`，MP4 尾部 `moov`，双 EAC 视频轨 4096×1344 | HEVC Main，`hvc1`，8-bit 4:2:0 | AAC-LC，48 kHz，双声道；忽略辅助 4 声道 Ambisonic PCM | gopro-max | 3 | implemented | 3 | 真实样例有界 probe 与 FFmpeg 双轨 EAC 几何校验通过；WebCodecs/WebGL 连续播放待目标浏览器复验；无 GPMF、gyro、稳定或空间音频 |
+| GoPro MAX2 `.360`，MP4 尾部 `moov`，双 EAC 视频轨 5952×1920 | HEVC Main，`hvc1`，8-bit 4:2:0 | AAC-LC，48 kHz，双声道；忽略辅助 4 声道 Ambisonic PCM | gopro-max | 3 | implemented | 3 | 真实样例有界 probe 与 FFmpeg 双轨 EAC 几何校验通过；WebCodecs/WebGL 连续播放待目标浏览器复验；无 GPMF、gyro、稳定或空间音频 |
 | 3GPP | H.263 等其他组合 | AMR 等 | FFmpeg video fallback | 0 | planned | 3–4 | 阶段 3 按真实需求和固定样例评估 |
 | Flash Video | Sorenson/VP6/AVC 等 | AAC/MP3 等 | FFmpeg video fallback | 0 | deferred | 3 | 阶段 3 后续批次，取决于真实需求 |
 | QuickTime/MOV | ProRes | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 4，先播放再增加专业能力；不能因阶段 3 decoder 存在而自动宣称支持 |
@@ -161,6 +163,14 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 - 严格文件名与组号配对；单独打开或不同录像组合返回 `missing-related-file`，提示同时选择成对文件或打开整个文件夹；
 - One RS、X4、X5、X6 的真实样例已完成有界 probe、轨道/RAW 布局检查和型号级镜头投影离线校验；X5/X6 的 HEVC WebCodecs 连续播放仍需在目标浏览器人工复验；
 - gyro、FlowState、逐文件标定覆盖和 Safari/Firefox/Windows/Android/iOS 未在本轮声明或验证。
+
+### GoPro MAX / MAX2 样例记录（2026-09-03）
+
+- 三张 MAX JPG 均为 5760×2880、2:1 的完整 equirectangular 全景，并具有 GoPro MAX EXIF 与 GPano XMP；图片查看路径已通过自动渲染与生命周期测试；
+- 两段 MAX 4096×1344 与两段 MAX2 5952×1920 `.360` 原片均通过有界 probe，包含两条同尺寸 `hvc1` HEVC 视频轨和 AAC-LC 48 kHz 双声道主音频；最大样例约 2.5 GB，probe 不读取完整文件；
+- MAX 与 MAX2 各取真实样例，用 FFmpeg 将双视频轨纵向组合并以 `v360=input=eac:output=equirect` 转换，得到方向完整的等距柱状全景，验证两种尺寸使用同一 EAC 面布局；
+- 实现使用 Mediabunny 按范围读取与 demux、WebCodecs 解码双 HEVC 轨、WebGL 直接采样 EAC，并用 AAC 主音频作为播放时钟；不读取 GPMF、timecode、设备描述或 Ambisonic PCM；
+- 浏览器文件选择器未能在本轮自动化环境中完成真实原片 smoke，因此暂记为 `implemented`；目标浏览器仍需复验首帧、连续播放、声音、seek、结束、重播与窄窗口 resize 后才能标记 `verified`。
 
 ## 7. 自动测试与构建证据
 
