@@ -10,6 +10,7 @@ import type { AppDictionary } from "@/i18n/types";
 export function SiteHeader({ locale, dictionary }: { locale: PublishedLocale; dictionary: AppDictionary }) {
   const links = [
     { href: "/categories/images-video", label: dictionary.nav.imagesVideo },
+    { href: "/categories/360-cameras", label: dictionary.nav.panorama360 },
     { href: "/categories/documents", label: dictionary.nav.documents },
     { href: "/categories/developer-artifacts", label: dictionary.nav.developerArtifacts },
     { href: "/categories/code-data", label: dictionary.nav.codeData },
@@ -18,7 +19,7 @@ export function SiteHeader({ locale, dictionary }: { locale: PublishedLocale; di
     <header className="sticky top-0 z-20 border-b border-background/10 bg-foreground text-background">
       <div className="content-shell flex h-12 items-center justify-between gap-6">
         <IsolationBoundaryLink href={localePath(locale)} aria-label={`Anyfile ${dictionary.common.home}`}><BrandMark /></IsolationBoundaryLink>
-        <nav className="hidden items-center gap-6 text-xs md:flex" aria-label={dictionary.common.mainNavigation}>
+        <nav className="hidden items-center gap-5 text-xs lg:flex" aria-label={dictionary.common.mainNavigation}>
           {links.map((link) => (
             <IsolationBoundaryLink key={link.href} href={localePath(locale, link.href)} className="opacity-75 transition-opacity hover:opacity-100">{link.label}</IsolationBoundaryLink>
           ))}

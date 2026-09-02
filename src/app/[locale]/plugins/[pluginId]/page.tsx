@@ -7,7 +7,7 @@ import { JsonLd } from "@/components/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getPlugin, publishedPlugins } from "@/content";
+import { getPanoramaViewerForPlugin, getPlugin, publishedPlugins } from "@/content";
 import { isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
 import { localizedPageMetadata } from "@/lib/seo";
@@ -31,6 +31,7 @@ export default async function PluginPage({ params }: { params: Promise<{ locale:
   const dictionary = await getDictionary(locale);
   const plugin = getPlugin(pluginId, locale);
   if (!plugin) notFound();
+  const panoramaViewer = getPanoramaViewerForPlugin(pluginId, locale);
   const name = plugin.manifest.name[locale] ?? plugin.manifest.name.en;
   const pageUrl = new URL(localePath(locale, `/plugins/${pluginId}`), siteUrl()).toString();
 
@@ -41,7 +42,7 @@ export default async function PluginPage({ params }: { params: Promise<{ locale:
     ] }} />
     <section className="bg-background py-14 sm:py-20"><div className="content-shell flex flex-col gap-10">
       <Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink render={<Link href={localePath(locale)} />}>{dictionary.common.home}</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>{name}</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>
-      <div className="max-w-4xl"><div className="mb-5 flex flex-wrap gap-2"><Badge variant="secondary">{plugin.pluginId}</Badge><Badge variant="outline">protocol v{plugin.manifest.protocolVersion}</Badge><Badge variant="outline">workspace: {plugin.manifest.workspaceAccess}</Badge></div><h1 className="display-title text-5xl leading-none sm:text-6xl">{plugin.title}</h1><p className="mt-6 text-xl leading-8 text-muted-foreground">{plugin.summary}</p></div>
+      <div className="max-w-4xl"><div className="mb-5 flex flex-wrap gap-2"><Badge variant="secondary">{plugin.pluginId}</Badge><Badge variant="outline">protocol v{plugin.manifest.protocolVersion}</Badge><Badge variant="outline">workspace: {plugin.manifest.workspaceAccess}</Badge></div><h1 className="display-title text-5xl leading-none sm:text-6xl">{plugin.title}</h1><p className="mt-6 text-xl leading-8 text-muted-foreground">{plugin.summary}</p>{panoramaViewer && <Link className="mt-6 inline-flex items-center gap-2 font-semibold text-primary" href={localePath(locale, `/viewers/${panoramaViewer.viewerId}`)}>{locale === "zh-CN" ? "查看面向用户的相机支持页" : "See the camera viewer guide"}<ArrowRightIcon className="size-4" /></Link>}</div>
     </div></section>
     <section className="bg-foreground py-16 text-background"><div className="content-shell grid gap-12 lg:grid-cols-2">
       <div><NetworkIcon className="mb-4 size-7 text-primary" /><h2 className="display-title mb-6 text-3xl">{locale === "zh-CN" ? "查看流程" : "Viewing architecture"}</h2><ol className="space-y-5">{plugin.architecture.map((item, index) => <li className="flex gap-4" key={item}><span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-background/10 text-sm">{index + 1}</span><span className="leading-7 opacity-80">{item}</span></li>)}</ol></div>

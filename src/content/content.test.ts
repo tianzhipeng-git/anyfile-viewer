@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { PUBLISHED_LOCALES } from "../i18n/config";
 
-import { getCategory, getFormat, getPlugin, publishedCategories, publishedFormatRoutes, publishedFormats, publishedPlugins, viewerManifests } from ".";
+import { getCategory, getFormat, getPanoramaViewer, getPanoramaViewerForPlugin, getPanoramaViewersForExtension, getPlugin, publishedCategories, publishedFormatRoutes, publishedFormats, publishedPanoramaViewers, publishedPlugins, viewerManifests } from ".";
 import { manifestsForExtension } from "./manifests";
 
 const unique = (values: readonly string[]) => new Set(values).size === values.length;
@@ -59,6 +59,24 @@ describe("published SEO content", () => {
     }
   });
 
+  it("publishes the 360 camera hub and localized viewer guides", () => {
+    expect(getCategory("360-cameras", "en")!.extensions).toEqual(["insv", "insp", "lrv", "360", "osv", "dng", "jpg"]);
+    expect(publishedPanoramaViewers.map(({ viewerId }) => viewerId)).toEqual(["insta360", "gopro-max", "dji-osmo-360"]);
+    for (const locale of PUBLISHED_LOCALES) {
+      for (const { viewerId, pluginId, formatExtensions } of publishedPanoramaViewers) {
+        const viewer = getPanoramaViewer(viewerId, locale)!;
+        expect(viewer.title.trim()).not.toBe("");
+        expect(viewer.formats.map(({ extension }) => extension)).toEqual(formatExtensions);
+        expect(viewer.faq.length).toBeGreaterThan(0);
+        expect(getPanoramaViewerForPlugin(pluginId, locale)?.viewerId).toBe(viewerId);
+        for (const extension of formatExtensions) {
+          expect(getFormat(extension, locale), `${viewerId}: ${extension}`).toBeDefined();
+          expect(getPanoramaViewersForExtension(extension, locale).map((item) => item.viewerId)).toContain(viewerId);
+        }
+      }
+    }
+  });
+
   it("keeps data separate from developer code and artifacts", () => {
     expect(getCategory("code-data", "en")!.name).toBe("Data");
     expect(getCategory("developer-artifacts", "en")!.name).toBe("Developer");
@@ -83,6 +101,7 @@ describe("published SEO content", () => {
     expect(unique(publishedFormats.map(({ extension }) => extension))).toBe(true);
     expect(unique(publishedCategories.map(({ slug }) => slug))).toBe(true);
     expect(unique(publishedPlugins.map(({ pluginId }) => pluginId))).toBe(true);
+    expect(unique(publishedPanoramaViewers.map(({ viewerId }) => viewerId))).toBe(true);
     expect(unique(publishedFormatRoutes)).toBe(true);
     for (const { extension, aliases = [] } of publishedFormats) {
       expect(aliases).not.toContain(extension);
@@ -98,6 +117,7 @@ describe("published SEO content", () => {
       expect(unique(publishedFormats.flatMap(({ extension }) => getFormat(extension, locale)!.faq.map(({ question }) => question)))).toBe(true);
       expect(unique(publishedCategories.map(({ slug }) => getCategory(slug, locale)!.title))).toBe(true);
       expect(unique(publishedPlugins.map(({ pluginId }) => getPlugin(pluginId, locale)!.title))).toBe(true);
+      expect(unique(publishedPanoramaViewers.map(({ viewerId }) => getPanoramaViewer(viewerId, locale)!.title))).toBe(true);
     }
   });
 

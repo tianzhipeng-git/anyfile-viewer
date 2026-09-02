@@ -9,6 +9,15 @@ export const categoryContents: readonly CategoryContent[] = [
     },
   },
   {
+    slug: "360-cameras", status: "published",
+    formatExtensions: ["insv", "insp", "lrv", "360", "osv", "dng", "jpg"],
+    panoramaViewerIds: ["insta360", "gopro-max", "dji-osmo-360"],
+    copy: {
+      en: { name: "360° Cameras", eyebrow: "OPEN ORIGINAL CAMERA MEDIA", title: "360° camera file viewers", description: "Preview original Insta360, GoPro MAX and DJI Osmo 360 media directly in your browser.", introduction: "Open supported camera-original panoramas without first exporting them to a flat MP4 or JPEG. Anyfile validates known camera layouts, reads large files locally and renders an interactive 360° view without uploading your footage.", useCases: ["Check original camera footage before starting an edit", "Preview large panoramas without waiting for an upload", "Open uncommon INSV, INSP, LRV, .360 and OSV files"], commonProblems: ["Some recordings require HEVC or HEVC Main 10 support from the browser and operating system", "Older Insta360 recordings may need both matching lens files", "Stabilization, reframing and export remain jobs for the camera maker's editing software"], faq: [{ question: "Does Anyfile replace Insta360 Studio, GoPro Player or DJI Studio?", answer: "No. Anyfile is a fast, private viewer for supported originals. Use the camera maker's software when you need stabilization, editing, reframing or export." }] },
+      "zh-CN": { name: "360° 全景", eyebrow: "直接打开相机原片", title: "360° 全景相机文件查看器", description: "直接在浏览器中预览 Insta360、GoPro MAX 与 DJI Osmo 360 原始素材。", introduction: "无需先导出为平面 MP4 或 JPEG，即可打开受支持的全景相机原片。Anyfile 会校验已知相机布局，在本地分段读取大文件，并渲染成交互式 360° 视图，全程不上传素材。", useCases: ["开始剪辑前快速检查相机原始素材", "无需等待上传即可预览大型全景文件", "打开少见的 INSV、INSP、LRV、.360 与 OSV 文件"], commonProblems: ["部分录像要求浏览器和操作系统支持 HEVC 或 HEVC Main 10", "较早的 Insta360 录像可能需要同时提供匹配的两路镜头文件", "防抖、重新取景与导出仍需使用相机厂商的编辑软件"], faq: [{ question: "Anyfile 可以替代 Insta360 Studio、GoPro Player 或 DJI Studio 吗？", answer: "不能。Anyfile 定位是快速、私密地查看受支持的原片；需要防抖、剪辑、重新取景或导出时，请使用相机厂商的软件。" }] },
+    },
+  },
+  {
     slug: "documents", status: "published",
     copy: {
       en: { name: "Documents", eyebrow: "READ WITHOUT AN UPLOAD QUEUE", title: "Document, spreadsheet and presentation viewers", description: "Read common office files locally while keeping the original file on your device.", introduction: "Document viewers reconstruct readable output in the browser. They are intended for review, not editing, and complex desktop-only layout features may render differently.", useCases: ["Read a PDF or DOCX on an untrusted machine", "Inspect workbook values and worksheets", "Review PPTX slides without installing office software"], commonProblems: ["Password-protected or encrypted files may not open", "Macros, external links and active content are not executed", "Fonts and advanced layout effects can differ from desktop applications"], faq: [{ question: "Can I edit office files in Anyfile?", answer: "No. Anyfile is deliberately read-only; use the authoring application when you need to edit and save a document." }] },

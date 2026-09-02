@@ -16,7 +16,7 @@ const dictionary = {
   },
   nav: {
     imagesVideo: "图片与音视频", documents: "文档", codeData: "数据",
-    developerArtifacts: "开发者", threeD: "3D", design: "设计",
+    developerArtifacts: "开发者", panorama360: "360° 全景", threeD: "3D", design: "设计",
   },
   home: {
     localFirst: "免费在线文件查看器", title: "在线打开文件，无需上传。",
@@ -31,10 +31,18 @@ const dictionary = {
     ],
     formatsEyebrow: "支持的格式", formatsTitle: "找到你要打开的格式。",
     formatsDescription: "从浏览器原生支持到专用查看器插件，统一在清晰的类别中。", browseCount: "浏览 {count} 种格式",
-    popularFormatsTitle: "常用文件查看器",
-    popularFormatsDescription: "直接查看常见格式的使用说明、已支持能力与已知限制。",
+    panoramaEyebrow: "相机原始素材", panoramaTitle: "剪辑之前，直接打开全景相机原片。",
+    panoramaDescription: "在本地预览受支持的 Insta360、GoPro MAX 与 DJI Osmo 360 原片，无需先导出平面视频，也无需上传大型素材。",
+    openSourceEyebrow: "开源项目", openSourceTitle: "不仅查看文件，也可以检查查看器本身。",
+    openSourceDescription: "Anyfile 完全开源。你可以审查本地文件如何被处理、验证隐私设计，也可以帮助项目支持更多少见格式。",
+    openSourceCta: "在 GitHub 查看源码",
+    openSourcePrinciples: [
+      { title: "可审查", description: "直接阅读浏览器如何探测、解码与渲染本地文件。" },
+      { title: "可扩展", description: "插件化查看器保持格式能力独立，也让新增格式更容易参与。" },
+      { title: "Apache-2.0", description: "通过宽松的开源许可证使用、研究并继续构建这个项目。" },
+    ],
   },
-  category: { home: "首页", viewerSuffix: "查看器", localSuffix: " 所有处理都在当前设备完成。", formats: "种格式", choose: "选择一种文件格式" },
+  category: { home: "首页", viewerSuffix: "查看器", localSuffix: " 所有处理都在当前设备完成。", formats: "种格式", choose: "支持的格式" },
   format: {
     viewerSuffix: "查看器", metadataDescription: "在浏览器本地查看 {name}。{description}",
     browserNativeView: "浏览器原生查看", pluginView: "专用插件查看", headline: "{name}，打开就看。",

@@ -18,7 +18,7 @@ const dictionary = {
   },
   nav: {
     imagesVideo: "Images & Media", documents: "Documents", codeData: "Data",
-    developerArtifacts: "Developer", threeD: "3D", design: "Design",
+    developerArtifacts: "Developer", panorama360: "360° Cameras", threeD: "3D", design: "Design",
   },
   home: {
     localFirst: "FREE ONLINE FILE VIEWER", title: "Open files online without uploading.",
@@ -34,10 +34,18 @@ const dictionary = {
     formatsEyebrow: "SUPPORTED FORMATS", formatsTitle: "Find the format you need.",
     formatsDescription: "Browser-native formats and dedicated viewer plugins, organized into clear categories.",
     browseCount: "Browse {count} formats",
-    popularFormatsTitle: "Popular file viewers",
-    popularFormatsDescription: "Go directly to practical guides, supported features and known limits for commonly opened formats.",
+    panoramaEyebrow: "CAMERA ORIGINALS", panoramaTitle: "Open 360° camera files before you edit.",
+    panoramaDescription: "Preview supported Insta360, GoPro MAX and DJI Osmo 360 originals locally—without first exporting a flat video or uploading large footage.",
+    openSourceEyebrow: "OPEN SOURCE", openSourceTitle: "Inspect the viewer, not just your files.",
+    openSourceDescription: "Anyfile is open source. Review how local files are handled, verify the privacy model and help extend support for uncommon formats.",
+    openSourceCta: "View source on GitHub",
+    openSourcePrinciples: [
+      { title: "Auditable", description: "Read the code that probes, decodes and renders files directly in the browser." },
+      { title: "Extensible", description: "Viewer plugins keep format support modular and make new capabilities easier to contribute." },
+      { title: "Apache-2.0", description: "Use, study and build on the project under a permissive open-source license." },
+    ],
   },
-  category: { home: "Home", viewerSuffix: " viewers", localSuffix: " Everything is processed on this device.", formats: "FORMATS", choose: "Choose a file format" },
+  category: { home: "Home", viewerSuffix: " viewers", localSuffix: " Everything is processed on this device.", formats: "FORMATS", choose: "Supported formats" },
   format: {
     viewerSuffix: " viewer", metadataDescription: "View {name} locally in your browser. {description}",
     browserNativeView: "Browser-native viewing", pluginView: "Dedicated plugin", headline: "Open {name} instantly.",
