@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCategory, getFormat, getPlugin, publishedFormatRoutes, publishedFormats } from "@/content";
+import { getCategory, getFormat, getPanoramaViewersForExtension, getPlugin, publishedFormatRoutes, publishedFormats } from "@/content";
 import { isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
 import { localizedPageMetadata } from "@/lib/seo";
@@ -37,6 +37,7 @@ export default async function FormatPage({ params }: { params: Promise<{ locale:
   const category = getCategory(format.categoryId, locale);
   if (!category) notFound();
   const plugins = format.pluginIds.map((id) => getPlugin(id, locale)).filter((item) => item !== undefined);
+  const panoramaViewers = getPanoramaViewersForExtension(format.extension, locale);
   const related = publishedFormats
     .filter((item) => item.categoryId === format.categoryId && item.extension !== format.extension)
     .slice(0, 4).map((item) => getFormat(item.extension, locale)!);
@@ -59,6 +60,7 @@ export default async function FormatPage({ params }: { params: Promise<{ locale:
         <Button nativeButton={false} size="lg" render={<IsolationBoundaryLink href={localePath(locale, "/view")} />}>{locale === "zh-CN" ? `选择 .${format.extension} 文件` : `Choose a .${format.extension} file`}<ArrowRightIcon data-icon="inline-end" /></Button>
       </div><div className="rounded-2xl border bg-muted p-6"><LockKeyholeIcon className="mb-4 size-7 text-primary" aria-hidden="true" /><h2 className="mb-2 text-lg font-semibold">{locale === "zh-CN" ? "文件留在当前设备" : "Your file stays on this device"}</h2><p className="leading-7 text-muted-foreground">{locale === "zh-CN" ? "Anyfile 只读取你明确选择的本地文件。解析、解码与渲染发生在当前浏览器标签页，不上传到 Anyfile 服务器。" : "Anyfile reads only the local file you select. Parsing, decoding and rendering happen in this browser tab; the file is not uploaded to Anyfile servers."}</p></div></div>
     </div></section>
+    {panoramaViewers.length > 0 && <section className="bg-foreground py-14 text-background"><div className="content-shell"><p className="text-sm font-semibold text-primary">{locale === "zh-CN" ? "360° 全景相机" : "360° CAMERAS"}</p><h2 className="display-title mt-2 text-3xl">{locale === "zh-CN" ? `使用 .${format.extension} 的全景查看器` : `360° viewers that use .${format.extension}`}</h2><div className="mt-7 grid gap-4 md:grid-cols-2">{panoramaViewers.map((viewer) => <Link className="rounded-xl border border-background/20 p-5 transition-colors hover:bg-background/10" href={localePath(locale, `/viewers/${viewer.viewerId}`)} key={viewer.viewerId}><span className="font-semibold">{viewer.name}</span><span className="mt-2 block text-sm leading-6 opacity-65">{viewer.description}</span></Link>)}</div></div></section>}
     <section className="bg-muted py-16 sm:py-20"><div className="content-shell grid gap-12 lg:grid-cols-2">
       <div><h2 className="display-title mb-6 text-3xl">{locale === "zh-CN" ? "可以查看什么" : "What Anyfile can show"}</h2><ul className="space-y-4">{format.canShow.map((item) => <li key={item} className="flex gap-3"><CheckIcon className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><span className="leading-7">{item}</span></li>)}</ul></div>
       <div><h2 className="display-title mb-6 text-3xl">{locale === "zh-CN" ? "限制与条件" : "Limits and conditions"}</h2><ul className="space-y-4">{[...(format.capability.conditions?.[locale] ?? []), ...format.limitations].map((item) => <li key={item} className="flex gap-3"><CircleAlertIcon className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><span className="leading-7">{item}</span></li>)}</ul>{format.alternatives && <div className="mt-8 rounded-xl border bg-background p-5"><h3 className="font-semibold">{locale === "zh-CN" ? "需要更完整能力？" : "Need deeper capabilities?"}</h3>{format.alternatives.map((alternative) => <p className="mt-3 leading-7 text-muted-foreground" key={alternative.name}><a className="font-semibold text-primary" href={alternative.url} rel="noreferrer">{alternative.name}</a> — {alternative.reason[locale]}</p>)}<p className="mt-3 text-xs text-muted-foreground">{locale === "zh-CN" ? "独立建议，与 Anyfile 无合作或背书关系。" : "Independent suggestion; no partnership or endorsement is implied."}</p></div>}</div>

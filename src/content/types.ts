@@ -47,7 +47,39 @@ export type CategoryCopy = {
 export type CategoryContent = {
   slug: string;
   status: PublishStatus;
+  formatExtensions?: readonly string[];
+  panoramaViewerIds?: readonly string[];
   copy: Localized<CategoryCopy>;
+};
+
+export type PanoramaViewerFormat = {
+  extension: string;
+  label: string;
+  description: string;
+};
+
+export type PanoramaViewerCopy = {
+  name: string;
+  eyebrow: string;
+  title: string;
+  description: string;
+  introduction: string;
+  openLabel: string;
+  models: readonly string[];
+  formats: readonly PanoramaViewerFormat[];
+  highlights: readonly string[];
+  openingSteps: readonly string[];
+  requirements: readonly string[];
+  limitations: readonly string[];
+  faq: readonly Faq[];
+};
+
+export type PanoramaViewerContent = {
+  viewerId: string;
+  pluginId: string;
+  status: PublishStatus;
+  formatExtensions: readonly string[];
+  copy: Localized<PanoramaViewerCopy>;
 };
 
 export type UpstreamProject = {

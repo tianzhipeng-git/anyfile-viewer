@@ -1,5 +1,6 @@
 import type { FormatContent } from "../types";
 
+import { goPro360Format } from "./360";
 import { lotus123Format } from "./123";
 import { threeGpFormat } from "./3gp";
 import { aacFormat } from "./aac";
@@ -36,6 +37,8 @@ import { gzFormat } from "./gz";
 import { harFormat } from "./har";
 import { heicFormat } from "./heic";
 import { icoFormat } from "./ico";
+import { inspFormat } from "./insp";
+import { insvFormat } from "./insv";
 import { ipaFormat } from "./ipa";
 import { jarFormat } from "./jar";
 import { jmodFormat } from "./jmod";
@@ -45,6 +48,7 @@ import { jsonlFormat } from "./jsonl";
 import { jxlFormat } from "./jxl";
 import { kmzFormat } from "./kmz";
 import { lz4Format } from "./lz4";
+import { lrvFormat } from "./lrv";
 import { m2tsFormat } from "./m2ts";
 import { m4aFormat } from "./m4a";
 import { mapFormat } from "./map";
@@ -69,6 +73,7 @@ import { ogvFormat } from "./ogv";
 import { omeTiffFormat } from "./ome-tiff";
 import { opusFormat } from "./opus";
 import { orfFormat } from "./orf";
+import { osvFormat } from "./osv";
 import { parquetFormat } from "./parquet";
 import { pdfFormat } from "./pdf";
 import { pefFormat } from "./pef";
@@ -117,6 +122,7 @@ import { zlibFormat } from "./zlib";
 import { zstFormat } from "./zst";
 
 export const formatContents: readonly FormatContent[] = [
+  goPro360Format,
   lotus123Format,
   threeGpFormat,
   aacFormat,
@@ -153,6 +159,8 @@ export const formatContents: readonly FormatContent[] = [
   harFormat,
   heicFormat,
   icoFormat,
+  inspFormat,
+  insvFormat,
   ipaFormat,
   jarFormat,
   jmodFormat,
@@ -162,6 +170,7 @@ export const formatContents: readonly FormatContent[] = [
   jxlFormat,
   kmzFormat,
   lz4Format,
+  lrvFormat,
   m2tsFormat,
   m4aFormat,
   mapFormat,
@@ -186,6 +195,7 @@ export const formatContents: readonly FormatContent[] = [
   omeTiffFormat,
   opusFormat,
   orfFormat,
+  osvFormat,
   parquetFormat,
   pdfFormat,
   pefFormat,

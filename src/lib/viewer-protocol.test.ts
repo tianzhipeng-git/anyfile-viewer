@@ -163,7 +163,15 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
+      .toEqual(["dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
+
+    const source = await resolveViewerRegistrations(
+      new File(["export const answer = 42;\n"], "answer.ts"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(source.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["ace-code-text", 3], ["hex-viewer", 1]]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -241,7 +249,7 @@ describe("viewer protocol", () => {
       { signal: new AbortController().signal },
     );
     expect(transportStream.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
-      .toEqual([["non-native-video", 3], ["ace-code-text", 1], ["hex-viewer", 1]]);
+      .toEqual([["non-native-video", 3], ["hex-viewer", 1]]);
 
     const npyBytes = readFileSync(join(process.cwd(), "viewer/plugins/dev-array/examples/matrix.npy"));
     const npy = await resolveViewerRegistrations(
@@ -318,6 +326,14 @@ describe("viewer protocol", () => {
   });
 
   it("keeps specialized viewers ahead of archive metadata and hex fallback", () => {
+    expect(findViewerRegistrations("capture.360", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["gopro-max", "hex-viewer"]);
+    expect(findViewerRegistrations("capture.osv", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dji-osmo", "hex-viewer"]);
+    expect(findViewerRegistrations("photo.insp", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["insta360", "hex-viewer"]);
+    expect(findViewerRegistrations("proxy.lrv", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["insta360", "hex-viewer"]);
     expect(findViewerRegistrations("clip.mp4", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-video", "browser-audio", "hex-viewer"]);
     expect(findViewerRegistrations("clip.webm", viewerRegistrations).map(({ manifest: item }) => item.id))
@@ -342,6 +358,8 @@ describe("viewer protocol", () => {
       .toEqual(["non-native-audio", "hex-viewer"]);
     expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "hex-viewer"]);
+    expect(findViewerRegistrations("photo.jpg", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dji-osmo", "gopro-max", "browser-image", "hex-viewer"]);
     expect(findViewerRegistrations("photo.jxl", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["modern-raster", "hex-viewer"]);
     expect(findViewerRegistrations("photo.heic", viewerRegistrations).map(({ manifest: item }) => item.id))
@@ -349,7 +367,7 @@ describe("viewer protocol", () => {
     expect(findViewerRegistrations("photo.heif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "modern-raster", "hex-viewer"]);
     expect(findViewerRegistrations("photo.dng", viewerRegistrations).map(({ manifest: item }) => item.id))
-      .toEqual(["camera-raw", "hex-viewer"]);
+      .toEqual(["insta360", "camera-raw", "hex-viewer"]);
     expect(findViewerRegistrations("photo.rw2", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["camera-raw", "hex-viewer"]);
     for (const extension of ["nrw", "sr2", "srf", "orf", "pef"]) {

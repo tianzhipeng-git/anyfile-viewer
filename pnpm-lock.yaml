@@ -38,12 +38,18 @@ importers:
       '@anyfile/dev-wasm-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/dev-wasm
+      '@anyfile/dji-osmo-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/dji-osmo
       '@anyfile/excel-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/excel
       '@anyfile/general-raster-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/general-raster
+      '@anyfile/gopro-max-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/gopro-max
       '@anyfile/har-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/har
@@ -53,6 +59,9 @@ importers:
       '@anyfile/i18n':
         specifier: workspace:*
         version: link:viewer/i18n
+      '@anyfile/insta360-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/insta360
       '@anyfile/modern-raster-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/modern-raster
@@ -249,15 +258,15 @@ importers:
 
   viewer/plugins/camera-raw:
     dependencies:
+      '@anyfile/raw-decoder':
+        specifier: workspace:*
+        version: link:../../raw-decoder
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
       '@anyfile/viewer-rendering':
         specifier: workspace:*
         version: link:../../rendering
-      libraw-wasm:
-        specifier: 1.6.0
-        version: 1.6.0
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -373,6 +382,31 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
+  viewer/plugins/dji-osmo:
+    dependencies:
+      '@anyfile/browser-video-viewer':
+        specifier: workspace:*
+        version: link:../browser-video
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      mediabunny:
+        specifier: 1.55.3
+        version: 1.55.3
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
   viewer/plugins/excel:
     dependencies:
       '@anyfile/viewer-protocol':
@@ -420,6 +454,31 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
+  viewer/plugins/gopro-max:
+    dependencies:
+      '@anyfile/browser-video-viewer':
+        specifier: workspace:*
+        version: link:../browser-video
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      mediabunny:
+        specifier: 1.55.3
+        version: 1.55.3
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
   viewer/plugins/har:
     dependencies:
       '@anyfile/viewer-protocol':
@@ -441,6 +500,34 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/insta360:
+    dependencies:
+      '@anyfile/browser-video-viewer':
+        specifier: workspace:*
+        version: link:../browser-video
+      '@anyfile/raw-decoder':
+        specifier: workspace:*
+        version: link:../../raw-decoder
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      mediabunny:
+        specifier: 1.55.3
+        version: 1.55.3
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -627,6 +714,22 @@ importers:
       '@anyfile/i18n':
         specifier: workspace:*
         version: link:../i18n
+
+  viewer/raw-decoder:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      libraw-wasm:
+        specifier: 1.6.0
+        version: 1.6.0
+    devDependencies:
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
   viewer/rendering:
     devDependencies:

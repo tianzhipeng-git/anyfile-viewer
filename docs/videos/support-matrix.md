@@ -82,6 +82,10 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | Ogg Video | Theora | Opus，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；OGV.js 软件解码 |
 | Ogg Video | Theora | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only 不创建 AudioContext |
 | 3GPP，尾部 `moov` | AVC/H.264 Constrained Baseline L1.3 | AAC-LC，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
+| Insta360 X3 成对 INSV，严格匹配 `_00`/`_10`，每文件单鱼眼 2880×2880 | AVC/H.264 Main，8-bit 4:2:0，full range，29.97 fps | AAC-LC，48 kHz，双声道；仅 `_00` 输出声音 | insta360 | 3 | verified | 3 | Chrome 152.0.7977.65 / macOS 15.6.1；双视频连续播放、同步 seek、较短时长、结束与重播通过；无 gyro/FlowState |
+| DJI Osmo 360 `.osv`，MP4 尾部 `moov`，双鱼眼视频轨 3840×3840 | HEVC Main 10，`hvc1`，10-bit 4:2:0，25/29.97 fps | AAC-LC，48 kHz，双声道；忽略 `djmd`/`dbgi` 与 MJPEG 缩略轨 | dji-osmo | 3 | implemented | 3 | 三段 OQ001 真实原片（最大 4.30 GB）完成有界结构探测、FFmpeg 双轨解码与三样例跨镜头投影标定；WebCodecs/WebGL 连续播放待目标浏览器复验；无 gyro、稳定与 HDR 精确输出 |
+| GoPro MAX `.360`，MP4 尾部 `moov`，双 EAC 视频轨 4096×1344 | HEVC Main，`hvc1`，8-bit 4:2:0 | AAC-LC，48 kHz，双声道；忽略辅助 4 声道 Ambisonic PCM | gopro-max | 3 | implemented | 3 | 真实样例有界 probe 与 FFmpeg 双轨 EAC 几何校验通过；WebCodecs/WebGL 连续播放待目标浏览器复验；无 GPMF、gyro、稳定或空间音频 |
+| GoPro MAX2 `.360`，MP4 尾部 `moov`，双 EAC 视频轨 5952×1920 | HEVC Main，`hvc1`，8-bit 4:2:0 | AAC-LC，48 kHz，双声道；忽略辅助 4 声道 Ambisonic PCM | gopro-max | 3 | implemented | 3 | 真实样例有界 probe 与 FFmpeg 双轨 EAC 几何校验通过；WebCodecs/WebGL 连续播放待目标浏览器复验；无 GPMF、gyro、稳定或空间音频 |
 | 3GPP | H.263 等其他组合 | AMR 等 | FFmpeg video fallback | 0 | planned | 3–4 | 阶段 3 按真实需求和固定样例评估 |
 | Flash Video | Sorenson/VP6/AVC 等 | AAC/MP3 等 | FFmpeg video fallback | 0 | deferred | 3 | 阶段 3 后续批次，取决于真实需求 |
 | QuickTime/MOV | ProRes | PCM 等 | professional video | 0 | deferred | 3–5 | 阶段 4，先播放再增加专业能力；不能因阶段 3 decoder 存在而自动宣称支持 |
@@ -151,6 +155,32 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 - QuickTime 的 AVC/PCM S16LE 与 HEVC video-only 均通过连续 Canvas 帧、前后/连续 seek、end/replay 和 260 × 180 resize；PCM 解码峰值 0.125；AAC QuickTime 留给原生插件，非原生 probe 不误接管。
 - Chromium 原生只能读取 Ogg Theora metadata、不能产生视频帧；`non-native-video` 因而按需加载 OGV.js 1.9.0 的 Ogg demux、Theora 与 Vorbis/Opus Worker/WASM。Theora/Vorbis 捕获 168 个非静音 PCM buffer、峰值 0.129；Theora video-only 不创建 AudioContext；Theora/Opus 使用独立固定样例复验。
 - Ogg audio-only、损坏和伪装容器均 probe 0；普通路径与 Ogg 路径的实现 chunk 分离，OGV.js 资产、MIT 及 codec 许可证由构建门禁检查。
+
+### Insta360 多型号目标环境记录（2026-09-02）
+
+- 环境：Google Chrome 152.0.7977.65，macOS 15.6.1（Apple Silicon）；通过实际 `/zh-CN/view` 页面一次多选两段真实 X3 INSV；
+- 两路 2880×2880 H.264/AAC 媒体均进入 `readyState=4` 并连续推进；`_00` 保持非静音主时钟，`_10` 永久静音；
+- 验证完整约 30.7 秒连续播放、前后 seek、连续快速 seek、小漂移 `playbackRate` 修正、较短 `_10` 结束、重播和替换为单文件后的双媒体清理；
+- 严格文件名与组号配对；单独打开或不同录像组合返回 `missing-related-file`，提示同时选择成对文件或打开整个文件夹；
+- One RS、X4、X5、X6 的真实样例已完成有界 probe、轨道/RAW 布局检查和型号级镜头投影离线校验；X5/X6 的 HEVC WebCodecs 连续播放仍需在目标浏览器人工复验；
+- gyro、FlowState、逐文件标定覆盖和 Safari/Firefox/Windows/Android/iOS 未在本轮声明或验证。
+
+### DJI Osmo 360 样例记录（2026-09-03）
+
+- 一张 OQ001 JPG 为 15520×7760、2:1 完整等距柱状全景，EXIF 为 `Osmo / OQ001`，XMP 明确声明 GPano equirectangular；两张 `DJI / OP-041` DNG 是普通 Osmo Pocket 4 RAW，不由全景插件接管；
+- 三段 OSV 均为 MP4/ISOBMFF：尾部 `moov`、两条 3840×3840 `hvc1` HEVC Main 10 镜头轨、AAC-LC 48 kHz 双声道、四条 `djmd`/`dbgi` 数据轨和一条 MJPEG 缩略轨；时长为 23.4、119.8、237.2 秒，最大文件 4,299,150,624 字节；
+- probe 读取 64 KiB 头部、16-byte `moov` 头和最多 2 MiB `moov`，通过扩展 `mdat` 长度定点定位，不扫描也不整体载入大文件；同时校验 `dvtm_oq101.proto`、`Osmo 360`、`djmd`/`dbgi` 和主音视频布局；
+- 使用 FFmpeg 从三段真实 OSV 各抽取同步双镜头帧，在两条接缝带上联合优化等距鱼眼投影。相较原调研原型统一 100°/居中参数，逐镜头焦距、光心和旋转标定在三组帧上的跨镜头相关性均提高；WebGL 直接采样两路镜头，不生成完整等距柱状中间帧；
+- 实现使用 Mediabunny 8 MiB Blob cache、每轨 2 个 Canvas 槽、约 1 秒音频预排和 AAC 主时钟；JPEG 按 `min(8192, MAX_TEXTURE_SIZE)` 降采样，源文件不上传；
+- 自动 probe、投影、DOM/lifecycle 和构建隔离测试已覆盖；目标浏览器的真实 OSV 首帧、连续播放、声音、seek、结束、重播和窄窗口 resize 尚待复验，因此视频状态记为 `implemented`。
+
+### GoPro MAX / MAX2 样例记录（2026-09-03）
+
+- 三张 MAX JPG 均为 5760×2880、2:1 的完整 equirectangular 全景，并具有 GoPro MAX EXIF 与 GPano XMP；图片查看路径已通过自动渲染与生命周期测试；
+- 两段 MAX 4096×1344 与两段 MAX2 5952×1920 `.360` 原片均通过有界 probe，包含两条同尺寸 `hvc1` HEVC 视频轨和 AAC-LC 48 kHz 双声道主音频；最大样例约 2.5 GB，probe 不读取完整文件；
+- MAX 与 MAX2 各取真实样例，用 FFmpeg 将双视频轨纵向组合并以 `v360=input=eac:output=equirect` 转换，得到方向完整的等距柱状全景，验证两种尺寸使用同一 EAC 面布局；
+- 实现使用 Mediabunny 按范围读取与 demux、WebCodecs 解码双 HEVC 轨、WebGL 直接采样 EAC，并用 AAC 主音频作为播放时钟；不读取 GPMF、timecode、设备描述或 Ambisonic PCM；
+- 浏览器文件选择器未能在本轮自动化环境中完成真实原片 smoke，因此暂记为 `implemented`；目标浏览器仍需复验首帧、连续播放、声音、seek、结束、重播与窄窗口 resize 后才能标记 `verified`。
 
 ## 7. 自动测试与构建证据
 

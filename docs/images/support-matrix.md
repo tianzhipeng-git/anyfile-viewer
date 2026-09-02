@@ -53,7 +53,9 @@
 | OME-TIFF | `.ome.tif` `.ome.tiff` `.ome.tf2` `.ome.tf8` `.ome.btf` | general raster | 3 | implemented | 5 | 可查看 TIFF 像素和页面；暂不解释 OME-XML 的 Z/C/T 维度语义 |
 | HEVC HEIF/HEIC | `.heif` `.heifs` `.hif` `.heic` | modern raster | 3 | implemented | 3 | 原生实际解码优先，失败后使用同源 `libheif 1.23.2 + libde265 1.1.1` Worker/WASM；显示 primary image，不提供辅助项或序列导航 |
 | JPEG XL | `.jxl` | modern raster | 4 | verified | 4 | 原生 ImageDecoder 优先，`jxl-oxide-wasm@0.12.6` Worker 回退；固定样例覆盖有损、无损 alpha 与动画 |
-| 相机 RAW | `.dng` `.cr2` `.cr3` `.crw` `.nef` `.nrw` `.arw` `.sr2` `.srf` `.raf` `.orf` `.pef` `.rwl` `.raw` `.rw2` | camera RAW | 2 | verified | 3 | 内嵌预览与 LibRaw 基础显影已实现；桌面真实文件已手工验证当前交付能力为等级 2。型号级自动回归覆盖仍待补充，但它不限制新增已实现格式以 `implemented` / 待验证状态进入 Manifest |
+| DJI Osmo 360 JPEG | `.jpg` `.jpeg` | dji-osmo | 5 | verified | 5 | 严格校验 Osmo / OQ001、15520×7760 和 GPano 等距柱状元数据；按设备纹理上限降采样后提供完整交互式球面查看 |
+| Insta360 X3 DNG | `.dng` | insta360 | 3 | verified | 3 | 严格校验 Arashi Vision / Insta360 X3 2976×5952 TB 双鱼眼；LibRaw 基础显影后以 WebGL 全景查看；不含 HDR 合成、专业色彩与精确型号校准 |
+| 相机 RAW | `.dng` `.cr2` `.cr3` `.crw` `.nef` `.nrw` `.arw` `.sr2` `.srf` `.raf` `.orf` `.pef` `.rwl` `.raw` `.rw2` | camera RAW | 2 | verified | 3 | 非 X3 DNG 与其他相机 RAW 由此插件处理；内嵌预览与 LibRaw 基础显影已实现，桌面真实文件已手工验证当前交付能力为等级 2。型号级自动回归覆盖仍待补充 |
 | PSD/PSB | `.psd` `.psb` | layered document | 0 | deferred | 3 | 先合成预览与图层元数据 |
 | ORA/KRA | `.ora` `.kra` | layered document | 0 | deferred | 3 | 利用规范中的合成预览，不承诺编辑语义 |
 | DDS | `.dds` | GPU texture | 0 | deferred | 5 | mip、array、cubemap 和 BC family |

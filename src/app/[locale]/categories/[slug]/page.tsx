@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowRightIcon, CircleAlertIcon, SparklesIcon } from "lucide-react";
+import { ArrowRightIcon, CameraIcon, CircleAlertIcon, SparklesIcon } from "lucide-react";
 
 import { FormatGlyph } from "@/components/format-glyph";
 import { JsonLd } from "@/components/json-ld";
@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getCategory, getCategoryFormats, publishedCategories } from "@/content";
+import { getCategory, getCategoryFormats, getPanoramaViewer, publishedCategories } from "@/content";
 import { isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
 import { localizedPageMetadata } from "@/lib/seo";
@@ -35,6 +35,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ local
   const category = getCategory(slug, locale);
   if (!category) notFound();
   const formats = getCategoryFormats(slug, locale);
+  const panoramaViewers = (category.panoramaViewerIds ?? []).map((viewerId) => getPanoramaViewer(viewerId, locale)).filter((viewer) => viewer !== undefined);
   const absolute = (path: string) => new URL(localePath(locale, path), siteUrl()).toString();
   return <>
     <JsonLd value={{ "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: dictionary.common.home, item: absolute("/") }, { "@type": "ListItem", position: 2, name: category.name, item: absolute(`/categories/${slug}`) }] }} />
@@ -43,6 +44,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ local
       <Breadcrumb><BreadcrumbList><BreadcrumbItem><BreadcrumbLink render={<Link href={localePath(locale)} />}>{dictionary.common.home}</BreadcrumbLink></BreadcrumbItem><BreadcrumbSeparator /><BreadcrumbItem><BreadcrumbPage>{category.name}</BreadcrumbPage></BreadcrumbItem></BreadcrumbList></Breadcrumb>
       <div className="max-w-4xl"><p className="mb-4 text-sm font-semibold text-primary">{category.eyebrow}</p><h1 className="display-title text-5xl sm:text-6xl">{category.title}</h1><p className="mt-6 text-xl leading-8 text-muted-foreground">{category.introduction}</p></div>
     </div></section>
+    {panoramaViewers.length > 0 && <section className="bg-muted py-16 sm:py-20"><div className="content-shell flex flex-col gap-8">
+      <div><p className="text-sm font-semibold text-primary">{locale === "zh-CN" ? "按相机选择" : "CHOOSE YOUR CAMERA"}</p><h2 className="display-title mt-2 text-3xl sm:text-4xl">{locale === "zh-CN" ? "直接查看相机原始素材" : "View camera-original media directly"}</h2></div>
+      <div className="grid gap-5 lg:grid-cols-3">{panoramaViewers.map((viewer) => <Card key={viewer.viewerId}><CardHeader><CameraIcon className="mb-3 size-7 text-primary" aria-hidden="true" /><CardTitle>{viewer.name}</CardTitle><CardDescription className="leading-6">{viewer.description}</CardDescription><div className="mt-3 flex flex-wrap gap-2">{viewer.formatExtensions.map((extension) => <Badge key={extension} variant="outline">.{extension}</Badge>)}</div></CardHeader><CardFooter><Link className="inline-flex items-center gap-2 font-semibold text-primary" href={localePath(locale, `/viewers/${viewer.viewerId}`)}>{locale === "zh-CN" ? "查看机型与使用方法" : "See cameras and instructions"}<ArrowRightIcon className="size-4" /></Link></CardFooter></Card>)}</div>
+    </div></section>}
     <section className="bg-foreground py-16 text-background"><div className="content-shell grid gap-10 md:grid-cols-2"><div><SparklesIcon className="mb-4 size-6 text-primary" /><h2 className="display-title mb-5 text-3xl">{locale === "zh-CN" ? "典型用途" : "Typical uses"}</h2><ul className="space-y-3 opacity-80">{category.useCases.map((item) => <li key={item}>— {item}</li>)}</ul></div><div><CircleAlertIcon className="mb-4 size-6 text-primary" /><h2 className="display-title mb-5 text-3xl">{locale === "zh-CN" ? "常见打不开原因" : "Common reasons files do not open"}</h2><ul className="space-y-3 opacity-80">{category.commonProblems.map((item) => <li key={item}>— {item}</li>)}</ul></div></div></section>
     <section className="bg-muted py-16 sm:py-20"><div className="content-shell flex flex-col gap-8">
       <div className="flex items-end justify-between gap-6"><div><p className="text-sm font-semibold text-primary">{formats.length} {dictionary.category.formats}</p><h2 className="display-title mt-2 text-3xl sm:text-4xl">{dictionary.category.choose}</h2></div><Button nativeButton={false} variant="outline" render={<IsolationBoundaryLink href={localePath(locale, "/view")} />}>{dictionary.common.directOpen}</Button></div>

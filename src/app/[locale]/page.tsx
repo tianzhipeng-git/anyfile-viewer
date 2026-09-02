@@ -1,24 +1,25 @@
-import { ArrowRightIcon, FolderOpenIcon, LockKeyholeIcon, ZapIcon } from "lucide-react";
+import { ArrowRightIcon, CameraIcon, Code2Icon, FolderOpenIcon, GitForkIcon, LockKeyholeIcon, ScaleIcon, ZapIcon } from "lucide-react";
 import Link from "next/link";
 
 import { CategoryCard } from "@/components/category-card";
 import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
 import { JsonLd } from "@/components/json-ld";
-import { Button } from "@/components/ui/button";
-import { getFormat } from "@/content";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { getPanoramaViewers } from "@/content";
 import { isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
 import { getCategories } from "@/lib/catalog";
 
 const principleIcons = [LockKeyholeIcon, ZapIcon, FolderOpenIcon];
-const popularExtensions = ["pdf", "docx", "xlsx", "pptx", "jpg", "png", "mp4", "json"] as const;
+const openSourceIcons = [Code2Icon, GitForkIcon, ScaleIcon];
 
 export default async function Home({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: candidate } = await params;
   if (!isPublishedLocale(candidate)) return null;
   const dictionary = await getDictionary(candidate);
   const categories = getCategories(candidate);
-  const popularFormats = popularExtensions.map((extension) => getFormat(extension, candidate)).filter((format) => format !== undefined);
+  const panoramaViewers = getPanoramaViewers(candidate);
   const pageUrl = new URL(localePath(candidate), siteUrl()).toString();
 
   return (
@@ -77,16 +78,35 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => <CategoryCard key={category.slug} category={category} locale={candidate} browseLabel={dictionary.home.browseCount} />)}
           </div>
-          <div className="mt-4 border-t pt-10">
-            <h2 className="display-title text-3xl sm:text-4xl">{dictionary.home.popularFormatsTitle}</h2>
-            <p className="mt-3 max-w-2xl leading-7 text-muted-foreground">{dictionary.home.popularFormatsDescription}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              {popularFormats.map((format) => (
-                <Link className="rounded-full border bg-background px-4 py-2 text-sm font-semibold transition-colors hover:border-primary hover:text-primary" href={localePath(candidate, `/formats/${format.extension}`)} key={format.extension}>
-                  {format.name} <span className="text-muted-foreground">.{format.extension}</span>
-                </Link>
-              ))}
+          <div className="mt-4 flex flex-col gap-8 border-t pt-10">
+            <div className="flex max-w-3xl flex-col gap-3">
+              <p className="text-sm font-semibold text-primary">{dictionary.home.panoramaEyebrow}</p>
+              <h2 className="display-title text-4xl sm:text-5xl">{dictionary.home.panoramaTitle}</h2>
+              <p className="text-lg leading-7 text-muted-foreground">{dictionary.home.panoramaDescription}</p>
             </div>
+            <div className="grid gap-5 lg:grid-cols-3">
+              {panoramaViewers.map((viewer) => <Card key={viewer.viewerId}><CardHeader><CameraIcon className="mb-3 size-7 text-primary" aria-hidden="true" /><CardTitle>{viewer.name}</CardTitle><CardDescription className="leading-6">{viewer.description}</CardDescription><div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">{viewer.formatExtensions.map((extension) => <span key={extension}>.{extension}</span>)}</div></CardHeader><CardFooter><Link className="inline-flex items-center gap-2 font-semibold text-primary" href={localePath(candidate, `/viewers/${viewer.viewerId}`)}>{candidate === "zh-CN" ? "查看相机支持" : "Explore camera support"}<ArrowRightIcon className="size-4" /></Link></CardFooter></Card>)}
+            </div>
+          </div>
+        </div>
+      </section>
+      <section className="bg-foreground py-20 text-background sm:py-24">
+        <div className="content-shell flex flex-col gap-12">
+          <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-end">
+            <div className="flex max-w-3xl flex-col gap-4">
+              <p className="text-sm font-semibold text-primary">{dictionary.home.openSourceEyebrow}</p>
+              <h2 className="display-title text-4xl sm:text-5xl">{dictionary.home.openSourceTitle}</h2>
+              <p className="text-lg leading-8 opacity-70">{dictionary.home.openSourceDescription}</p>
+            </div>
+            <a className={buttonVariants({ variant: "secondary", size: "lg" })} href="https://github.com/tianzhipeng-git/anyfile-viewer" rel="noreferrer" target="_blank">
+              {dictionary.home.openSourceCta}<ArrowRightIcon data-icon="inline-end" />
+            </a>
+          </div>
+          <div className="grid gap-px overflow-hidden rounded-2xl bg-background/10 md:grid-cols-3">
+            {dictionary.home.openSourcePrinciples.map(({ title, description }, index) => {
+              const Icon = openSourceIcons[index];
+              return <div className="flex flex-col gap-4 bg-foreground p-7" key={title}><Icon className="size-7 text-primary" aria-hidden="true" /><h3 className="text-lg font-semibold">{title}</h3><p className="text-sm leading-6 opacity-65">{description}</p></div>;
+            })}
           </div>
         </div>
       </section>

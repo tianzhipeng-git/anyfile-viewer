@@ -10,9 +10,9 @@
   },
   "scripts": { "test": "vitest run" },
   "dependencies": {
+    "@anyfile/raw-decoder": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
-    "@anyfile/viewer-rendering": "workspace:*",
-    "libraw-wasm": "1.6.0"
+    "@anyfile/viewer-rendering": "workspace:*"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*",

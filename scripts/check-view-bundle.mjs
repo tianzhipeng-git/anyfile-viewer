@@ -59,6 +59,9 @@ const deferredImplementationMarkers = [
   "anyfile-modern-raster-viewer__canvas",
   "anyfile-camera-raw-viewer__canvas",
   "anyfile-browser-video-viewer__video",
+  "anyfile-insta360-viewer__canvas",
+  "anyfile-gopro-max-viewer__canvas",
+  "anyfile-dji-osmo-viewer__canvas",
   "anyfile-non-native-video-viewer__controls",
   "anyfile-browser-audio-viewer__audio",
   "anyfile-non-native-audio-viewer__controls",
@@ -180,6 +183,23 @@ if (videoProbeChunks.length === 0) {
 if (videoProbeChunks.some(({ content }) => content.includes("anyfile-browser-video-viewer__video"))) {
   throw new Error("Browser video probe chunk contains the full video viewer implementation");
 }
+const insta360ProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_insta360_probe_v1__"));
+if (insta360ProbeChunks.length === 0) throw new Error("Insta360 probe chunk was not found");
+if (insta360ProbeChunks.some(({ content }) => content.includes("anyfile-insta360-viewer__canvas"))) {
+  throw new Error("Insta360 probe chunk contains the full panorama viewer implementation");
+}
+const goProMaxProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_gopro_max_probe_v1__"));
+if (goProMaxProbeChunks.length === 0) throw new Error("GoPro MAX probe chunk was not found");
+if (goProMaxProbeChunks.some(({ content }) => content.includes("anyfile-gopro-max-viewer__canvas")
+  || content.includes("videoTrack must be an InputVideoTrack"))) {
+  throw new Error("GoPro MAX probe chunk contains Mediabunny or the full panorama viewer implementation");
+}
+const djiOsmoProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_dji_osmo_probe_v1__"));
+if (djiOsmoProbeChunks.length === 0) throw new Error("DJI Osmo probe chunk was not found");
+if (djiOsmoProbeChunks.some(({ content }) => content.includes("anyfile-dji-osmo-viewer__canvas")
+  || content.includes("videoTrack must be an InputVideoTrack"))) {
+  throw new Error("DJI Osmo probe chunk contains Mediabunny or the full panorama viewer implementation");
+}
 const nonNativeVideoProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Non-native video probe read budget exceeded"));
 if (nonNativeVideoProbeChunks.length === 0) {
   throw new Error("Non-native video probe chunk was not found");
@@ -216,10 +236,19 @@ if (ogvViewerChunks.some(({ content }) => content.includes("videoTrack must be a
   || mediabunnyChunks.some(({ content }) => content.includes("OGV.js did not expose its runtime"))) {
   throw new Error("Mediabunny and OGV.js viewer implementations share a deferred chunk");
 }
-const mediabunnyPackage = JSON.parse(await readFile(join(
-  projectRoot,
-  "viewer/plugins/non-native-video/node_modules/mediabunny/package.json",
-), "utf8"));
+const mediabunnyConsumers = ["non-native-video", "non-native-audio", "dji-osmo", "gopro-max", "insta360"];
+const mediabunnyPackages = await Promise.all(mediabunnyConsumers.map(async (plugin) => ({
+  plugin,
+  package: JSON.parse(await readFile(join(
+    projectRoot,
+    `viewer/plugins/${plugin}/node_modules/mediabunny/package.json`,
+  ), "utf8")),
+})));
+const mediabunnyPackage = mediabunnyPackages[0].package;
+if (mediabunnyPackages.some(({ package: dependency }) => dependency.version !== mediabunnyPackage.version
+  || dependency.license !== "MPL-2.0")) {
+  throw new Error("All Mediabunny-consuming viewer packages must use the same MPL-2.0 version");
+}
 const mediabunnyLicense = await readFile(join(
   projectRoot,
   "public/vendor/licenses/mediabunny",
@@ -300,7 +329,7 @@ const librawPackage = JSON.parse(
   await readFile(join(projectRoot, "node_modules/libraw-wasm/package.json"), "utf8"),
 );
 const librawDecoderSource = await readFile(
-  join(projectRoot, "viewer/plugins/camera-raw/src/raw-decoder.ts"),
+  join(projectRoot, "viewer/raw-decoder/src/index.ts"),
   "utf8",
 );
 const librawRuntimeVersion = librawDecoderSource.match(/\/vendor\/libraw\/([^/"']+)\/index\.js/)?.[1];

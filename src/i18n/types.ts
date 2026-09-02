@@ -6,13 +6,15 @@ export type AppDictionary = {
     learnAndOpen: string; browseFormats: string; directOpen: string; language: string;
     about: string; privacy: string; contact: string; resources: string; email: string; sourceCode: string;
   };
-  nav: { imagesVideo: string; documents: string; codeData: string; developerArtifacts: string; threeD: string; design: string };
+  nav: { imagesVideo: string; documents: string; codeData: string; developerArtifacts: string; panorama360: string; threeD: string; design: string };
   home: {
     localFirst: string; title: string; description: string; selectFile: string; browse: string; trust: string;
     privacyEyebrow: string; privacyTitle: string; privacyDescription: string;
     principles: readonly { title: string; description: string }[];
     formatsEyebrow: string; formatsTitle: string; formatsDescription: string; browseCount: string;
-    popularFormatsTitle: string; popularFormatsDescription: string;
+    panoramaEyebrow: string; panoramaTitle: string; panoramaDescription: string;
+    openSourceEyebrow: string; openSourceTitle: string; openSourceDescription: string; openSourceCta: string;
+    openSourcePrinciples: readonly { title: string; description: string }[];
   };
   category: { home: string; viewerSuffix: string; localSuffix: string; formats: string; choose: string };
   format: {
@@ -28,7 +30,8 @@ export type AppDictionary = {
   };
   viewer: {
     detecting: string; detectionFailed: string; loadingViewer: string; loadingNamedViewer: string;
-    workspaceRequired: string; openFailedFallback: string; viewerLabel: string; fallbackTitle: string;
+    workspaceRequired: string; openFailedFallback: string; viewerLabel: string; supportLevelLabel: string;
+    supportLevelDescriptions: readonly [string, string, string, string, string, string]; fallbackTitle: string;
     fallbackDescription: string; openingTitle: string; failedTitle: string; noViewerTitle: string;
     selectTitle: string; noPlugin: string; selectDescription: string;
   };
