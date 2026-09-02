@@ -69,9 +69,27 @@ export function parseX6DeflateDng(bytes: ArrayBuffer): TiffData {
   return { view, littleEndian, rowsPerStrip, stripOffsets: offsets, stripByteCounts: byteCounts };
 }
 
-async function inflate(bytes: Uint8Array<ArrayBuffer>) {
-  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate"));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
+async function inflate(bytes: Uint8Array<ArrayBuffer>, expectedBytes: number) {
+  const reader = new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate")).getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > expectedBytes) {
+      await reader.cancel();
+      throw new Error("X6 DNG strip exceeds its expected size.");
+    }
+    chunks.push(value);
+  }
+  const output = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    output.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return output;
 }
 
 function tone(value: number, balance: number) {
@@ -89,8 +107,9 @@ async function decode(file: File) {
   for (let strip = 0, firstRow = 0; strip < tiff.stripOffsets.length; strip += 1, firstRow += tiff.rowsPerStrip) {
     const rowCount = Math.min(tiff.rowsPerStrip, HEIGHT - firstRow);
     const compressed = new Uint8Array(bytes, tiff.stripOffsets[strip], tiff.stripByteCounts[strip]);
-    const raw = await inflate(compressed);
-    if (raw.byteLength !== rowCount * WIDTH * 2) throw new Error("Unexpected X6 DNG strip size.");
+    const expectedBytes = rowCount * WIDTH * 2;
+    const raw = await inflate(compressed, expectedBytes);
+    if (raw.byteLength !== expectedBytes) throw new Error("Unexpected X6 DNG strip size.");
     const view = new DataView(raw.buffer, raw.byteOffset, raw.byteLength);
     for (let row = 0; row < rowCount; row += 2) {
       const top = row * WIDTH * 2;

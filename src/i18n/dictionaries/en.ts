@@ -54,7 +54,6 @@ const dictionary = {
     secureContext: "The File System Access API requires HTTPS or localhost.",
     folderUnsupported: "This browser cannot open folders. Use the latest Chrome or another compatible browser, or open individual files.",
     pickerFailed: "Unable to open the folder picker.", droppedEmpty: "The dropped content contains no readable files.",
-    duplicateFileNames: "The selected files contain duplicate names, so an unambiguous workspace cannot be created.",
     accessErrorTitle: "Unable to access local files", collapseSidebar: "Collapse file sidebar", expandSidebar: "Expand file sidebar",
     chooseLocalFile: "Choose local files", unopenedTitle: "No workspace open", unopenedDescription: "Choose files or a folder to display them here.",
     preview: "Preview", unknownType: "Unknown type", workspaceFiles: "Workspace files",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { AlertCircleIcon, AlertTriangleIcon, CircleIcon, FileSearchIcon, LoaderCircleIcon } from "lucide-react";
 import {
   ViewerError,
@@ -19,7 +19,6 @@ import {
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { viewerRegistrations } from "@/lib/viewer-registrations";
 import type { AppDictionary } from "@/i18n/types";
 
@@ -31,6 +30,55 @@ type ViewerRoutingResult = {
   readonly candidates: ResolvedViewerRegistration[];
   readonly error?: string;
 };
+
+function SupportLevelBadge({
+  description,
+  label,
+  level,
+  variant,
+}: {
+  description: string;
+  label: string;
+  level: number;
+  variant: "supportLow" | "supportPartial" | "supportStrong";
+}) {
+  const tooltipId = useId();
+  const [dismissed, setDismissed] = useState(false);
+
+  return (
+    <span className="group/support-tooltip relative inline-flex">
+      <Badge
+        render={(
+          <button
+            type="button"
+            aria-describedby={tooltipId}
+            aria-label={label}
+            className="cursor-help"
+            onFocus={() => setDismissed(false)}
+            onPointerEnter={() => setDismissed(false)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setDismissed(true);
+            }}
+          />
+        )}
+        variant={variant}
+      >
+        <CircleIcon className="fill-current" aria-hidden="true" />
+        Lv. {level}
+      </Badge>
+      <span
+        id={tooltipId}
+        role="tooltip"
+        className="pointer-events-none invisible absolute top-[calc(100%+0.375rem)] right-0 z-50 inline-flex w-max max-w-72 origin-top-right -translate-y-2 scale-95 flex-col gap-1 rounded-md bg-foreground px-3 py-1.5 text-xs text-background opacity-0 shadow-md transition-[opacity,transform,visibility] duration-150 group-hover/support-tooltip:visible group-hover/support-tooltip:translate-y-0 group-hover/support-tooltip:scale-100 group-hover/support-tooltip:opacity-100 group-focus-within/support-tooltip:visible group-focus-within/support-tooltip:translate-y-0 group-focus-within/support-tooltip:scale-100 group-focus-within/support-tooltip:opacity-100 motion-reduce:transition-none"
+        style={dismissed ? { visibility: "hidden", opacity: 0, transform: "translateY(-0.5rem) scale(0.95)" } : undefined}
+      >
+        <span aria-hidden="true" className="absolute -top-1 right-4 size-2 rotate-45 bg-foreground" />
+        <span aria-hidden="true" className="font-semibold">{label}</span>
+        <span className="opacity-80">{description}</span>
+      </span>
+    </span>
+  );
+}
 
 export function ViewerHost({
   file,
@@ -62,9 +110,6 @@ export function ViewerHost({
   const registration = selectedCandidate?.registration;
   const supportLevel = selectedCandidate?.supportLevel
     ?? (file && currentRoutingResult && !currentRoutingResult.error ? 0 : undefined);
-  const supportLevelTooltip = supportLevel === undefined
-    ? undefined
-    : `${interpolate(dictionary.supportLevelLabel, { level: supportLevel })}: ${dictionary.supportLevelDescriptions[supportLevel]}`;
   const supportLevelBadgeVariant = supportLevel !== undefined && supportLevel <= 1
     ? "supportLow"
     : supportLevel === 2
@@ -207,20 +252,12 @@ export function ViewerHost({
                 </select>
               </label>
             )}
-            <Tooltip>
-              <TooltipTrigger
-                render={<Badge variant={supportLevelBadgeVariant} aria-label={supportLevelTooltip} />}
-              >
-                <CircleIcon className="fill-current" aria-hidden="true" />
-                Lv. {supportLevel}
-              </TooltipTrigger>
-              <TooltipContent side="bottom" align="end">
-                <div className="flex max-w-72 flex-col gap-1">
-                  <p className="font-semibold">{interpolate(dictionary.supportLevelLabel, { level: supportLevel })}</p>
-                  <p className="opacity-80">{dictionary.supportLevelDescriptions[supportLevel]}</p>
-                </div>
-              </TooltipContent>
-            </Tooltip>
+            <SupportLevelBadge
+              level={supportLevel}
+              label={interpolate(dictionary.supportLevelLabel, { level: supportLevel })}
+              description={dictionary.supportLevelDescriptions[supportLevel]}
+              variant={supportLevelBadgeVariant}
+            />
           </div>
         )}
       </div>

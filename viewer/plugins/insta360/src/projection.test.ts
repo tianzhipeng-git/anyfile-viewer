@@ -40,6 +40,8 @@ describe("model-specific projection profiles", () => {
     expect(X5_VIDEO_PROJECTION.kind).toBe("mei");
     expect(X6_PROJECTION.kind).toBe("mei");
     expect(X5_VIDEO_PROJECTION.lenses[0].xi).toBe(2);
+    expect(X5_VIDEO_PROJECTION.lenses[1].radial).toEqual([0.19422133, 1.97706831, -2.96845055, 0]);
+    expect(X5_VIDEO_PROJECTION.lenses[1].tangential).toEqual([0.00193654, -0.00116275]);
     expect(X6_PROJECTION.lenses[0].xi).toBeCloseTo(2.45543);
     expect(X4_VIDEO_PROJECTION.lenses[0].center).not.toEqual(X4_VIDEO_PROJECTION.lenses[1].center);
   });

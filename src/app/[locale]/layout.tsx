@@ -5,7 +5,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import { PUBLISHED_LOCALES, isPublishedLocale, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
 import { localizedPageMetadata } from "@/lib/seo";
@@ -45,13 +44,11 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} className="h-full antialiased">
       <body className="flex min-h-full flex-col">
-        <TooltipProvider>
-          <SiteHeader locale={locale} dictionary={dictionary} />
-          <main className="flex flex-1 flex-col">{children}</main>
-          <SiteFooter locale={locale} dictionary={dictionary} />
-          <Analytics />
-          <SpeedInsights />
-        </TooltipProvider>
+        <SiteHeader locale={locale} dictionary={dictionary} />
+        <main className="flex flex-1 flex-col">{children}</main>
+        <SiteFooter locale={locale} dictionary={dictionary} />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

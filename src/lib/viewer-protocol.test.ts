@@ -163,7 +163,15 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
+      .toEqual(["gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
+
+    const source = await resolveViewerRegistrations(
+      new File(["export const answer = 42;\n"], "answer.ts"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(source.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["ace-code-text", 3], ["hex-viewer", 1]]);
 
     const invalidPdf = await resolveViewerRegistrations(
       new File(["not a pdf"], "document.pdf"),
@@ -241,7 +249,7 @@ describe("viewer protocol", () => {
       { signal: new AbortController().signal },
     );
     expect(transportStream.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
-      .toEqual([["non-native-video", 3], ["ace-code-text", 1], ["hex-viewer", 1]]);
+      .toEqual([["non-native-video", 3], ["hex-viewer", 1]]);
 
     const npyBytes = readFileSync(join(process.cwd(), "viewer/plugins/dev-array/examples/matrix.npy"));
     const npy = await resolveViewerRegistrations(

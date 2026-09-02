@@ -13,8 +13,8 @@ describe("RAW metadata", () => {
     })).toEqual({ make: "Canon", model: "EOS R5", width: 8192, height: 5464, iso: 400 });
   });
 
-  it("allows the X6-sized 120-megapixel RAW source within the 128 MiPixel limit", () => {
-    expect(checkRawDimensions(15_520, 7_760)).toBe(120_435_200);
-    expect(() => checkRawDimensions(16_385, 8_192)).toThrow(/128-megapixel/);
+  it("keeps full RAW development within the 64 MiPixel memory limit", () => {
+    expect(checkRawDimensions(8_192, 8_192)).toBe(67_108_864);
+    expect(() => checkRawDimensions(8_193, 8_192)).toThrow(/64-megapixel/);
   });
 });

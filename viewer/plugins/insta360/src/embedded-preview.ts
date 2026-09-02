@@ -1,11 +1,37 @@
 import { ViewerError } from "@anyfile/viewer-protocol";
 
 import type { InsvEmbeddedPreview } from "./insv-metadata";
-import { readBlob } from "./read-blob";
+import { abortError, readBlob } from "./read-blob";
 
 const HEADER_BYTES = 40;
 
 const clampByte = (value: number) => Math.max(0, Math.min(255, Math.round(value)));
+
+function createBitmapAbortably(factory: () => Promise<ImageBitmap>, signal: AbortSignal) {
+  if (signal.aborted) return Promise.reject(abortError());
+  const task = factory();
+  return new Promise<ImageBitmap>((resolve, reject) => {
+    let settled = false;
+    const onAbort = () => {
+      if (settled) return;
+      settled = true;
+      reject(abortError());
+      void task.then((bitmap) => bitmap.close(), () => undefined);
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+    void task.then((bitmap) => {
+      if (settled) return;
+      settled = true;
+      signal.removeEventListener("abort", onAbort);
+      resolve(bitmap);
+    }, (error) => {
+      if (settled) return;
+      settled = true;
+      signal.removeEventListener("abort", onAbort);
+      reject(error);
+    });
+  });
+}
 
 export function yuv420ToRgba(bytes: Uint8Array, width: number, height: number) {
   const pixels = width * height;
@@ -46,8 +72,8 @@ export async function decodeEmbeddedPreview(
     throw new ViewerError("invalid-file", invalidMessage);
   }
   const rgba = yuv420ToRgba(bytes.subarray(HEADER_BYTES), preview.width, preview.height);
-  return createImageBitmap(new ImageData(rgba, preview.width, preview.height), {
+  return createBitmapAbortably(() => createImageBitmap(new ImageData(rgba, preview.width, preview.height), {
     colorSpaceConversion: "none",
     premultiplyAlpha: "none",
-  });
+  }), signal);
 }

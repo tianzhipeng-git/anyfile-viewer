@@ -22,7 +22,7 @@ export type AppDictionary = {
   };
   workspace: {
     files: string; fileCount: string; readFileFailed: string; readFolderFailed: string; secureContext: string;
-    folderUnsupported: string; pickerFailed: string; droppedEmpty: string; duplicateFileNames: string; accessErrorTitle: string;
+    folderUnsupported: string; pickerFailed: string; droppedEmpty: string; accessErrorTitle: string;
     collapseSidebar: string; expandSidebar: string; chooseLocalFile: string; unopenedTitle: string;
     unopenedDescription: string; preview: string; unknownType: string; workspaceFiles: string;
   };

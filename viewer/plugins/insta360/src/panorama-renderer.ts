@@ -194,6 +194,9 @@ export class PanoramaRenderer {
   private readonly fragmentShader: WebGLShader;
   private readonly buffer: WebGLBuffer;
   private readonly textures: readonly [WebGLTexture, WebGLTexture];
+  private readonly maximumTextureSize: number;
+  private readonly uniforms = new Map<string, WebGLUniformLocation | null>();
+  private readonly textureSizes: Array<{ width: number; height: number } | undefined> = [undefined, undefined];
   private frame?: number;
   private readonly videoFrames: Array<number | undefined> = [undefined, undefined];
   private readonly videoFrameKinds: Array<"video" | "animation" | undefined> = [undefined, undefined];
@@ -248,6 +251,7 @@ export class PanoramaRenderer {
     this.program = program;
     this.buffer = buffer;
     this.textures = textures;
+    this.maximumTextureSize = gl.getParameter(gl.MAX_TEXTURE_SIZE) as number;
 
     this.initializeGeometry();
     this.resources.listen(viewport, "wheel", (event) => this.onWheel(event as WheelEvent), { passive: false });
@@ -277,8 +281,8 @@ export class PanoramaRenderer {
     this.ensureTextureSize(width, height);
     this.layout = "dual";
     this.projection = projection;
-    this.upload(0, first);
-    this.upload(1, second);
+    this.upload(0, first, width, height);
+    this.upload(1, second, width, height);
     this.schedule();
   }
 
@@ -286,7 +290,7 @@ export class PanoramaRenderer {
     this.ensureTextureSize(width, height);
     this.layout = "dual";
     this.projection = EQUIRECTANGULAR_PROJECTION;
-    this.upload(0, source);
+    this.upload(0, source, width, height);
     this.schedule();
   }
 
@@ -323,8 +327,8 @@ export class PanoramaRenderer {
     this.ensureTextureSize(width, height);
     this.layout = "dual";
     this.projection = projection;
-    this.upload(0, first);
-    this.upload(1, second);
+    this.upload(0, first, width, height);
+    this.upload(1, second, width, height);
     this.schedule();
   }
 
@@ -368,22 +372,32 @@ export class PanoramaRenderer {
     const position = gl.getAttribLocation(this.program, "aPosition");
     gl.enableVertexAttribArray(position);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform1i(gl.getUniformLocation(this.program, "uTexture0"), 0);
-    gl.uniform1i(gl.getUniformLocation(this.program, "uTexture1"), 1);
+    gl.uniform1i(this.uniform("uTexture0"), 0);
+    gl.uniform1i(this.uniform("uTexture1"), 1);
   }
 
   private ensureTextureSize(width: number, height: number) {
-    const maximum = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) as number;
-    if (width > maximum || height > maximum) {
+    if (width > this.maximumTextureSize || height > this.maximumTextureSize) {
       throw new ViewerError("resource-limit", this.resourceMessage);
     }
   }
 
-  private upload(index: 0 | 1, source: TexImageSource) {
+  private uniform(name: string) {
+    if (!this.uniforms.has(name)) this.uniforms.set(name, this.gl.getUniformLocation(this.program, name));
+    return this.uniforms.get(name)!;
+  }
+
+  private upload(index: 0 | 1, source: TexImageSource, width: number, height: number) {
     const gl = this.gl;
     gl.activeTexture(index === 0 ? gl.TEXTURE0 : gl.TEXTURE1);
     gl.bindTexture(gl.TEXTURE_2D, this.textures[index]);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    const allocated = this.textureSizes[index];
+    if (allocated?.width === width && allocated.height === height) {
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, source);
+    } else {
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, source);
+      this.textureSizes[index] = { width, height };
+    }
     const error = gl.getError();
     if (error !== gl.NO_ERROR) {
       throw new ViewerError(error === gl.OUT_OF_MEMORY ? "resource-limit" : "open-failed", this.resourceMessage);
@@ -399,8 +413,12 @@ export class PanoramaRenderer {
       const shouldUploadVideo = this.uploadVideoOnFrame;
       this.uploadVideoOnFrame = false;
       try {
-        if (shouldUploadVideo && this.video?.readyState && this.video.videoWidth) this.upload(0, this.video);
-        if (shouldUploadVideo && this.secondVideo?.readyState && this.secondVideo.videoWidth) this.upload(1, this.secondVideo);
+        if (shouldUploadVideo && this.video?.readyState && this.video.videoWidth) {
+          this.upload(0, this.video, this.video.videoWidth, this.video.videoHeight);
+        }
+        if (shouldUploadVideo && this.secondVideo?.readyState && this.secondVideo.videoWidth) {
+          this.upload(1, this.secondVideo, this.secondVideo.videoWidth, this.secondVideo.videoHeight);
+        }
         this.draw();
       } catch (error) {
         this.onFatalError(error instanceof ViewerError ? error : new ViewerError("open-failed", this.resourceMessage, { cause: error }));
@@ -443,8 +461,7 @@ export class PanoramaRenderer {
     if (this.disposed) return;
     const cssWidth = Math.max(1, this.viewport.clientWidth || 800);
     const cssHeight = Math.max(1, this.viewport.clientHeight || 600);
-    const maximum = this.gl.getParameter(this.gl.MAX_TEXTURE_SIZE) as number;
-    const dpr = Math.min(Math.max(1, window.devicePixelRatio || 1), maximum / cssWidth, maximum / cssHeight);
+    const dpr = Math.min(Math.max(1, window.devicePixelRatio || 1), this.maximumTextureSize / cssWidth, this.maximumTextureSize / cssHeight);
     const width = Math.max(1, Math.round(cssWidth * dpr));
     const height = Math.max(1, Math.round(cssHeight * dpr));
     if (this.canvas.width !== width) this.canvas.width = width;
@@ -452,33 +469,33 @@ export class PanoramaRenderer {
     const gl = this.gl;
     gl.viewport(0, 0, width, height);
     gl.useProgram(this.program);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uAspect"), width / height);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uTanHalfFov"), Math.tan(this.fov * Math.PI / 360));
-    gl.uniform1f(gl.getUniformLocation(this.program, "uYaw"), this.yaw);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uPitch"), this.pitch);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uLayout"), this.layout === "sbs" ? 1 : 0);
+    gl.uniform1f(this.uniform("uAspect"), width / height);
+    gl.uniform1f(this.uniform("uTanHalfFov"), Math.tan(this.fov * Math.PI / 360));
+    gl.uniform1f(this.uniform("uYaw"), this.yaw);
+    gl.uniform1f(this.uniform("uPitch"), this.pitch);
+    gl.uniform1f(this.uniform("uLayout"), this.layout === "sbs" ? 1 : 0);
     const equidistant = this.projection.kind === "equidistant" ? this.projection : undefined;
     const calibrated = this.projection.kind === "calibrated-equidistant" ? this.projection : undefined;
     const mei = this.projection.kind === "mei" ? this.projection : undefined;
     const projectionKind = equidistant ? 0 : mei ? 1 : this.projection.kind === "equirectangular" ? 3 : 2;
-    gl.uniform1f(gl.getUniformLocation(this.program, "uProjectionKind"), projectionKind);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uThetaMax"), equidistant?.thetaMaxRadians ?? 0);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uBlend"), this.projection.blendRadians);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uRotation"), equidistant?.rotationRadians ?? 0);
+    gl.uniform1f(this.uniform("uProjectionKind"), projectionKind);
+    gl.uniform1f(this.uniform("uThetaMax"), equidistant?.thetaMaxRadians ?? 0);
+    gl.uniform1f(this.uniform("uBlend"), this.projection.blendRadians);
+    gl.uniform1f(this.uniform("uRotation"), equidistant?.rotationRadians ?? 0);
     const calibratedLenses = calibrated?.lenses ?? mei?.lenses;
     if (calibratedLenses) {
       for (const index of [0, 1] as const) {
         const lens = calibratedLenses[index];
-        gl.uniform2fv(gl.getUniformLocation(this.program, `uFocal${index}`), lens.focal);
-        gl.uniform2fv(gl.getUniformLocation(this.program, `uCenter${index}`), lens.center);
-        gl.uniformMatrix3fv(gl.getUniformLocation(this.program, `uExtrinsic${index}`), false, lens.rotation);
-        gl.uniform1f(gl.getUniformLocation(this.program, `uTextureRotation${index}`), lens.textureRotationRadians);
+        gl.uniform2fv(this.uniform(`uFocal${index}`), lens.focal);
+        gl.uniform2fv(this.uniform(`uCenter${index}`), lens.center);
+        gl.uniformMatrix3fv(this.uniform(`uExtrinsic${index}`), false, lens.rotation);
+        gl.uniform1f(this.uniform(`uTextureRotation${index}`), lens.textureRotationRadians);
         if (mei) {
           const meiLens = mei.lenses[index];
-          gl.uniform1f(gl.getUniformLocation(this.program, `uXi${index}`), meiLens.xi);
-          gl.uniform4fv(gl.getUniformLocation(this.program, `uRadial${index}`), meiLens.radial);
-          gl.uniform2fv(gl.getUniformLocation(this.program, `uTangential${index}`), meiLens.tangential);
-          gl.uniform4fv(gl.getUniformLocation(this.program, `uPrism${index}`), meiLens.prism);
+          gl.uniform1f(this.uniform(`uXi${index}`), meiLens.xi);
+          gl.uniform4fv(this.uniform(`uRadial${index}`), meiLens.radial);
+          gl.uniform2fv(this.uniform(`uTangential${index}`), meiLens.tangential);
+          gl.uniform4fv(this.uniform(`uPrism${index}`), meiLens.prism);
         }
       }
     }

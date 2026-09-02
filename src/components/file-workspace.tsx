@@ -35,7 +35,6 @@ import {
 import {
   createMemoryWorkspaceReader,
   createWorkspaceReader,
-  duplicateWorkspaceFileName,
 } from "@/lib/workspace-reader";
 import type { PublishedLocale } from "@/i18n/config";
 import type { AppDictionary } from "@/i18n/types";
@@ -57,12 +56,15 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const workspace = useMemo(
-    () => rootDirectory
-      ? createWorkspaceReader(rootDirectory, selectedEntry)
-      : createMemoryWorkspaceReader(entries, selectedEntry),
-    [entries, rootDirectory, selectedEntry],
+  const directoryWorkspace = useMemo(
+    () => createWorkspaceReader(rootDirectory, selectedEntry),
+    [rootDirectory, selectedEntry],
   );
+  const memoryWorkspace = useMemo(
+    () => createMemoryWorkspaceReader(entries, selectedEntry),
+    [entries, selectedEntry],
+  );
+  const workspace = rootDirectory ? directoryWorkspace : memoryWorkspace;
 
   async function selectEntry(entry: WorkspaceTreeEntry) {
     if (entry.kind !== "file") return;
@@ -89,10 +91,6 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
   async function loadFileHandles(handles: FileSystemFileHandle[]) {
     setError("");
     const nextEntries = fileHandleEntries(handles);
-    if (duplicateWorkspaceFileName(nextEntries)) {
-      setError(dictionary.workspace.duplicateFileNames);
-      return;
-    }
     setRootDirectory(undefined);
     setEntries(nextEntries);
     setWorkspaceName(handles.length === 1 ? handles[0].name : interpolate(dictionary.workspace.fileCount, { count: formatNumber(handles.length, locale) }));
@@ -102,10 +100,6 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
   async function loadBrowserFiles(files: File[]) {
     setError("");
     const nextEntries = browserFileEntries(files);
-    if (duplicateWorkspaceFileName(nextEntries)) {
-      setError(dictionary.workspace.duplicateFileNames);
-      return;
-    }
     setRootDirectory(undefined);
     setEntries(nextEntries);
     setWorkspaceName(files.length === 1 ? files[0].name : interpolate(dictionary.workspace.fileCount, { count: formatNumber(files.length, locale) }));

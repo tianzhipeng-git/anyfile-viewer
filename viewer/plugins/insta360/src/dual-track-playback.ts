@@ -143,8 +143,9 @@ export class DualTrackPlayback {
     }
     const media = await inspectDualTrackMedia(file, inspection, signal);
     const playback = new DualTrackPlayback(media, projection, renderer, elements, copy);
+    playback.listen(signal, "abort", () => { void playback.dispose(); });
     try {
-      await playback.initialize(inspection);
+      await playback.initialize(inspection, signal);
       return playback;
     } catch (error) {
       await playback.dispose();
@@ -154,10 +155,13 @@ export class DualTrackPlayback {
     }
   }
 
-  private async initialize(inspection: Insta360VideoInspection) {
+  private async initialize(inspection: Insta360VideoInspection, signal: AbortSignal) {
+    if (signal.aborted) throw abortError();
     const frames = await Promise.all(this.#videoSinks.map((sink) => sink.getCanvas(this.#position)));
+    if (signal.aborted || this.#disposed) throw abortError();
     if (!frames[0] || !frames[1]) throw new ViewerError("invalid-file", "The fisheye tracks have no first frame.");
     const audio = await this.#audioSink.getBuffer(Math.max(this.#position, this.#media.audioStart));
+    if (signal.aborted || this.#disposed) throw abortError();
     if (!audio) throw new ViewerError("invalid-file", "The audio track has no first buffer.");
     this.#renderer.setDualFrames(frames[0].canvas, frames[1].canvas, inspection.width, inspection.height, this.#projection);
     const { play, seek, volume, viewport } = this.#elements;

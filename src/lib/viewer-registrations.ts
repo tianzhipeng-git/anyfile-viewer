@@ -202,6 +202,10 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
   },
   {
     manifest: codeManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/code-viewer/probe");
+      return probePackage.probeCode(context);
+    },
     async load() {
       const viewerPackage = await import("@anyfile/code-viewer");
       return viewerPackage.codeViewer;

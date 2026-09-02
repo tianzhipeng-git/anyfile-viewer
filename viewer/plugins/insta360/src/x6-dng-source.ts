@@ -4,6 +4,7 @@ import { abortError } from "./read-blob";
 import type { X6DngWorkerRequest, X6DngWorkerResponse } from "./x6-dng-types";
 
 export function decodeX6DeflateDng(file: File, signal: AbortSignal, failedMessage: string) {
+  if (signal.aborted) return Promise.reject(abortError());
   if (typeof Worker !== "function" || typeof DecompressionStream !== "function") {
     return Promise.reject(new ViewerError("unsupported-environment", failedMessage));
   }

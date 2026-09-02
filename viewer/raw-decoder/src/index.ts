@@ -3,7 +3,7 @@ import type LibRaw from "libraw-wasm";
 import type { Metadata } from "libraw-wasm";
 
 export const MAX_RAW_SOURCE_BYTES = 256 * 1024 * 1024;
-export const MAX_RAW_PIXELS = 128 * 1024 * 1024;
+export const MAX_RAW_PIXELS = 64 * 1024 * 1024;
 
 export interface RawMetadataSummary {
   readonly make?: string;
@@ -42,7 +42,7 @@ export function checkRawDimensions(width: number, height: number) {
   }
   const pixels = width * height;
   if (!Number.isSafeInteger(pixels) || pixels > MAX_RAW_PIXELS) {
-    throw new ViewerError("resource-limit", "The developed RAW image exceeds the 128-megapixel limit.");
+    throw new ViewerError("resource-limit", "The developed RAW image exceeds the 64-megapixel limit.");
   }
   return pixels;
 }

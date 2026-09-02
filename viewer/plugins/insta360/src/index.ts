@@ -126,6 +126,10 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
         const { DualTrackPlayback } = await import("./dual-track-playback");
         try {
           const playback = await DualTrackPlayback.open(file, inspection, projection, renderer, elements, insta360UiCopy(context.locale), signal);
+          if (disposed) {
+            await playback.dispose();
+            throw abortError();
+          }
           disposeDualTrack = () => playback.dispose();
         } catch (error) {
           if (!(error instanceof ViewerError) || error.code !== "unsupported-environment" || !inspection.preview) throw error;

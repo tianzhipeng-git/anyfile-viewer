@@ -229,10 +229,19 @@ if (ogvViewerChunks.some(({ content }) => content.includes("videoTrack must be a
   || mediabunnyChunks.some(({ content }) => content.includes("OGV.js did not expose its runtime"))) {
   throw new Error("Mediabunny and OGV.js viewer implementations share a deferred chunk");
 }
-const mediabunnyPackage = JSON.parse(await readFile(join(
-  projectRoot,
-  "viewer/plugins/non-native-video/node_modules/mediabunny/package.json",
-), "utf8"));
+const mediabunnyConsumers = ["non-native-video", "non-native-audio", "gopro-max", "insta360"];
+const mediabunnyPackages = await Promise.all(mediabunnyConsumers.map(async (plugin) => ({
+  plugin,
+  package: JSON.parse(await readFile(join(
+    projectRoot,
+    `viewer/plugins/${plugin}/node_modules/mediabunny/package.json`,
+  ), "utf8")),
+})));
+const mediabunnyPackage = mediabunnyPackages[0].package;
+if (mediabunnyPackages.some(({ package: dependency }) => dependency.version !== mediabunnyPackage.version
+  || dependency.license !== "MPL-2.0")) {
+  throw new Error("All Mediabunny-consuming viewer packages must use the same MPL-2.0 version");
+}
 const mediabunnyLicense = await readFile(join(
   projectRoot,
   "public/vendor/licenses/mediabunny",

@@ -54,7 +54,7 @@ function fakeGl(maximumTextureSize = 4096) {
     useProgram: vi.fn(), getAttribLocation: vi.fn(() => 0), enableVertexAttribArray: vi.fn(), vertexAttribPointer: vi.fn(),
     getUniformLocation: vi.fn((_program: unknown, name: string) => name), uniform1i: vi.fn(), uniform1f: vi.fn(),
     uniform2fv: vi.fn(), uniform4fv: vi.fn(), uniformMatrix3fv: vi.fn(), activeTexture: vi.fn(),
-    texImage2D: vi.fn(), getError: vi.fn(() => 0), getParameter: vi.fn(() => maximumTextureSize),
+    texImage2D: vi.fn(), texSubImage2D: vi.fn(), getError: vi.fn(() => 0), getParameter: vi.fn(() => maximumTextureSize),
     viewport: vi.fn(), drawArrays: vi.fn(),
   };
 }
@@ -213,6 +213,24 @@ describe("Insta360 viewer protocol lifecycle", () => {
     await vi.waitFor(() => expect(gl.uniform1f).toHaveBeenCalledWith("uProjectionKind", 3));
     await controller.dispose();
     expect(preview.close).toHaveBeenCalledOnce();
+  });
+
+  it("disposes a dual-track playback that finishes opening after abort", async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(fakeGl() as unknown as WebGLRenderingContext);
+    let resolvePlayback!: (playback: { dispose: () => Promise<void> }) => void;
+    const disposePlayback = vi.fn().mockResolvedValue(undefined);
+    dualTrackMocks.open.mockImplementation(() => new Promise((resolve) => { resolvePlayback = resolve; }));
+    const fixture = modernInsvBytes({ model: "X5" });
+    const context = testContext(new File([fixture.bytes], "x5.insv"));
+    const opening = insta360Viewer.open(context.context);
+    await vi.waitFor(() => expect(dualTrackMocks.open).toHaveBeenCalledOnce());
+
+    context.abortController.abort();
+    resolvePlayback({ dispose: disposePlayback });
+
+    await expect(opening).rejects.toMatchObject({ name: "AbortError" });
+    expect(disposePlayback).toHaveBeenCalledOnce();
+    expect(context.container.childElementCount).toBe(0);
   });
 
   it("plays X3 LRV through one audible media element and custom controls", async () => {

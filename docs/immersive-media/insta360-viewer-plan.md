@@ -33,9 +33,9 @@
 
 单文件双轨路径不会复制整个源文件：Mediabunny 通过 `BlobSource` 范围读取 MP4 索引和媒体数据，两条视频轨以同一播放时钟解码，AAC 通过 Web Audio 输出。HEVC 是否可播由 WebCodecs 能力检查决定。X4/X5/X6 样例还包含索引记录指向的 1280×640 I420 等距柱状全景帧；浏览器无法解码 3840² HEVC 时，查看器读取这 1.17 MiB 数据并打开明确标注的静态 360° 预览，而不是把文件整体判为无法打开。
 
-不同设备不再复用 X3 的单一视场角。X4/X5/X6 单文件 INSV 从文件尾部索引定位 protobuf metadata，再读取该文件 `offset_v3` 中两颗镜头各自的 MEI 焦距、光心、径向/切向畸变和姿态；不再把某个样例的参数冻结成整个型号的默认值，也不再让两颗镜头共用畸变参数。X4 LRV 没有对应 INSV metadata 可直接使用，仍使用 40 个跨镜头特征点拟合的双镜头等距 profile，中位角残差约 0.19°。One RS 使用其样例标定。尚未应用 gyro、rolling shutter 或 FlowState，因此支持等级保持 3。
+不同设备不再复用 X3 的单一视场角。X4/X5 单文件 INSV 从文件尾部索引定位 protobuf metadata，再读取该文件 `offset_v3` 中两颗镜头各自的 MEI 焦距、光心、径向/切向畸变和姿态。现有 X6 样例没有可验证的 `offset_v3`，因此 X6 使用型号级双镜头标定常量。X4 LRV 没有对应 INSV metadata 可直接使用，仍使用 40 个跨镜头特征点拟合的双镜头等距 profile，中位角残差约 0.19°。One RS 使用其样例标定。尚未应用 gyro、rolling shutter 或 FlowState，因此支持等级保持 3。
 
-X6 DNG 原始画面约 1.20 亿像素。该样例的 31 个 Adobe Deflate 条带完整有效，但 LibRaw 1.6.0 无法解包，因此 X6 改用专用 Worker 逐条带解压，每个 2×2 GB/RG CFA 单元直接生成一个 RGB 像素，输出 7760×3880 后分割为两个 3880² 镜头。共享 RAW 输出上限同时由 64 MiPixel 放宽到 128 MiPixel。
+X6 DNG 原始画面约 1.20 亿像素。该样例的 31 个 Adobe Deflate 条带完整有效，但 LibRaw 1.6.0 无法解包，因此 X6 改用专用 Worker 逐条带解压，每个 2×2 GB/RG CFA 单元直接生成一个 RGB 像素，输出 7760×3880 后分割为两个 3880² 镜头。该专用半尺寸路径不经过共享 LibRaw 解码器，共享 RAW 输出上限保持 64 MiPixel。
 
 实现验证：上述七个非 X3 源文件均通过真实文件的有界 probe；X5/X6 原文件已通过 Mediabunny 实际读取并确认轨道 codec、尺寸和时长索引；双轨首帧、seek、播放、音频与幂等清理由自动化测试覆盖。仍需在带 HEVC WebCodecs 的目标浏览器完成真实画面的接缝、方向和连续播放人工验收。
 

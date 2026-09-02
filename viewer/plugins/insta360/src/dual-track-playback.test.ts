@@ -128,4 +128,24 @@ describe("single-file dual-track playback", () => {
     expect(media.contextClose).toHaveBeenCalledOnce();
     elements.root.remove();
   });
+
+  it("owns the abort signal after media inspection", async () => {
+    const elements = createInsta360ViewerElements("modern.insv", inspection, "zh-CN");
+    document.body.append(elements.root);
+    const controller = new AbortController();
+    await DualTrackPlayback.open(
+      new File(["video"], "modern.insv"),
+      inspection,
+      X5_VIDEO_PROJECTION,
+      { setDualFrames: vi.fn() } as never,
+      elements,
+      insta360UiCopy("zh-CN"),
+      controller.signal,
+    );
+
+    controller.abort();
+    await vi.waitFor(() => expect(media.contextClose).toHaveBeenCalledOnce());
+    expect(media.inputDispose).toHaveBeenCalledOnce();
+    elements.root.remove();
+  });
 });
