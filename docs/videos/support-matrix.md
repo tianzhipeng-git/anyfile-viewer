@@ -83,6 +83,7 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | Ogg Video | Theora | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only 不创建 AudioContext |
 | 3GPP，尾部 `moov` | AVC/H.264 Constrained Baseline L1.3 | AAC-LC，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
 | Insta360 X3 成对 INSV，严格匹配 `_00`/`_10`，每文件单鱼眼 2880×2880 | AVC/H.264 Main，8-bit 4:2:0，full range，29.97 fps | AAC-LC，48 kHz，双声道；仅 `_00` 输出声音 | insta360 | 3 | verified | 3 | Chrome 152.0.7977.65 / macOS 15.6.1；双视频连续播放、同步 seek、较短时长、结束与重播通过；无 gyro/FlowState |
+| DJI Osmo 360 `.osv`，MP4 尾部 `moov`，双鱼眼视频轨 3840×3840 | HEVC Main 10，`hvc1`，10-bit 4:2:0，25/29.97 fps | AAC-LC，48 kHz，双声道；忽略 `djmd`/`dbgi` 与 MJPEG 缩略轨 | dji-osmo | 3 | implemented | 3 | 三段 OQ001 真实原片（最大 4.30 GB）完成有界结构探测、FFmpeg 双轨解码与三样例跨镜头投影标定；WebCodecs/WebGL 连续播放待目标浏览器复验；无 gyro、稳定与 HDR 精确输出 |
 | GoPro MAX `.360`，MP4 尾部 `moov`，双 EAC 视频轨 4096×1344 | HEVC Main，`hvc1`，8-bit 4:2:0 | AAC-LC，48 kHz，双声道；忽略辅助 4 声道 Ambisonic PCM | gopro-max | 3 | implemented | 3 | 真实样例有界 probe 与 FFmpeg 双轨 EAC 几何校验通过；WebCodecs/WebGL 连续播放待目标浏览器复验；无 GPMF、gyro、稳定或空间音频 |
 | GoPro MAX2 `.360`，MP4 尾部 `moov`，双 EAC 视频轨 5952×1920 | HEVC Main，`hvc1`，8-bit 4:2:0 | AAC-LC，48 kHz，双声道；忽略辅助 4 声道 Ambisonic PCM | gopro-max | 3 | implemented | 3 | 真实样例有界 probe 与 FFmpeg 双轨 EAC 几何校验通过；WebCodecs/WebGL 连续播放待目标浏览器复验；无 GPMF、gyro、稳定或空间音频 |
 | 3GPP | H.263 等其他组合 | AMR 等 | FFmpeg video fallback | 0 | planned | 3–4 | 阶段 3 按真实需求和固定样例评估 |
@@ -163,6 +164,15 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 - 严格文件名与组号配对；单独打开或不同录像组合返回 `missing-related-file`，提示同时选择成对文件或打开整个文件夹；
 - One RS、X4、X5、X6 的真实样例已完成有界 probe、轨道/RAW 布局检查和型号级镜头投影离线校验；X5/X6 的 HEVC WebCodecs 连续播放仍需在目标浏览器人工复验；
 - gyro、FlowState、逐文件标定覆盖和 Safari/Firefox/Windows/Android/iOS 未在本轮声明或验证。
+
+### DJI Osmo 360 样例记录（2026-09-03）
+
+- 一张 OQ001 JPG 为 15520×7760、2:1 完整等距柱状全景，EXIF 为 `Osmo / OQ001`，XMP 明确声明 GPano equirectangular；两张 `DJI / OP-041` DNG 是普通 Osmo Pocket 4 RAW，不由全景插件接管；
+- 三段 OSV 均为 MP4/ISOBMFF：尾部 `moov`、两条 3840×3840 `hvc1` HEVC Main 10 镜头轨、AAC-LC 48 kHz 双声道、四条 `djmd`/`dbgi` 数据轨和一条 MJPEG 缩略轨；时长为 23.4、119.8、237.2 秒，最大文件 4,299,150,624 字节；
+- probe 读取 64 KiB 头部、16-byte `moov` 头和最多 2 MiB `moov`，通过扩展 `mdat` 长度定点定位，不扫描也不整体载入大文件；同时校验 `dvtm_oq101.proto`、`Osmo 360`、`djmd`/`dbgi` 和主音视频布局；
+- 使用 FFmpeg 从三段真实 OSV 各抽取同步双镜头帧，在两条接缝带上联合优化等距鱼眼投影。相较原调研原型统一 100°/居中参数，逐镜头焦距、光心和旋转标定在三组帧上的跨镜头相关性均提高；WebGL 直接采样两路镜头，不生成完整等距柱状中间帧；
+- 实现使用 Mediabunny 8 MiB Blob cache、每轨 2 个 Canvas 槽、约 1 秒音频预排和 AAC 主时钟；JPEG 按 `min(8192, MAX_TEXTURE_SIZE)` 降采样，源文件不上传；
+- 自动 probe、投影、DOM/lifecycle 和构建隔离测试已覆盖；目标浏览器的真实 OSV 首帧、连续播放、声音、seek、结束、重播和窄窗口 resize 尚待复验，因此视频状态记为 `implemented`。
 
 ### GoPro MAX / MAX2 样例记录（2026-09-03）
 

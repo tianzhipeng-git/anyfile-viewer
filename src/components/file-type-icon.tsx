@@ -8,6 +8,7 @@ import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
+import { djiOsmoManifest } from "@anyfile/dji-osmo-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
@@ -95,6 +96,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     kind: "image",
     icon: FileImageIcon,
     extensions: [
+      ...djiOsmoManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".jpg" || extension === ".jpeg"),
       ...goProMaxManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".jpg" || extension === ".jpeg"),
       ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".insp" || extension === ".dng"),
       ...manifestExtensions(
@@ -112,6 +114,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     // `.ts` is far more commonly a TypeScript source file; the content probe still
     // routes real MPEG-TS files to the video viewer.
     extensions: [
+      ...djiOsmoManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".osv"),
       ...goProMaxManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".360"),
       ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".lrv" || extension === ".insv"),
       ...manifestExtensions(browserVideoManifest, nonNativeVideoManifest)

@@ -38,6 +38,9 @@ importers:
       '@anyfile/dev-wasm-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/dev-wasm
+      '@anyfile/dji-osmo-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/dji-osmo
       '@anyfile/excel-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/excel
@@ -368,6 +371,31 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/dji-osmo:
+    dependencies:
+      '@anyfile/browser-video-viewer':
+        specifier: workspace:*
+        version: link:../browser-video
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      mediabunny:
+        specifier: 1.55.3
+        version: 1.55.3
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*

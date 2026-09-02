@@ -92,6 +92,7 @@ export class GoProMaxPlayback {
   #generation = 0;
   #animationFrame: number | undefined;
   #seekRequest = 0;
+  #seekQueue: Promise<void> = Promise.resolve();
   #resumeAfterSeek = false;
   #playing = false;
   #disposed = false;
@@ -149,7 +150,8 @@ export class GoProMaxPlayback {
     const { play, seek, volume, viewport } = this.#elements;
     if (!play || !seek || !volume) throw new ViewerError("open-failed", "Missing playback controls.");
     this.listen(play, "click", () => void this.toggle());
-    this.listen(seek, "input", () => void this.seek(Number(seek.value)).catch(() => this.fail()));
+    this.listen(seek, "input", () => { this.previewSeek(Number(seek.value)); });
+    this.listen(seek, "change", () => void this.seek(Number(seek.value)).catch(() => this.fail()));
     this.listen(volume, "input", () => { this.#gain.gain.value = Number(volume.value); });
     this.listen(viewport, "keydown", (event) => {
       const keyboard = event as KeyboardEvent;
@@ -198,24 +200,37 @@ export class GoProMaxPlayback {
     this.updateControls();
   }
 
-  private async seek(position: number) {
-    if (this.#disposed || !Number.isFinite(position)) return;
-    const request = ++this.#seekRequest;
+  private previewSeek(position: number) {
+    if (this.#disposed || !Number.isFinite(position)) return undefined;
+    this.#seekRequest += 1;
     this.#resumeAfterSeek ||= this.#playing;
     if (this.#playing) this.pause();
-    else this.cancelPipelines();
     this.#position = Math.min(this.#media.duration, Math.max(this.#media.start, position));
     this.updateControls();
-    if (this.#position < this.#media.duration) {
-      const frames = await Promise.all(this.#videoSinks.map((sink) => sink.getCanvas(this.#position)));
+    return this.#position;
+  }
+
+  private seek(position: number) {
+    const target = this.previewSeek(position);
+    if (target === undefined) return Promise.resolve();
+    const request = this.#seekRequest;
+    const task = this.#seekQueue.catch(() => undefined).then(async () => {
+      if (this.#disposed || request !== this.#seekRequest) return;
+      if (target >= this.#media.duration) {
+        this.#resumeAfterSeek = false;
+        return;
+      }
+      const frames = await Promise.all(this.#videoSinks.map((sink) => sink.getCanvas(target)));
       if (this.#disposed || request !== this.#seekRequest) return;
       if (!frames[0] || !frames[1]) throw new Error("No frames at requested time.");
       this.#renderer.setEacFrames(frames[0].canvas, frames[1].canvas, this.#width, this.#height);
-    }
-    if (this.#resumeAfterSeek && this.#position < this.#media.duration) {
-      this.#resumeAfterSeek = false;
-      await this.play();
-    }
+      if (this.#resumeAfterSeek) {
+        this.#resumeAfterSeek = false;
+        await this.play();
+      }
+    });
+    this.#seekQueue = task;
+    return task;
   }
 
   private currentPosition() {

@@ -61,6 +61,7 @@ const deferredImplementationMarkers = [
   "anyfile-browser-video-viewer__video",
   "anyfile-insta360-viewer__canvas",
   "anyfile-gopro-max-viewer__canvas",
+  "anyfile-dji-osmo-viewer__canvas",
   "anyfile-non-native-video-viewer__controls",
   "anyfile-browser-audio-viewer__audio",
   "anyfile-non-native-audio-viewer__controls",
@@ -193,6 +194,12 @@ if (goProMaxProbeChunks.some(({ content }) => content.includes("anyfile-gopro-ma
   || content.includes("videoTrack must be an InputVideoTrack"))) {
   throw new Error("GoPro MAX probe chunk contains Mediabunny or the full panorama viewer implementation");
 }
+const djiOsmoProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_dji_osmo_probe_v1__"));
+if (djiOsmoProbeChunks.length === 0) throw new Error("DJI Osmo probe chunk was not found");
+if (djiOsmoProbeChunks.some(({ content }) => content.includes("anyfile-dji-osmo-viewer__canvas")
+  || content.includes("videoTrack must be an InputVideoTrack"))) {
+  throw new Error("DJI Osmo probe chunk contains Mediabunny or the full panorama viewer implementation");
+}
 const nonNativeVideoProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Non-native video probe read budget exceeded"));
 if (nonNativeVideoProbeChunks.length === 0) {
   throw new Error("Non-native video probe chunk was not found");
@@ -229,7 +236,7 @@ if (ogvViewerChunks.some(({ content }) => content.includes("videoTrack must be a
   || mediabunnyChunks.some(({ content }) => content.includes("OGV.js did not expose its runtime"))) {
   throw new Error("Mediabunny and OGV.js viewer implementations share a deferred chunk");
 }
-const mediabunnyConsumers = ["non-native-video", "non-native-audio", "gopro-max", "insta360"];
+const mediabunnyConsumers = ["non-native-video", "non-native-audio", "dji-osmo", "gopro-max", "insta360"];
 const mediabunnyPackages = await Promise.all(mediabunnyConsumers.map(async (plugin) => ({
   plugin,
   package: JSON.parse(await readFile(join(

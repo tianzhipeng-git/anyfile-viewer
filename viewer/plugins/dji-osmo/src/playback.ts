@@ -11,16 +11,15 @@ import {
   type WrappedCanvas,
 } from "mediabunny";
 
+import type { DjiOsmoPanoramaRenderer } from "./panorama-renderer";
 import { abortError } from "./read-blob";
-import type { PanoramaRenderer } from "./panorama-renderer";
-import type { PanoramaProjectionProfile } from "./projection";
-import { formatTime, type Insta360UiCopy, type Insta360ViewerElements } from "./ui";
-import type { Insta360VideoInspection } from "./video-inspection";
+import { formatTime, type DjiOsmoViewerElements, type djiOsmoUiCopy } from "./ui";
+import type { DjiOsmoVideoInspection } from "./video-inspection";
 
 const BLOB_CACHE_BYTES = 8 * 1024 * 1024;
 const AUDIO_LOOKAHEAD_SECONDS = 1;
 
-interface DualTrackMedia {
+interface DjiOsmoMedia {
   readonly input: Input<BlobSource>;
   readonly videos: readonly [InputVideoTrack, InputVideoTrack];
   readonly audio: InputAudioTrack;
@@ -30,52 +29,41 @@ interface DualTrackMedia {
 }
 
 type MediaIterator = AsyncGenerator<WrappedCanvas | WrappedAudioBuffer, void, unknown>;
+type UiCopy = ReturnType<typeof djiOsmoUiCopy>;
 
-async function inspectDualTrackMedia(
-  file: File,
-  inspection: Insta360VideoInspection,
-  signal: AbortSignal,
-): Promise<DualTrackMedia> {
-  const input = new Input({
-    source: new BlobSource(file, { maxCacheSize: BLOB_CACHE_BYTES }),
-    formats: [MP4],
-  });
+async function inspectMedia(file: File, inspection: DjiOsmoVideoInspection, signal: AbortSignal): Promise<DjiOsmoMedia> {
+  const input = new Input({ source: new BlobSource(file, { maxCacheSize: BLOB_CACHE_BYTES }), formats: [MP4] });
   const abort = () => input.dispose();
   signal.addEventListener("abort", abort, { once: true });
   try {
     if (signal.aborted) throw abortError();
-    if (!await input.canRead() || await input.getFormat() !== MP4) {
-      throw new ViewerError("invalid-file", "Invalid Insta360 MP4 container.");
-    }
-    const videos = await input.getVideoTracks();
+    if (!await input.canRead() || await input.getFormat() !== MP4) throw new ViewerError("invalid-file", "Invalid DJI Osmo MP4 container.");
+    const allVideos = await input.getVideoTracks();
     const audios = await input.getAudioTracks();
-    if (videos.length !== 2 || audios.length !== 1) {
-      throw new ViewerError("invalid-file", "Expected two video tracks and one audio track.");
-    }
+    const allVideoCodecs = await Promise.all(allVideos.map((track) => track.getCodec()));
+    const videos = allVideos.filter((_track, index) => allVideoCodecs[index] === "hevc");
+    const audioCodecs = await Promise.all(audios.map((track) => track.getCodec()));
+    const audio = audios[audioCodecs.indexOf("aac")];
+    if (videos.length !== 2 || !audio) throw new ViewerError("invalid-file", "Expected two HEVC tracks and AAC audio.");
     const dimensions = await Promise.all(videos.flatMap((track) => [track.getCodedWidth(), track.getCodedHeight()]));
-    const codecs = await Promise.all([...videos.map((track) => track.getCodec()), audios[0].getCodec()]);
-    if (dimensions.some((value) => value !== inspection.width)
-      || codecs[0] !== "hevc" || codecs[1] !== "hevc" || codecs[2] !== "aac") {
-      throw new ViewerError("invalid-file", "Unexpected Insta360 media tracks.");
+    if (dimensions[0] !== inspection.width || dimensions[1] !== inspection.height
+      || dimensions[2] !== inspection.width || dimensions[3] !== inspection.height
+      || videos.length !== 2) {
+      throw new ViewerError("invalid-file", "Unexpected DJI Osmo media tracks.");
     }
     if (typeof VideoDecoder === "undefined" || typeof AudioDecoder === "undefined") {
       throw new ViewerError("unsupported-environment", "WebCodecs is unavailable.");
     }
-    const starts = await Promise.all([videos[0].getFirstTimestamp(), videos[1].getFirstTimestamp()]);
-    const audioStart = await audios[0].getFirstTimestamp();
+    const starts = await Promise.all(videos.map((track) => track.getFirstTimestamp()));
+    const audioStart = await audio.getFirstTimestamp();
     const start = Math.max(0, ...starts);
-    const durations = await Promise.all([...videos, audios[0]].map((track) => (
-      input.getDurationFromMetadata([track], { skipLiveWait: true })
-    )));
-    const duration = durations.every((value): value is number => value !== null && Number.isFinite(value))
-      ? Math.min(...durations)
-      : Number.NaN;
-    if (!Number.isFinite(start) || !Number.isFinite(audioStart) || !Number.isFinite(duration)
-      || duration <= start || audioStart >= duration) {
-      throw new ViewerError("invalid-file", "Invalid Insta360 track timeline.");
+    const durations = await Promise.all([...videos, audio].map((track) => input.getDurationFromMetadata([track], { skipLiveWait: true })));
+    const duration = durations.every((value): value is number => value !== null && Number.isFinite(value)) ? Math.min(...durations) : Number.NaN;
+    if (!Number.isFinite(start) || !Number.isFinite(audioStart) || !Number.isFinite(duration) || duration <= start || audioStart >= duration) {
+      throw new ViewerError("invalid-file", "Invalid DJI Osmo track timeline.");
     }
     signal.removeEventListener("abort", abort);
-    return { input, videos: [videos[0], videos[1]], audio: audios[0], start, audioStart, duration };
+    return { input, videos: [videos[0], videos[1]], audio, start, audioStart, duration };
   } catch (error) {
     signal.removeEventListener("abort", abort);
     input.dispose();
@@ -84,12 +72,13 @@ async function inspectDualTrackMedia(
   }
 }
 
-export class DualTrackPlayback {
-  readonly #media: DualTrackMedia;
-  readonly #renderer: PanoramaRenderer;
-  readonly #projection: PanoramaProjectionProfile;
-  readonly #elements: Insta360ViewerElements;
-  readonly #copy: Insta360UiCopy;
+export class DjiOsmoPlayback {
+  readonly #media: DjiOsmoMedia;
+  readonly #renderer: DjiOsmoPanoramaRenderer;
+  readonly #elements: DjiOsmoViewerElements;
+  readonly #copy: UiCopy;
+  readonly #width: number;
+  readonly #height: number;
   readonly #videoSinks: readonly [CanvasSink, CanvasSink];
   readonly #audioSink: AudioBufferSink;
   readonly #audioContext: AudioContext;
@@ -111,17 +100,18 @@ export class DualTrackPlayback {
   #failed = false;
 
   private constructor(
-    media: DualTrackMedia,
-    projection: PanoramaProjectionProfile,
-    renderer: PanoramaRenderer,
-    elements: Insta360ViewerElements,
-    copy: Insta360UiCopy,
+    media: DjiOsmoMedia,
+    inspection: DjiOsmoVideoInspection,
+    renderer: DjiOsmoPanoramaRenderer,
+    elements: DjiOsmoViewerElements,
+    copy: UiCopy,
   ) {
     this.#media = media;
-    this.#projection = projection;
     this.#renderer = renderer;
     this.#elements = elements;
     this.#copy = copy;
+    this.#width = inspection.width;
+    this.#height = inspection.height;
     this.#position = media.start;
     this.#videoSinks = [new CanvasSink(media.videos[0], { poolSize: 2 }), new CanvasSink(media.videos[1], { poolSize: 2 })];
     this.#audioSink = new AudioBufferSink(media.audio);
@@ -132,39 +122,32 @@ export class DualTrackPlayback {
 
   static async open(
     file: File,
-    inspection: Insta360VideoInspection,
-    projection: PanoramaProjectionProfile,
-    renderer: PanoramaRenderer,
-    elements: Insta360ViewerElements,
-    copy: Insta360UiCopy,
+    inspection: DjiOsmoVideoInspection,
+    renderer: DjiOsmoPanoramaRenderer,
+    elements: DjiOsmoViewerElements,
+    copy: UiCopy,
     signal: AbortSignal,
   ) {
-    if (typeof AudioContext === "undefined") {
-      throw new ViewerError("unsupported-environment", "Web Audio is unavailable.");
-    }
-    const media = await inspectDualTrackMedia(file, inspection, signal);
-    const playback = new DualTrackPlayback(media, projection, renderer, elements, copy);
-    playback.listen(signal, "abort", () => { void playback.dispose(); });
+    if (typeof AudioContext === "undefined") throw new ViewerError("unsupported-environment", "Web Audio is unavailable.");
+    const media = await inspectMedia(file, inspection, signal);
+    const playback = new DjiOsmoPlayback(media, inspection, renderer, elements, copy);
     try {
-      await playback.initialize(inspection, signal);
+      await playback.initialize();
       return playback;
     } catch (error) {
       await playback.dispose();
       if (error instanceof DOMException && error.name === "AbortError") throw error;
       if (error instanceof ViewerError) throw error;
-      throw new ViewerError("unsupported-environment", "The browser could not decode the first HEVC frames.", { cause: error });
+      throw new ViewerError("unsupported-environment", "The browser could not decode the first DJI Osmo frames.", { cause: error });
     }
   }
 
-  private async initialize(inspection: Insta360VideoInspection, signal: AbortSignal) {
-    if (signal.aborted) throw abortError();
+  private async initialize() {
     const frames = await Promise.all(this.#videoSinks.map((sink) => sink.getCanvas(this.#position)));
-    if (signal.aborted || this.#disposed) throw abortError();
     if (!frames[0] || !frames[1]) throw new ViewerError("invalid-file", "The fisheye tracks have no first frame.");
     const audio = await this.#audioSink.getBuffer(Math.max(this.#position, this.#media.audioStart));
-    if (signal.aborted || this.#disposed) throw abortError();
-    if (!audio) throw new ViewerError("invalid-file", "The audio track has no first buffer.");
-    this.#renderer.setDualFrames(frames[0].canvas, frames[1].canvas, inspection.width, inspection.height, this.#projection);
+    if (!audio) throw new ViewerError("invalid-file", "The AAC track has no first buffer.");
+    this.#renderer.setFisheyeFrames(frames[0].canvas, frames[1].canvas, this.#width, this.#height);
     const { play, seek, volume, viewport } = this.#elements;
     if (!play || !seek || !volume) throw new ViewerError("open-failed", "Missing playback controls.");
     this.listen(play, "click", () => void this.toggle());
@@ -221,8 +204,7 @@ export class DualTrackPlayback {
   private previewSeek(position: number) {
     if (this.#disposed || !Number.isFinite(position)) return undefined;
     this.#seekRequest += 1;
-    const resume = this.#playing || this.#resumeAfterSeek;
-    this.#resumeAfterSeek = resume;
+    this.#resumeAfterSeek ||= this.#playing;
     if (this.#playing) this.pause();
     this.#position = Math.min(this.#media.duration, Math.max(this.#media.start, position));
     this.updateControls();
@@ -242,7 +224,7 @@ export class DualTrackPlayback {
       const frames = await Promise.all(this.#videoSinks.map((sink) => sink.getCanvas(target)));
       if (this.#disposed || request !== this.#seekRequest) return;
       if (!frames[0] || !frames[1]) throw new Error("No frames at requested time.");
-      this.#renderer.setDualFrames(frames[0].canvas, frames[1].canvas, 3840, 3840, this.#projection);
+      this.#renderer.setFisheyeFrames(frames[0].canvas, frames[1].canvas, this.#width, this.#height);
       if (this.#resumeAfterSeek) {
         this.#resumeAfterSeek = false;
         await this.play();
@@ -253,9 +235,7 @@ export class DualTrackPlayback {
   }
 
   private currentPosition() {
-    return this.#playing
-      ? Math.min(this.#media.duration, this.#clockMedia + this.#audioContext.currentTime - this.#clockWall)
-      : this.#position;
+    return this.#playing ? Math.min(this.#media.duration, this.#clockMedia + this.#audioContext.currentTime - this.#clockWall) : this.#position;
   }
 
   private async runVideo(generation: number) {
@@ -265,11 +245,10 @@ export class DualTrackPlayback {
       while (this.active(generation)) {
         const [first, second] = await Promise.all(iterators.map((iterator) => iterator.next()));
         if (first.done || second.done || !this.active(generation)) break;
-        const left = first.value as WrappedCanvas;
-        const right = second.value as WrappedCanvas;
-        await this.waitUntil(Math.max(left.timestamp, right.timestamp), generation);
-        if (!this.active(generation)) break;
-        this.#renderer.setDualFrames(left.canvas, right.canvas, 3840, 3840, this.#projection);
+        const firstFrame = first.value as WrappedCanvas;
+        const secondFrame = second.value as WrappedCanvas;
+        await this.waitUntil(Math.max(firstFrame.timestamp, secondFrame.timestamp), generation);
+        if (this.active(generation)) this.#renderer.setFisheyeFrames(firstFrame.canvas, secondFrame.canvas, this.#width, this.#height);
       }
     } finally {
       iterators.forEach((iterator) => this.#iterators.delete(iterator));
@@ -284,9 +263,7 @@ export class DualTrackPlayback {
         const result = await iterator.next();
         if (result.done || !this.active(generation)) break;
         const wrapped = result.value as WrappedAudioBuffer;
-        while (this.active(generation) && wrapped.timestamp - this.currentPosition() > AUDIO_LOOKAHEAD_SECONDS) {
-          await this.delay(50);
-        }
+        while (this.active(generation) && wrapped.timestamp - this.currentPosition() > AUDIO_LOOKAHEAD_SECONDS) await this.delay(50);
         if (this.active(generation)) this.scheduleAudio(wrapped);
       }
     } finally {
@@ -299,7 +276,10 @@ export class DualTrackPlayback {
     source.buffer = buffer;
     source.connect(this.#gain);
     const offset = Math.max(0, this.#clockMedia - timestamp);
-    if (offset >= duration) return;
+    if (offset >= duration) {
+      source.disconnect();
+      return;
+    }
     const when = Math.max(this.#audioContext.currentTime, this.#clockWall + timestamp - this.#clockMedia + offset);
     source.addEventListener("ended", () => this.#audioSources.delete(source), { once: true });
     this.#audioSources.add(source);
@@ -355,7 +335,7 @@ export class DualTrackPlayback {
     for (const iterator of this.#iterators) void iterator.return(undefined);
     this.#iterators.clear();
     for (const source of this.#audioSources) {
-      try { source.stop(); } catch { /* Source may already have ended. */ }
+      try { source.stop(); } catch { /* The source may already have ended. */ }
       source.disconnect();
     }
     this.#audioSources.clear();

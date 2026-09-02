@@ -204,9 +204,43 @@ describe("non-native video viewer protocol lifecycle", () => {
     seek.dispatchEvent(new Event("input"));
     seek.value = "0.6";
     seek.dispatchEvent(new Event("input"));
+    seek.dispatchEvent(new Event("change"));
 
     await vi.waitFor(() => expect(playButton.textContent).toBe("暂停"));
     expect(media.getCanvas).toHaveBeenCalledWith(0.6);
+    await controller.dispose();
+  });
+
+  it("previews range dragging without decoding and serializes committed seeks", async () => {
+    const context = testContext();
+    const controller = await nonNativeVideoViewer.open(context.context);
+    const seek = context.container.querySelector<HTMLInputElement>('input[aria-label="播放位置"]')!;
+    media.getCanvas.mockClear();
+    media.drawImage.mockClear();
+
+    seek.value = "0.4";
+    seek.dispatchEvent(new Event("input"));
+    seek.value = "0.8";
+    seek.dispatchEvent(new Event("input"));
+    await Promise.resolve();
+    expect(media.getCanvas).not.toHaveBeenCalled();
+
+    const releases: Array<() => void> = [];
+    media.getCanvas.mockImplementation((timestamp: number) => new Promise((resolve) => {
+      releases.push(() => resolve({ canvas: document.createElement("canvas"), timestamp, duration: 1 / 15 }));
+    }));
+    seek.dispatchEvent(new Event("change"));
+    await vi.waitFor(() => expect(media.getCanvas).toHaveBeenCalledTimes(1));
+    seek.value = "1";
+    seek.dispatchEvent(new Event("input"));
+    seek.dispatchEvent(new Event("change"));
+    await Promise.resolve();
+    expect(media.getCanvas).toHaveBeenCalledTimes(1);
+
+    releases.splice(0).forEach((release) => release());
+    await vi.waitFor(() => expect(media.getCanvas).toHaveBeenCalledTimes(2));
+    releases.splice(0).forEach((release) => release());
+    await vi.waitFor(() => expect(media.drawImage).toHaveBeenCalledOnce());
     await controller.dispose();
   });
 

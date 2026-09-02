@@ -9,6 +9,7 @@ describe("getFileTypeKind", () => {
     ["photo.HEIC", "image"],
     ["panorama.insp", "image"],
     ["panorama.360", "video"],
+    ["panorama.osv", "video"],
     ["proxy.lrv", "video"],
     ["clip.webm", "video"],
     ["movie.mkv", "video"],

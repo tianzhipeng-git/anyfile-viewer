@@ -8,6 +8,7 @@ import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
+import { djiOsmoManifest } from "@anyfile/dji-osmo-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
@@ -26,7 +27,7 @@ import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
 
 // Manifest-only inventory. This module must never import registrations, probes or plugin roots.
 export const viewerManifests: readonly ViewerPluginManifest[] = [
-  goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
+  djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest,
   safeSvgManifest, pdfManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
   codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest,

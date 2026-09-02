@@ -7,6 +7,7 @@ import { dataManifest } from "@anyfile/data-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
+import { djiOsmoManifest } from "@anyfile/dji-osmo-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
@@ -28,6 +29,17 @@ import {
 } from "@anyfile/viewer-protocol";
 
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
+  {
+    manifest: djiOsmoManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/dji-osmo-viewer/probe");
+      return probePackage.probeDjiOsmo(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/dji-osmo-viewer");
+      return viewerPackage.djiOsmoViewer;
+    },
+  },
   {
     manifest: goProMaxManifest,
     async probe(context) {

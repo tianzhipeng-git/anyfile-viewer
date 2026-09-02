@@ -113,8 +113,12 @@ describe("single-file dual-track playback", () => {
     expect(media.canDecode).not.toHaveBeenCalled();
     expect(elements.root.querySelectorAll("video")).toHaveLength(0);
     expect(elements.time?.textContent).toBe("0:00 / 0:04");
+    media.getCanvas.mockClear();
     elements.seek!.value = "2";
     elements.seek!.dispatchEvent(new Event("input"));
+    await Promise.resolve();
+    expect(media.getCanvas).not.toHaveBeenCalled();
+    elements.seek!.dispatchEvent(new Event("change"));
     await vi.waitFor(() => expect(media.getCanvas).toHaveBeenCalledWith(0, 2));
     expect(media.getCanvas).toHaveBeenCalledWith(1, 2);
 
@@ -126,6 +130,43 @@ describe("single-file dual-track playback", () => {
     await playback.dispose();
     expect(media.inputDispose).toHaveBeenCalledOnce();
     expect(media.contextClose).toHaveBeenCalledOnce();
+    elements.root.remove();
+  });
+
+  it("serializes committed seeks and skips stale dual-track results", async () => {
+    const elements = createInsta360ViewerElements("modern.insv", inspection, "zh-CN");
+    document.body.append(elements.root);
+    const renderer = { setDualFrames: vi.fn() };
+    const playback = await DualTrackPlayback.open(
+      new File(["video"], "modern.insv"),
+      inspection,
+      X5_VIDEO_PROJECTION,
+      renderer as never,
+      elements,
+      insta360UiCopy("zh-CN"),
+      new AbortController().signal,
+    );
+    media.getCanvas.mockClear();
+    renderer.setDualFrames.mockClear();
+    const releases: Array<() => void> = [];
+    media.getCanvas.mockImplementation((_index: number, timestamp: number) => new Promise((resolve) => {
+      releases.push(() => resolve({ canvas: document.createElement("canvas"), timestamp, duration: 1 / 25 }));
+    }));
+
+    elements.seek!.value = "1";
+    elements.seek!.dispatchEvent(new Event("change"));
+    await vi.waitFor(() => expect(media.getCanvas).toHaveBeenCalledTimes(2));
+    elements.seek!.value = "3";
+    elements.seek!.dispatchEvent(new Event("input"));
+    elements.seek!.dispatchEvent(new Event("change"));
+    await Promise.resolve();
+    expect(media.getCanvas).toHaveBeenCalledTimes(2);
+
+    releases.splice(0).forEach((release) => release());
+    await vi.waitFor(() => expect(media.getCanvas).toHaveBeenCalledTimes(4));
+    releases.splice(0).forEach((release) => release());
+    await vi.waitFor(() => expect(renderer.setDualFrames).toHaveBeenCalledOnce());
+    await playback.dispose();
     elements.root.remove();
   });
 

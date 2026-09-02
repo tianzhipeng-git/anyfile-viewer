@@ -39,6 +39,7 @@
     "@anyfile/dev-array-viewer": "workspace:*",
     "@anyfile/dev-source-map-viewer": "workspace:*",
     "@anyfile/dev-wasm-viewer": "workspace:*",
+    "@anyfile/dji-osmo-viewer": "workspace:*",
     "@anyfile/excel-viewer": "workspace:*",
     "@anyfile/general-raster-viewer": "workspace:*",
     "@anyfile/gopro-max-viewer": "workspace:*",

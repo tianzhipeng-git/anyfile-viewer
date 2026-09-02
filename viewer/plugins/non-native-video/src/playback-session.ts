@@ -34,6 +34,7 @@ export class PlaybackSession {
   #generation = 0;
   #animationFrame: number | null = null;
   #seekRequest = 0;
+  #seekQueue: Promise<void> = Promise.resolve();
   #resumeAfterSeek = false;
   #playing = false;
   #disposed = false;
@@ -65,7 +66,8 @@ export class PlaybackSession {
       if (firstBuffer.done) throw new Error("The primary audio track has no decodable first buffer.");
     }
     this.#listen(this.#elements.playButton, "click", () => void this.#toggle());
-    this.#listen(this.#elements.seek, "input", () => {
+    this.#listen(this.#elements.seek, "input", () => { this.#previewSeek(Number(this.#elements.seek.value)); });
+    this.#listen(this.#elements.seek, "change", () => {
       void this.seek(Number(this.#elements.seek.value)).catch(() => this.#showFailure());
     });
     this.#listen(this.#elements.volume, "input", () => {
@@ -114,30 +116,43 @@ export class PlaybackSession {
     updateTime(this.#elements, this.#position, this.#media.duration);
   }
 
-  async seek(position: number) {
-    if (this.#disposed || !Number.isFinite(position)) return;
-    const request = ++this.#seekRequest;
+  #previewSeek(position: number) {
+    if (this.#disposed || !Number.isFinite(position)) return undefined;
+    this.#seekRequest += 1;
     if (this.#playing) {
       this.#resumeAfterSeek = true;
       this.pause();
     }
-    else this.#cancelPipelines();
     this.#position = Math.min(this.#media.duration, Math.max(this.#media.startTimestamp, position));
     updateTime(this.#elements, this.#position, this.#media.duration);
-    if (this.#position < this.#media.duration) {
-      const frame = await this.#videoSink.getCanvas(this.#position);
+    return this.#position;
+  }
+
+  seek(position: number) {
+    const target = this.#previewSeek(position);
+    if (target === undefined) return Promise.resolve();
+    const request = this.#seekRequest;
+    const task = this.#seekQueue.catch(() => undefined).then(async () => {
       if (this.#disposed || request !== this.#seekRequest) return;
-      if (!frame) throw new Error("No frame exists at the requested timestamp.");
-      this.#draw(frame);
-    }
-    else if (this.#disposed || request !== this.#seekRequest) return;
-    this.#elements.playButton.textContent = this.#position >= this.#media.duration
-      ? this.#copy.replay
-      : this.#copy.play;
-    if (this.#resumeAfterSeek && this.#position < this.#media.duration) {
-      this.#resumeAfterSeek = false;
-      await this.play();
-    }
+      if (target < this.#media.duration) {
+        const frame = await this.#videoSink.getCanvas(target);
+        if (this.#disposed || request !== this.#seekRequest) return;
+        if (!frame) throw new Error("No frame exists at the requested timestamp.");
+        this.#draw(frame);
+      } else {
+        this.#resumeAfterSeek = false;
+      }
+      if (this.#disposed || request !== this.#seekRequest) return;
+      this.#elements.playButton.textContent = target >= this.#media.duration
+        ? this.#copy.replay
+        : this.#copy.play;
+      if (this.#resumeAfterSeek && target < this.#media.duration) {
+        this.#resumeAfterSeek = false;
+        await this.play();
+      }
+    });
+    this.#seekQueue = task;
+    return task;
   }
 
   currentPosition() {

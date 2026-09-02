@@ -73,6 +73,7 @@ import { ogvFormat } from "./ogv";
 import { omeTiffFormat } from "./ome-tiff";
 import { opusFormat } from "./opus";
 import { orfFormat } from "./orf";
+import { osvFormat } from "./osv";
 import { parquetFormat } from "./parquet";
 import { pdfFormat } from "./pdf";
 import { pefFormat } from "./pef";
@@ -194,6 +195,7 @@ export const formatContents: readonly FormatContent[] = [
   omeTiffFormat,
   opusFormat,
   orfFormat,
+  osvFormat,
   parquetFormat,
   pdfFormat,
   pefFormat,
