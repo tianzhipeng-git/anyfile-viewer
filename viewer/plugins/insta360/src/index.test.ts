@@ -19,6 +19,7 @@ vi.mock("@anyfile/raw-decoder", () => ({
 }));
 
 import { insta360Viewer } from "./index";
+import { X3_PHOTO_PROJECTION, X3_VIDEO_PROJECTION } from "./projection";
 import { x3DngBytes, x3InsvBytes, x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
 
 const activeContexts: ViewerTestContext[] = [];
@@ -114,6 +115,7 @@ describe("Insta360 viewer protocol lifecycle", () => {
     viewport.dispatchEvent(new PointerEvent("pointermove", { pointerId: 1, clientX: 140, clientY: 100 }));
     await vi.waitFor(() => expect(gl.uniform1f).toHaveBeenCalledWith("uYaw", 0.2));
     expect(gl.uniform1f).toHaveBeenCalledWith("uPitch", 0);
+    expect(gl.uniform1f).toHaveBeenCalledWith("uThetaMax", X3_PHOTO_PROJECTION.thetaMaxRadians);
 
     await controller.dispose();
     await controller.dispose();
@@ -177,6 +179,7 @@ describe("Insta360 viewer protocol lifecycle", () => {
     expect(video.muted).toBe(false);
     expect(video.autoplay).toBe(false);
     expect(video.src).toBe("blob:insta360");
+    await vi.waitFor(() => expect(gl.uniform1f).toHaveBeenCalledWith("uThetaMax", X3_VIDEO_PROJECTION.thetaMaxRadians));
     expect(seek.max).toBe("30");
     seek.value = "8.5";
     seek.dispatchEvent(new Event("input"));

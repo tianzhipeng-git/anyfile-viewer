@@ -75,12 +75,14 @@ theta = acos(clamp(dot(d, forward), -1, 1))
 r = theta / thetaMax × 0.5
 ```
 
-X3 样本当前使用：
+X3 样本按源类型使用不同的机内裁切标定：
 
 ```text
-thetaMax = 105°
-单镜头完整 FOV = 210°
+.insp / .dng: thetaMax = 98.5°，单镜头有效 FOV = 197°
+.lrv / .insv: thetaMax = 95.75°，单镜头有效 FOV = 191.5°
 ```
+
+原先统一使用 `thetaMax = 105°` 只复现了 FFmpeg `v360` 的名义 210° 输入假设，不能证明真实镜头接缝对齐。使用两张照片、两张 DNG 显影图以及视频四个时间点测量两路镜头在重叠区的结构相关性后，照片/RAW 的对齐峰值为约 98.5°，视频为约 95.75°。视频的机内裁切与照片不同，因此 renderer 必须在载入源时选择对应 profile，不能共用一个角度常量。
 
 镜头坐标约定：
 

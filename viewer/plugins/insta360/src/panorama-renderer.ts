@@ -1,7 +1,11 @@
 import { ViewerError } from "@anyfile/viewer-protocol";
 import { ResourceScope } from "@anyfile/viewer-rendering";
 
-import { X3_BLEND_RADIANS, X3_THETA_MAX_RADIANS } from "./projection";
+import {
+  X3_PHOTO_PROJECTION,
+  X3_VIDEO_PROJECTION,
+  type X3ProjectionProfile,
+} from "./projection";
 
 type VideoWithFrameCallback = HTMLVideoElement & {
   requestVideoFrameCallback?(callback: () => void): number;
@@ -26,9 +30,8 @@ uniform float uTanHalfFov;
 uniform float uYaw;
 uniform float uPitch;
 uniform float uLayout;
-
-const float THETA_MAX = ${X3_THETA_MAX_RADIANS};
-const float BLEND = ${X3_BLEND_RADIANS};
+uniform float uThetaMax;
+uniform float uBlend;
 
 vec2 lensUv(vec3 direction, vec3 forward, vec3 right, out float angle) {
   angle = acos(clamp(dot(direction, forward), -1.0, 1.0));
@@ -36,7 +39,7 @@ vec2 lensUv(vec3 direction, vec3 forward, vec3 right, out float angle) {
   vec2 radial = sine > 0.000001
     ? vec2(dot(direction, right), direction.y) / sine
     : vec2(0.0);
-  return vec2(0.5) + vec2(1.0, -1.0) * radial * (angle / THETA_MAX * 0.5);
+  return vec2(0.5) + vec2(1.0, -1.0) * radial * (angle / uThetaMax * 0.5);
 }
 
 vec4 sampleLens(vec2 uv, float lens) {
@@ -57,12 +60,12 @@ void main() {
   float angle1;
   vec2 uv0 = lensUv(direction, vec3(0.0, 0.0, -1.0), vec3(1.0, 0.0, 0.0), angle0);
   vec2 uv1 = lensUv(direction, vec3(0.0, 0.0, 1.0), vec3(-1.0, 0.0, 0.0), angle1);
-  bool valid0 = angle0 <= THETA_MAX;
-  bool valid1 = angle1 <= THETA_MAX;
+  bool valid0 = angle0 <= uThetaMax;
+  bool valid1 = angle1 <= uThetaMax;
   if (!valid0 && !valid1) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
   if (!valid0) { gl_FragColor = sampleLens(uv1, 1.0); return; }
   if (!valid1) { gl_FragColor = sampleLens(uv0, 0.0); return; }
-  float weight0 = smoothstep(-BLEND, BLEND, angle1 - angle0);
+  float weight0 = smoothstep(-uBlend, uBlend, angle1 - angle0);
   gl_FragColor = mix(sampleLens(uv1, 1.0), sampleLens(uv0, 0.0), weight0);
 }`;
 
@@ -107,6 +110,7 @@ export class PanoramaRenderer {
   private video?: VideoWithFrameCallback;
   private secondVideo?: VideoWithFrameCallback;
   private layout: "dual" | "sbs" = "dual";
+  private projection: X3ProjectionProfile = X3_PHOTO_PROJECTION;
   private yaw = 0;
   private pitch = 0;
   private fov = 75;
@@ -175,6 +179,7 @@ export class PanoramaRenderer {
   setDualSources(first: TexImageSource, second: TexImageSource, width: number, height: number) {
     this.ensureTextureSize(width, height);
     this.layout = "dual";
+    this.projection = X3_PHOTO_PROJECTION;
     this.upload(0, first);
     this.upload(1, second);
     this.schedule();
@@ -183,6 +188,7 @@ export class PanoramaRenderer {
   setSbsVideo(video: HTMLVideoElement, width: number, height: number) {
     this.ensureTextureSize(width, height);
     this.layout = "sbs";
+    this.projection = X3_VIDEO_PROJECTION;
     this.video = video;
     this.bindVideoFrames(video, 0);
     this.schedule(true);
@@ -192,6 +198,7 @@ export class PanoramaRenderer {
   setDualVideos(first: HTMLVideoElement, second: HTMLVideoElement, width: number, height: number) {
     this.ensureTextureSize(width, height);
     this.layout = "dual";
+    this.projection = X3_VIDEO_PROJECTION;
     this.video = first;
     this.secondVideo = second;
     this.bindVideoFrames(first, 0);
@@ -330,6 +337,8 @@ export class PanoramaRenderer {
     gl.uniform1f(gl.getUniformLocation(this.program, "uYaw"), this.yaw);
     gl.uniform1f(gl.getUniformLocation(this.program, "uPitch"), this.pitch);
     gl.uniform1f(gl.getUniformLocation(this.program, "uLayout"), this.layout === "sbs" ? 1 : 0);
+    gl.uniform1f(gl.getUniformLocation(this.program, "uThetaMax"), this.projection.thetaMaxRadians);
+    gl.uniform1f(gl.getUniformLocation(this.program, "uBlend"), this.projection.blendRadians);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 
