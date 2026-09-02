@@ -153,13 +153,14 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 - Chromium 原生只能读取 Ogg Theora metadata、不能产生视频帧；`non-native-video` 因而按需加载 OGV.js 1.9.0 的 Ogg demux、Theora 与 Vorbis/Opus Worker/WASM。Theora/Vorbis 捕获 168 个非静音 PCM buffer、峰值 0.129；Theora video-only 不创建 AudioContext；Theora/Opus 使用独立固定样例复验。
 - Ogg audio-only、损坏和伪装容器均 probe 0；普通路径与 Ogg 路径的实现 chunk 分离，OGV.js 资产、MIT 及 codec 许可证由构建门禁检查。
 
-### Insta360 X3 成对 INSV 目标环境记录（2026-09-02）
+### Insta360 多型号目标环境记录（2026-09-02）
 
 - 环境：Google Chrome 152.0.7977.65，macOS 15.6.1（Apple Silicon）；通过实际 `/zh-CN/view` 页面一次多选两段真实 X3 INSV；
 - 两路 2880×2880 H.264/AAC 媒体均进入 `readyState=4` 并连续推进；`_00` 保持非静音主时钟，`_10` 永久静音；
 - 验证完整约 30.7 秒连续播放、前后 seek、连续快速 seek、小漂移 `playbackRate` 修正、较短 `_10` 结束、重播和替换为单文件后的双媒体清理；
 - 严格文件名与组号配对；单独打开或不同录像组合返回 `missing-related-file`，提示同时选择成对文件或打开整个文件夹；
-- 出厂精确校准、gyro、FlowState、其他机型和 Safari/Firefox/Windows/Android/iOS 未在本轮声明或验证。
+- One RS、X4、X5、X6 的真实样例已完成有界 probe、轨道/RAW 布局检查和型号级镜头投影离线校验；X5/X6 的 HEVC WebCodecs 连续播放仍需在目标浏览器人工复验；
+- gyro、FlowState、逐文件标定覆盖和 Safari/Firefox/Windows/Android/iOS 未在本轮声明或验证。
 
 ## 7. 自动测试与构建证据
 

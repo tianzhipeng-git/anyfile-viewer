@@ -1,7 +1,7 @@
 # Insta360 全景文件查看支持方案
 
-- 状态：阶段 1–4 已实现；阶段 5 规划中
-- 首批目标设备：Insta360 X3
+- 状态：阶段 1–5 已实现；新版单文件 INSV 已读取逐文件镜头标定，gyro 仍规划中
+- 已验证设备：Insta360 X3、One RS、X4、X5、X6
 - 适用范围：浏览器本地查看 `.insp`、`.lrv`、成对 `.insv` 与 Insta360 `.dng`
 - 非目标：编辑、导出、服务端转码、自动 HDR 合成、完整复刻 Insta360 Studio
 - 隐私边界：文件只在浏览器本地读取和渲染，不上传到服务器或第三方服务
@@ -18,7 +18,26 @@
 2. `.lrv` 低分辨率全景视频；
 3. 多文件工作区与成对 `.insv` 高清视频（已完成）；
 4. Insta360 `.dng` RAW 全景（已完成）；
-5. 陀螺仪、水平校正、FlowState 和更多设备型号。
+5. 更多设备型号基础预览（已完成）；陀螺仪、水平校正、FlowState 和逐文件精确校准继续规划。
+
+### 1.1 多型号扩展（2026-09-02）
+
+使用 `/Users/tianzhipeng/Desktop/more_footage` 的真实样例扩展了以下布局：
+
+| 设备 | 格式 | 已验证布局 | 浏览器处理路径 |
+|---|---|---|---|
+| One RS | `.insv` | 成对 3072×3072 H.264；单个 768×384 SBS 代理 | 双 `<video>` 或单 `<video>` → WebGL |
+| X4 | `.lrv` / `.insv` | 1664×832 H.264 SBS 代理；单文件双 3840² HEVC 轨 | `<video>` 或 Mediabunny / WebCodecs → WebGL |
+| X5 / X6 | `.insv` | 单文件、两条 3840×3840 HEVC 轨 + AAC | Mediabunny 分片解复用 → WebCodecs → WebGL |
+| X6 | `.dng` | 15520×7760 SBS、16-bit CFA、Adobe Deflate RAW | Worker 逐条带解压并 2×2 CFA 预览 → 两张 3880² 纹理 → WebGL |
+
+单文件双轨路径不会复制整个源文件：Mediabunny 通过 `BlobSource` 范围读取 MP4 索引和媒体数据，两条视频轨以同一播放时钟解码，AAC 通过 Web Audio 输出。HEVC 是否可播由 WebCodecs 能力检查决定。X4/X5/X6 样例还包含索引记录指向的 1280×640 I420 等距柱状全景帧；浏览器无法解码 3840² HEVC 时，查看器读取这 1.17 MiB 数据并打开明确标注的静态 360° 预览，而不是把文件整体判为无法打开。
+
+不同设备不再复用 X3 的单一视场角。X4/X5/X6 单文件 INSV 从文件尾部索引定位 protobuf metadata，再读取该文件 `offset_v3` 中两颗镜头各自的 MEI 焦距、光心、径向/切向畸变和姿态；不再把某个样例的参数冻结成整个型号的默认值，也不再让两颗镜头共用畸变参数。X4 LRV 没有对应 INSV metadata 可直接使用，仍使用 40 个跨镜头特征点拟合的双镜头等距 profile，中位角残差约 0.19°。One RS 使用其样例标定。尚未应用 gyro、rolling shutter 或 FlowState，因此支持等级保持 3。
+
+X6 DNG 原始画面约 1.20 亿像素。该样例的 31 个 Adobe Deflate 条带完整有效，但 LibRaw 1.6.0 无法解包，因此 X6 改用专用 Worker 逐条带解压，每个 2×2 GB/RG CFA 单元直接生成一个 RGB 像素，输出 7760×3880 后分割为两个 3880² 镜头。共享 RAW 输出上限同时由 64 MiPixel 放宽到 128 MiPixel。
+
+实现验证：上述七个非 X3 源文件均通过真实文件的有界 probe；X5/X6 原文件已通过 Mediabunny 实际读取并确认轨道 codec、尺寸和时长索引；双轨首帧、seek、播放、音频与幂等清理由自动化测试覆盖。仍需在带 HEVC WebCodecs 的目标浏览器完成真实画面的接缝、方向和连续播放人工验收。
 
 ## 2. 已验证的样本结构
 

@@ -469,6 +469,9 @@ importers:
       '@anyfile/viewer-rendering':
         specifier: workspace:*
         version: link:../../rendering
+      mediabunny:
+        specifier: 1.55.3
+        version: 1.55.3
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*

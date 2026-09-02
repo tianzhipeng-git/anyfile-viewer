@@ -3,7 +3,7 @@ import type LibRaw from "libraw-wasm";
 import type { Metadata } from "libraw-wasm";
 
 export const MAX_RAW_SOURCE_BYTES = 256 * 1024 * 1024;
-export const MAX_RAW_PIXELS = 64 * 1024 * 1024;
+export const MAX_RAW_PIXELS = 128 * 1024 * 1024;
 
 export interface RawMetadataSummary {
   readonly make?: string;
@@ -42,7 +42,7 @@ export function checkRawDimensions(width: number, height: number) {
   }
   const pixels = width * height;
   if (!Number.isSafeInteger(pixels) || pixels > MAX_RAW_PIXELS) {
-    throw new ViewerError("resource-limit", "The developed RAW image exceeds the 64-megapixel limit.");
+    throw new ViewerError("resource-limit", "The developed RAW image exceeds the 128-megapixel limit.");
   }
   return pixels;
 }
@@ -55,7 +55,7 @@ export class RawDecoder {
     signal.addEventListener("abort", this.dispose, { once: true });
   }
 
-  async open(bytes: Uint8Array<ArrayBuffer>) {
+  async open(bytes: Uint8Array<ArrayBuffer>, options: { halfSize?: boolean } = {}) {
     if (this.disposed || this.signal.aborted) throw abortError();
     const libRawPackage = await import(/* webpackIgnore: true */ LIBRAW_MODULE_URL) as LibRawPackage;
     if (this.disposed || this.signal.aborted) throw abortError();
@@ -70,6 +70,7 @@ export class RawDecoder {
           outputColor: 1,
           outputBps: 8,
           userFlip: -1,
+          halfSize: options.halfSize,
         }),
         new Promise<never>((_, reject) => {
           timeout = setTimeout(() => {

@@ -2,9 +2,10 @@ import { ViewerError } from "@anyfile/viewer-protocol";
 import { ResourceScope } from "@anyfile/viewer-rendering";
 
 import {
+  EQUIRECTANGULAR_PROJECTION,
   X3_PHOTO_PROJECTION,
   X3_VIDEO_PROJECTION,
-  type X3ProjectionProfile,
+  type PanoramaProjectionProfile,
 } from "./projection";
 
 type VideoWithFrameCallback = HTMLVideoElement & {
@@ -30,8 +31,26 @@ uniform float uTanHalfFov;
 uniform float uYaw;
 uniform float uPitch;
 uniform float uLayout;
+uniform float uProjectionKind;
 uniform float uThetaMax;
 uniform float uBlend;
+uniform float uRotation;
+uniform float uXi0;
+uniform float uXi1;
+uniform vec2 uFocal0;
+uniform vec2 uFocal1;
+uniform vec2 uCenter0;
+uniform vec2 uCenter1;
+uniform vec4 uRadial0;
+uniform vec4 uRadial1;
+uniform vec2 uTangential0;
+uniform vec2 uTangential1;
+uniform vec4 uPrism0;
+uniform vec4 uPrism1;
+uniform mat3 uExtrinsic0;
+uniform mat3 uExtrinsic1;
+uniform float uTextureRotation0;
+uniform float uTextureRotation1;
 
 vec2 lensUv(vec3 direction, vec3 forward, vec3 right, out float angle) {
   angle = acos(clamp(dot(direction, forward), -1.0, 1.0));
@@ -39,7 +58,58 @@ vec2 lensUv(vec3 direction, vec3 forward, vec3 right, out float angle) {
   vec2 radial = sine > 0.000001
     ? vec2(dot(direction, right), direction.y) / sine
     : vec2(0.0);
+  float cr = cos(uRotation);
+  float sr = sin(uRotation);
+  radial = mat2(cr, sr, -sr, cr) * radial;
   return vec2(0.5) + vec2(1.0, -1.0) * radial * (angle / uThetaMax * 0.5);
+}
+
+vec2 rotateTexture(vec2 uv, float radians) {
+  float c = cos(radians);
+  float s = sin(radians);
+  vec2 delta = uv - vec2(0.5);
+  return vec2(0.5) + mat2(c, s, -s, c) * delta;
+}
+
+vec2 meiUv(vec3 cameraDirection, float lens, out float angle, out bool valid) {
+  mat3 extrinsic = lens < 0.5 ? uExtrinsic0 : uExtrinsic1;
+  vec3 local = cameraDirection * extrinsic;
+  angle = acos(clamp(local.z, -1.0, 1.0));
+  float xi = lens < 0.5 ? uXi0 : uXi1;
+  float denominator = local.z + xi;
+  vec2 point = local.xy / max(denominator, 0.000001);
+  float r2 = dot(point, point);
+  float r4 = r2 * r2;
+  vec4 radialCoefficients = lens < 0.5 ? uRadial0 : uRadial1;
+  vec2 tangential = lens < 0.5 ? uTangential0 : uTangential1;
+  vec4 prism = lens < 0.5 ? uPrism0 : uPrism1;
+  float radial = 1.0 + radialCoefficients.x * r2 + radialCoefficients.y * r4
+    + radialCoefficients.z * r2 * r4 + radialCoefficients.w * r4 * r4;
+  vec2 distorted;
+  distorted.x = point.x * radial + 2.0 * tangential.x * point.x * point.y
+    + tangential.y * (r2 + 2.0 * point.x * point.x) + prism.x * r2 + prism.y * r4;
+  distorted.y = point.y * radial + tangential.x * (r2 + 2.0 * point.y * point.y)
+    + 2.0 * tangential.y * point.x * point.y + prism.z * r2 + prism.w * r4;
+  vec2 focal = lens < 0.5 ? uFocal0 : uFocal1;
+  vec2 center = lens < 0.5 ? uCenter0 : uCenter1;
+  float textureRotation = lens < 0.5 ? uTextureRotation0 : uTextureRotation1;
+  vec2 uv = rotateTexture(focal * distorted + center, textureRotation);
+  valid = denominator > 0.000001 && all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
+  return uv;
+}
+
+vec2 calibratedEquidistantUv(vec3 cameraDirection, float lens, out float angle, out bool valid) {
+  mat3 extrinsic = lens < 0.5 ? uExtrinsic0 : uExtrinsic1;
+  vec3 local = cameraDirection * extrinsic;
+  angle = acos(clamp(local.z, -1.0, 1.0));
+  float sine = sin(angle);
+  vec2 radial = sine > 0.000001 ? local.xy / sine : vec2(0.0);
+  vec2 focal = lens < 0.5 ? uFocal0 : uFocal1;
+  vec2 center = lens < 0.5 ? uCenter0 : uCenter1;
+  float textureRotation = lens < 0.5 ? uTextureRotation0 : uTextureRotation1;
+  vec2 uv = rotateTexture(center + focal * radial * angle, textureRotation);
+  valid = all(greaterThanEqual(uv, vec2(0.0))) && all(lessThanEqual(uv, vec2(1.0)));
+  return uv;
 }
 
 vec4 sampleLens(vec2 uv, float lens) {
@@ -56,12 +126,33 @@ void main() {
   float sy = sin(uYaw);
   direction = vec3(cy * direction.x + sy * direction.z, direction.y, -sy * direction.x + cy * direction.z);
 
+  if (uProjectionKind > 2.5) {
+    vec2 uv = vec2(0.5 + atan(direction.x, -direction.z) / 6.28318530718,
+      0.5 - asin(clamp(direction.y, -1.0, 1.0)) / 3.14159265359);
+    gl_FragColor = texture2D(uTexture0, uv);
+    return;
+  }
+
   float angle0;
   float angle1;
-  vec2 uv0 = lensUv(direction, vec3(0.0, 0.0, -1.0), vec3(1.0, 0.0, 0.0), angle0);
-  vec2 uv1 = lensUv(direction, vec3(0.0, 0.0, 1.0), vec3(-1.0, 0.0, 0.0), angle1);
-  bool valid0 = angle0 <= uThetaMax;
-  bool valid1 = angle1 <= uThetaMax;
+  bool valid0;
+  bool valid1;
+  vec2 uv0;
+  vec2 uv1;
+  if (uProjectionKind > 1.5) {
+    vec3 cameraDirection = vec3(direction.x, -direction.y, -direction.z);
+    uv0 = calibratedEquidistantUv(cameraDirection, 0.0, angle0, valid0);
+    uv1 = calibratedEquidistantUv(cameraDirection, 1.0, angle1, valid1);
+  } else if (uProjectionKind > 0.5) {
+    vec3 cameraDirection = vec3(direction.x, -direction.y, -direction.z);
+    uv0 = meiUv(cameraDirection, 0.0, angle0, valid0);
+    uv1 = meiUv(cameraDirection, 1.0, angle1, valid1);
+  } else {
+    uv0 = lensUv(direction, vec3(0.0, 0.0, -1.0), vec3(1.0, 0.0, 0.0), angle0);
+    uv1 = lensUv(direction, vec3(0.0, 0.0, 1.0), vec3(-1.0, 0.0, 0.0), angle1);
+    valid0 = angle0 <= uThetaMax;
+    valid1 = angle1 <= uThetaMax;
+  }
   if (!valid0 && !valid1) { gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0); return; }
   if (!valid0) { gl_FragColor = sampleLens(uv1, 1.0); return; }
   if (!valid1) { gl_FragColor = sampleLens(uv0, 0.0); return; }
@@ -110,7 +201,7 @@ export class PanoramaRenderer {
   private video?: VideoWithFrameCallback;
   private secondVideo?: VideoWithFrameCallback;
   private layout: "dual" | "sbs" = "dual";
-  private projection: X3ProjectionProfile = X3_PHOTO_PROJECTION;
+  private projection: PanoramaProjectionProfile = X3_PHOTO_PROJECTION;
   private yaw = 0;
   private pitch = 0;
   private fov = 75;
@@ -176,29 +267,43 @@ export class PanoramaRenderer {
     }
   }
 
-  setDualSources(first: TexImageSource, second: TexImageSource, width: number, height: number) {
+  setDualSources(
+    first: TexImageSource,
+    second: TexImageSource,
+    width: number,
+    height: number,
+    projection: PanoramaProjectionProfile = X3_PHOTO_PROJECTION,
+  ) {
     this.ensureTextureSize(width, height);
     this.layout = "dual";
-    this.projection = X3_PHOTO_PROJECTION;
+    this.projection = projection;
     this.upload(0, first);
     this.upload(1, second);
     this.schedule();
   }
 
-  setSbsVideo(video: HTMLVideoElement, width: number, height: number) {
+  setEquirectangularSource(source: TexImageSource, width: number, height: number) {
+    this.ensureTextureSize(width, height);
+    this.layout = "dual";
+    this.projection = EQUIRECTANGULAR_PROJECTION;
+    this.upload(0, source);
+    this.schedule();
+  }
+
+  setSbsVideo(video: HTMLVideoElement, width: number, height: number, projection: PanoramaProjectionProfile = X3_VIDEO_PROJECTION) {
     this.ensureTextureSize(width, height);
     this.layout = "sbs";
-    this.projection = X3_VIDEO_PROJECTION;
+    this.projection = projection;
     this.video = video;
     this.bindVideoFrames(video, 0);
     this.schedule(true);
     this.startVideoFrames(0);
   }
 
-  setDualVideos(first: HTMLVideoElement, second: HTMLVideoElement, width: number, height: number) {
+  setDualVideos(first: HTMLVideoElement, second: HTMLVideoElement, width: number, height: number, projection: PanoramaProjectionProfile = X3_VIDEO_PROJECTION) {
     this.ensureTextureSize(width, height);
     this.layout = "dual";
-    this.projection = X3_VIDEO_PROJECTION;
+    this.projection = projection;
     this.video = first;
     this.secondVideo = second;
     this.bindVideoFrames(first, 0);
@@ -206,6 +311,21 @@ export class PanoramaRenderer {
     this.schedule(true);
     this.startVideoFrames(0);
     this.startVideoFrames(1);
+  }
+
+  setDualFrames(
+    first: TexImageSource,
+    second: TexImageSource,
+    width: number,
+    height: number,
+    projection: PanoramaProjectionProfile,
+  ) {
+    this.ensureTextureSize(width, height);
+    this.layout = "dual";
+    this.projection = projection;
+    this.upload(0, first);
+    this.upload(1, second);
+    this.schedule();
   }
 
   reset() {
@@ -337,8 +457,31 @@ export class PanoramaRenderer {
     gl.uniform1f(gl.getUniformLocation(this.program, "uYaw"), this.yaw);
     gl.uniform1f(gl.getUniformLocation(this.program, "uPitch"), this.pitch);
     gl.uniform1f(gl.getUniformLocation(this.program, "uLayout"), this.layout === "sbs" ? 1 : 0);
-    gl.uniform1f(gl.getUniformLocation(this.program, "uThetaMax"), this.projection.thetaMaxRadians);
+    const equidistant = this.projection.kind === "equidistant" ? this.projection : undefined;
+    const calibrated = this.projection.kind === "calibrated-equidistant" ? this.projection : undefined;
+    const mei = this.projection.kind === "mei" ? this.projection : undefined;
+    const projectionKind = equidistant ? 0 : mei ? 1 : this.projection.kind === "equirectangular" ? 3 : 2;
+    gl.uniform1f(gl.getUniformLocation(this.program, "uProjectionKind"), projectionKind);
+    gl.uniform1f(gl.getUniformLocation(this.program, "uThetaMax"), equidistant?.thetaMaxRadians ?? 0);
     gl.uniform1f(gl.getUniformLocation(this.program, "uBlend"), this.projection.blendRadians);
+    gl.uniform1f(gl.getUniformLocation(this.program, "uRotation"), equidistant?.rotationRadians ?? 0);
+    const calibratedLenses = calibrated?.lenses ?? mei?.lenses;
+    if (calibratedLenses) {
+      for (const index of [0, 1] as const) {
+        const lens = calibratedLenses[index];
+        gl.uniform2fv(gl.getUniformLocation(this.program, `uFocal${index}`), lens.focal);
+        gl.uniform2fv(gl.getUniformLocation(this.program, `uCenter${index}`), lens.center);
+        gl.uniformMatrix3fv(gl.getUniformLocation(this.program, `uExtrinsic${index}`), false, lens.rotation);
+        gl.uniform1f(gl.getUniformLocation(this.program, `uTextureRotation${index}`), lens.textureRotationRadians);
+        if (mei) {
+          const meiLens = mei.lenses[index];
+          gl.uniform1f(gl.getUniformLocation(this.program, `uXi${index}`), meiLens.xi);
+          gl.uniform4fv(gl.getUniformLocation(this.program, `uRadial${index}`), meiLens.radial);
+          gl.uniform2fv(gl.getUniformLocation(this.program, `uTangential${index}`), meiLens.tangential);
+          gl.uniform4fv(gl.getUniformLocation(this.program, `uPrism${index}`), meiLens.prism);
+        }
+      }
+    }
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
   }
 

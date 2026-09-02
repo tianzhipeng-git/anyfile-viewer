@@ -34,22 +34,25 @@ const styles = `
   .anyfile-insta360-viewer__volume { width:96px; }
   .anyfile-insta360-viewer__time { min-width:92px; color:#ddd; font-size:12px; text-align:center; font-variant-numeric:tabular-nums; }
   .anyfile-insta360-viewer__status { min-width:0; overflow:hidden; color:#ddd; font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
+  .anyfile-insta360-viewer__status[data-kind=notice] { color:color-mix(in srgb,currentColor 72%,#f59e0b); font-weight:600; }
   .anyfile-insta360-viewer__error { display:grid; height:100%; place-items:center; padding:24px; color:#fff; text-align:center; }
   @media (max-width:640px), (max-height:420px) {
     .anyfile-insta360-viewer__toolbar, .anyfile-insta360-viewer__controls { min-height:40px; padding:4px 8px; }
-    .anyfile-insta360-viewer__meta, .anyfile-insta360-viewer__status, .anyfile-insta360-viewer__volume { display:none; }
+    .anyfile-insta360-viewer__meta, .anyfile-insta360-viewer__status:not([data-kind=notice]), .anyfile-insta360-viewer__volume { display:none; }
     .anyfile-insta360-viewer__time { min-width:76px; }
   }
 `;
 
-function copyFor(locale: Locale) {
+export function insta360UiCopy(locale: Locale) {
   return selectMessages(locale, {
-    en: { tools: "Panorama viewing tools", reset: "Reset view", canvas: "360 degree panorama; drag to look around and use the mouse wheel to zoom", photo: "X3 photo · side-by-side dual fisheye", raw: "X3 RAW photo · top-bottom dual fisheye", proxyVideo: "X3 proxy video · side-by-side dual fisheye", pairedVideo: "X3 HD video · paired dual fisheye", play: "Play", pause: "Pause", replay: "Replay", seek: "Seek video", volume: "Volume", ready: "Ready", playbackFailed: "Playback could not start." },
-    "zh-CN": { tools: "全景查看工具", reset: "重置视角", canvas: "360 度全景；拖动环视，使用滚轮缩放", photo: "X3 照片 · 左右双鱼眼", raw: "X3 RAW 照片 · 上下双鱼眼", proxyVideo: "X3 代理视频 · 左右双鱼眼", pairedVideo: "X3 高清视频 · 成对双鱼眼", play: "播放", pause: "暂停", replay: "重播", seek: "视频进度", volume: "音量", ready: "就绪", playbackFailed: "无法开始播放。" },
+    en: { tools: "Panorama viewing tools", reset: "Reset view", canvas: "360 degree panorama; drag to look around and use the mouse wheel to zoom", photo: "X3 photo · side-by-side dual fisheye", raw: "RAW photo · dual fisheye", proxyVideo: "proxy video · side-by-side dual fisheye", pairedVideo: "HD video · paired dual fisheye files", dualTrackVideo: "HD video · two fisheye tracks in one file", play: "Play", pause: "Pause", replay: "Replay", seek: "Seek video", volume: "Volume", ready: "Ready", staticPreview: "HEVC is unsupported: showing the embedded stitched panorama frame", playbackFailed: "Playback could not start." },
+    "zh-CN": { tools: "全景查看工具", reset: "重置视角", canvas: "360 度全景；拖动环视，使用滚轮缩放", photo: "X3 照片 · 左右双鱼眼", raw: "RAW 照片 · 双鱼眼", proxyVideo: "代理视频 · 左右双鱼眼", pairedVideo: "高清视频 · 双文件双鱼眼", dualTrackVideo: "高清视频 · 单文件双鱼眼双轨", play: "播放", pause: "暂停", replay: "重播", seek: "视频进度", volume: "音量", ready: "就绪", staticPreview: "不支持 HEVC：当前读取已拼接全景帧", playbackFailed: "无法开始播放。" },
   });
 }
 
-function formatTime(value: number) {
+export type Insta360UiCopy = ReturnType<typeof insta360UiCopy>;
+
+export function formatTime(value: number) {
   if (!Number.isFinite(value) || value < 0) return "0:00";
   const seconds = Math.floor(value % 60).toString().padStart(2, "0");
   return `${Math.floor(value / 60)}:${seconds}`;
@@ -60,7 +63,7 @@ export function createInsta360ViewerElements(
   inspection: Insta360Inspection,
   locale: Locale,
 ): Insta360ViewerElements {
-  const copy = copyFor(locale);
+  const copy = insta360UiCopy(locale);
   const root = document.createElement("div");
   root.className = "anyfile-insta360-viewer";
   const style = document.createElement("style");
@@ -77,7 +80,10 @@ export function createInsta360ViewerElements(
   name.title = fileName;
   const metadata = document.createElement("span");
   metadata.className = "anyfile-insta360-viewer__meta";
-  metadata.textContent = `${inspection.width} × ${inspection.height} · ${inspection.kind === "photo" ? copy.photo : inspection.kind === "raw" ? copy.raw : inspection.layout === "single" ? copy.pairedVideo : copy.proxyVideo}`;
+  const description = inspection.kind === "photo" ? copy.photo
+    : inspection.kind === "raw" ? `${inspection.device} ${copy.raw}`
+      : `${inspection.device} ${inspection.layout === "paired-files" ? copy.pairedVideo : inspection.layout === "dual-track" ? copy.dualTrackVideo : copy.proxyVideo}`;
+  metadata.textContent = `${inspection.width} × ${inspection.height} · ${description}`;
   identity.append(name, metadata);
   const status = document.createElement("span");
   status.className = "anyfile-insta360-viewer__status";
@@ -99,14 +105,17 @@ export function createInsta360ViewerElements(
   root.append(style, toolbar, viewport);
   if (inspection.kind === "photo" || inspection.kind === "raw") return { root, viewport, canvas, reset, status };
 
-  const video = document.createElement("video");
-  video.className = "anyfile-insta360-viewer__video";
-  video.autoplay = false;
-  video.controls = false;
-  video.preload = "auto";
-  video.playsInline = true;
+  let video: HTMLVideoElement | undefined;
   let secondVideo: HTMLVideoElement | undefined;
-  if (inspection.layout === "single") {
+  if (inspection.layout !== "dual-track") {
+    video = document.createElement("video");
+    video.className = "anyfile-insta360-viewer__video";
+    video.autoplay = false;
+    video.controls = false;
+    video.preload = "auto";
+    video.playsInline = true;
+  }
+  if (inspection.layout === "paired-files" && video) {
     secondVideo = video.cloneNode() as HTMLVideoElement;
     secondVideo.muted = true;
     secondVideo.defaultMuted = true;
@@ -136,7 +145,7 @@ export function createInsta360ViewerElements(
   volume.step = "0.05";
   volume.value = "1";
   volume.setAttribute("aria-label", copy.volume);
-  viewport.append(video);
+  if (video) viewport.append(video);
   if (secondVideo) viewport.append(secondVideo);
   controls.append(play, seek, time, volume);
   root.append(controls);
@@ -146,7 +155,7 @@ export function createInsta360ViewerElements(
 export function bindVideoControls(elements: Insta360ViewerElements, locale: Locale) {
   const { video, secondVideo, play, seek, volume, time, viewport, status } = elements;
   if (!video || !play || !seek || !volume || !time) return () => undefined;
-  const copy = copyFor(locale);
+  const copy = insta360UiCopy(locale);
   const resources = new ResourceScope();
   const update = () => {
     const durations = [video.duration, secondVideo?.duration].filter((value): value is number => Number.isFinite(value));
@@ -242,4 +251,12 @@ export function showFatalError(elements: Insta360ViewerElements, message: string
   alert.setAttribute("role", "alert");
   alert.textContent = message;
   elements.viewport.replaceChildren(alert);
+}
+
+export function showStaticPreview(elements: Insta360ViewerElements, locale: Locale) {
+  const message = insta360UiCopy(locale).staticPreview;
+  elements.status.dataset.kind = "notice";
+  elements.status.textContent = message;
+  elements.status.title = message;
+  elements.play?.parentElement?.remove();
 }

@@ -35,7 +35,7 @@ export async function findInsvPair(
   inspect: (file: File, signal: AbortSignal) => Promise<Insta360VideoInspection | undefined>,
 ): Promise<InsvPair | undefined> {
   const currentName = parseInsvName(currentFile.name);
-  if (!workspace || !currentName || currentInspection.layout !== "single" || currentInspection.role !== currentName.role) {
+  if (!workspace || !currentName || currentInspection.layout !== "paired-files" || currentInspection.role !== currentName.role) {
     return undefined;
   }
 
@@ -56,7 +56,9 @@ export async function findInsvPair(
   const counterpartName = parseInsvName(counterpart.name);
   if (
     !counterpartInspection
-    || counterpartInspection.layout !== "single"
+    || counterpartInspection.layout !== "paired-files"
+    || counterpartInspection.device !== currentInspection.device
+    || counterpartInspection.width !== currentInspection.width
     || counterpartInspection.role !== counterpartRole
     || counterpartName?.group !== currentName.group
   ) return undefined;

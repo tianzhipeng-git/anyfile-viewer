@@ -2,6 +2,8 @@ import { MAX_RAW_SOURCE_BYTES, RawDecoder } from "@anyfile/raw-decoder";
 import { ViewerError } from "@anyfile/viewer-protocol";
 
 import { abortError, readBlob } from "./read-blob";
+import type { Insta360DngInspection } from "./dng-inspection";
+import { decodeX6DeflateDng } from "./x6-dng-source";
 
 function createBitmapAbortably(factory: () => Promise<ImageBitmap>, signal: AbortSignal) {
   if (signal.aborted) return Promise.reject(abortError());
@@ -30,8 +32,9 @@ function createBitmapAbortably(factory: () => Promise<ImageBitmap>, signal: Abor
   });
 }
 
-export async function decodeX3Dng(
+export async function decodeInsta360Dng(
   file: File,
+  inspection: Insta360DngInspection,
   signal: AbortSignal,
   invalidMessage: string,
   unsupportedMessage: string,
@@ -43,21 +46,32 @@ export async function decodeX3Dng(
   if (globalThis.crossOriginIsolated !== true || typeof createImageBitmap !== "function") {
     throw new ViewerError("unsupported-environment", unsupportedMessage);
   }
-  const bytes = await readBlob(file, signal);
+  const bytes = inspection.device === "X6" ? undefined : await readBlob(file, signal);
   const decoder = new RawDecoder(signal);
   let developed: ImageBitmap | undefined;
   try {
-    await decoder.open(bytes);
-    const metadata = await decoder.metadata();
-    if (metadata.make !== "Arashi Vision" || metadata.model !== "Insta360 X3" || metadata.width !== 2976 || metadata.height !== 5952) {
-      throw new ViewerError("invalid-file", invalidMessage);
+    const halfSize = inspection.device === "X6";
+    if (inspection.device === "X6") {
+      developed = await decodeX6DeflateDng(file, signal, failedMessage);
+    } else {
+      await decoder.open(bytes!, { halfSize });
+      const metadata = await decoder.metadata();
+      if (metadata.make !== inspection.make || metadata.model !== inspection.model
+        || metadata.width !== inspection.width || metadata.height !== inspection.height) {
+        throw new ViewerError("invalid-file", invalidMessage);
+      }
+      developed = await decoder.developed();
     }
-    developed = await decoder.developed();
-    if (developed.width !== 2976 || developed.height !== 5952) throw new ViewerError("invalid-file", invalidMessage);
+    const outputWidth = halfSize ? inspection.width / 2 : inspection.width;
+    const outputHeight = halfSize ? inspection.height / 2 : inspection.height;
+    const lensSize = halfSize ? inspection.lensSize / 2 : inspection.lensSize;
+    if (developed.width !== outputWidth || developed.height !== outputHeight) throw new ViewerError("invalid-file", invalidMessage);
     let first: ImageBitmap | undefined;
     try {
-      first = await createBitmapAbortably(() => createImageBitmap(developed!, 0, 0, 2976, 2976), signal);
-      const second = await createBitmapAbortably(() => createImageBitmap(developed!, 0, 2976, 2976, 2976), signal);
+      const secondX = inspection.layout === "sbs" ? lensSize : 0;
+      const secondY = inspection.layout === "tb" ? lensSize : 0;
+      first = await createBitmapAbortably(() => createImageBitmap(developed!, 0, 0, lensSize, lensSize), signal);
+      const second = await createBitmapAbortably(() => createImageBitmap(developed!, secondX, secondY, lensSize, lensSize), signal);
       return [first, second] as const;
     } catch (error) {
       first?.close();

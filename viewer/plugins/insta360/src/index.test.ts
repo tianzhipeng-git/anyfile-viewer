@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer-test";
+import { ViewerError } from "@anyfile/viewer-protocol";
 
 const rawMocks = vi.hoisted(() => ({
   open: vi.fn(),
@@ -7,6 +8,8 @@ const rawMocks = vi.hoisted(() => ({
   developed: vi.fn(),
   dispose: vi.fn(),
 }));
+const x6Mocks = vi.hoisted(() => ({ decode: vi.fn() }));
+const dualTrackMocks = vi.hoisted(() => ({ open: vi.fn() }));
 
 vi.mock("@anyfile/raw-decoder", () => ({
   MAX_RAW_SOURCE_BYTES: 256 * 1024 * 1024,
@@ -17,10 +20,12 @@ vi.mock("@anyfile/raw-decoder", () => ({
     dispose = rawMocks.dispose;
   },
 }));
+vi.mock("./x6-dng-source", () => ({ decodeX6DeflateDng: x6Mocks.decode }));
+vi.mock("./dual-track-playback", () => ({ DualTrackPlayback: { open: dualTrackMocks.open } }));
 
 import { insta360Viewer } from "./index";
 import { X3_PHOTO_PROJECTION, X3_VIDEO_PROJECTION } from "./projection";
-import { x3DngBytes, x3InsvBytes, x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
+import { modernInsvBytes, x3DngBytes, x3InsvBytes, x3LrvBytes, x3PhotoBytes } from "./test-fixtures";
 
 const activeContexts: ViewerTestContext[] = [];
 
@@ -47,7 +52,8 @@ function fakeGl(maximumTextureSize = 4096) {
     createBuffer: vi.fn(object), bindBuffer: vi.fn(), bufferData: vi.fn(), deleteBuffer: vi.fn(),
     createTexture: vi.fn(object), bindTexture: vi.fn(), texParameteri: vi.fn(), deleteTexture: vi.fn(),
     useProgram: vi.fn(), getAttribLocation: vi.fn(() => 0), enableVertexAttribArray: vi.fn(), vertexAttribPointer: vi.fn(),
-    getUniformLocation: vi.fn((_program: unknown, name: string) => name), uniform1i: vi.fn(), uniform1f: vi.fn(), activeTexture: vi.fn(),
+    getUniformLocation: vi.fn((_program: unknown, name: string) => name), uniform1i: vi.fn(), uniform1f: vi.fn(),
+    uniform2fv: vi.fn(), uniform4fv: vi.fn(), uniformMatrix3fv: vi.fn(), activeTexture: vi.fn(),
     texImage2D: vi.fn(), getError: vi.fn(() => 0), getParameter: vi.fn(() => maximumTextureSize),
     viewport: vi.fn(), drawArrays: vi.fn(),
   };
@@ -65,6 +71,8 @@ function memoryWorkspace(files: readonly File[]) {
 
 beforeEach(() => {
   for (const mock of Object.values(rawMocks)) mock.mockReset();
+  x6Mocks.decode.mockReset();
+  dualTrackMocks.open.mockReset();
   vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:insta360");
   vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
   vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
@@ -145,7 +153,7 @@ describe("Insta360 viewer protocol lifecycle", () => {
     expect(rawMocks.developed).toHaveBeenCalledOnce();
     expect(rawMocks.dispose).toHaveBeenCalledOnce();
     expect(close[0]).toHaveBeenCalledOnce();
-    expect(context.container.textContent).toContain("2976 × 5952 · X3 RAW 照片 · 上下双鱼眼");
+    expect(context.container.textContent).toContain("2976 × 5952 · X3 RAW 照片 · 双鱼眼");
     expect(gl.texImage2D).toHaveBeenCalledTimes(2);
 
     await controller.dispose();
@@ -163,6 +171,48 @@ describe("Insta360 viewer protocol lifecycle", () => {
     await expect(insta360Viewer.open(context.context)).rejects.toMatchObject({ code: "invalid-file" });
     expect(rawMocks.dispose).toHaveBeenCalledOnce();
     expect(context.container.childElementCount).toBe(0);
+  });
+
+  it("develops an X6 Deflate DNG in a Worker before splitting its two lenses", async () => {
+    const gl = fakeGl();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(gl as unknown as WebGLRenderingContext);
+    vi.stubGlobal("crossOriginIsolated", true);
+    const developed = { width: 7760, height: 3880, close: vi.fn() };
+    const lenses = [
+      { width: 3880, height: 3880, close: vi.fn() },
+      { width: 3880, height: 3880, close: vi.fn() },
+    ];
+    x6Mocks.decode.mockResolvedValue(developed);
+    vi.stubGlobal("createImageBitmap", vi.fn().mockResolvedValueOnce(lenses[0]).mockResolvedValueOnce(lenses[1]));
+    const context = testContext(new File([x3DngBytes({ model: "Insta360 X6", width: 15520, height: 7760 })], "x6.dng"));
+
+    const controller = await insta360Viewer.open(context.context);
+    expect(x6Mocks.decode).toHaveBeenCalledWith(expect.any(File), expect.any(AbortSignal), expect.any(String));
+    expect(rawMocks.open).not.toHaveBeenCalled();
+    expect(createImageBitmap).toHaveBeenNthCalledWith(1, developed, 0, 0, 3880, 3880);
+    expect(createImageBitmap).toHaveBeenNthCalledWith(2, developed, 3880, 0, 3880, 3880);
+    await vi.waitFor(() => expect(gl.uniform1f).toHaveBeenCalledWith("uProjectionKind", 1));
+    await controller.dispose();
+  });
+
+  it("opens the embedded static panorama when dual-track HEVC decoding is unavailable", async () => {
+    const gl = fakeGl();
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(gl as unknown as WebGLRenderingContext);
+    const preview = { width: 1280, height: 640, close: vi.fn() };
+    vi.stubGlobal("createImageBitmap", vi.fn().mockResolvedValue(preview));
+    dualTrackMocks.open.mockRejectedValue(new ViewerError("unsupported-environment", "HEVC unavailable"));
+    const fixture = modernInsvBytes({ model: "X4" });
+    const context = testContext(new File([fixture.bytes], "x4.insv"));
+
+    const controller = await insta360Viewer.open(context.context);
+    const status = context.container.querySelector<HTMLElement>(".anyfile-insta360-viewer__status");
+    expect(status?.textContent).toBe("不支持 HEVC：当前读取已拼接全景帧");
+    expect(status?.dataset.kind).toBe("notice");
+    expect(status?.title).toBe(status?.textContent);
+    expect(context.container.querySelector(".anyfile-insta360-viewer__controls")).toBeNull();
+    await vi.waitFor(() => expect(gl.uniform1f).toHaveBeenCalledWith("uProjectionKind", 3));
+    await controller.dispose();
+    expect(preview.close).toHaveBeenCalledOnce();
   });
 
   it("plays X3 LRV through one audible media element and custom controls", async () => {
@@ -215,7 +265,7 @@ describe("Insta360 viewer protocol lifecycle", () => {
     expect(videos[0].muted).toBe(false);
     expect(videos[1].src).toBe("blob:back");
     expect(videos[1].muted).toBe(true);
-    expect(context.container.textContent).toContain("X3 高清视频 · 成对双鱼眼");
+    expect(context.container.textContent).toContain("X3 高清视频 · 双文件双鱼眼");
     const seek = context.container.querySelector<HTMLInputElement>('[aria-label="视频进度"]')!;
     Object.defineProperty(videos[0], "duration", { configurable: true, value: 30 });
     Object.defineProperty(videos[1], "duration", { configurable: true, value: 29.5 });

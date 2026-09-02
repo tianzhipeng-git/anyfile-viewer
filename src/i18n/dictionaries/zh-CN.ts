@@ -58,7 +58,16 @@ const dictionary = {
   viewer: {
     detecting: "正在检测文件格式并选择查看器…", detectionFailed: "无法检测这个文件的格式。", loadingViewer: "正在加载查看器…",
     loadingNamedViewer: "正在加载{name}…", workspaceRequired: "此查看器需要从文件夹工作区打开文件。",
-    openFailedFallback: "无法打开这个文件。", viewerLabel: "查看器", fallbackTitle: "暂不支持此文件类型的专用预览",
+    openFailedFallback: "无法打开这个文件。", viewerLabel: "查看器", supportLevelLabel: "支持等级 {level}",
+    supportLevelDescriptions: [
+      "Anyfile 当前无法有意义地打开此文件。这表示我们尚未提供相应查看能力，不代表文件损坏或存在问题。",
+      "Anyfile 当前只能检查底层字节、元数据或结构。这表示我们的查看能力有限，不代表文件质量差或内容有问题。",
+      "Anyfile 当前只能提供缩略图、摘要或代表性内容。这表示我们的查看能力尚不完整，不代表文件质量差或内容有问题。",
+      "可以查看主要内容，但部分重要的格式能力尚未覆盖。",
+      "在声明的支持范围内，可以完整查看主要内容和常见格式语义。",
+      "可以完整查看主要内容，并提供理解该格式所需的专业导航或交互。",
+    ],
+    fallbackTitle: "暂不支持此文件类型的专用预览",
     fallbackDescription: "当前以十六进制展示文件的原始内容。", openingTitle: "正在打开文件", failedTitle: "查看器打开失败",
     noViewerTitle: "没有匹配的查看器", selectTitle: "选择本地文件", noPlugin: "当前没有支持 {extension} 格式的插件。",
     selectDescription: "选择 PDF、表格、代码、文本或结构化数据文件，内容只在浏览器本地处理。",

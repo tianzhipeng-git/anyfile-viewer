@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { AlertCircleIcon, AlertTriangleIcon, FileSearchIcon, LoaderCircleIcon } from "lucide-react";
+import { AlertCircleIcon, AlertTriangleIcon, CircleIcon, FileSearchIcon, LoaderCircleIcon } from "lucide-react";
 import {
   ViewerError,
   interpolate,
@@ -18,6 +18,8 @@ import {
 
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { viewerRegistrations } from "@/lib/viewer-registrations";
 import type { AppDictionary } from "@/i18n/types";
 
@@ -55,8 +57,19 @@ export function ViewerHost({
     ? routingResult
     : undefined;
   const isRouting = Boolean(file && !currentRoutingResult);
-  const candidates = currentRoutingResult?.candidates.map(({ registration }) => registration) ?? [];
-  const registration = candidates.find(({ manifest }) => manifest.id === registrationId) ?? candidates[0];
+  const candidates = currentRoutingResult?.candidates ?? [];
+  const selectedCandidate = candidates.find(({ registration }) => registration.manifest.id === registrationId) ?? candidates[0];
+  const registration = selectedCandidate?.registration;
+  const supportLevel = selectedCandidate?.supportLevel
+    ?? (file && currentRoutingResult && !currentRoutingResult.error ? 0 : undefined);
+  const supportLevelTooltip = supportLevel === undefined
+    ? undefined
+    : `${interpolate(dictionary.supportLevelLabel, { level: supportLevel })}: ${dictionary.supportLevelDescriptions[supportLevel]}`;
+  const supportLevelBadgeVariant = supportLevel !== undefined && supportLevel <= 1
+    ? "supportLow"
+    : supportLevel === 2
+      ? "supportPartial"
+      : "supportStrong";
   const usesFallbackHexViewer = candidates.length === 1 && registration?.manifest.id === "hex-viewer";
 
   useEffect(() => {
@@ -178,19 +191,37 @@ export function ViewerHost({
     <div className="flex min-h-0 w-full flex-1 flex-col overflow-hidden">
       <div className="flex min-h-14 items-center justify-between gap-4 border-b bg-background px-4 sm:px-6">
         {header}
-        {candidates.length > 1 && (
-          <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            {dictionary.viewerLabel}
-            <select
-              className="h-8 rounded-md border bg-background px-2 text-foreground"
-              value={registration?.manifest.id ?? ""}
-              onChange={(event) => setRegistrationId(event.target.value)}
-            >
-              {candidates.map(({ manifest }) => (
-                <option key={manifest.id} value={manifest.id}>{manifestName(manifest, locale)}</option>
-              ))}
-            </select>
-          </label>
+        {supportLevel !== undefined && (
+          <div className="flex items-center gap-2">
+            {candidates.length > 1 && (
+              <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                {dictionary.viewerLabel}
+                <select
+                  className="h-8 rounded-md border bg-background px-2 text-foreground"
+                  value={registration?.manifest.id ?? ""}
+                  onChange={(event) => setRegistrationId(event.target.value)}
+                >
+                  {candidates.map(({ registration: candidate }) => (
+                    <option key={candidate.manifest.id} value={candidate.manifest.id}>{manifestName(candidate.manifest, locale)}</option>
+                  ))}
+                </select>
+              </label>
+            )}
+            <Tooltip>
+              <TooltipTrigger
+                render={<Badge variant={supportLevelBadgeVariant} aria-label={supportLevelTooltip} />}
+              >
+                <CircleIcon className="fill-current" aria-hidden="true" />
+                Lv. {supportLevel}
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="end">
+                <div className="flex max-w-72 flex-col gap-1">
+                  <p className="font-semibold">{interpolate(dictionary.supportLevelLabel, { level: supportLevel })}</p>
+                  <p className="opacity-80">{dictionary.supportLevelDescriptions[supportLevel]}</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
+          </div>
         )}
       </div>
       <div className="relative flex min-h-0 flex-1 flex-col">

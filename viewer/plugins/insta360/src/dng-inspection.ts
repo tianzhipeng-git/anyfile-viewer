@@ -1,9 +1,12 @@
 export interface Insta360DngInspection {
   readonly kind: "raw";
-  readonly width: 2976;
-  readonly height: 5952;
+  readonly device: "X3" | "X6";
+  readonly width: 2976 | 15520;
+  readonly height: 5952 | 7760;
+  readonly layout: "tb" | "sbs";
+  readonly lensSize: 2976 | 7760;
   readonly make: "Arashi Vision";
-  readonly model: "Insta360 X3";
+  readonly model: "Insta360 X3" | "Insta360 X6";
 }
 
 const MAX_TEXT_BYTES = 256;
@@ -83,9 +86,14 @@ export function inspectInsta360DngDirectory(
     }
   }
 
-  return dng && width === 2976 && height === 5952 && make === "Arashi Vision" && model === "Insta360 X3"
-    ? { kind: "raw", width, height, make, model }
-    : undefined;
+  if (!dng || make !== "Arashi Vision") return undefined;
+  if (width === 2976 && height === 5952 && model === "Insta360 X3") {
+    return { kind: "raw", device: "X3", width, height, layout: "tb", lensSize: 2976, make, model };
+  }
+  if (width === 15520 && height === 7760 && model === "Insta360 X6") {
+    return { kind: "raw", device: "X6", width, height, layout: "sbs", lensSize: 7760, make, model };
+  }
+  return undefined;
 }
 
 export function inspectInsta360Dng(bytes: Uint8Array): Insta360DngInspection | undefined {
