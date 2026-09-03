@@ -45,7 +45,7 @@ function flush(count = 1) {
 function surface2d() {
   return {
     clearRect: vi.fn(), beginPath: vi.fn(), moveTo: vi.fn(), lineTo: vi.fn(), stroke: vi.fn(), setTransform: vi.fn(),
-    strokeStyle: "", lineWidth: 1, lineJoin: "", lineCap: "",
+    strokeStyle: "", lineWidth: 1, lineJoin: "", lineCap: "", globalAlpha: 1,
   };
 }
 
@@ -236,11 +236,18 @@ describe("AudioVisualizer", () => {
     flush(1);
     expect(drawn.moveTo).toHaveBeenLastCalledWith(0, 72 - 1.5);
 
+    // spectrum → waveform (midline)
     element.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     flush(1);
     expect(drawn.moveTo).toHaveBeenLastCalledWith(0, 36);
     expect(pending.size).toBe(0);
 
+    // waveform → waves (still midline)
+    element.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    flush(1);
+    expect(drawn.moveTo).toHaveBeenLastCalledWith(0, 36);
+
+    // waves → spectrum (baseline)
     element.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     flush(1);
     expect(drawn.moveTo).toHaveBeenLastCalledWith(0, 72 - 1.5);
@@ -270,6 +277,30 @@ describe("AudioVisualizer", () => {
     visualizer.dispose();
   });
 
+  it("draws layered sine ribbons from band energy in waves mode", () => {
+    const drawn = surface2d();
+    const context = new FakeAudioContext();
+    const visualizer = new AudioVisualizer(canvas(drawn), { mode: "waves" });
+    visualizer.attach({ kind: "node", node: nodeTap(context) });
+    const analyser = context.createAnalyser.mock.results[0]!.value as FakeAnalyserNode;
+    expect(analyser.smoothingTimeConstant).toBe(0.72);
+    analyser.getByteFrequencyData = (array: Uint8Array) => {
+      array.fill(0);
+      // Pump only the lowest band so the first ribbon has non-zero amplitude.
+      array.fill(200, 0, 60);
+    };
+    visualizer.setActive(true);
+    flush(1);
+
+    // Four ribbons, each stroked once with increasing opacity.
+    expect(drawn.stroke).toHaveBeenCalledTimes(4);
+    expect(drawn.globalAlpha).toBe(1);
+    const firstY = drawn.moveTo.mock.calls[0]![1] as number;
+    // Bass ribbon: offset -0.18 * half, phase starts at i*1.1; with energy the Y leaves center.
+    expect(firstY).not.toBe(36);
+    visualizer.dispose();
+  });
+
   it("retunes the live analyser and keeps one pending frame across a cycle", () => {
     const element = canvas(surface2d());
     const context = new FakeAudioContext();
@@ -280,10 +311,17 @@ describe("AudioVisualizer", () => {
     const analyser = context.createAnalyser.mock.results[0]!.value as FakeAnalyserNode;
     expect(analyser.smoothingTimeConstant).toBe(0.72);
 
+    // spectrum → waveform
     element.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(analyser.smoothingTimeConstant).toBe(0);
     expect(pending.size).toBe(1);
 
+    // waveform → waves (Analyser smoothing back on)
+    element.dispatchEvent(new MouseEvent("click", { bubbles: true }));
+    expect(analyser.smoothingTimeConstant).toBe(0.72);
+    expect(pending.size).toBe(1);
+
+    // waves → spectrum
     element.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     expect(analyser.smoothingTimeConstant).toBe(0.72);
     expect(pending.size).toBe(1);
@@ -305,6 +343,13 @@ describe("AudioVisualizer", () => {
     const enter = new KeyboardEvent("keydown", { key: "Enter", cancelable: true });
     element.dispatchEvent(enter);
     expect(enter.defaultPrevented).toBe(true);
+    flush(1);
+    // waveform → waves; resting line stays on the midline.
+    expect(drawn.moveTo).toHaveBeenLastCalledWith(0, 36);
+
+    const enterAgain = new KeyboardEvent("keydown", { key: "Enter", cancelable: true });
+    element.dispatchEvent(enterAgain);
+    expect(enterAgain.defaultPrevented).toBe(true);
     flush(1);
     expect(drawn.moveTo).toHaveBeenLastCalledWith(0, 72 - 1.5);
 

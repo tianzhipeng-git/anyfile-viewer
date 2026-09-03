@@ -12,18 +12,26 @@ export type AudioVisualizerTap =
   | { readonly kind: "media"; readonly element: HTMLMediaElement };
 
 /** Effect order used by the canvas activation cycle; the public mode type follows it. */
-const MODES = ["spectrum", "waveform"] as const;
+const MODES = ["spectrum", "waveform", "waves"] as const;
 
 export type AudioVisualizerMode = (typeof MODES)[number];
 
 export interface AudioVisualizerOptions {
-  /** `spectrum` draws a smooth bouncing envelope, `waveform` an oscilloscope trace. */
+  /** `spectrum` bouncing envelope, `waveform` oscilloscope, `waves` multi-line ribbons. */
   readonly mode?: AudioVisualizerMode;
   readonly fftSize?: number;
-  /** Spectrum smoothing only; 0 gives the sharpest bounce, 1 barely moves. */
+  /** Spectrum / waves Analyser smoothing; 0 sharpest, 1 barely moves. */
   readonly smoothing?: number;
   readonly lineWidth?: number;
 }
+
+/** Band edges as fractions of the usable (high-trimmed) frequency bins. */
+const WAVE_BANDS = [0, 0.08, 0.25, 0.5, 1] as const;
+/** Spatial cycles across the canvas width, bass → treble. */
+const WAVE_CYCLES = [0.7, 1.2, 2.0, 3.0] as const;
+const WAVE_ALPHAS = [0.25, 0.4, 0.55, 0.9] as const;
+/** Vertical offsets as fractions of half-height. */
+const WAVE_OFFSETS = [-0.18, -0.06, 0.06, 0.16] as const;
 
 function audioContextConstructor(): typeof AudioContext | undefined {
   const scope = globalThis as { AudioContext?: typeof AudioContext; webkitAudioContext?: typeof AudioContext };
@@ -81,6 +89,10 @@ export class AudioVisualizer {
   private samples: Float32Array<ArrayBuffer> | null = null;
   /** Smoothed waveform Y path in CSS pixels; length matches the last painted width. */
   private waveYs: Float32Array | null = null;
+  /** Per-band EMA levels that drive the waves ribbons (length = WAVE_CYCLES.length). */
+  private waveLevels: Float32Array | null = null;
+  /** Slow phase drift so ribbons travel instead of pulsing in place. */
+  private wavePhase = 0;
   private stroke = "#111";
   private active = false;
   private frames = 0;
@@ -94,6 +106,12 @@ export class AudioVisualizer {
   private static readonly WAVEFORM_HEIGHT = 0.92;
   /** Ignore near-silence so peak-normalise does not amplify noise into a full swing. */
   private static readonly WAVEFORM_PEAK_FLOOR = 0.04;
+  /** Band-energy EMA for waves; lower than waveform path EMA → calmer big swells. */
+  private static readonly WAVES_LEVEL_SMOOTH = 0.09;
+  /** Peak ribbon amplitude as a fraction of half-height. */
+  private static readonly WAVES_HEIGHT = 0.72;
+  /** Draw every N CSS pixels; sine paths stay smooth without a per-pixel loop. */
+  private static readonly WAVES_STEP = 2;
 
   constructor(private readonly canvas: HTMLCanvasElement, options: AudioVisualizerOptions = {}) {
     this.mode = options.mode ?? "spectrum";
@@ -132,6 +150,8 @@ export class AudioVisualizer {
     this.frequencies = null;
     this.samples = null;
     this.waveYs = null;
+    this.waveLevels = null;
+    this.wavePhase = 0;
   }
 
   private attachNode(node: AudioNode) {
@@ -213,9 +233,11 @@ export class AudioVisualizer {
   private cycleMode() {
     if (this.disposed) return;
     this.mode = MODES[(MODES.indexOf(this.mode) + 1) % MODES.length];
-    // Drop the smoothed path so the next waveform frame seeds cleanly.
+    // Drop smoothed state so the next waveform / waves frame seeds cleanly.
     this.waveYs = null;
-    // Only spectrum uses AnalyserNode smoothing; waveform calms via its own EMA below.
+    this.waveLevels = null;
+    this.wavePhase = 0;
+    // Spectrum and waves use AnalyserNode smoothing; waveform calms via its own EMA.
     if (this.analyser) this.analyser.smoothingTimeConstant = this.smoothingFor();
     // An idle visualizer runs no loop; repaint once so the resting line moves immediately.
     this.surface.schedule();
@@ -229,7 +251,7 @@ export class AudioVisualizer {
   }
 
   private smoothingFor() {
-    return this.mode === "spectrum" ? this.smoothing : 0;
+    return this.mode === "waveform" ? 0 : this.smoothing;
   }
 
   private draw(context: CanvasRenderingContext2D, width: number, height: number, dpr: number) {
@@ -249,18 +271,28 @@ export class AudioVisualizer {
     // the draw callback, so CSS-space coordinates must be scaled here.
     context.setTransform(dpr, 0, 0, dpr, 0, 0);
     context.clearRect(0, 0, width, height);
-    context.beginPath();
-    if (this.analyser && this.frequencies && this.samples) {
-      if (this.mode === "waveform") this.traceWaveform(context, width, height);
-      else this.traceSpectrum(context, width, height);
-    } else {
-      this.traceResting(context, width, height);
-    }
     context.strokeStyle = this.stroke;
     context.lineWidth = this.lineWidth;
     context.lineJoin = "round";
     context.lineCap = "round";
-    context.stroke();
+    if (this.analyser && this.frequencies && this.samples) {
+      if (this.mode === "waveform") {
+        context.beginPath();
+        this.traceWaveform(context, width, height);
+        context.stroke();
+      } else if (this.mode === "waves") {
+        // Waves strokes each ribbon itself so per-line alpha can differ.
+        this.traceWaves(context, width, height);
+      } else {
+        context.beginPath();
+        this.traceSpectrum(context, width, height);
+        context.stroke();
+      }
+    } else {
+      context.beginPath();
+      this.traceResting(context, width, height);
+      context.stroke();
+    }
   }
 
   private traceSpectrum(context: CanvasRenderingContext2D, width: number, height: number) {
@@ -328,8 +360,77 @@ export class AudioVisualizer {
     }
   }
 
+  /**
+   * Band-energy sine ribbons: spectrum bins only drive amplitude; shape is synthesised
+   * so the trace reads as calm layered waves rather than a second oscilloscope.
+   */
+  private traceWaves(context: CanvasRenderingContext2D, width: number, height: number) {
+    const analyser = this.analyser!;
+    const bins = this.frequencies!;
+    analyser.getByteFrequencyData(bins);
+    const usable = Math.max(8, Math.floor(bins.length * 0.7));
+    const lineCount = WAVE_CYCLES.length;
+    if (!this.waveLevels || this.waveLevels.length !== lineCount) {
+      this.waveLevels = new Float32Array(lineCount);
+    }
+    const levels = this.waveLevels;
+    const smooth = AudioVisualizer.WAVES_LEVEL_SMOOTH;
+    let energySum = 0;
+    for (let i = 0; i < lineCount; i += 1) {
+      const lo = Math.floor(WAVE_BANDS[i]! * usable);
+      const hi = Math.max(lo + 1, Math.floor(WAVE_BANDS[i + 1]! * usable));
+      let sum = 0;
+      for (let b = lo; b < hi; b += 1) sum += bins[b]!;
+      const energy = sum / ((hi - lo) * 255);
+      levels[i] = levels[i]! * (1 - smooth) + energy * smooth;
+      energySum += levels[i]!;
+    }
+    // Advance phase with a quiet base drift plus a boost from loud frames.
+    this.wavePhase += 0.012 + energySum * 0.022;
+
+    const center = height / 2;
+    const half = (height / 2) * AudioVisualizer.WAVES_HEIGHT;
+    const step = AudioVisualizer.WAVES_STEP;
+    for (let i = 0; i < lineCount; i += 1) {
+      const amplitude = levels[i]! * half;
+      const offset = WAVE_OFFSETS[i]! * half;
+      const cycles = WAVE_CYCLES[i]!;
+      const phase = this.wavePhase * (0.7 + i * 0.15) + i * 1.1;
+      context.beginPath();
+      context.globalAlpha = WAVE_ALPHAS[i]!;
+      for (let x = 0; x < width; x += step) {
+        const y = this.waveY(x, width, center, offset, amplitude, cycles, phase);
+        if (x === 0) context.moveTo(x, y);
+        else context.lineTo(x, y);
+      }
+      if (width > 1 && (width - 1) % step !== 0) {
+        context.lineTo(width - 1, this.waveY(width - 1, width, center, offset, amplitude, cycles, phase));
+      }
+      context.stroke();
+    }
+    context.globalAlpha = 1;
+  }
+
+  private waveY(
+    x: number,
+    width: number,
+    center: number,
+    offset: number,
+    amplitude: number,
+    cycles: number,
+    phase: number,
+  ) {
+    const t = width > 1 ? x / (width - 1) : 0;
+    return (
+      center +
+      offset +
+      amplitude * Math.sin(Math.PI * 2 * cycles * t + phase) +
+      0.25 * amplitude * Math.sin(Math.PI * 2 * 2 * cycles * t + phase * 1.3)
+    );
+  }
+
   private traceResting(context: CanvasRenderingContext2D, width: number, height: number) {
-    const y = this.mode === "waveform" ? height / 2 : height - this.lineWidth;
+    const y = this.mode === "spectrum" ? height - this.lineWidth : height / 2;
     context.moveTo(0, y);
     context.lineTo(width, y);
   }
