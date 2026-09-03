@@ -99,15 +99,28 @@
 
 ## 4. 阶段 2：non-native-audio
 
-已实现 `non-native-audio` workspace 插件，首个完整 vertical slice 为带安全 seek index 的单主音轨 `.mka`，声明 Opus、Vorbis、FLAC 与 AAC。Mediabunny 只存在于完整实现 chunk；`open()` 在不创建 `AudioContext` 的前提下解码首个 PCM buffer，首次播放手势才建立 Web Audio 输出链。
+已实现 `non-native-audio` workspace 插件。当前声明范围：
+
+- 带安全 seek index 的单主音轨 `.mka`（Opus、Vorbis、FLAC、AAC）；
+- browser-audio 拒绝的 WAVE A-law / μ-law（Mediabunny 软件 PCM 路径）。
+
+Mediabunny 只存在于完整实现 chunk；`open()` 在不创建 `AudioContext` 的前提下解码首个 PCM buffer，首次播放手势才建立 Web Audio 输出链。
+
+阶段 2 候选中尚未进入支持声明、并已记录阻塞原因的组合：
+
+- WAVE ADPCM：Mediabunny 明确不支持 → 留给 FFmpeg；
+- M4A HE-AAC / ADTS 非 LC：本机锁定 FFmpeg 无法生成可用样例，WebCodecs 证据未建立；
+- M4A ALAC：Mediabunny 不识别 → FFmpeg；
+- Ogg FLAC：Mediabunny Ogg 仅 Vorbis/Opus；
+- 与 browser-audio 已覆盖的 Ogg/WebM/FLAC/ADTS AAC-LC 同组合：不抢轻路径。
 
 新增单一 `non-native-audio` workspace 插件，承接浏览器媒体元素不能稳定播放、但 Mediabunny 能分片 demux且 PCM/WebCodecs 能解码的明确组合。
 
 首批 spike 候选：
 
 - `.mka` Matroska audio-only 的 Opus、Vorbis、FLAC、AAC 子集；
-- 原生路径失败但 Mediabunny PCM 能安全输出的 WAVE 变体；
-- 原生路径失败但目标环境 `AudioDecoder` 能解码的 ADTS、Ogg、FLAC、M4A/WebM 具体组合。
+- 原生路径失败但 Mediabunny PCM 能安全输出的 WAVE 变体（已交付 A-law / μ-law）；
+- 原生路径失败但目标环境 `AudioDecoder` 能解码的 ADTS、Ogg、FLAC、M4A/WebM 具体组合（见上，当前阻塞）。
 
 不是所有 Mediabunny `ALL_FORMATS` 或 codec enum 都进入 manifest。每一组合仍需独立 probe、`track.canDecode()`、首 buffer、seek 和真实输出证据。
 

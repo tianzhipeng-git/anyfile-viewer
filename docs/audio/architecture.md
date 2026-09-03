@@ -113,7 +113,7 @@ File → Object URL → audio.src
 
 ## 7. non-native-audio 路径
 
-项目已锁定的 Mediabunny 1.55.3 能解析 MP3、WAVE、Ogg、FLAC、ADTS、MP4/QuickTime、Matroska/WebM 等输入，并提供 `AudioBufferSink`。这只是候选基础，不等于所有格式和 codec 均已支持。
+项目已锁定的 Mediabunny 1.55.3 能解析 MP3、WAVE、Ogg、FLAC、ADTS、MP4/QuickTime、Matroska/WebM 等输入，并提供 `AudioBufferSink`。这只是候选基础，不等于所有格式和 codec 均已支持。当前 `non-native-audio` 只声明已验收的 Matroska audio-only 与 WAVE A-law / μ-law；Ogg FLAC、ALAC、ADPCM 与 HE-AAC 等缺口见支持矩阵。
 
 完整路径：
 

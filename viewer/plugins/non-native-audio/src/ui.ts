@@ -329,7 +329,7 @@ export function createPlayerElements(fileName: string, media: AudioDescription, 
 
   const meta = document.createElement("span");
   meta.className = "anyfile-non-native-audio-viewer__meta";
-  meta.textContent = `Matroska · ${media.codec.toUpperCase()} · ${media.sampleRate} Hz · ${media.channels} ch`;
+  meta.textContent = `${media.container} · ${media.codec.toUpperCase()} · ${media.sampleRate} Hz · ${media.channels} ch`;
   meta.title = meta.textContent;
 
   header.append(name, meta);

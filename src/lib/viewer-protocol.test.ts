@@ -239,6 +239,30 @@ describe("viewer protocol", () => {
     expect(mka.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["non-native-audio", 3], ["hex-viewer", 1]]);
 
+    const waveAlawBytes = readFileSync(join(
+      process.cwd(),
+      "viewer/plugins/non-native-audio/examples/wave-alaw.wav",
+    ));
+    const waveAlaw = await resolveViewerRegistrations(
+      new File([waveAlawBytes], "tone.wav"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(waveAlaw.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["non-native-audio", 3], ["hex-viewer", 1]]);
+
+    const wavePcmBytes = readFileSync(join(
+      process.cwd(),
+      "viewer/plugins/browser-audio/examples/wave-s16le.wav",
+    ));
+    const wavePcm = await resolveViewerRegistrations(
+      new File([wavePcmBytes], "tone.wav"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(wavePcm.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["browser-audio", 3], ["hex-viewer", 1]]);
+
     const transportStreamBytes = readFileSync(join(
       process.cwd(),
       "viewer/plugins/non-native-video/examples/ts-avc-aac.ts.fixture",
@@ -356,6 +380,8 @@ describe("viewer protocol", () => {
       .toEqual(["browser-audio", "hex-viewer"]);
     expect(findViewerRegistrations("tone.mka", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["non-native-audio", "hex-viewer"]);
+    expect(findViewerRegistrations("tone.wav", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["browser-audio", "non-native-audio", "hex-viewer"]);
     expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "hex-viewer"]);
     expect(findViewerRegistrations("photo.jpg", viewerRegistrations).map(({ manifest: item }) => item.id))

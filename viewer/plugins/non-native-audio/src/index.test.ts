@@ -3,24 +3,32 @@ import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer
 
 const media = vi.hoisted(() => ({
   codec: "opus", channels: 2, sampleRate: 48_000, duration: 3, videoTracks: 0, audioTracks: 1,
+  fileName: "clip.mka", canDecode: true,
   inputDispose: vi.fn(), contextConstruct: vi.fn(), contextResume: vi.fn(), contextClose: vi.fn(), sourceStart: vi.fn(), sourceStop: vi.fn(),
 }));
 
 vi.mock("mediabunny", () => {
   const MATROSKA = {};
+  const WAVE = {};
   const audioTrack = {
     getCodec: async () => media.codec,
     getNumberOfChannels: async () => media.channels,
     getSampleRate: async () => media.sampleRate,
-    canDecode: async () => true,
+    canDecode: async () => media.canDecode,
     getFirstTimestamp: async () => 0,
   };
   const buffer = { length: 4800, numberOfChannels: 2 };
   return {
     MATROSKA,
+    WAVE,
     BlobSource: class BlobSource {},
     Input: class Input {
-      canRead = async () => true; getFormat = async () => MATROSKA;
+      #format = MATROSKA;
+      constructor(options: { formats: unknown[] }) {
+        this.#format = options.formats[0] ?? MATROSKA;
+      }
+      canRead = async () => true;
+      getFormat = async () => this.#format;
       getTracks = async () => Array.from({ length: media.audioTracks }, () => audioTrack);
       getVideoTracks = async () => Array.from({ length: media.videoTracks }, () => ({}));
       getAudioTracks = async () => Array.from({ length: media.audioTracks }, () => audioTrack);
@@ -45,10 +53,15 @@ class MockAudioContext {
   async close() { this.state = "closed"; media.contextClose(); }
 }
 
-function testContext() { const result = createViewerTestContext(new File(["audio"], "clip.mka")); contexts.push(result); return result; }
+function testContext() {
+  const result = createViewerTestContext(new File(["audio"], media.fileName));
+  contexts.push(result);
+  return result;
+}
 
 beforeEach(() => {
-  media.codec = "opus"; media.channels = 2; media.sampleRate = 48_000; media.duration = 3; media.videoTracks = 0; media.audioTracks = 1;
+  media.codec = "opus"; media.channels = 2; media.sampleRate = 48_000; media.duration = 3;
+  media.videoTracks = 0; media.audioTracks = 1; media.fileName = "clip.mka"; media.canDecode = true;
   vi.stubGlobal("AudioDecoder", class AudioDecoder {}); vi.stubGlobal("AudioContext", MockAudioContext);
   vi.stubGlobal("requestAnimationFrame", vi.fn(() => 1)); vi.stubGlobal("cancelAnimationFrame", vi.fn());
 });
@@ -93,5 +106,17 @@ describe("non-native audio viewer lifecycle", () => {
     await expect(nonNativeAudioViewer.open(testContext().context)).rejects.toMatchObject({ code: "invalid-file" });
     media.audioTracks = 1; media.channels = 8;
     await expect(nonNativeAudioViewer.open(testContext().context)).rejects.toMatchObject({ code: "resource-limit" });
+  });
+
+  it("opens WAVE A-law without requiring track.canDecode for software PCM", async () => {
+    media.fileName = "clip.wav";
+    media.codec = "alaw";
+    media.channels = 1;
+    media.sampleRate = 8_000;
+    media.canDecode = false;
+    const context = testContext();
+    const controller = await nonNativeAudioViewer.open(context.context);
+    expect(context.container.textContent).toContain("WAVE · ALAW · 8000 Hz · 1 ch");
+    await controller.dispose();
   });
 });
