@@ -100,6 +100,17 @@ File → Object URL → audio.src
 - 文件名、容器、codec、sample rate、声道、时长只展示可靠取得的信息；
 - dispose 幂等执行 pause、移除监听与 source/src、`load()`、revoke Object URL、移除根节点。
 
+实时可视化曲线由 `@anyfile/viewer-rendering/audio` 的 `AudioVisualizer` 绘制，接入约束：
+
+- `open()` 阶段只登记 `<audio>` 的 `play`、`pause`、`ended` 监听，不创建 AudioContext、不接管元素输出、不发声；
+- AudioContext 只在用户触发的 `play` 事件内创建，`resume()` 后必须确认 `state === "running"` 才允许调用 `createMediaElementSource()`；
+- `resume()` 失败或仍为 suspended 时，立即关闭该 context 并放弃可视化；宁可不显示曲线，也不能让原生路径静音；
+- 接管成功后先连 `source → destination` 保住可听通路，再挂 analyser 旁路；
+- 只用 `AnalyserNode` 的实时读数，不用 `decodeAudioData()`或整轨峰值扫描，保持第 1 节“不预解码完整 PCM、不为首期波形扫描全文件”；
+- 可视化画布自身就是效果开关：`AudioVisualizer` 在它接到的那个 canvas 上监听 `click` 与 `keydown`（Enter/Space）循环切换 spectrum/waveform，切换时重设 `smoothingTimeConstant` 并补一帧；该交互不创建 AudioContext、不改变播放状态，也不改变上述音频图所有权；
+- 因为画布可交互，插件必须自己把它设为 `role="button"`、`tabindex="0"` 并给本地化的 `aria-label` 与 `title`，`cursor` 与 `:focus-visible` 轮廓也在插件 CSS 里；visualizer 不写 canvas 属性也不注入样式，漏掉 `tabindex` 只会静默失去键盘可达性；
+- dispose 关闭自建 AudioContext、断开 source/analyser、停止 `requestAnimationFrame` 与 `ResizeObserver`，并移除画布上的激活监听。
+
 ## 7. non-native-audio 路径
 
 项目已锁定的 Mediabunny 1.55.3 能解析 MP3、WAVE、Ogg、FLAC、ADTS、MP4/QuickTime、Matroska/WebM 等输入，并提供 `AudioBufferSink`。这只是候选基础，不等于所有格式和 codec 均已支持。
@@ -117,6 +128,8 @@ File
 ```
 
 `open()` 在首个时间戳和长度有效的 buffer 解码成功、播放 UI 和清理链建立后返回。AudioContext 可以延迟到首次用户播放时创建或恢复；不能为了等待用户手势阻塞 `open()`。
+
+同一个 `AudioVisualizer` 在本路径以 `node` 模式挂在 `#gain` 上：`gain.connect(analyser)` 是纯旁路，`gain → destination` 的可听通路和 AudioContext 生命周期仍由 session 拥有，visualizer 不创建也不关闭它。播放状态由 `#setPlayState()` 与 `#cancelPipeline()` 驱动，因此暂停、seek、解码失败、自然结束和 dispose 都会停止动画循环。两条路径共用同一套画布点击切换效果的行为，各自的 canvas 无障碍属性和 CSS 由本插件 `ui.ts` 自己给。
 
 音频 session 首期独立实现，不直接复用当前强依赖 Canvas/video track 的 `non-native-video/PlaybackSession`。完成一个真实 audio-only vertical slice 后，再提取以下最小重复能力：
 
@@ -180,7 +193,9 @@ Probe 的初始预算在阶段 0 通过真实样例测量后锁定，不自动�
 - 原生路径保留 `<audio controls>` 的键盘和无障碍能力；
 - 自定义 controls 的播放、seek、音量均提供可访问名称和 focus-visible；
 - 很窄或很矮的窗口仍可访问播放与 seek；
-- 首期不渲染整文件 waveform、频谱动画或大封面；
+- 不渲染整文件 waveform 和大封面；实时频谱曲线允许，但只能来自 `AnalyserNode` 的流式读数，不得为此解码或扫描全文件；
+- 频谱曲线是装饰元素，标记 `aria-hidden="true"`，不承载播放信息，也不取代原生 controls 或自定义 controls 的键盘能力；
+- 很矮的窗口直接隐藏曲线；`prefers-reduced-motion: reduce` 时不启动动画循环，只保留静止基线；
 - 错误使用局部 `role="alert"`，状态使用 `role="status"`；
 - 不覆盖页面缩放、全局快捷键或宿主样式。
 
@@ -207,6 +222,7 @@ opening abort、active abort、文件切换和重复 dispose 走统一清理逻�
 
 - manifest 只包含静态声明；probe 与完整插件为独立动态入口；
 - Mediabunny 不进入 `/view` 首包或 `browser-audio` chunk；
+- 共享音频可视化只走 `@anyfile/viewer-rendering/audio` 子入口，不从 `viewer-rendering` 根入口重新导出；它不进入 `/view` 首包、任一音频 probe chunk，也不得把 Mediabunny 带进图片插件 chunk；
 - FFmpeg JS/Worker/WASM 不进入首包、manifest、probe、browser/non-native audio 或无关视频 chunk；
 - 普通应用构建不现场编译或下载 FFmpeg；只校验并复制已审核版本化产物；
 - 文件、文件名、标签、PCM 和封面不上传，不自动请求标签内 URL；
@@ -222,5 +238,6 @@ opening abort、active abort、文件切换和重复 dispose 走统一清理逻�
 - [FFmpeg 音视频播放 fallback 接入方案](../videos/ffmpeg-playback-runtime-plan.md)
 - [格式查看器插件协议](../viewer-plugin-protocol.md)
 - [查看器插件渲染规范](../viewer-render-tips.md)
+- [共享 UI 与渲染基础设施决策记录](../viewer-ui-and-rendering-proposal.md)
 - [查看器加载、渲染与部署约定](../viewer-loading-and-deployment.md)
 - [源码构建型第三方依赖规范](../viewer-source-built-dependencies.md)

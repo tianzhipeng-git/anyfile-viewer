@@ -28,6 +28,13 @@ describe("browser audio viewer lifecycle", () => {
     const audio = context.container.querySelector<HTMLAudioElement>("audio");
     expect(audio).toMatchObject({ controls: true, autoplay: false, src: "blob:browser-audio" });
     expect(context.container.textContent).toContain("MP3 · MP3 · 48000 Hz · 2 ch · 3.00 s");
+    // AudioVisualizer cycles its effect when the canvas is activated, so the canvas has to be a
+    // named, focusable control instead of a decorative aria-hidden element.
+    const visualizer = context.container.querySelector("canvas")!;
+    expect(visualizer.getAttribute("role")).toBe("button");
+    expect(visualizer.getAttribute("tabindex")).toBe("0");
+    expect(visualizer.getAttribute("aria-label")).toBe("音频可视化效果，激活可在频谱与波形之间切换");
+    expect(visualizer.getAttribute("aria-hidden")).toBeNull();
     expect(context.progress.at(-1)?.stage).toBe("ready");
     expect(context.outside.dataset.viewerTestOutside).toBe("untouched");
     await controller.dispose(); await controller.dispose();

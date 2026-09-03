@@ -210,6 +210,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -569,6 +572,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
       mediabunny:
         specifier: 1.55.3
         version: 1.55.3

@@ -15,16 +15,19 @@
 
 当前没有 Lit 运行时依赖，也没有 Web Components 或 Shadow DOM。Lit 不是默认方向，只在原生 DOM 已出现可验证的复杂度问题时，针对具体组件重新评估。评估结论可以是继续使用原生 DOM。
 
-### 1.2 `viewer-rendering` 当前是图片试点
+### 1.2 `viewer-rendering` 以图片试点为主，另有音频可视化子入口
 
 `@anyfile/viewer-rendering` 当前导出：
 
 - `InteractiveViewport`：面向单张图片的 fit、actual size、缩放、旋转和平移交互；
 - `CanvasSurface`：Canvas 2D 的 DPR 尺寸同步、`ResizeObserver`、逐帧合并绘制和销毁；
 - `ResourceScope`：清理函数与事件监听器的集中登记和幂等释放；
-- `ViewTransform`、`ViewMode` 和 `ViewportControls` 等配套类型。
+- `ViewTransform`、`ViewMode` 和 `ViewportControls` 等配套类型；
+- `AudioVisualizer`（子入口 `@anyfile/viewer-rendering/audio`）：在调用方拥有的 `<canvas>` 上绘制随音频跳动的曲线，复用 `CanvasSurface` 与 `ResourceScope`，由 `browser-audio` 与 `non-native-audio` 共同调用。用户点击该 canvas（或它获得焦点后按 Enter/Space）即可循环切换效果。绘制算法、切换交互与改动范围见 `viewer/rendering/audio-visualizer.md`。
 
 这些代码来自图片插件的真实重复，但这不等于格式无关的通用渲染层已经完成。`InteractiveViewport` 的构造参数和行为直接包含图片宽高、90 度旋转、fit/actual 按钮以及单内容平面语义，应标记为“被多款图片复用的图片试点”。
+
+`AudioVisualizer` 是共享层第一次超出图片范围，因此单独走 `./audio` 子入口，而不是从根入口重新导出。这样图片插件的 chunk 不会因为根入口而把音频代码纳入模块图；`viewer/rendering/src/index.ts` 也不得反向 import 该模块。它只共享渲染与效果切换交互（DPR、循环起停、analyser 读数、主题色、画布激活循环模式、幂等销毁），音频图所有权仍留在插件：`node` 模式只挂旁路且不关闭调用方的 AudioContext，`media` 模式才自建并自关。这不是 `docs/audio/architecture.md` 禁止的公共 `MediaPlayer` 或统一媒体工具栏。
 
 ### 1.3 继续按真实重复提取，不预建万能层
 
@@ -46,6 +49,7 @@
 | 图片 fit / actual / 旋转 | 图片试点已落地 | 单图片尺寸、中心点、缩放比例和 90 度旋转 | 不是通用 fit-width、fit-page 或任意旋转模型 |
 | 通用坐标系统 | 未落地 | 只有图片绘制使用的 `scale`、`rotation`、`panX`、`panY` | 没有公开的屏幕、视口、内容坐标互转 API，也没有边界约束协议 |
 | Canvas 2D surface | 图片试点已落地 | `CanvasSurface` 被通用栅格、现代栅格和相机 RAW 插件复用 | 不管理图层、命中检测、Canvas 池、WebGL/WebGPU 或 context lost |
+| 音频可视化曲线 | 已落地 | `AudioVisualizer`（`viewer-rendering/audio`）被 `browser-audio` 与 `non-native-audio` 复用；点击画布或 Enter/Space 循环切换 spectrum/waveform | 只管渲染与切换行为；不拥有插件的 AudioContext（`media` 模式除外）、不解码 PCM、不做整轨波形、不是统一媒体工具栏；只在自己那个 canvas 上挂监听，`role`/`tabindex`/`aria-label`/`title` 与 CSS 仍归插件 |
 | 绘制调度 | 局部落地 | `CanvasSurface.schedule()` 用 `requestAnimationFrame` 合并重绘 | 不是独立、通用的 render scheduler；没有局部失效模型 |
 | 资源登记 | 基础能力已落地 | `ResourceScope` 支持清理函数、事件监听和幂等逆序释放 | Worker、Object URL、ImageBitmap、GPU 等仍由调用方显式登记或自行管理 |
 | 页面布局与虚拟化 | 未形成共享层 | PDF 等插件有各自的可见性和页面渲染逻辑 | 没有公共 `page-layout`、`visibility-controller` 或 Canvas 池 |
@@ -67,6 +71,11 @@ Data / SQLite / Excel
 通用栅格 / 现代栅格 / 相机 RAW
   → 插件自己的原生 DOM 工具栏和 decoder
   → InteractiveViewport + CanvasSurface
+
+浏览器音频 / 非原生音频
+  → 插件自己的原生 DOM、<audio> 或 AudioContext 播放图
+  → @anyfile/viewer-rendering/audio 的 AudioVisualizer
+  → CanvasSurface + ResourceScope
 
 所有其他插件
   → 各自的 DOM、渲染器和生命周期实现
@@ -168,6 +177,7 @@ adapter 原则上需要两个潜在调用方；单一格式若有明确且无法
 - `viewer-ui`：验证异步竞态、Abort、empty/error/ready、键盘与 aria、事件只触发一次以及重复 dispose。
 - `InteractiveViewport`：验证 wheel、单 pointer、键盘、fit/actual、旋转、resize、监听清理和图片调用方回归。
 - `CanvasSurface`：验证 DPR、最大边长限制、resize、同帧合并、取消 frame、Canvas 释放和重复 dispose。
+- `AudioVisualizer`：验证 `node`/`media` 两种 tap 的接入与所有权边界、循环起停、reduced-motion 静止态、DPR、dispose 后停画，以及画布点击与 Enter/Space 循环切换（切换后重设 `smoothingTimeConstant`、只补一帧、不重启已有循环、dispose 后监听失效）。
 - `ResourceScope`：验证登记后立即释放、逆序释放、重复 dispose 以及各类实际资源的适配用法。
 - 生产构建：验证共享依赖只进入实际调用插件的 chunk。
 

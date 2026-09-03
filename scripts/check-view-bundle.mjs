@@ -64,7 +64,9 @@ const deferredImplementationMarkers = [
   "anyfile-dji-osmo-viewer__canvas",
   "anyfile-non-native-video-viewer__controls",
   "anyfile-browser-audio-viewer__audio",
+  "anyfile-browser-audio-viewer__visualizer",
   "anyfile-non-native-audio-viewer__controls",
+  "anyfile-non-native-audio-viewer__visualizer",
   "Video probe read budget exceeded",
   "Non-native video probe read budget exceeded",
   "Audio probe read budget exceeded",
@@ -207,6 +209,8 @@ if (nonNativeVideoProbeChunks.length === 0) {
 const browserAudioProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Audio probe read budget exceeded"));
 if (browserAudioProbeChunks.length === 0) throw new Error("Browser audio probe chunk was not found");
 if (browserAudioProbeChunks.some(({ content }) => content.includes("anyfile-browser-audio-viewer__audio")
+  || content.includes("anyfile-browser-audio-viewer__visualizer")
+  || content.includes("(prefers-reduced-motion: reduce)")
   || content.includes("Decoded PCM buffer exceeds limits")
   || content.includes("audioTrack must be an InputAudioTrack"))) {
   throw new Error("Browser audio probe chunk contains a full audio player implementation");
@@ -214,9 +218,18 @@ if (browserAudioProbeChunks.some(({ content }) => content.includes("anyfile-brow
 const nonNativeAudioProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Non-native audio probe read budget exceeded"));
 if (nonNativeAudioProbeChunks.length === 0) throw new Error("Non-native audio probe chunk was not found");
 if (nonNativeAudioProbeChunks.some(({ content }) => content.includes("anyfile-non-native-audio-viewer__controls")
+  || content.includes("anyfile-non-native-audio-viewer__visualizer")
+  || content.includes("(prefers-reduced-motion: reduce)")
   || content.includes("Decoded PCM buffer exceeds limits")
   || content.includes("audioTrack must be an InputAudioTrack"))) {
   throw new Error("Non-native audio probe chunk contains Mediabunny or the full player implementation");
+}
+const audioVisualizerChunks = archiveChunkContents.filter(({ content }) => content.includes("(prefers-reduced-motion: reduce)"));
+if (audioVisualizerChunks.length === 0) {
+  throw new Error("Shared audio visualizer chunk was not found");
+}
+if (audioVisualizerChunks.some(({ content }) => content.includes("audioTrack must be an InputAudioTrack"))) {
+  throw new Error("Shared audio visualizer chunk pulled in Mediabunny");
 }
 const nonNativeAudioViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-non-native-audio-viewer__controls"));
 if (nonNativeAudioViewerChunks.length === 0) throw new Error("Non-native audio viewer chunk was not found");

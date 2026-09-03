@@ -59,6 +59,13 @@ describe("non-native audio viewer lifecycle", () => {
     const context = testContext();
     const controller = await nonNativeAudioViewer.open(context.context);
     expect(context.container.textContent).toContain("Matroska · OPUS · 48000 Hz · 2 ch");
+    // AudioVisualizer cycles its effect when the canvas is activated, so the canvas has to be a
+    // named, focusable control instead of a decorative aria-hidden element.
+    const visualizer = context.container.querySelector("canvas")!;
+    expect(visualizer.getAttribute("role")).toBe("button");
+    expect(visualizer.getAttribute("tabindex")).toBe("0");
+    expect(visualizer.getAttribute("aria-label")).toBe("音频可视化效果，激活可在频谱与波形之间切换");
+    expect(visualizer.getAttribute("aria-hidden")).toBeNull();
     expect(media.contextConstruct).not.toHaveBeenCalled();
     context.container.querySelector<HTMLButtonElement>("button")!.click();
     await vi.waitFor(() => expect(media.contextResume).toHaveBeenCalledOnce());

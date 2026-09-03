@@ -8,6 +8,7 @@ export interface PlayerCopy {
   readonly replay: string;
   readonly seek: string;
   readonly volume: string;
+  readonly visualizer: string;
   readonly failed: string;
 }
 
@@ -19,6 +20,7 @@ export interface PlayerElements {
   readonly duration: HTMLSpanElement;
   readonly volume: HTMLInputElement;
   readonly status: HTMLDivElement;
+  readonly visualizer: HTMLCanvasElement;
 }
 
 export function playerCopy(locale: Locale): PlayerCopy {
@@ -29,6 +31,7 @@ export function playerCopy(locale: Locale): PlayerCopy {
       replay: "Replay",
       seek: "Playback position",
       volume: "Volume",
+      visualizer: "Audio visualisation. Activate to switch between spectrum and waveform.",
       failed: "A decoding error occurred during playback.",
     },
     "zh-CN": {
@@ -37,6 +40,7 @@ export function playerCopy(locale: Locale): PlayerCopy {
       replay: "重播",
       seek: "播放位置",
       volume: "音量",
+      visualizer: "音频可视化效果，激活可在频谱与波形之间切换",
       failed: "播放过程中发生解码错误。",
     },
   });
@@ -134,9 +138,21 @@ export function createPlayerElements(fileName: string, media: AudioDescription, 
       display: flex;
       min-height: 0;
       flex: 1;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 38px;
       padding: 20px;
+    }
+
+    .anyfile-non-native-audio-viewer__visualizer {
+      display: block;
+      flex: none;
+      width: 100%;
+      max-width: 600px;
+      height: 72px;
+      color: var(--viewer-foreground, #111);
+      cursor: pointer;
     }
 
     .anyfile-non-native-audio-viewer__status {
@@ -285,7 +301,8 @@ export function createPlayerElements(fileName: string, media: AudioDescription, 
 
     .anyfile-non-native-audio-viewer__play:focus-visible,
     .anyfile-non-native-audio-viewer__seek:focus-visible,
-    .anyfile-non-native-audio-viewer__volume:focus-visible {
+    .anyfile-non-native-audio-viewer__volume:focus-visible,
+    .anyfile-non-native-audio-viewer__visualizer:focus-visible {
       outline: 2px solid var(--viewer-accent, #2563eb);
       outline-offset: 2px;
     }
@@ -293,7 +310,8 @@ export function createPlayerElements(fileName: string, media: AudioDescription, 
     @media (max-width: 520px), (max-height: 300px) {
       .anyfile-non-native-audio-viewer__header { padding: 5px 8px; }
       .anyfile-non-native-audio-viewer__meta { display: none; }
-      .anyfile-non-native-audio-viewer__stage { padding: 12px; }
+      .anyfile-non-native-audio-viewer__stage { padding: 12px; gap: 10px; }
+      .anyfile-non-native-audio-viewer__visualizer { display: none; }
       .anyfile-non-native-audio-viewer__controls { padding: 8px 10px; gap: 6px; border-radius: 10px; }
       .anyfile-non-native-audio-viewer__volume,
       .anyfile-non-native-audio-viewer__volume-icon { display: none; }
@@ -318,6 +336,15 @@ export function createPlayerElements(fileName: string, media: AudioDescription, 
 
   const stage = document.createElement("div");
   stage.className = "anyfile-non-native-audio-viewer__stage";
+
+  const visualizer = document.createElement("canvas");
+  visualizer.className = "anyfile-non-native-audio-viewer__visualizer";
+  // AudioVisualizer cycles its effect on click and Enter/Space; focusability, the accessible
+  // name and the pointer affordance stay here because the plugin owns this element and its CSS.
+  visualizer.setAttribute("role", "button");
+  visualizer.setAttribute("tabindex", "0");
+  visualizer.setAttribute("aria-label", copy.visualizer);
+  visualizer.title = copy.visualizer;
 
   const status = document.createElement("div");
   status.className = "anyfile-non-native-audio-viewer__status";
@@ -372,10 +399,10 @@ export function createPlayerElements(fileName: string, media: AudioDescription, 
   volume.setAttribute("aria-label", copy.volume);
 
   controls.append(play, currentTime, seek, duration, volumeIcon, volume);
-  stage.append(status, controls);
+  stage.append(status, visualizer, controls);
   root.append(style, header, stage);
 
-  const elements = { root, play, seek, currentTime, duration, volume, status };
+  const elements = { root, play, seek, currentTime, duration, volume, status, visualizer };
   updateTime(elements, media.startTimestamp, media.duration);
   return elements;
 }

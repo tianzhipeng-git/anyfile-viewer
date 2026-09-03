@@ -14,7 +14,8 @@
   "dependencies": {
     "@anyfile/browser-video-viewer": "workspace:*",
     "@anyfile/non-native-video-viewer": "workspace:*",
-    "@anyfile/viewer-protocol": "workspace:*"
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-rendering": "workspace:*"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*",

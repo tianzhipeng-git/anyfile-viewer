@@ -1,3 +1,4 @@
+import { AudioVisualizer } from "@anyfile/viewer-rendering/audio";
 import type { WrappedAudioBuffer } from "mediabunny";
 import { MAX_BUFFER_BYTES, MAX_BUFFER_SECONDS, PCM_LOOKAHEAD_SECONDS } from "./limits";
 import type { AudioDescription } from "./media-inspection";
@@ -9,6 +10,7 @@ export class AudioPlaybackSession {
   readonly #media: AudioDescription;
   readonly #elements: PlayerElements;
   readonly #copy: PlayerCopy;
+  readonly #visualizer: AudioVisualizer;
   readonly #listeners: Array<() => void> = [];
   readonly #iterators = new Set<AudioIterator>();
   readonly #sources = new Set<AudioBufferSourceNode>();
@@ -28,6 +30,7 @@ export class AudioPlaybackSession {
 
   constructor(media: AudioDescription, elements: PlayerElements, copy: PlayerCopy) {
     this.#media = media; this.#elements = elements; this.#copy = copy; this.#position = media.startTimestamp;
+    this.#visualizer = new AudioVisualizer(elements.visualizer);
   }
 
   initialize() {
@@ -39,6 +42,7 @@ export class AudioPlaybackSession {
   #setPlayState(state: "play" | "pause" | "replay") {
     this.#elements.play.dataset.state = state;
     this.#elements.play.setAttribute("aria-label", this.#copy[state]);
+    this.#visualizer.setActive(state === "pause");
   }
 
   #listen(target: EventTarget, type: string, listener: EventListener) {
@@ -53,6 +57,9 @@ export class AudioPlaybackSession {
       this.#gain = this.#audioContext.createGain();
       this.#gain.gain.value = Number(this.#elements.volume.value);
       this.#gain.connect(this.#audioContext.destination);
+      // Side branch only: the audible gain → destination path and the AudioContext itself
+      // stay owned by this session, so the visualizer never closes them.
+      this.#visualizer.attach({ kind: "node", node: this.#gain });
     }
     await this.#audioContext.resume();
   }
@@ -129,6 +136,7 @@ export class AudioPlaybackSession {
 
   #cancelPipeline() {
     this.#generation += 1;
+    this.#visualizer.setActive(false);
     for (const iterator of this.#iterators) void iterator.return(undefined); this.#iterators.clear();
     for (const source of this.#sources) { try { source.stop(); } catch { /* Already ended. */ } source.disconnect(); } this.#sources.clear();
     if (this.#animationFrame !== null) cancelAnimationFrame(this.#animationFrame); this.#animationFrame = null;
@@ -145,6 +153,7 @@ export class AudioPlaybackSession {
     if (this.#disposed) return;
     this.#disposed = true; this.#seekRequest += 1; this.#playing = false; this.#cancelPipeline();
     for (const remove of this.#listeners.splice(0)) remove();
+    this.#visualizer.dispose();
     this.#gain?.disconnect();
     // Mediabunny owns sink/decoder lifetimes through Input; disposing it cancels all sink operations.
     this.#media.input.dispose();
