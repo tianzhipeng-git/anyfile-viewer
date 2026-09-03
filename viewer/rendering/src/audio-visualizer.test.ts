@@ -247,6 +247,29 @@ describe("AudioVisualizer", () => {
     visualizer.dispose();
   });
 
+  it("phase-locks waveform draws to a rising zero crossing", () => {
+    const drawn = surface2d();
+    const context = new FakeAudioContext();
+    const visualizer = new AudioVisualizer(canvas(drawn), { mode: "waveform" });
+    visualizer.attach({ kind: "node", node: nodeTap(context) });
+    const analyser = context.createAnalyser.mock.results[0]!.value as FakeAnalyserNode;
+    analyser.getFloatTimeDomainData = (array: Float32Array) => {
+      array.fill(0.4);
+      // Rising edge at index 40; columns should sample from there, not from 0.
+      array[39] = -0.2;
+      array[40] = 0.1;
+    };
+    visualizer.setActive(true);
+    flush(1);
+
+    const [x, y] = drawn.moveTo.mock.calls[0] as [number, number];
+    expect(x).toBe(0);
+    // Drawn window peaks at 0.4 (fill); sample[40] === 0.1 → 0.1/0.4 of full height.
+    const amplitude = (72 / 2) * 0.92;
+    expect(y).toBeCloseTo(36 - (0.1 / 0.4) * amplitude, 5);
+    visualizer.dispose();
+  });
+
   it("retunes the live analyser and keeps one pending frame across a cycle", () => {
     const element = canvas(surface2d());
     const context = new FakeAudioContext();

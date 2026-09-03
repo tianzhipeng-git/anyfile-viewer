@@ -79,10 +79,21 @@ export class AudioVisualizer {
   private analyser: AnalyserNode | null = null;
   private frequencies: Uint8Array<ArrayBuffer> | null = null;
   private samples: Float32Array<ArrayBuffer> | null = null;
+  /** Smoothed waveform Y path in CSS pixels; length matches the last painted width. */
+  private waveYs: Float32Array | null = null;
   private stroke = "#111";
   private active = false;
   private frames = 0;
   private disposed = false;
+
+  /** Analyser refresh stride for waveform (~15 Hz at 60 Hz rAF); spectrum stays every frame. */
+  private static readonly WAVEFORM_SAMPLE_EVERY = 4;
+  /** Blend toward each new sample; 1 = snap, lower = calmer morph. */
+  private static readonly WAVEFORM_SMOOTH = 0.22;
+  /** Fraction of half-height the normalised peak should reach. */
+  private static readonly WAVEFORM_HEIGHT = 0.92;
+  /** Ignore near-silence so peak-normalise does not amplify noise into a full swing. */
+  private static readonly WAVEFORM_PEAK_FLOOR = 0.04;
 
   constructor(private readonly canvas: HTMLCanvasElement, options: AudioVisualizerOptions = {}) {
     this.mode = options.mode ?? "spectrum";
@@ -120,6 +131,7 @@ export class AudioVisualizer {
     this.analyser = null;
     this.frequencies = null;
     this.samples = null;
+    this.waveYs = null;
   }
 
   private attachNode(node: AudioNode) {
@@ -201,7 +213,9 @@ export class AudioVisualizer {
   private cycleMode() {
     if (this.disposed) return;
     this.mode = MODES[(MODES.indexOf(this.mode) + 1) % MODES.length];
-    // Only spectrum smooths between frames, so the live analyser follows the new mode.
+    // Drop the smoothed path so the next waveform frame seeds cleanly.
+    this.waveYs = null;
+    // Only spectrum uses AnalyserNode smoothing; waveform calms via its own EMA below.
     if (this.analyser) this.analyser.smoothingTimeConstant = this.smoothingFor();
     // An idle visualizer runs no loop; repaint once so the resting line moves immediately.
     this.surface.schedule();
@@ -268,17 +282,49 @@ export class AudioVisualizer {
   }
 
   private traceWaveform(context: CanvasRenderingContext2D, width: number, height: number) {
+    const fresh = !this.waveYs || this.waveYs.length !== width;
+    const sampleNow = fresh || this.frames % AudioVisualizer.WAVEFORM_SAMPLE_EVERY === 0;
+    if (sampleNow) this.sampleWaveform(width, height, fresh);
+    const ys = this.waveYs!;
+    for (let x = 0; x < width; x += 1) {
+      const y = ys[x]!;
+      if (x === 0) context.moveTo(x, y);
+      else context.lineTo(x, y);
+    }
+  }
+
+  private sampleWaveform(width: number, height: number, fresh: boolean) {
     const analyser = this.analyser!;
     const samples = this.samples!;
     analyser.getFloatTimeDomainData(samples);
     const center = height / 2;
-    const amplitude = (height / 2) * 0.88;
-    const step = samples.length / Math.max(1, width);
+    const amplitude = (height / 2) * AudioVisualizer.WAVEFORM_HEIGHT;
+    // Rising zero-crossing trigger: without a phase lock each window starts at a random
+    // offset and the trace thrashes. Search only the first half so enough samples remain.
+    let start = 0;
+    const searchEnd = Math.floor(samples.length / 2);
+    for (let i = 1; i < searchEnd; i += 1) {
+      if (samples[i - 1]! < 0 && samples[i]! >= 0) {
+        start = i;
+        break;
+      }
+    }
+    if (fresh) this.waveYs = new Float32Array(width);
+    const ys = this.waveYs!;
+    const alpha = fresh ? 1 : AudioVisualizer.WAVEFORM_SMOOTH;
+    const step = (samples.length - start) / Math.max(1, width);
+    // Real music rarely hits ±1; scale the drawn window so its peak fills the canvas.
+    let peak = AudioVisualizer.WAVEFORM_PEAK_FLOOR;
     for (let x = 0; x < width; x += 1) {
-      const index = Math.min(samples.length - 1, Math.floor(x * step));
-      const y = center - samples[index] * amplitude;
-      if (x === 0) context.moveTo(x, y);
-      else context.lineTo(x, y);
+      const index = Math.min(samples.length - 1, start + Math.floor(x * step));
+      const value = Math.abs(samples[index]!);
+      if (value > peak) peak = value;
+    }
+    const scale = amplitude / peak;
+    for (let x = 0; x < width; x += 1) {
+      const index = Math.min(samples.length - 1, start + Math.floor(x * step));
+      const raw = center - samples[index]! * scale;
+      ys[x] = ys[x]! * (1 - alpha) + raw * alpha;
     }
   }
 

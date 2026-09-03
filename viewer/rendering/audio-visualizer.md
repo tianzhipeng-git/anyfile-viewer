@@ -27,11 +27,15 @@
 
 ## waveform 模式
 
-示波器观感，密集抖动：
+示波器观感（比 spectrum 更刺眼，所以多两层降速，不只靠 Analyser）：
 
-1. `smoothingTimeConstant = 0`（时域不需要帧间平滑）。
-2. **X**：`step = samples.length / width`，每列取 `floor(x * step)` 一个采样（抽取，不是 min/max 聚合）。
-3. **Y**：`y = center - sample * (height / 2 * 0.88)`，围绕画布中线对称。
+1. `smoothingTimeConstant = 0`（时域不走 Analyser 帧间平滑）。
+2. **过零触发**：在缓冲前半段找第一个上升沿（`prev < 0 && curr >= 0`），从该采样起算；找不到则 `start = 0`。
+3. **降采样率**：大约每 4 个 rAF 才重新读一次时域（~15 Hz）；中间帧重画上一份平滑路径，避免 60 Hz 换形。
+4. **路径 EMA**：新采样以 `alpha ≈ 0.22` 混进上一帧的 Y 路径（首帧或宽度变化时 `alpha = 1` 直接种子）。
+5. **X / Y**：从 `start` 起 `step = (samples.length - start) / width` 每列取一个采样。
+   真实音乐很少顶到 ±1，所以先对**本窗绘制采样**取峰值，再按 `scale = (height/2 * 0.92) / max(peak, 0.04)`
+   映射到 Y（静音地板避免把底噪放大成满幅），最后走路径 EMA。
 
 ## 静止态与动画循环
 
