@@ -1,6 +1,7 @@
 import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
 import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
+import { cad2dManifest } from "@anyfile/cad-2d-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
@@ -287,6 +288,17 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/archive-metadata-viewer");
       return viewerPackage.archiveMetadataViewer;
+    },
+  },
+  {
+    manifest: cad2dManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/cad-2d-viewer/probe");
+      return probePackage.probeCad2d(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/cad-2d-viewer");
+      return viewerPackage.cad2dViewer;
     },
   },
   {

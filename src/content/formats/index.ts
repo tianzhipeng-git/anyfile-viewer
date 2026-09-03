@@ -23,6 +23,7 @@ import { dbfFormat } from "./dbf";
 import { deflateFormat } from "./deflate";
 import { difFormat } from "./dif";
 import { dngFormat } from "./dng";
+import { dxfFormat } from "./dxf";
 import { docxFormat } from "./docx";
 import { duckdbFormat } from "./duckdb";
 import { earFormat } from "./ear";
@@ -145,6 +146,7 @@ export const formatContents: readonly FormatContent[] = [
   deflateFormat,
   difFormat,
   dngFormat,
+  dxfFormat,
   docxFormat,
   duckdbFormat,
   earFormat,

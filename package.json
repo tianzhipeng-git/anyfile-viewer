@@ -33,6 +33,7 @@
     "@anyfile/browser-image-viewer": "workspace:*",
     "@anyfile/browser-audio-viewer": "workspace:*",
     "@anyfile/browser-video-viewer": "workspace:*",
+    "@anyfile/cad-2d-viewer": "workspace:*",
     "@anyfile/camera-raw-viewer": "workspace:*",
     "@anyfile/code-viewer": "workspace:*",
     "@anyfile/data-viewer": "workspace:*",

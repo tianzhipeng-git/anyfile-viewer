@@ -164,7 +164,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "design",
     icon: PaletteIcon,
-    extensions: [".psd", ".psb", ".ai", ".fig", ".sketch", ".xd", ".indd"],
+    extensions: [".dxf", ".psd", ".psb", ".ai", ".fig", ".sketch", ".xd", ".indd"],
   },
   {
     kind: "font",
