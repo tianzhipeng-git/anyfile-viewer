@@ -2,6 +2,7 @@ import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manife
 import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
+import { cad2dManifest } from "@anyfile/cad-2d-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
@@ -29,7 +30,7 @@ import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
 export const viewerManifests: readonly ViewerPluginManifest[] = [
   djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest,
-  safeSvgManifest, pdfManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
+  safeSvgManifest, cad2dManifest, pdfManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
   codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest,
   dataManifest, archiveMetadataManifest, hexManifest,
 ];

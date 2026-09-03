@@ -18,6 +18,13 @@ export const categoryContents: readonly CategoryContent[] = [
     },
   },
   {
+    slug: "engineering", status: "published",
+    copy: {
+      en: { name: "Engineering", eyebrow: "READ CAD LOCALLY", title: "CAD 2D drawing viewers", description: "View CAD 2D engineering drawings without installing desktop CAD software.", introduction: "This category covers CAD drawing interchange files that can be inspected and rendered locally. The first viewer targets DXF, the open 2D vector exchange format used by many CAD programs.", useCases: ["Check DXF drawings without uploading them", "Inspect vector geometry before importing into CAD", "Open engineering drawings on a locked-down computer"], commonProblems: ["Native DWG drawings require a separate proprietary parser", "Complex hatches, dimensions and sheet layouts may be simplified", "Very large drawings remain bounded by browser memory"], faq: [{ question: "Can Anyfile replace AutoCAD?", answer: "No. Anyfile is a read-only local viewer, not a CAD editor. Use a CAD application for editing, dimensioning and exact plotting." }] },
+      "zh-CN": { name: "工程图", eyebrow: "本地阅读 CAD", title: "CAD 2D 工程图查看器", description: "无需安装桌面 CAD 软件，即可在本地查看 CAD 2D 工程图。", introduction: "此类别包含可在本地解析和渲染的 CAD 工程图交换文件。首批查看器面向 DXF，这是众多 CAD 程序使用的开放 2D 矢量交换格式。", useCases: ["不上传即可检查 DXF 工程图", "在导入 CAD 前检查矢量几何", "在受限电脑上打开工程图"], commonProblems: ["原生 DWG 图档需要独立的专有解析器", "复杂剖面线、标注与图纸布局可能被简化", "超大工程图仍受浏览器内存限制"], faq: [{ question: "Anyfile 能替代 AutoCAD 吗？", answer: "不能。Anyfile 是只读本地查看器，不是 CAD 编辑器。编辑、标注和精确出图仍需使用 CAD 软件。" }] },
+    },
+  },
+  {
     slug: "documents", status: "published",
     copy: {
       en: { name: "Documents", eyebrow: "READ WITHOUT AN UPLOAD QUEUE", title: "Document, spreadsheet and presentation viewers", description: "Read common office files locally while keeping the original file on your device.", introduction: "Document viewers reconstruct readable output in the browser. They are intended for review, not editing, and complex desktop-only layout features may render differently.", useCases: ["Read a PDF or DOCX on an untrusted machine", "Inspect workbook values and worksheets", "Review PPTX slides without installing office software"], commonProblems: ["Password-protected or encrypted files may not open", "Macros, external links and active content are not executed", "Fonts and advanced layout effects can differ from desktop applications"], faq: [{ question: "Can I edit office files in Anyfile?", answer: "No. Anyfile is deliberately read-only; use the authoring application when you need to edit and save a document." }] },
