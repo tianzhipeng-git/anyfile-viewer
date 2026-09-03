@@ -36,6 +36,11 @@ export class AudioPlaybackSession {
     this.#listen(this.#elements.volume, "input", () => { if (this.#gain) this.#gain.gain.value = Number(this.#elements.volume.value); });
   }
 
+  #setPlayState(state: "play" | "pause" | "replay") {
+    this.#elements.play.dataset.state = state;
+    this.#elements.play.setAttribute("aria-label", this.#copy[state]);
+  }
+
   #listen(target: EventTarget, type: string, listener: EventListener) {
     target.addEventListener(type, listener); this.#listeners.push(() => target.removeEventListener(type, listener));
   }
@@ -60,14 +65,14 @@ export class AudioPlaybackSession {
     this.#cancelPipeline();
     const generation = this.#generation;
     this.#playing = true; this.#clockMedia = this.#position; this.#clockWall = this.#audioContext!.currentTime;
-    this.#elements.play.textContent = this.#copy.pause;
+    this.#setPlayState("pause");
     void this.#runAudio(generation).catch(() => this.#showFailure());
     this.#updateTimeline();
   }
 
   pause() {
     if (this.#disposed || !this.#playing) return;
-    this.#position = this.currentPosition(); this.#playing = false; this.#elements.play.textContent = this.#copy.play;
+    this.#position = this.currentPosition(); this.#playing = false; this.#setPlayState("play");
     this.#cancelPipeline(); updateTime(this.#elements, this.#position, this.#media.duration);
   }
 
@@ -78,7 +83,7 @@ export class AudioPlaybackSession {
     this.#position = Math.min(this.#media.duration, Math.max(this.#media.startTimestamp, position));
     updateTime(this.#elements, this.#position, this.#media.duration);
     if (request !== this.#seekRequest || this.#disposed) return;
-    this.#elements.play.textContent = this.#position >= this.#media.duration ? this.#copy.replay : this.#copy.play;
+    this.#setPlayState(this.#position >= this.#media.duration ? "replay" : "play");
     if (this.#resumeAfterSeek && this.#position < this.#media.duration) { this.#resumeAfterSeek = false; await this.play(); }
   }
 
@@ -116,7 +121,7 @@ export class AudioPlaybackSession {
   #updateTimeline = () => {
     if (!this.#playing || this.#disposed) return;
     const position = this.currentPosition(); updateTime(this.#elements, position, this.#media.duration);
-    if (position >= this.#media.duration) { this.#position = this.#media.duration; this.#playing = false; this.#elements.play.textContent = this.#copy.replay; this.#cancelPipeline(); return; }
+    if (position >= this.#media.duration) { this.#position = this.#media.duration; this.#playing = false; this.#setPlayState("replay"); this.#cancelPipeline(); return; }
     this.#animationFrame = requestAnimationFrame(this.#updateTimeline);
   };
 
