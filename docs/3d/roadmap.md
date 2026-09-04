@@ -90,7 +90,7 @@
 ### 完成标准
 
 - DXF 2D、DXF 3D line 和 STL 共用 runtime，但 parser 和领域 UI 无交叉分支；
-- `bridge.dxf` 可以从多个标准视图观察并自由旋转，Z 不再丢失；
+- `/Users/tianzhipeng/Desktop/design_files/bridge.dxf` 可以从多个标准视图观察并自由旋转，Z 不再丢失；
 - 现有二维 DXF 的方向、颜色、fit、文本和取消行为无回归；
 - STL 的 binary/ASCII 正常、损坏和超限样例均有证据；
 - 真实浏览器中连续切换 DXF/STL 后没有 GPU 或事件残留；
