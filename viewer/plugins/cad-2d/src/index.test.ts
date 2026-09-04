@@ -8,6 +8,10 @@ import { cad2dViewer } from "./index";
 import { cad2dManifest } from "./manifest";
 
 const activeContexts: ViewerTestContext[] = [];
+let canvasContext: {
+  moveTo: ReturnType<typeof vi.fn>;
+  lineTo: ReturnType<typeof vi.fn>;
+};
 
 function contextFor(file: File) {
   const context = createViewerTestContext(file);
@@ -17,12 +21,12 @@ function contextFor(file: File) {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({
+  canvasContext = {
     setTransform() {},
     clearRect() {},
     beginPath() {},
-    moveTo() {},
-    lineTo() {},
+    moveTo: vi.fn(),
+    lineTo: vi.fn(),
     closePath() {},
     stroke() {},
     fill() {},
@@ -42,7 +46,8 @@ beforeEach(() => {
     strokeStyle: "#000",
     fillStyle: "#000",
     globalAlpha: 1,
-  } as unknown as CanvasRenderingContext2D);
+  } as unknown as typeof canvasContext;
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(canvasContext as unknown as CanvasRenderingContext2D);
 });
 
 afterEach(() => {
@@ -68,6 +73,19 @@ describe("CAD 2D viewer protocol compliance", () => {
     await controller.dispose();
     await controller.dispose();
     expect(context.container.childElementCount).toBe(0);
+  });
+
+  it("fits sub-unit model-space geometry to a visible canvas size", async () => {
+    const source = "0\nSECTION\n2\nENTITIES\n0\nLINE\n10\n0\n20\n0\n11\n0.1\n21\n0.05\n0\nENDSEC\n0\nEOF\n";
+    const context = contextFor(new File([source], "small-units.dxf"));
+    const controller = await cad2dViewer.open(context.context);
+
+    await vi.waitFor(() => expect(canvasContext.lineTo).toHaveBeenCalled());
+    const [startX, startY] = canvasContext.moveTo.mock.calls.at(-1) as [number, number];
+    const [endX, endY] = canvasContext.lineTo.mock.calls.at(-1) as [number, number];
+    expect(Math.hypot(endX - startX, endY - startY)).toBeGreaterThan(100);
+
+    await controller.dispose();
   });
 
   it("rejects invalid and oversized DXF files", async () => {

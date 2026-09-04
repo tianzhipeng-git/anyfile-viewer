@@ -163,6 +163,8 @@ Lit 与 Shadow DOM 是两个独立决策。采用 Lit 不自动采用 Shadow DOM
 
 adapter 原则上需要两个潜在调用方；单一格式若有明确且无法由轻量基础合理实现的领域需求，可以例外，但 adapter 仍不得进入无关插件 chunk。
 
+CAD、通用网格、CG、3D 打印与点云的长期目标已经形成独立的[3D 文件查看架构](3d/architecture.md)和[实施路线图](3d/roadmap.md)，规划以 DXF 线框与 STL 网格两个真实调用方建立 `@anyfile/rendering-3d`。该规划不表示共享包、Three.js adapter 或对应格式已经落地；当前能力仍以[3D 支持矩阵](3d/support-matrix.md)为准。
+
 ## 6. 测试现状与新增要求
 
 ### 6.1 当前测试覆盖

@@ -7,9 +7,19 @@ import {
 import type { CadPoint, CadPrimitive, CadScene } from "./scene";
 import type { CadViewerElements } from "./ui";
 
+const NORMALIZED_MODEL_EDGE = 1_000;
+
+function cadModelScale(scene: CadScene) {
+  const maximumEdge = Math.max(scene.bounds.width, scene.bounds.height);
+  if (!Number.isFinite(maximumEdge) || maximumEdge <= Number.EPSILON) return 1;
+  const scale = NORMALIZED_MODEL_EDGE / maximumEdge;
+  return Number.isFinite(scale) && scale > 0 ? scale : 1;
+}
+
 export class Cad2dViewport {
   private readonly surface: CanvasSurface;
   private readonly interactive: InteractiveViewport;
+  private readonly modelScale: number;
   private transform: ViewTransform = { scale: 1, rotation: 0, panX: 0, panY: 0 };
   private disposed = false;
 
@@ -20,6 +30,7 @@ export class Cad2dViewport {
     if (!elements.canvas.getContext("2d", { alpha: true })) {
       throw new Error("Canvas 2D is unavailable.");
     }
+    this.modelScale = cadModelScale(scene);
     this.surface = new CanvasSurface(
       elements.canvas,
       elements.viewport,
@@ -27,8 +38,8 @@ export class Cad2dViewport {
     );
     this.interactive = new InteractiveViewport(
       elements,
-      scene.bounds.width,
-      scene.bounds.height,
+      scene.bounds.width * this.modelScale,
+      scene.bounds.height * this.modelScale,
       (transform) => {
         this.transform = transform;
         this.surface.schedule();
@@ -46,7 +57,10 @@ export class Cad2dViewport {
   private localPoint(value: CadPoint) {
     const centerX = (this.scene.bounds.minX + this.scene.bounds.maxX) / 2;
     const centerY = (this.scene.bounds.minY + this.scene.bounds.maxY) / 2;
-    return { x: value.x - centerX, y: centerY - value.y };
+    return {
+      x: (value.x - centerX) * this.modelScale,
+      y: (centerY - value.y) * this.modelScale,
+    };
   }
 
   private draw(context: CanvasRenderingContext2D, width: number, height: number, dpr: number) {
@@ -105,7 +119,7 @@ export class Cad2dViewport {
         context.save();
         context.translate(position.x, position.y);
         context.rotate((-primitive.rotation * Math.PI) / 180);
-        context.font = `500 ${Math.max(0.5, primitive.height)}px sans-serif`;
+        context.font = `500 ${Math.max(0.5, primitive.height * this.modelScale)}px sans-serif`;
         context.textAlign = "left";
         context.textBaseline = "bottom";
         context.fillText(primitive.text, 0, 0);
