@@ -174,6 +174,7 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 | PDF.js 支持资源 | 锁定的 npm 包 | 总目录约 3.7 MiB；最大单文件约 441 KiB | PDF 实际需要对应字体、色彩或解码能力时 | 同源 | 192 个资源按需互斥加载，单次传输未达到门槛 |
 | DuckDB WASM / Worker | 锁定的 npm 包 | MVP/EH WASM 约 38/33 MiB | DuckDB 插件被选中并初始化时 | jsDelivr → R2 → 同源 | 单个 WASM 远超门槛 |
 | HEIF decoder / WASM | 审核过的源码构建产物 | 主要 WASM 约 1.17 MiB | 已识别为 HEVC 的 HEIF 原生解码失败后 | 同源 | 小于门槛，且只作为条件 fallback |
+| stet PostScript / WASM | 审核过的源码构建产物 | WASM 约 13.0 MiB raw、10.3 MiB gzip | EPS/PS 插件被选中时 | 同源 | 模块 Worker 在隔离页面内动态导入 glue 并实例化 WASM；当前先保留单一同源发布链路，详见 `docs/postscript/architecture.md` |
 | LibRaw Worker / WASM | 锁定的 npm 包及补充许可材料 | 主要 WASM 约 1.38 MiB | RAW 插件被选中时 | 同源 | 小于门槛，并有 pthread/Worker 同源隔离约束 |
 | JXL Worker / WASM | bundler 产物 | 构建时持续检查 | JXL 插件被选中时 | `/_next/static` | 可正确拆分并使用内容哈希路径 |
 
@@ -184,6 +185,7 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 - **PDF.js**：`pnpm dev` 和 `pnpm build` 先运行 `scripts/prepare-pdfjs-assets.mjs`，把锁定版本 `pdfjs-dist` 的 `cmaps/`、`standard_fonts/`、`iccs/` 和 `wasm/` 原目录复制到 `public/vendor/pdfjs/<version>/`。这些目录分别提供复合字体字符映射、标准字体、ICC 色彩配置，以及 JBIG2、OpenJPEG、QCMS 和官方 JavaScript 解码回退。目录是生成产物，不提交仓库；版本目录避免升级后缓存混用。
 - **DuckDB**：JavaScript API 由应用打包。运行时使用 `getJsDelivrBundles()` 取得与已安装包一致的官方 URL，用 `selectBundle()` 选择 MVP 或 EH，再按 jsDelivr、`assets.anyfile.top` 同版本镜像、构建产物中的同版本本地资源依次尝试。切换来源时遵守前述清理和失败分类规则。
 - **HEIF**：`pnpm prepare:heif` 校验 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json` 中的大小和 SHA-256，再把 decoder、WASM、许可证与源码说明复制到 `/vendor/libheif/1.23.2-anyfile.1/`，构建门禁交叉校验运行时 URL 与产物版本。probe 不导入这些资产；独立 Worker 只在原生实际解码失败后动态导入同源 glue 并加载 WASM。`/vendor/libheif/:path*` 返回与其他同源 Worker/WASM 一致的 COEP/CORP 头；CSP 只需允许同源 Worker 和 WebAssembly。
+- **stet**：`pnpm prepare:stet` 校验 `third_party/stet-wasm/0.8.1-anyfile.1/build-info.json`，再把 PS/EPS-only glue、WASM、许可证和源码说明复制到 `/vendor/stet/0.8.1-anyfile.1/`。轻量 probe 不导入运行时；完整插件被选择后才创建模块 Worker，并从版本化同源路径加载 stet。该 WASM 超过外部分发门槛；当前同源例外用于先保持模块 Worker、glue、WASM、COEP/CORP 和 Safari 行为在单一可验收边界内。上线流量扩大前必须发布相同哈希到 `assets.anyfile.top`，验证目标浏览器的跨源模块导入后改为 R2 → 同源回退，不能长期把 10 MiB 级冷启动流量留在 Vercel。
 
 DuckDB 当前生产 bucket 为 `anyfile-bucket`，公开资产域名为 `https://assets.anyfile.top`。`1.32.0` 的 MVP/EH 单线程 WASM 与 Worker 保持 npm 包原文件名，发布在：
 

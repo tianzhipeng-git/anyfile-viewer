@@ -6,6 +6,11 @@ under their own licenses. The exact installed versions are locked by
 `pnpm-lock.yaml`; `pnpm licenses list --prod` provides the complete installed
 production dependency closure.
 
+The optional EPS/PostScript viewer also uses a source-built `stet` 0.8.1
+WebAssembly runtime under Apache-2.0 OR MIT. Exact source, hashes, build
+instructions, and license texts are published with
+`/vendor/stet/0.8.1-anyfile.1/`.
+
 ## Browser application dependencies
 
 | Component | Version | License | Source |

@@ -44,6 +44,8 @@ const deferredImplementationMarkers = [
   "正在读取 Excel 工作簿",
   "正在读取 PowerPoint 演示文稿",
   "anyfile-pdf-viewer__viewport",
+  "anyfile-postscript-viewer__canvas",
+  "stet_wasm_bg.wasm",
   "anyfile-photoshop-viewer__canvas",
   "Unexpected Photoshop composite pixel layout",
   "__anyfile_archive_metadata_viewer_v1__",
@@ -106,6 +108,24 @@ for (const [asset, expected] of Object.entries(heifBuildInfo.artifacts)) {
   if (!content?.byteLength || content.byteLength !== expected.bytes || sha256 !== expected.sha256) {
     throw new Error(`HEIF runtime asset is missing or failed its integrity check: ${asset}`);
   }
+}
+const stetRuntimeSource = await readFile(join(projectRoot, "viewer/plugins/postscript/src/runtime.ts"), "utf8");
+const stetRuntimeVersion = stetRuntimeSource.match(/STET_ARTIFACT_VERSION = "([^"]+)"/)?.[1];
+if (!stetRuntimeVersion) throw new Error("stet runtime artifact version is missing");
+const stetSourceRoot = join(projectRoot, "third_party/stet-wasm", stetRuntimeVersion);
+const stetBuildInfo = JSON.parse(await readFile(join(stetSourceRoot, "build-info.json"), "utf8"));
+const stetSupportRoot = join(projectRoot, "public/vendor/stet", stetRuntimeVersion);
+for (const [asset, expected] of Object.entries(stetBuildInfo.artifacts)) {
+  const content = await readFile(join(stetSupportRoot, asset)).catch(() => undefined);
+  const sha256 = content && createHash("sha256").update(content).digest("hex");
+  if (!content?.byteLength || content.byteLength !== expected.bytes || sha256 !== expected.sha256) {
+    throw new Error(`stet runtime asset is missing or failed its integrity check: ${asset}`);
+  }
+}
+const postscriptViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-postscript-viewer__canvas"));
+if (postscriptViewerChunks.length === 0) throw new Error("PostScript viewer dynamic chunk was not found");
+if (!stetRuntimeSource.includes(`/vendor/stet/\${STET_ARTIFACT_VERSION}`)) {
+  throw new Error("PostScript runtime does not use the version-locked stet asset path");
 }
 const jxlChunks = archiveChunkContents.filter(({ content }) => content.includes("JxlImage"));
 if (jxlChunks.length === 0) {

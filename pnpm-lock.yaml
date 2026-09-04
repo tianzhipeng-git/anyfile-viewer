@@ -80,6 +80,9 @@ importers:
       '@anyfile/photoshop-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/photoshop
+      '@anyfile/postscript-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/postscript
       '@anyfile/powerpoint-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/powerpoint
@@ -669,6 +672,22 @@ importers:
       ag-psd:
         specifier: 31.0.2
         version: 31.0.2
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/postscript:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*

@@ -20,6 +20,7 @@ import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
 import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
+import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
@@ -183,6 +184,17 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/pdf-viewer");
       return viewerPackage.pdfViewer;
+    },
+  },
+  {
+    manifest: postscriptManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/postscript-viewer/probe");
+      return probePackage.probePostscript(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/postscript-viewer");
+      return viewerPackage.postscriptViewer;
     },
   },
   {

@@ -43,6 +43,13 @@ const nextConfig: NextConfig = {
         ],
       },
       {
+        source: "/vendor/stet/:path*",
+        headers: [
+          { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
+          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+        ],
+      },
+      {
         source: "/vendor/ogv/:path*",
         headers: [
           { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },

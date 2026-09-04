@@ -30,6 +30,7 @@ import { duckdbFormat } from "./duckdb";
 import { earFormat } from "./ear";
 import { eggFormat } from "./egg";
 import { epubFormat } from "./epub";
+import { epsFormat } from "./eps";
 import { etFormat } from "./et";
 import { flacFormat } from "./flac";
 import { fodsFormat } from "./fods";
@@ -81,6 +82,7 @@ import { pdfFormat } from "./pdf";
 import { pefFormat } from "./pef";
 import { pngFormat } from "./png";
 import { psdFormat } from "./psd";
+import { psFormat } from "./ps";
 import { pnmFormat } from "./pnm";
 import { prnFormat } from "./prn";
 import { pptxFormat } from "./pptx";
@@ -155,6 +157,7 @@ export const formatContents: readonly FormatContent[] = [
   earFormat,
   eggFormat,
   epubFormat,
+  epsFormat,
   etFormat,
   flacFormat,
   fodsFormat,
@@ -206,6 +209,7 @@ export const formatContents: readonly FormatContent[] = [
   pefFormat,
   pngFormat,
   psdFormat,
+  psFormat,
   pnmFormat,
   prnFormat,
   pptxFormat,

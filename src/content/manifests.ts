@@ -20,6 +20,7 @@ import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
+import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
@@ -31,7 +32,7 @@ import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
 export const viewerManifests: readonly ViewerPluginManifest[] = [
   djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest,
-  safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
+  safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
   codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest,
   dataManifest, archiveMetadataManifest, hexManifest,
 ];

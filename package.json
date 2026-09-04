@@ -15,8 +15,9 @@
   "scripts": {
     "prepare:pdfjs": "node scripts/prepare-pdfjs-assets.mjs",
     "prepare:heif": "node scripts/prepare-heif-assets.mjs",
+    "prepare:stet": "node scripts/prepare-stet-assets.mjs",
     "prepare:ogv": "node scripts/prepare-ogv-assets.mjs",
-    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif && pnpm prepare:ogv",
+    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif && pnpm prepare:stet && pnpm prepare:ogv",
     "dev": "pnpm prepare:assets && next dev",
     "build": "pnpm prepare:assets && next build --webpack && pnpm check:bundle",
     "check:bundle": "node scripts/check-view-bundle.mjs",
@@ -51,6 +52,7 @@
     "@anyfile/non-native-video-viewer": "workspace:*",
     "@anyfile/non-native-audio-viewer": "workspace:*",
     "@anyfile/pdf-viewer": "workspace:*",
+    "@anyfile/postscript-viewer": "workspace:*",
     "@anyfile/photoshop-viewer": "workspace:*",
     "@anyfile/powerpoint-viewer": "workspace:*",
     "@anyfile/safe-svg-viewer": "workspace:*",

@@ -15,7 +15,9 @@ const eslintConfig = defineConfig([
     "public/vendor/libraw/**",
     "public/vendor/libheif/**",
     "public/vendor/ogv/**",
+    "public/vendor/stet/**",
     "third_party/heif-wasm/**",
+    "third_party/stet-wasm/**",
     "next-env.d.ts",
   ]),
 ]);

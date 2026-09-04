@@ -163,7 +163,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "photoshop-document", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d"]);
+      .toEqual(["dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),
@@ -179,6 +179,30 @@ describe("viewer protocol", () => {
       { signal: new AbortController().signal },
     );
     expect(invalidPdf.map(({ registration: item }) => item.manifest.id)).toEqual(["hex-viewer"]);
+
+    const modernIllustrator = await resolveViewerRegistrations(
+      new File(["%PDF-1.7\n% Illustrator data"], "artwork.ai"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(modernIllustrator.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["pdfjs-pdf", 4], ["hex-viewer", 1]]);
+
+    const legacyIllustrator = await resolveViewerRegistrations(
+      new File(["%!PS-Adobe-3.0 EPSF-3.0\n%%Creator: Adobe Illustrator\n"], "artwork.ai"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(legacyIllustrator.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["postscript-document", 3], ["hex-viewer", 1]]);
+
+    const epsi = await resolveViewerRegistrations(
+      new File(["%!PS-Adobe-3.0 EPSF-3.0\n"], "artwork.epsi"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(epsi.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["postscript-document", 3], ["hex-viewer", 1]]);
 
     const sqlite = await resolveViewerRegistrations(
       new File(["SQLite format 3\0payload"], "database.db"),
