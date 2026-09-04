@@ -14,6 +14,7 @@ production dependency closure.
 | `@base-ui/react` | 1.7.0 | MIT | <https://github.com/mui/base-ui> |
 | `@duckdb/duckdb-wasm` | 1.32.0 | MIT | <https://github.com/duckdb/duckdb-wasm> |
 | `@zip.js/zip.js` | 2.8.60 | BSD-3-Clause | <https://github.com/gildas-lormeau/zip.js> |
+| `ag-psd` | 31.0.2 | MIT | <https://github.com/Agamnentzar/ag-psd> |
 | Ace | 1.44.0 | BSD-3-Clause | <https://github.com/ajaxorg/ace> |
 | Apache Arrow JS | 17.0.0 | Apache-2.0 | <https://github.com/apache/arrow-js> |
 | class-variance-authority | 0.7.1 | Apache-2.0 | <https://github.com/joe-bell/cva> |

@@ -23,6 +23,8 @@ describe("getFileTypeKind", () => {
     ["records.parquet", "database"],
     ["scene.gltf", "model"],
     ["layout.fig", "design"],
+    ["artwork.ai", "design"],
+    ["composition.psd", "design"],
     ["typeface.woff2", "font"],
     ["bundle.tar.gz", "archive"],
     ["module.wasm", "developer"],

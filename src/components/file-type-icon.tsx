@@ -2,6 +2,7 @@ import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manife
 import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
+import { cad2dManifest } from "@anyfile/cad-2d-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { dataManifest } from "@anyfile/data-viewer/manifest";
@@ -18,6 +19,7 @@ import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
 import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
+import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
@@ -129,7 +131,8 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "document",
     icon: FileTextIcon,
-    extensions: manifestExtensions(pdfManifest, wordManifest),
+    extensions: manifestExtensions(pdfManifest, wordManifest)
+      .filter((extension) => extension !== ".ai"),
   },
   {
     kind: "code",
@@ -164,7 +167,11 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "design",
     icon: PaletteIcon,
-    extensions: [".dxf", ".psd", ".psb", ".ai", ".fig", ".sketch", ".xd", ".indd"],
+    extensions: [
+      ...manifestExtensions(photoshopManifest, cad2dManifest),
+      ...pdfManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".ai"),
+      ".psb", ".fig", ".sketch", ".xd", ".indd",
+    ],
   },
   {
     kind: "font",

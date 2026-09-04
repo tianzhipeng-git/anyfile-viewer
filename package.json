@@ -51,6 +51,7 @@
     "@anyfile/non-native-video-viewer": "workspace:*",
     "@anyfile/non-native-audio-viewer": "workspace:*",
     "@anyfile/pdf-viewer": "workspace:*",
+    "@anyfile/photoshop-viewer": "workspace:*",
     "@anyfile/powerpoint-viewer": "workspace:*",
     "@anyfile/safe-svg-viewer": "workspace:*",
     "@anyfile/sqlite-viewer": "workspace:*",

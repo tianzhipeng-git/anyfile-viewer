@@ -4,6 +4,7 @@ import { goPro360Format } from "./360";
 import { lotus123Format } from "./123";
 import { threeGpFormat } from "./3gp";
 import { aacFormat } from "./aac";
+import { aiFormat } from "./ai";
 import { aabFormat } from "./aab";
 import { apngFormat } from "./apng";
 import { apkFormat } from "./apk";
@@ -79,6 +80,7 @@ import { parquetFormat } from "./parquet";
 import { pdfFormat } from "./pdf";
 import { pefFormat } from "./pef";
 import { pngFormat } from "./png";
+import { psdFormat } from "./psd";
 import { pnmFormat } from "./pnm";
 import { prnFormat } from "./prn";
 import { pptxFormat } from "./pptx";
@@ -127,6 +129,7 @@ export const formatContents: readonly FormatContent[] = [
   lotus123Format,
   threeGpFormat,
   aacFormat,
+  aiFormat,
   aabFormat,
   apngFormat,
   apkFormat,
@@ -202,6 +205,7 @@ export const formatContents: readonly FormatContent[] = [
   pdfFormat,
   pefFormat,
   pngFormat,
+  psdFormat,
   pnmFormat,
   prnFormat,
   pptxFormat,
