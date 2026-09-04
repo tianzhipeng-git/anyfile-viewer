@@ -23,10 +23,10 @@ async function openPhotoshop(context: OpenViewerContext): Promise<ViewerControll
   const { container, file, locale, reportProgress, signal } = context;
   const copy = selectMessages(locale, { "zh-CN": {
     reading: "正在检查 Photoshop 文档…", decoding: "正在 Worker 中生成合成图预览…", ready: "Photoshop 文档已打开",
-    invalid: "文件内容不是有效且可预览的 PSD 文档。", unsupported: "当前浏览器缺少 Worker、ImageBitmap 或 Canvas 2D 能力。", limit: "PSD 文件或合成图超过浏览器安全预览上限。",
+    invalid: "文件内容不是有效且可预览的 PSD 或 PSB 文档。", unsupported: "当前浏览器缺少 Worker、ImageBitmap 或 Canvas 2D 能力。", limit: "PSD/PSB 文件或合成图超过浏览器安全预览上限。",
   }, en: {
     reading: "Inspecting Photoshop document…", decoding: "Building the composite preview in a worker…", ready: "Photoshop document opened",
-    invalid: "The file is not a valid, previewable PSD document.", unsupported: "This browser lacks Worker, ImageBitmap or Canvas 2D support.", limit: "The PSD file or composite image exceeds the safe browser preview limit.",
+    invalid: "The file is not a valid, previewable PSD or PSB document.", unsupported: "This browser lacks Worker, ImageBitmap or Canvas 2D support.", limit: "The PSD/PSB file or composite image exceeds the safe browser preview limit.",
   } });
   let root: HTMLElement | undefined;
   let viewport: PhotoshopViewport | undefined;

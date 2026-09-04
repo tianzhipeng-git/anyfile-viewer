@@ -57,7 +57,7 @@
 | Insta360 X3 DNG | `.dng` | insta360 | 3 | verified | 3 | 严格校验 Arashi Vision / Insta360 X3 2976×5952 TB 双鱼眼；LibRaw 基础显影后以 WebGL 全景查看；不含 HDR 合成、专业色彩与精确型号校准 |
 | 相机 RAW | `.dng` `.cr2` `.cr3` `.crw` `.nef` `.nrw` `.arw` `.sr2` `.srf` `.raf` `.orf` `.pef` `.rwl` `.raw` `.rw2` | camera RAW | 2 | verified | 3 | 非 X3 DNG 与其他相机 RAW 由此插件处理；内嵌预览与 LibRaw 基础显影已实现，桌面真实文件已手工验证当前交付能力为等级 2。型号级自动回归覆盖仍待补充 |
 | PSD | `.psd` | layered document | 3 | implemented | 3 | `ag-psd@31.0.2` 在 Worker 中解码已保存的扁平合成图；展示尺寸、位深、颜色模式及图层/可见图层数量；不提供图层切换或重新合成 |
-| PSB | `.psb` | layered document | 0 | deferred | 3 | 当前依赖不支持 PSB 大型文档格式，未加入 Manifest |
+| PSB | `.psb` | layered document | 3 | implemented | 3 | 与 PSD 共用 `ag-psd@31.0.2` Worker 合成预览路径；只接受 version 2，沿用 256 MiB 输入与 64 Mi 像素边界，不承诺打开超出浏览器资源预算的大型文档 |
 | ORA/KRA | `.ora` `.kra` | layered document | 0 | deferred | 3 | 利用规范中的合成预览，不承诺编辑语义 |
 | DDS | `.dds` | GPU texture | 0 | deferred | 5 | mip、array、cubemap 和 BC family |
 | KTX/KTX2 | `.ktx` `.ktx2` | GPU texture | 0 | deferred | 5 | 评估 Khronos 官方 WASM |
@@ -111,11 +111,11 @@
 
 ## 9. PSD 读取、资源与验证证据
 
-- probe 只读取 26-byte 文件头，校验 `8BPS`、PSD version 1、保留位、通道数、尺寸、位深和颜色模式；PSB version 2 返回等级 0。
-- 完整插件锁定 `ag-psd@31.0.2`（MIT），在专用 Worker 中跳过图层像素、缩略图和链接文件，只解码保存的合成图并统计图层树。
+- probe 只读取 26-byte 文件头，校验 `8BPS`、PSD version 1 或 PSB version 2、对应版本的尺寸上限、保留位、通道数、位深和颜色模式；有效文件返回等级 3。
+- 完整插件锁定 `ag-psd@31.0.2`（MIT），在专用 Worker 中跳过图层像素、缩略图和链接文件，只解码 PSD/PSB 保存的合成图并统计图层树。
 - 输入上限为 256 MiB，合成图上限为 64 Mi 像素，解码内存预算为 256 MiB；RGBA8 通过 transferable 返回，主线程不再复制像素缓冲。
 - Canvas 复用 `@anyfile/viewer-rendering` 的 fit、actual size、缩放、平移、旋转、DPR 与资源清理能力；abort/dispose 会终止 Worker 并释放 ImageBitmap 与 Canvas backing store。
-- 自动测试覆盖真实生成的 PSD 字节解码、文件头识别、PSB/伪装文件拒绝、probe 取消、opening abort、重复 dispose、DOM 所有权及中英文 UI。
+- 自动测试覆盖真实生成的 PSD 与 PSB 字节解码、文件头识别、未知版本/伪装文件拒绝、probe 取消、opening abort、重复 dispose、DOM 所有权及中英文 UI。
 - 生产构建门禁确认 probe、完整查看器和 `ag-psd` Worker 均在 `/view` 首包之外。真实 Photoshop 复杂文档、窄/矮窗口和高 DPR 的手工验收仍待补充，因此状态保持 `implemented`。
 
 ## 10. 每个格式必须记录的维度

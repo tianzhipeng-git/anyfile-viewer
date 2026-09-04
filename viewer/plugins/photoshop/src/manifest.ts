@@ -6,7 +6,7 @@ export const photoshopManifest = {
   name: { en: "Photoshop viewer", "zh-CN": "Photoshop 查看器" },
   formats: [{
     name: { en: "Adobe Photoshop document", "zh-CN": "Adobe Photoshop 文档" },
-    extensions: [".psd"],
+    extensions: [".psd", ".psb"],
     mimeTypes: ["image/vnd.adobe.photoshop"],
   }],
   workspaceAccess: "none",

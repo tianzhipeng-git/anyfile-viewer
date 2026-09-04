@@ -16,18 +16,34 @@ function psdHeader() {
 }
 
 describe("Photoshop probe", () => {
-  it("recognizes a structurally valid PSD header", async () => {
+  it("recognizes structurally valid PSD and PSB headers", async () => {
     await expect(probePhotoshop({
       file: new File([psdHeader()], "artwork.psd"),
       signal: new AbortController().signal,
     })).resolves.toBe(3);
-  });
 
-  it("rejects PSB and invalid headers", async () => {
     const psb = psdHeader();
     new DataView(psb.buffer).setUint16(4, 2);
-    await expect(probePhotoshop({ file: new File([psb], "large.psd"), signal: new AbortController().signal })).resolves.toBe(0);
+    await expect(probePhotoshop({ file: new File([psb], "large.psb"), signal: new AbortController().signal })).resolves.toBe(3);
+  });
+
+  it("rejects unsupported versions and invalid headers", async () => {
+    const unsupported = psdHeader();
+    new DataView(unsupported.buffer).setUint16(4, 3);
+    await expect(probePhotoshop({ file: new File([unsupported], "future.psb"), signal: new AbortController().signal })).resolves.toBe(0);
     await expect(probePhotoshop({ file: new File(["not psd"], "fake.psd"), signal: new AbortController().signal })).resolves.toBe(0);
+  });
+
+  it("applies the version-specific dimension limit", async () => {
+    const psd = psdHeader();
+    new DataView(psd.buffer).setUint32(18, 30_001);
+    await expect(probePhotoshop({ file: new File([psd], "too-wide.psd"), signal: new AbortController().signal })).resolves.toBe(0);
+
+    const psb = psdHeader();
+    const psbView = new DataView(psb.buffer);
+    psbView.setUint16(4, 2);
+    psbView.setUint32(18, 30_001);
+    await expect(probePhotoshop({ file: new File([psb], "large.psb"), signal: new AbortController().signal })).resolves.toBe(3);
   });
 
   it("honors cancellation", async () => {

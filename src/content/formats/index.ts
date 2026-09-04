@@ -81,6 +81,7 @@ import { parquetFormat } from "./parquet";
 import { pdfFormat } from "./pdf";
 import { pefFormat } from "./pef";
 import { pngFormat } from "./png";
+import { psbFormat } from "./psb";
 import { psdFormat } from "./psd";
 import { psFormat } from "./ps";
 import { pnmFormat } from "./pnm";
@@ -208,6 +209,7 @@ export const formatContents: readonly FormatContent[] = [
   pdfFormat,
   pefFormat,
   pngFormat,
+  psbFormat,
   psdFormat,
   psFormat,
   pnmFormat,
