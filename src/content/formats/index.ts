@@ -88,6 +88,7 @@ import { pnmFormat } from "./pnm";
 import { prnFormat } from "./prn";
 import { pptxFormat } from "./pptx";
 import { pyzFormat } from "./pyz";
+import { pxdFormat } from "./pxd";
 import { qpwFormat } from "./qpw";
 import { rafFormat } from "./raf";
 import { rarFormat } from "./rar";
@@ -216,6 +217,7 @@ export const formatContents: readonly FormatContent[] = [
   prnFormat,
   pptxFormat,
   pyzFormat,
+  pxdFormat,
   qpwFormat,
   rafFormat,
   rarFormat,

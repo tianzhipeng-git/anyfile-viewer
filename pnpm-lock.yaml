@@ -80,6 +80,9 @@ importers:
       '@anyfile/photoshop-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/photoshop
+      '@anyfile/pixelmator-pxd-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/pixelmator-pxd
       '@anyfile/postscript-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/postscript
@@ -676,6 +679,34 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/pixelmator-pxd:
+    dependencies:
+      '@anyfile/general-raster-viewer':
+        specifier: workspace:*
+        version: link:../general-raster
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      '@zip.js/zip.js':
+        specifier: 2.8.60
+        version: 2.8.60
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6

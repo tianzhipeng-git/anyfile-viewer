@@ -19,8 +19,9 @@ import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
 import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
-import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
+import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
+import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
@@ -169,7 +170,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     kind: "design",
     icon: PaletteIcon,
     extensions: [
-      ...manifestExtensions(photoshopManifest, cad2dManifest),
+      ...manifestExtensions(pixelmatorPxdManifest, photoshopManifest, cad2dManifest),
       ...pdfManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".ai"),
       ".psb", ".fig", ".sketch", ".xd", ".indd",
     ],

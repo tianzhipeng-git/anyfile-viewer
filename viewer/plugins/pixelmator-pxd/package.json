@@ -1,24 +1,25 @@
 {
-  "name": "@anyfile/general-raster-viewer",
+  "name": "@anyfile/pixelmator-pxd-viewer",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
     "./manifest": "./src/manifest.ts",
-    "./probe": "./src/probe.ts",
-    "./tiff": "./src/decode-tiff.ts"
+    "./probe": "./src/probe.ts"
   },
   "scripts": {
     "test": "vitest run"
   },
   "dependencies": {
+    "@anyfile/general-raster-viewer": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",
-    "geotiff": "3.0.5"
+    "@zip.js/zip.js": "2.8.60"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*",
+    "fflate": "0.8.3",
     "happy-dom": "20.11.6",
     "vitest": "4.1.11"
   }
