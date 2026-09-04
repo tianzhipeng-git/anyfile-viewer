@@ -63,7 +63,7 @@ afterEach(() => {
 describe("PDF viewer protocol compliance", () => {
   it("publishes a valid v1 manifest", () => {
     expect(() => validateManifest(pdfManifest)).not.toThrow();
-    expect(pdfManifest.formats.flatMap((format) => format.extensions)).toEqual([".pdf"]);
+    expect(pdfManifest.formats.flatMap((format) => format.extensions)).toEqual([".pdf", ".ai"]);
   });
 
   it("opens through a sliced read and releases its Object URL on repeated dispose", async () => {

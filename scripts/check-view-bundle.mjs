@@ -44,6 +44,8 @@ const deferredImplementationMarkers = [
   "正在读取 Excel 工作簿",
   "正在读取 PowerPoint 演示文稿",
   "anyfile-pdf-viewer__viewport",
+  "anyfile-photoshop-viewer__canvas",
+  "Unexpected Photoshop composite pixel layout",
   "__anyfile_archive_metadata_viewer_v1__",
   "__anyfile_archive_probe_v1__",
   "__anyfile_dev_array_viewer_v1__",
@@ -131,6 +133,15 @@ if (dataProbeChunks.length === 0) throw new Error("Data probe chunk was not foun
 if (dataProbeChunks.some(({ content }) => content.includes("Starting DuckDB"))) {
   throw new Error("Data probe chunk contains the full DuckDB viewer implementation");
 }
+const photoshopProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_photoshop_probe_v1__"));
+if (photoshopProbeChunks.length === 0) throw new Error("Photoshop probe chunk was not found");
+if (photoshopProbeChunks.some(({ content }) => content.includes("Unexpected Photoshop composite pixel layout"))) {
+  throw new Error("Photoshop probe chunk contains the full PSD decoder");
+}
+const photoshopViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-photoshop-viewer__canvas"));
+if (photoshopViewerChunks.length === 0) throw new Error("Photoshop viewer dynamic chunk was not found");
+const photoshopDecoderChunks = archiveChunkContents.filter(({ content }) => content.includes("Unexpected Photoshop composite pixel layout"));
+if (photoshopDecoderChunks.length === 0) throw new Error("Deferred Photoshop decoder Worker chunk was not found");
 const duckdbPackage = JSON.parse(await readFile(join(
   projectRoot,
   "viewer/plugins/data/node_modules/@duckdb/duckdb-wasm/package.json",

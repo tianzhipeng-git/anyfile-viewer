@@ -16,6 +16,13 @@ describe("PDF probe", () => {
     })).resolves.toBe(0);
   });
 
+  it("recognizes the PDF representation in an Illustrator file", async () => {
+    await expect(probePdf({
+      file: new File(["%PDF-1.7\n% Illustrator data"], "artwork.ai"),
+      signal: new AbortController().signal,
+    })).resolves.toBe(4);
+  });
+
   it("cancels an unfinished header read", async () => {
     const deferred = createDeferredFile("document.pdf", 1_024);
     const abortController = new AbortController();
