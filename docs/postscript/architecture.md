@@ -39,7 +39,9 @@ PostScript 是可编程语言。解释器只能在 Worker 中运行；单次初�
 
 源码锁定在 stet v0.8.1、commit `a61c70796f25e0d0a8f5eaa04992cb7cd222aa07`，release archive SHA-256 为 `78a1140a4fad3862325f04402e746f590b4fb82664127e9416d97a2052be0510`。可重复配方位于 `tools/stet-wasm-build/`，审核产物位于 `third_party/stet-wasm/0.8.1-anyfile.1/`，`pnpm prepare:stet` 校验后复制到 `/vendor/stet/0.8.1-anyfile.1/`。
 
-WASM 为 13,600,486 bytes，gzip 约 10.3 MiB，超过外部资产门槛。当前保留同源分发例外，让模块 Worker、动态 glue、WASM 和 `/view` 的 COEP/CORP 行为先形成一个可验证发布边界。运行时只在插件选中后加载，不进入查看页首包、probe chunk 或其他插件 chunk。上线流量扩大前应把相同哈希发布到 `assets.anyfile.top`，完成 Chrome、Edge、Firefox、Safari 的跨源模块与 WASM 验证后切换成 R2 → 同源回退。
+WASM 为 13,600,486 bytes，gzip 约 10.3 MiB，超过外部资产门槛。运行时依次使用 jsDelivr 上包含审核产物的完整 Git commit、`assets.anyfile.top` 的同版本 R2 镜像和版本化同源资源。每个来源使用独立的一次性 Worker；只有资源获取、Worker 创建或引擎初始化失败时才销毁失败 Worker 并切换下一来源，文件解释与栅格化错误不会触发整套运行时重试。三个来源的 glue/WASM 字节与 `build-info.json` 保持一致。
+
+jsDelivr URL 锁定完整 commit `296f90ad07f025082cc76b237f1fab0ad53b1e50`，不得改用分支或 tag 浮动 URL。运行时仍只在插件选中后加载，不进入查看页首包、probe chunk 或其他插件 chunk。发布验收需在 Chrome、Edge、Firefox、Safari 中分别验证正常链路、阻断 jsDelivr 后的 R2 回退，以及同时阻断两个外部域名后的同源回退。
 
 ## 5. 已知限制与验证
 

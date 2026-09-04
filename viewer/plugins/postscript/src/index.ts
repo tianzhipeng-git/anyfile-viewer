@@ -10,7 +10,7 @@ import { postscriptManifest } from "./manifest";
 import { probePostscript } from "./probe";
 import { readBlob } from "./read-blob";
 import { PostscriptView } from "./view";
-import { PostscriptWorkerClient } from "./worker-client";
+import { createPostscriptWorkerClient, type PostscriptWorkerClient } from "./worker-client";
 
 const MAX_FILE_BYTES = 64 * 1024 * 1024;
 
@@ -80,8 +80,7 @@ async function openPostscript(context: OpenViewerContext): Promise<ViewerControl
     if (await probePostscript({ file, signal }) === 0) throw new ViewerError("invalid-file", copy.invalid);
     const buffer = await readBlob(file, signal);
     reportProgress({ stage: "engine", message: copy.engine });
-    client = new PostscriptWorkerClient(signal);
-    await client.initialize();
+    client = await createPostscriptWorkerClient(signal);
     reportProgress({ stage: "interpreting", message: copy.interpreting });
     const document = await client.open(buffer, file.name);
     if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");

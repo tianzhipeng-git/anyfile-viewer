@@ -100,7 +100,7 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 分发链路根据单次真实传输量、上游发布条件和浏览器运行约束决定：
 
 - 小型资产默认使用版本化同源路径；
-- 达到本节量化门槛且有可靠官方公共 CDN 的资产，使用“官方 CDN → 受控资产域名 → 同源”；
+- 达到本节量化门槛且有可靠公共 CDN 的资产，使用“公共 CDN → 受控资产域名 → 同源”；上游 npm 包使用官方版本 URL，源码构建产物只能使用包含审核产物的公开仓库完整 Git commit URL；
 - 达到门槛但没有可靠官方公共 CDN 的自建产物，使用“受控资产域名 → 同源”；
 - 模块 Worker、pthread 或相对导入链要求同源时，可以保留同源，但必须记录原因和传输量。
 
@@ -150,7 +150,7 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 
 链路选择遵守以下规则：
 
-- 上游提供官方发布、精确版本且真实 URL 满足 CORS、CORP、MIME 和缓存要求时，使用 `jsDelivr → R2 同版本镜像 → Vercel 同源`；
+- 上游提供官方发布，或源码构建审核产物已进入公开仓库的不可变 Git commit，且真实 URL 满足 CORS、CORP、MIME 和缓存要求时，使用 `jsDelivr → R2 同版本镜像 → Vercel 同源`；
 - 自建产物或没有可靠官方公共 CDN 时，使用 `R2 → Vercel 同源`，不为凑齐三层而使用非官方 CDN；
 - 小于门槛的资源默认保持同源，避免为低收益资源增加上传、版本同步和跨源诊断成本；
 - 模块 Worker、pthread、相对导入链或其他运行约束确实要求同源时可以例外，但必须在对应架构文档记录原因、实际传输量和流量观察方式，不能只写“兼容性需要”。
@@ -174,7 +174,7 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 | PDF.js 支持资源 | 锁定的 npm 包 | 总目录约 3.7 MiB；最大单文件约 441 KiB | PDF 实际需要对应字体、色彩或解码能力时 | 同源 | 192 个资源按需互斥加载，单次传输未达到门槛 |
 | DuckDB WASM / Worker | 锁定的 npm 包 | MVP/EH WASM 约 38/33 MiB | DuckDB 插件被选中并初始化时 | jsDelivr → R2 → 同源 | 单个 WASM 远超门槛 |
 | HEIF decoder / WASM | 审核过的源码构建产物 | 主要 WASM 约 1.17 MiB | 已识别为 HEVC 的 HEIF 原生解码失败后 | 同源 | 小于门槛，且只作为条件 fallback |
-| stet PostScript / WASM | 审核过的源码构建产物 | WASM 约 13.0 MiB raw、10.3 MiB gzip | EPS/PS 插件被选中时 | 同源 | 模块 Worker 在隔离页面内动态导入 glue 并实例化 WASM；当前先保留单一同源发布链路，详见 `docs/postscript/architecture.md` |
+| stet PostScript / WASM | 审核过的源码构建产物 | WASM 约 13.0 MiB raw、10.3 MiB gzip | EPS/PS 插件被选中时 | jsDelivr commit → R2 → 同源 | 模块 Worker 依次从三个同版本来源动态导入 glue 并实例化 WASM；每次失败都销毁 Worker，详见 `docs/postscript/architecture.md` |
 | LibRaw Worker / WASM | 锁定的 npm 包及补充许可材料 | 主要 WASM 约 1.38 MiB | RAW 插件被选中时 | 同源 | 小于门槛，并有 pthread/Worker 同源隔离约束 |
 | JXL Worker / WASM | bundler 产物 | 构建时持续检查 | JXL 插件被选中时 | `/_next/static` | 可正确拆分并使用内容哈希路径 |
 
@@ -185,7 +185,7 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 - **PDF.js**：`pnpm dev` 和 `pnpm build` 先运行 `scripts/prepare-pdfjs-assets.mjs`，把锁定版本 `pdfjs-dist` 的 `cmaps/`、`standard_fonts/`、`iccs/` 和 `wasm/` 原目录复制到 `public/vendor/pdfjs/<version>/`。这些目录分别提供复合字体字符映射、标准字体、ICC 色彩配置，以及 JBIG2、OpenJPEG、QCMS 和官方 JavaScript 解码回退。目录是生成产物，不提交仓库；版本目录避免升级后缓存混用。
 - **DuckDB**：JavaScript API 由应用打包。运行时使用 `getJsDelivrBundles()` 取得与已安装包一致的官方 URL，用 `selectBundle()` 选择 MVP 或 EH，再按 jsDelivr、`assets.anyfile.top` 同版本镜像、构建产物中的同版本本地资源依次尝试。切换来源时遵守前述清理和失败分类规则。
 - **HEIF**：`pnpm prepare:heif` 校验 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json` 中的大小和 SHA-256，再把 decoder、WASM、许可证与源码说明复制到 `/vendor/libheif/1.23.2-anyfile.1/`，构建门禁交叉校验运行时 URL 与产物版本。probe 不导入这些资产；独立 Worker 只在原生实际解码失败后动态导入同源 glue 并加载 WASM。`/vendor/libheif/:path*` 返回与其他同源 Worker/WASM 一致的 COEP/CORP 头；CSP 只需允许同源 Worker 和 WebAssembly。
-- **stet**：`pnpm prepare:stet` 校验 `third_party/stet-wasm/0.8.1-anyfile.1/build-info.json`，再把 PS/EPS-only glue、WASM、许可证和源码说明复制到 `/vendor/stet/0.8.1-anyfile.1/`。轻量 probe 不导入运行时；完整插件被选择后才创建模块 Worker，并从版本化同源路径加载 stet。该 WASM 超过外部分发门槛；当前同源例外用于先保持模块 Worker、glue、WASM、COEP/CORP 和 Safari 行为在单一可验收边界内。上线流量扩大前必须发布相同哈希到 `assets.anyfile.top`，验证目标浏览器的跨源模块导入后改为 R2 → 同源回退，不能长期把 10 MiB 级冷启动流量留在 Vercel。
+- **stet**：`pnpm prepare:stet` 校验 `third_party/stet-wasm/0.8.1-anyfile.1/build-info.json`，再把 PS/EPS-only glue、WASM、许可证和源码说明复制到 `/vendor/stet/0.8.1-anyfile.1/`。轻量 probe 不导入运行时；完整插件被选择后才创建模块 Worker。运行时先使用 jsDelivr 上包含审核产物的完整 Git commit URL，再回退到 `assets.anyfile.top` 的同版本 R2 镜像，最后回退到版本化同源路径。每个来源只尝试一次，初始化失败时销毁对应 Worker；文件解释或渲染错误不切换来源。构建门禁同时校验三组版本化 URL 和回退实现仍位于延迟插件 chunk。
 
 DuckDB 当前生产 bucket 为 `anyfile-bucket`，公开资产域名为 `https://assets.anyfile.top`。`1.32.0` 的 MVP/EH 单线程 WASM 与 Worker 保持 npm 包原文件名，发布在：
 
@@ -352,6 +352,7 @@ JXL 的打包 Worker 和 WASM 位于 `/_next/static/:path*`，该路径同样返
 - 在正常网络下确认 DuckDB 使用带精确版本号的 jsDelivr URL。
 - 阻断 `cdn.jsdelivr.net` 后确认 DuckDB 从 `assets.anyfile.top` 打开文件，并观察资产请求进入 Cloudflare cache HIT。
 - 同时阻断 `cdn.jsdelivr.net` 与 `assets.anyfile.top` 后确认 DuckDB 可以使用本站资源打开文件。
+- 对 PostScript 重复上述三级阻断测试，确认每次初始化失败都销毁旧 Worker，且文件解释或渲染错误不会切换资产来源。
 - 对同源版本化 `/vendor` 资源检查 MIME、COEP/CORP（适用时）和 `Cache-Control: public, max-age=31536000, immutable`。例如运行 `curl -I https://<domain>/vendor/libraw/1.6.0/libraw.wasm`。
 - 对所有外部 Worker/WASM 的最终 URL（包括重定向后 URL）检查 CORS、CORP、MIME 和不可变缓存头。
 - 新增或升级运行时依赖时，记录单资源与典型冷启动实际传输量；达到 2 MiB/4 MiB 门槛或月度流量占套餐额度 10% 时，确认已按本节接入外部资产链路或记录同源例外依据。

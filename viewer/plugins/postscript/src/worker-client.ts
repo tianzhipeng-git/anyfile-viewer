@@ -1,7 +1,7 @@
 import { ViewerError } from "@anyfile/viewer-protocol";
 
 import { abortError } from "./read-blob";
-import { STET_RUNTIME_URL, STET_WASM_URL } from "./runtime";
+import { STET_ASSET_SOURCES } from "./runtime";
 import type {
   PostscriptWorkerRequest,
   PostscriptWorkerResponse,
@@ -20,8 +20,13 @@ export class PostscriptWorkerClient {
     signal.addEventListener("abort", this.dispose, { once: true });
   }
 
-  async initialize() {
-    await this.request({ type: "init", id: this.nextId++, runtimeUrl: STET_RUNTIME_URL, wasmUrl: STET_WASM_URL }, "ready");
+  async initialize(source: (typeof STET_ASSET_SOURCES)[number]) {
+    await this.request({
+      type: "init",
+      id: this.nextId++,
+      runtimeUrl: source.runtimeUrl,
+      wasmUrl: source.wasmUrl,
+    }, "ready");
   }
 
   async open(buffer: ArrayBuffer, fileName: string) {
@@ -99,4 +104,26 @@ export class PostscriptWorkerClient {
     for (const cancel of [...this.cancellations]) cancel();
     this.worker.terminate();
   };
+}
+
+export async function createPostscriptWorkerClient(signal: AbortSignal) {
+  const errors: unknown[] = [];
+  for (const source of STET_ASSET_SOURCES) {
+    if (signal.aborted) throw abortError();
+    let client: PostscriptWorkerClient | undefined;
+    try {
+      client = new PostscriptWorkerClient(signal);
+      await client.initialize(source);
+      return client;
+    } catch (error) {
+      client?.dispose();
+      if (error instanceof DOMException && error.name === "AbortError") throw error;
+      errors.push(error);
+    }
+  }
+  throw new ViewerError(
+    "open-failed",
+    "Unable to initialize PostScript from jsDelivr, R2, or local assets.",
+    { cause: new AggregateError(errors) },
+  );
 }

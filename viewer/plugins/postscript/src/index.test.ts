@@ -2,13 +2,16 @@ import { createViewerTestContext } from "@anyfile/viewer-test";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { postscriptViewer } from "./index";
+import { STET_ASSET_SOURCES } from "./runtime";
 import type { PostscriptWorkerRequest, PostscriptWorkerResponse } from "./types";
 
 class MockWorker extends EventTarget {
   static pending = false;
   static streaming = false;
+  static initializationFailures = 0;
   static instances: MockWorker[] = [];
   terminated = false;
+  requests: PostscriptWorkerRequest[] = [];
 
   constructor() {
     super();
@@ -16,11 +19,14 @@ class MockWorker extends EventTarget {
   }
 
   postMessage(request: PostscriptWorkerRequest) {
+    this.requests.push(request);
     if (MockWorker.pending) return;
     queueMicrotask(() => {
       if (this.terminated) return;
       let response: PostscriptWorkerResponse;
-      if (request.type === "init") response = { type: "ready", id: request.id };
+      if (request.type === "init" && MockWorker.initializationFailures-- > 0) {
+        response = { type: "error", id: request.id, code: "open-failed", message: "Runtime unavailable" };
+      } else if (request.type === "init") response = { type: "ready", id: request.id };
       else if (request.type === "open") response = { type: "opened", id: request.id, pages: [{ width: 120, height: 80, dpi: 150 }], streaming: MockWorker.streaming };
       else if (request.type === "step") response = { type: "stepped", id: request.id, pages: [{ width: 120, height: 80, dpi: 150 }], done: true };
       else response = { type: "rendered", id: request.id, width: 2, height: 1, rgba: new Uint8Array([255, 0, 0, 255, 0, 0, 255, 255]).buffer };
@@ -38,6 +44,7 @@ const canvasContext = { putImageData: vi.fn() };
 beforeEach(() => {
   MockWorker.pending = false;
   MockWorker.streaming = false;
+  MockWorker.initializationFailures = 0;
   MockWorker.instances = [];
   canvasContext.putImageData.mockClear();
   vi.stubGlobal("Worker", MockWorker);
@@ -82,6 +89,35 @@ describe("postscript viewer protocol compliance", () => {
     await expect(opening).rejects.toMatchObject({ name: "AbortError" });
     expect(test.container.childElementCount).toBe(0);
     expect(MockWorker.instances[0].terminated).toBe(true);
+    test.cleanup();
+  });
+
+  it("falls back from jsDelivr to R2 and then local assets with a fresh Worker", async () => {
+    MockWorker.initializationFailures = 2;
+    const file = new File(["%!PS-Adobe-3.0\nshowpage\n"], "sample.ps");
+    const test = createViewerTestContext(file);
+    const controller = await postscriptViewer.open(test.context);
+
+    expect(MockWorker.instances).toHaveLength(3);
+    expect(MockWorker.instances.slice(0, 2).every((worker) => worker.terminated)).toBe(true);
+    expect(MockWorker.instances.map((worker) => {
+      const request = worker.requests[0];
+      return request.type === "init" ? request.runtimeUrl : undefined;
+    })).toEqual(STET_ASSET_SOURCES.map((source) => source.runtimeUrl));
+
+    await controller.dispose();
+    expect(MockWorker.instances[2].terminated).toBe(true);
+    test.cleanup();
+  });
+
+  it("fails after trying each runtime source exactly once", async () => {
+    MockWorker.initializationFailures = STET_ASSET_SOURCES.length;
+    const file = new File(["%!PS-Adobe-3.0\nshowpage\n"], "sample.ps");
+    const test = createViewerTestContext(file);
+
+    await expect(postscriptViewer.open(test.context)).rejects.toMatchObject({ code: "open-failed" });
+    expect(MockWorker.instances).toHaveLength(STET_ASSET_SOURCES.length);
+    expect(MockWorker.instances.every((worker) => worker.terminated)).toBe(true);
     test.cleanup();
   });
 

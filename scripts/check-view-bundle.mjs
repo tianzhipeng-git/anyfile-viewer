@@ -112,6 +112,17 @@ for (const [asset, expected] of Object.entries(heifBuildInfo.artifacts)) {
 const stetRuntimeSource = await readFile(join(projectRoot, "viewer/plugins/postscript/src/runtime.ts"), "utf8");
 const stetRuntimeVersion = stetRuntimeSource.match(/STET_ARTIFACT_VERSION = "([^"]+)"/)?.[1];
 if (!stetRuntimeVersion) throw new Error("stet runtime artifact version is missing");
+const stetJsDelivrRevision = stetRuntimeSource.match(/STET_JSDELIVR_REVISION = "([0-9a-f]{40})"/)?.[1];
+if (!stetJsDelivrRevision) throw new Error("stet jsDelivr revision must be a full Git commit hash");
+for (const sourceRoot of [
+  "https://cdn.jsdelivr.net/gh/tianzhipeng-git/anyfile-viewer@${STET_JSDELIVR_REVISION}/third_party/stet-wasm/${STET_ARTIFACT_VERSION}",
+  "https://assets.anyfile.top/vendor/stet/${STET_ARTIFACT_VERSION}",
+  "/vendor/stet/${STET_ARTIFACT_VERSION}",
+]) {
+  if (!stetRuntimeSource.includes(sourceRoot)) {
+    throw new Error(`PostScript runtime source is not version-aligned: ${sourceRoot}`);
+  }
+}
 const stetSourceRoot = join(projectRoot, "third_party/stet-wasm", stetRuntimeVersion);
 const stetBuildInfo = JSON.parse(await readFile(join(stetSourceRoot, "build-info.json"), "utf8"));
 const stetSupportRoot = join(projectRoot, "public/vendor/stet", stetRuntimeVersion);
@@ -124,8 +135,19 @@ for (const [asset, expected] of Object.entries(stetBuildInfo.artifacts)) {
 }
 const postscriptViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-postscript-viewer__canvas"));
 if (postscriptViewerChunks.length === 0) throw new Error("PostScript viewer dynamic chunk was not found");
-if (!stetRuntimeSource.includes(`/vendor/stet/\${STET_ARTIFACT_VERSION}`)) {
-  throw new Error("PostScript runtime does not use the version-locked stet asset path");
+const postscriptViewerCode = Buffer.concat(postscriptViewerChunks.map(({ content }) => content)).toString("utf8");
+for (const marker of [
+  `https://cdn.jsdelivr.net/gh/tianzhipeng-git/anyfile-viewer@${stetJsDelivrRevision}/third_party/stet-wasm/`,
+  "https://assets.anyfile.top/vendor/stet/",
+  "/vendor/stet/",
+  stetRuntimeVersion,
+]) {
+  if (!postscriptViewerCode.includes(marker)) {
+    throw new Error(`Deferred PostScript viewer chunk is missing asset marker: ${marker}`);
+  }
+}
+if (!postscriptViewerCode.includes("Unable to initialize PostScript from jsDelivr, R2, or local assets")) {
+  throw new Error("Deferred PostScript viewer chunk does not contain the three-source fallback");
 }
 const jxlChunks = archiveChunkContents.filter(({ content }) => content.includes("JxlImage"));
 if (jxlChunks.length === 0) {
