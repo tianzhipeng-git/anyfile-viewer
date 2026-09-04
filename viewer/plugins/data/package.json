@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@anyfile/runtime-assets": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-ui": "workspace:*",
     "@duckdb/duckdb-wasm": "1.32.0",

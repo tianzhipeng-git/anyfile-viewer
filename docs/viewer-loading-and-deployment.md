@@ -71,7 +71,8 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 2. 在注册表中静态导入 manifest，通过 `import()` 动态导入 probe 和完整实现。
 3. 不需要精确路由的插件省略 probe，以默认支持等级 1 参与排序。
 4. 注册顺序只作为同支持等级候选的稳定 tie-break；通用兜底插件仍放在末尾。
-5. 运行 `pnpm build`，确认首包体积检查通过。
+5. 在 `viewer/plugin-policies.json` 中增加对应插件项；没有运行时资产时也必须显式声明空 `runtimeSets`。
+6. 运行 `pnpm build`，确认首包、插件入口与运行时资产体积检查通过。
 
 ## 3. 运行时资产的准备、分发与回退
 
@@ -96,6 +97,10 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 - **npm 可恢复资产**：由 lockfile 中的精确包版本恢复，构建前复制到版本化同源目录；不重复提交到 `third_party`。
 - **源码构建资产**：由 `tools/<dependency>-build/` 的可重复配方生成，审核产物提交到 `third_party`，构建前校验并复制。
 - **打包资产**：能够被 bundler 正确拆分的 Worker/WASM 随插件 chunk 产出，但仍不得进入查看页首包。
+
+这些信息以 `viewer/plugin-policies.json` 为机器可读事实来源。策略文件必须覆盖每个已注册插件，并为运行时声明精确版本、构建产物匹配模式、互斥的典型冷启动集合及来源顺序。构建后 `scripts/check-plugin-assets.mjs` 会交叉校验注册表、插件导出、锁定依赖版本、所有 `/vendor` 与 Webpack 产出的 Worker/WASM，并按 gzip 估算执行本节的 2 MiB/4 MiB 门槛。gzip 是离线、确定性的 CI 估算；生产环境最终仍以浏览器实际 `transferred size` 为准。
+
+确需让达到门槛的资源保持同源时，策略中的 `sameOriginException` 必须同时记录原因、对应架构文档和实测 gzip 字节数。只写布尔豁免不被接受。
 
 分发链路根据单次真实传输量、上游发布条件和浏览器运行约束决定：
 
@@ -128,6 +133,8 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 ### 外部链路的回退语义
 
 使用外部资产链路时，每个来源只尝试一次。仅在资源获取、Worker 创建或引擎初始化失败时切换到下一来源；文件损坏、格式不支持、解码或查询失败不得触发整套运行时重新初始化。切换前必须清理失败实例，所有来源失败后才向查看器上层返回错误。
+
+`@anyfile/runtime-assets` 提供统一的初始化回退编排：插件传入有序来源，并为每个来源创建带 `initialize()` / `dispose()` 的一次性 attempt。共享工具负责取消、失败清理、逐源单次尝试和错误聚合；Worker、Emscripten 或数据库的具体创建仍留在插件内。回退作用域必须在文件解析或查询开始前结束，不能把整次 `open()` 包进来源循环。DuckDB 与 PostScript 已使用这一工具，新增多来源运行时应复用它。
 
 外部来源、受控镜像和同源 fallback 必须是同一精确版本。保留同源 fallback 会降低正常流量对 Vercel 大文件分发的依赖，但不会缩小部署产物；如果某项资产有意不保留同源 fallback，必须在对应架构文档说明离线行为和失败 UI。
 
@@ -183,7 +190,7 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 以下三项还包含本节直接负责的 prepare 或外部部署操作；LibRaw 的许可证与准备约束见第 4 节，JXL 的响应头约束见第 5 节：
 
 - **PDF.js**：`pnpm dev` 和 `pnpm build` 先运行 `scripts/prepare-pdfjs-assets.mjs`，把锁定版本 `pdfjs-dist` 的 `cmaps/`、`standard_fonts/`、`iccs/` 和 `wasm/` 原目录复制到 `public/vendor/pdfjs/<version>/`。这些目录分别提供复合字体字符映射、标准字体、ICC 色彩配置，以及 JBIG2、OpenJPEG、QCMS 和官方 JavaScript 解码回退。目录是生成产物，不提交仓库；版本目录避免升级后缓存混用。
-- **DuckDB**：JavaScript API 由应用打包。运行时使用 `getJsDelivrBundles()` 取得与已安装包一致的官方 URL，用 `selectBundle()` 选择 MVP 或 EH，再按 jsDelivr、`assets.anyfile.top` 同版本镜像、构建产物中的同版本本地资源依次尝试。切换来源时遵守前述清理和失败分类规则。
+- **DuckDB**：JavaScript API 由应用打包，并显式导入包公开的 `dist/duckdb-browser.mjs` 子路径，避免 Next.js 的服务端构建目标误选包含动态 Node `require()` 的入口。运行时使用 `getJsDelivrBundles()` 取得与已安装包一致的官方 URL，用 `selectBundle()` 选择 MVP 或 EH，再按 jsDelivr、`assets.anyfile.top` 同版本镜像、构建产物中的同版本本地资源依次尝试。切换来源时遵守前述清理和失败分类规则。
 - **HEIF**：`pnpm prepare:heif` 校验 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json` 中的大小和 SHA-256，再把 decoder、WASM、许可证与源码说明复制到 `/vendor/libheif/1.23.2-anyfile.1/`，构建门禁交叉校验运行时 URL 与产物版本。probe 不导入这些资产；独立 Worker 只在原生实际解码失败后动态导入同源 glue 并加载 WASM。`/vendor/libheif/:path*` 返回与其他同源 Worker/WASM 一致的 COEP/CORP 头；CSP 只需允许同源 Worker 和 WebAssembly。
 - **stet**：`pnpm prepare:stet` 校验 `third_party/stet-wasm/0.8.1-anyfile.1/build-info.json`，再把 PS/EPS-only glue、WASM、许可证和源码说明复制到 `/vendor/stet/0.8.1-anyfile.1/`。轻量 probe 不导入运行时；完整插件被选择后才创建模块 Worker。运行时先使用 jsDelivr 上包含审核产物的完整 Git commit URL，再回退到 `assets.anyfile.top` 的同版本 R2 镜像，最后回退到版本化同源路径。每个来源只尝试一次，初始化失败时销毁对应 Worker；文件解释或渲染错误不切换来源。构建门禁同时校验三组版本化 URL 和回退实现仍位于延迟插件 chunk。
 
@@ -294,6 +301,13 @@ public/vendor/<dependency>/<version>/     不提交的部署资源
 - 检查新增 probe 及其解析依赖没有进入初始 JavaScript；probe chunk 也不能静态带入完整插件实现。
 - 检查 PDF.js Worker 已产出，且版本化 CMap、标准字体、ICC、WASM 和 JavaScript 解码回退齐全。
 - 检查 JXL 与 RAW 的 Worker/WASM 没有进入 `/en/view` 初始 JavaScript，并且只在对应插件完整入口加载。
+
+随后还会执行两个通用门禁：
+
+- `scripts/check-plugin-bundles.mjs` 从 Next.js 生成的 `react-loadable-manifest.json` 读取注册表中每个动态 import 的真实 chunk 集合。Manifest 源码 gzip 上限为 16 KiB，probe 为 96 KiB，完整插件初始入口为 512 KiB；任一客户端 JavaScript chunk 也不得超过 512 KiB gzip。详细结果写入 `.next/diagnostics/viewer-bundle-report.json`。
+- `scripts/check-plugin-assets.mjs` 要求所有已注册插件存在策略项，检查运行时资产无人遗漏，并执行单资源 2 MiB、典型冷启动 4 MiB 的外部分发门槛。该检查不访问 jsDelivr 或 R2，因此不会把外部网络波动引入生产构建。
+
+项目使用 Vercel Git 自动部署，以上检查直接属于根 `package.json` 的 `build` 命令。Preview 与 Production 构建都会在产物部署前执行；门禁失败即终止该次 Vercel 部署，不需要额外的 Vercel CLI、Token 或独立 CI 工作流。
 
 ### `/{locale}/view` 统一计算环境的跨源隔离
 

@@ -1,4 +1,5 @@
-import * as duckdb from "@duckdb/duckdb-wasm";
+import * as duckdb from "@duckdb/duckdb-wasm/dist/duckdb-browser.mjs";
+import { initializeRuntimeFromSources, type RuntimeSource } from "@anyfile/runtime-assets";
 
 const R2_ASSET_ROOT = "https://assets.anyfile.top/vendor/duckdb/1.32.0";
 
@@ -24,30 +25,31 @@ const LOCAL_BUNDLES: duckdb.DuckDBBundles = {
   },
 };
 
-async function instantiateBundle(bundles: duckdb.DuckDBBundles) {
-  const bundle = await duckdb.selectBundle(bundles);
-  if (!bundle.mainWorker) throw new Error("No compatible DuckDB worker bundle");
-  const worker = await duckdb.createWorker(bundle.mainWorker);
-  const database = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), worker);
-  try {
-    await database.instantiate(bundle.mainModule, bundle.pthreadWorker);
-    return database;
-  } catch (error) {
-    await database.terminate().catch(() => undefined);
-    throw error;
-  }
-}
-
 export async function createDuckDBRuntime(signal: AbortSignal) {
-  const errors: unknown[] = [];
-  const sources = [duckdb.getJsDelivrBundles(), R2_BUNDLES, LOCAL_BUNDLES];
-  for (const bundles of sources) {
-    if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");
-    try {
-      return await instantiateBundle(bundles);
-    } catch (error) {
-      errors.push(error);
-    }
-  }
-  throw new AggregateError(errors, "Unable to initialize DuckDB from jsDelivr, R2, or local assets");
+  const sources: RuntimeSource<duckdb.DuckDBBundles>[] = [
+    { name: "jsDelivr", value: duckdb.getJsDelivrBundles() },
+    { name: "R2", value: R2_BUNDLES },
+    { name: "local", value: LOCAL_BUNDLES },
+  ];
+  return initializeRuntimeFromSources({
+    signal,
+    sources,
+    errorMessage: "Unable to initialize DuckDB from jsDelivr, R2, or local assets",
+    abortMessage: "Viewer operation aborted.",
+    async createAttempt(source) {
+      const bundle = await duckdb.selectBundle(source.value);
+      if (!bundle.mainWorker) throw new Error("No compatible DuckDB worker bundle");
+      const worker = await duckdb.createWorker(bundle.mainWorker);
+      const database = new duckdb.AsyncDuckDB(new duckdb.VoidLogger(), worker);
+      return {
+        async initialize() {
+          await database.instantiate(bundle.mainModule, bundle.pthreadWorker);
+          return database;
+        },
+        async dispose() {
+          await database.terminate().catch(() => undefined);
+        },
+      };
+    },
+  });
 }

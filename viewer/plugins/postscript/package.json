@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@anyfile/runtime-assets": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*"
   },
   "devDependencies": {

@@ -9,7 +9,7 @@ const mocks = vi.hoisted(() => ({
   terminate: vi.fn(async () => undefined),
 }));
 
-vi.mock("@duckdb/duckdb-wasm", () => ({
+vi.mock("@duckdb/duckdb-wasm/dist/duckdb-browser.mjs", () => ({
   getJsDelivrBundles: () => mocks.cdnBundles,
   selectBundle: vi.fn(async (bundles: typeof mocks.cdnBundles) => ({
     mainModule: bundles.mvp.mainModule,

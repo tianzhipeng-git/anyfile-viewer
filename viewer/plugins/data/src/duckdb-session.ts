@@ -1,4 +1,4 @@
-import * as duckdb from "@duckdb/duckdb-wasm";
+import * as duckdb from "@duckdb/duckdb-wasm/dist/duckdb-browser.mjs";
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import { RecordBatchReader, Table } from "apache-arrow";
 
