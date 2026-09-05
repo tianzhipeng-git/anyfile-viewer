@@ -453,12 +453,69 @@
     "comic-book-reader": {
       "directory": "comic-book",
       "package": "@anyfile/comic-book-reader",
-      "runtimeSets": []
+      "runtimeSets": [
+        {
+          "id": "comic-archive",
+          "version": "3.8.9-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/comic-archive/3.8.9-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "decode",
+              "assetPatterns": [
+                "public/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.js",
+                "public/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/comic-book/src/archive-client.ts"
+          ],
+          "requiredMarkers": [
+            "/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.js"
+          ]
+        }
+      ]
     },
     "fictionbook-reader": {
       "directory": "fictionbook",
       "package": "@anyfile/fictionbook-reader",
       "runtimeSets": []
+    },
+    "mobi-reader": {
+      "directory": "mobi",
+      "package": "@anyfile/mobi-reader",
+      "runtimeSets": [
+        {
+          "id": "libmobi",
+          "version": "0.12-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/libmobi/0.12-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "decode",
+              "assetPatterns": [
+                "public/vendor/libmobi/0.12-anyfile.1/mobi.js",
+                "public/vendor/libmobi/0.12-anyfile.1/mobi.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/mobi/src/index.ts"
+          ],
+          "requiredMarkers": [
+            "/vendor/libmobi/0.12-anyfile.1/mobi.js"
+          ]
+        }
+      ]
     }
   }
 }

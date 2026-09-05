@@ -1,12 +1,12 @@
 import { ViewerError, type Locale } from "@anyfile/viewer-protocol";
-import { checkBookAbort, type BookZip } from "@anyfile/archive-metadata-viewer/zip-source";
+import { checkBookAbort, type BookSource } from "@anyfile/archive-metadata-viewer/book-source";
 import { inspectImageFile, decodeImage } from "@anyfile/browser-image-viewer/decode";
 import { COMIC_LIMITS, comicSpreads, type ComicPage } from "./model";
 import { comicButton, comicCopy, comicSelect } from "./ui";
 
 export function createComicViewport(
   root: HTMLElement,
-  zip: BookZip,
+  zip: BookSource,
   pages: ComicPage[],
   initialRtl: boolean,
   locale: Locale,

@@ -1,6 +1,6 @@
 # 电子书查看架构
 
-- 状态：EPUB 2/3 reflowable、CBZ 与 FB2 已交付；EPUB/FB2 共用最小章节阅读层
+- 状态：阶段 0–5 已交付；EPUB/FB2/MOBI 共用章节阅读层，漫画复用 ZIP/TAR/RAR/7z archive adapter
 - 适用范围：EPUB、FB2、MOBI/Kindle、漫画归档、DjVu、CHM 等本地只读阅读
 - 相关文档：[格式清单](format-inventory.md)、[支持矩阵](support-matrix.md)、[实施路线图](roadmap.md)
 
@@ -44,7 +44,7 @@
 |---|---|---|
 | `epub-reader` | EPUB 2/3、reflowable、fixed-layout | MOBI 转换、DRM、执行书内脚本 |
 | `fictionbook-reader` | `.fb2`、`.fb2.zip` | 任意 XML/ZIP 查看 |
-| `comic-book-reader` | CBZ；后续 CBR、CB7、CBT | 通用归档浏览、图片编辑 |
+| `comic-book-reader` | CBZ、CBR、CB7、CBT | 通用归档浏览、图片编辑 |
 | `mobi-reader` | PalmDOC/MOBI7/KF8/AZW3 无 DRM 子集 | KFX、DRM 解密、云端转换 |
 | `djvu-reader` | 单页/多页 DjVu 渲染和可用文本层 | PDF 回退、OCR 生成 |
 | `chm-reader` | CHM 目录、索引与 HTML topic | ActiveX、脚本、外部网站嵌入 |
@@ -242,7 +242,7 @@ DRM 是已识别但不支持的内容能力，不伪装成文件损坏。当前 
 3. 可裁剪、可在 Worker 中终止、可复现构建的 C/C++/Rust WASM；
 4. 无安全边界、只能整书转码、需要上传、许可证不兼容或长期无人维护的方案拒绝。
 
-EPUB.js 经比较未采用；libmobi、DjVu.js 和 libarchive 的固定样例/许可与未通过门禁见 [阶段 0 决策](phase-0-decisions.md)，尚不是运行依赖。选用前必须用固定语料验证能力，不能根据 README 或底层库的理论格式列表直接进入 Manifest。
+EPUB.js 经比较未采用；libmobi、DjVu.js 和 libarchive 的固定样例/许可与未通过门禁见 [阶段 0 决策](phase-0-decisions.md)，其中 libmobi 与裁剪 libarchive 已在阶段 4–5 采用，覆盖原停止门禁，见 [当前决策](phase-4-5-decisions.md)。其余候选选用前必须用固定语料验证能力，不能根据 README 或底层库的理论格式列表直接进入 Manifest。
 
 ## 10. 规范与候选上游
 
@@ -251,3 +251,7 @@ EPUB.js 经比较未采用；libmobi、DjVu.js 和 libarchive 的固定样例/�
 - [libmobi](https://github.com/bfabiszewski/libmobi)
 - [DjVu.js](https://github.com/RussCoder/djvujs)
 - [libarchive](https://github.com/libarchive/libarchive)
+
+## 11. 阶段 4–5 实现增量
+
+以 [阶段 4–5 决策](phase-4-5-decisions.md) 为当前 MOBI/漫画容器、整书重建、固实缓存、LGPL 分发和资源上限事实。MOBI/KF8 不追求 Kindle 完整排版，等级 3；CBR/CB7 输入最多 64 MiB，展开最多 128 MiB。`BookSource` 仅描述 entries/read/dispose；它不把 decoder 引入共享视口或 probe。

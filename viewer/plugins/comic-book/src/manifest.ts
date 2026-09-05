@@ -5,8 +5,8 @@ export const comicBookManifest: ViewerPluginManifest = {
   name: { en: "Comic book reader", "zh-CN": "漫画阅读器" },
   formats: [
     {
-      name: { en: "CBZ", "zh-CN": "CBZ" },
-      extensions: [".cbz"],
+      name: { en: "CBZ / CBR / CB7 / CBT", "zh-CN": "CBZ / CBR / CB7 / CBT" },
+      extensions: [".cbz", ".cbr", ".cb7", ".cbt"],
       mimeTypes: ["application/vnd.comicbook+zip"],
     },
   ],

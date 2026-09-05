@@ -1,5 +1,5 @@
 import { ViewerError } from "@anyfile/viewer-protocol";
-import type { BookZip } from "@anyfile/archive-metadata-viewer/zip-source";
+import type { BookSource } from "@anyfile/archive-metadata-viewer/book-source";
 export interface ComicPage {
   path: string;
   type: string;
@@ -22,7 +22,7 @@ export function naturalPathCompare(a: string, b: string) {
   }
   return left.length - right.length;
 }
-export async function parseComic(zip: BookZip, signal: AbortSignal) {
+export async function parseComic(zip: BookSource, signal: AbortSignal) {
   const pages: ComicPage[] = [...zip.entries.values()]
     .filter(
       (entry) =>

@@ -98,6 +98,8 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 - **源码构建资产**：由 `tools/<dependency>-build/` 的可重复配方生成，审核产物提交到 `third_party`，构建前校验并复制。
 - **打包资产**：能够被 bundler 正确拆分的 Worker/WASM 随插件 chunk 产出，但仍不得进入查看页首包。
 
+`public/vendor/` 统一作为生成目录并由 Git 忽略；`pnpm prepare:assets` 在开发和生产构建前重新准备资源。Mediabunny 的许可证及源码说明原件保存在 `licenses/mediabunny/<version>/`，由 `prepare:licenses` 复制到 `public/vendor/licenses/mediabunny/<version>/`，保持现有公开 URL。
+
 这些信息以 `viewer/plugin-policies.json` 为机器可读事实来源。策略文件必须覆盖每个已注册插件，并为运行时声明精确版本、构建产物匹配模式、互斥的典型冷启动集合及来源顺序。构建后 `scripts/check-plugin-assets.mjs` 会交叉校验注册表、插件导出、锁定依赖版本、所有 `/vendor` 与 Webpack 产出的 Worker/WASM，并按 gzip 估算执行本节的 2 MiB/4 MiB 门槛。gzip 是离线、确定性的 CI 估算；生产环境最终仍以浏览器实际 `transferred size` 为准。
 
 确需让达到门槛的资源保持同源时，策略中的 `sameOriginException` 必须同时记录原因、对应架构文档和实测 gzip 字节数。只写布尔豁免不被接受。

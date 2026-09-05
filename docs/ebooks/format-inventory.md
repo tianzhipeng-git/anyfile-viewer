@@ -32,12 +32,12 @@
 
 | 格式/组合 | 扩展名 | 难点 | 候选路径 | 状态 |
 |---|---|---|---|---|
-| MOBI7 / Mobipocket | `.mobi`, `.prc` | PalmDB records、PalmDOC/Huffman 压缩、HTML 方言 | 纯 TS 或裁剪 `libmobi` WASM | planned spike |
-| KF8 / AZW3 | `.azw3`, `.azw`, `.mobi` | 双格式容器、KF8 CSS/资源、EXTH | 与 MOBI parser 共用 record 层 | planned spike |
-| PalmDOC eBook | `.pdb`, `.prc` | 扩展名歧义、不同 Palm database type | creator/type + record probe | candidate |
-| CBR RAR4/RAR5 | `.cbr` | 专有 RAR 变体、随机访问、固实压缩 | 裁剪 libarchive WASM 或专用 decoder | planned spike |
-| CB7 | `.cb7` | 7z 索引和固实压缩、内存 | 同一漫画 UI + 7z decoder | planned spike |
-| CBT | `.cbt` | TAR 顺序读取、图片资源预算 | 同一漫画 UI + 轻量 TAR path | candidate |
+| MOBI7 / Mobipocket | `.mobi`, `.prc` | PalmDB records、PalmDOC/Huffman 压缩、HTML 方言 | 独立 libmobi Worker/WASM | implemented，固定组合见支持矩阵 |
+| KF8 / AZW3 | `.azw3`, `.azw`, `.mobi` | 双格式容器、KF8 CSS/资源、EXTH | libmobi 重建 KF8 part，复用安全章节视口 | implemented |
+| PalmDOC eBook | `.pdb`, `.prc` | 扩展名歧义、不同 Palm database type | creator/type + record probe、libmobi 解码 | implemented |
+| CBR RAR4/RAR5 | `.cbr` | 专有 RAR 变体、随机访问、固实压缩 | 裁剪 libarchive Worker/WASM | implemented；RAR4 压缩组合证据待补 |
+| CB7 | `.cb7` | 7z 索引和固实压缩、内存 | 同一漫画 UI + 有界 7z decoder | implemented |
+| CBT | `.cbt` | TAR 顺序读取、图片资源预算 | 同一漫画 UI + 切片 USTAR reader | implemented |
 | DjVu single/multipage | `.djvu`, `.djv` | IFF、页解码、文本层、许可 | DjVu.js 或其他可审计本地 decoder | planned spike |
 | CHM | `.chm` | ITSF/ITSP、LZX、目录/索引、恶意 HTML | 专用 Worker decoder + safe content host | planned spike |
 
@@ -123,3 +123,5 @@
 - 两者都需要大型文件、取消、连续切换和恶意主动内容反例。
 
 所有第三方样例必须记录来源、许可证、原始哈希和是否可再分发；不适合提交的样例只记录人工验收步骤，不进入仓库。
+
+阶段 4–5 已实现 MOBI/PalmDOC/KF8 与 CBR/CB7/CBT；本清单中的其他候选路径不是当前支持承诺。最新范围、许可和预算见 [当前决策](phase-4-5-decisions.md)。

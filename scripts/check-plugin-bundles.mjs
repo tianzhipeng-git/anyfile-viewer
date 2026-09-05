@@ -73,6 +73,8 @@ for (const [id, plugin] of Object.entries(policy.plugins)) {
 }
 
 for (const [id, ownMarker, otherMarker] of [
+  ["mobi-reader", "anyfile-publication-reader__viewport", "Invalid EPUB media type."],
+  ["mobi-reader", "anyfile-publication-reader__viewport", "anyfile-comic-reader__viewport"],
   ["epub-reader", "anyfile-publication-reader__viewport", "anyfile-comic-reader__viewport"],
   ["epub-reader", "anyfile-publication-reader__viewport", "FB2 structure limit exceeded."],
   ["fictionbook-reader", "anyfile-publication-reader__viewport", "Invalid EPUB media type."],

@@ -1,10 +1,10 @@
+import { openComicArchive } from "./archive-source";
 import { ViewerError, isViewerAbortError, type FileViewerPlugin } from "@anyfile/viewer-protocol";
 import {
   checkBookAbort,
-  openBookZip,
   ProtectedBookError,
-  type BookZip,
-} from "@anyfile/archive-metadata-viewer/zip-source";
+  type BookSource,
+} from "@anyfile/archive-metadata-viewer/book-source";
 import { comicBookManifest } from "./manifest";
 import { parseComic } from "./model";
 import { createComicViewport } from "./viewport";
@@ -16,7 +16,7 @@ export const comicBookViewer: FileViewerPlugin = {
       root = document.createElement("div");
     root.className = "anyfile-comic-reader";
     const lifetime = new AbortController();
-    let zip: BookZip | undefined,
+    let zip: BookSource | undefined,
       viewport: ReturnType<typeof createComicViewport> | undefined,
       disposed = false;
     const dispose = () => {
@@ -34,7 +34,7 @@ export const comicBookViewer: FileViewerPlugin = {
         throw new ViewerError("unsupported-environment", copy.environment);
       context.signal.addEventListener("abort", dispose, { once: true });
       context.reportProgress({ stage: "parsing", message: copy.loading });
-      zip = await openBookZip(context.file, lifetime.signal);
+      zip = await openComicArchive(context.file, lifetime.signal);
       const book = await parseComic(zip, lifetime.signal);
       checkBookAbort(lifetime.signal);
       context.container.append(root);

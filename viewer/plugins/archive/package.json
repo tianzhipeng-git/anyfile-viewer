@@ -8,7 +8,9 @@
     "./manifest": "./src/manifest.ts",
     "./probe": "./src/probe.ts",
     "./zip-catalog": "./src/zip-catalog.ts",
-    "./zip-source": "./src/zip-source.ts"
+    "./zip-source": "./src/zip-source.ts",
+    "./book-source": "./src/book-source.ts",
+    "./book-worker": "./src/book-worker.ts"
   },
   "scripts": {
     "test": "vitest run"

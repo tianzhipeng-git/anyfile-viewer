@@ -1,6 +1,6 @@
 # 电子书查看实施路线图
 
-- 状态：阶段 0 首批门禁与阶段 1–3 已交付（2026-09-05）；阶段 4 以后未实施
+- 状态：阶段 0–5 已交付（2026-09-05）；阶段 6 以后未实施
 - 范围：流式电子书、漫画归档、固定页电子书和历史二进制电子书
 - 相关文档：[架构](architecture.md)、[格式清单](format-inventory.md)、[支持矩阵](support-matrix.md)
 
@@ -136,6 +136,8 @@
 
 ## 6. 阶段 4：MOBI7、PalmDOC 与 KF8/AZW3
 
+已交付 `mobi-reader`，等级 3。采用独立可替换 libmobi Worker/WASM，包含对应源码和 LGPL 分发材料；支持 PalmDOC、MOBI7、Huffman、KF8 和联合文件的本地阅读。原计划调整为有界整书重建、按 part 读取，MOBI7 单 part 与复杂排版限制明确保留。见 [实际决策](phase-4-5-decisions.md) 和 [阶段 4–5 验证](verification.md#阶段-45)。以下原始门禁以该决策中的实际子集和预算为准。
+
 ### 先行决策
 
 - 比较纯 TypeScript 与裁剪 `libmobi` WASM；
@@ -160,6 +162,8 @@
 - Manifest 只声明已验证组合，不把 KFX 或所有 `.pdb` 一并纳入。
 
 ## 7. 阶段 5：CBR、CB7、CBT
+
+已交付 CBT USTAR、CBR RAR4/RAR5、CB7 Copy/LZMA/LZMA2 的读取路径，复用原漫画 model/viewport，等级 4。RAR/7z 采用一次有界顺序解压，后续跳页不重复解压；不承诺超大固实归档随机访问。ZIP/TAR 不加载该 WASM。固定组合及尚待验证变体见 [支持矩阵](support-matrix.md)，完整取舍见 [阶段 4–5 决策](phase-4-5-decisions.md)。
 
 ### 候选顺序
 

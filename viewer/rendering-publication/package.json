@@ -4,9 +4,13 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./markup": "./src/markup.ts",
+    "./safe-content": "./src/safe-content.ts"
   },
   "dependencies": {
-    "@anyfile/viewer-protocol": "workspace:*"
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/browser-image-viewer": "workspace:*",
+    "@anyfile/archive-metadata-viewer": "workspace:*"
   }
 }

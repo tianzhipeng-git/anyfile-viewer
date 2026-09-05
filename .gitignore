@@ -16,13 +16,9 @@ node_modules/
 # next.js
 /.next/
 /out/
-/public/vendor/pdfjs/
-/public/vendor/libraw/
-/public/vendor/libheif/
-/public/vendor/ogv/
-/public/vendor/stet/
-/public/vendor/occt-import-js/
-/public/vendor/laz-perf/
+
+# Generated deployment assets; recreated by pnpm prepare:assets
+/public/vendor/
 
 # production
 /build

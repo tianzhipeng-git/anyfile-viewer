@@ -57,7 +57,7 @@ public/vendor/<dependency>/<artifact-version>/
 
 ### `public/vendor/<dependency>/<artifact-version>/`
 
-部署时由 prepare 脚本生成的同源静态资源目录，不是可信来源，默认不提交 Git。只复制浏览器运行和随分发必须公开的文件。
+部署时由 prepare 脚本生成的同源静态资源目录，不是可信来源，整个 `public/vendor/` 由 Git 忽略。只复制浏览器运行和随分发必须公开的文件；许可证原件保存在 `licenses/` 或 `third_party/`，不能只保存在这里。
 
 删除 `public/vendor` 后，必须可以仅凭受版本控制的输入重新生成。浏览器插件的同源 fallback 只能引用这里的版本化 URL，不能以应用路径引用 `tools/` 或 `third_party/`。大型审核产物需要接入公共 CDN 时，可以使用 jsDelivr 指向公开仓库中 `third_party/` 产物的完整 Git commit URL；不得使用浮动分支或 tag，并且仍须保留 `public/vendor` 同版本 fallback。
 

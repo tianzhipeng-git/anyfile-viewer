@@ -1,3 +1,4 @@
+import { mobiFormats, comicArchiveFormats } from "./ebook-archives";
 import { fb2Format } from "./fb2";
 import { cadExchangeFormats } from "./cad-exchange";
 import { pointFormats } from "./point-cloud";
@@ -164,7 +165,7 @@ export const formatContents: readonly FormatContent[] = [
   duckdbFormat,
   earFormat,
   eggFormat,
-  epubFormat,
+  epubFormat, ...mobiFormats, ...comicArchiveFormats,
   fb2Format,
   epsFormat,
   etFormat,

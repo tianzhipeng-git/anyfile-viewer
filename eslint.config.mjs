@@ -22,6 +22,10 @@ const eslintConfig = defineConfig([
     "third_party/stet-wasm/**",
     "third_party/occt-import-js/**",
     "third_party/laz-perf/**",
+    "third_party/libmobi/**",
+    "third_party/comic-archive/**",
+    "public/vendor/libmobi/**",
+    "public/vendor/comic-archive/**",
     "next-env.d.ts",
   ]),
 ]);

@@ -1,3 +1,4 @@
+import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { epubManifest } from "@anyfile/epub-reader/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
@@ -140,7 +141,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "document",
     icon: FileTextIcon,
-    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, fictionBookManifest, epubManifest, comicBookManifest)
+    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest)
       .filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },
   {

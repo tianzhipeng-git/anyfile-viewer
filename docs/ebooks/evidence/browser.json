@@ -4,27 +4,27 @@
   "results": [
     {
       "name": "English homepage enters isolated viewer",
-      "elapsedMs": 213
+      "elapsedMs": 177
     },
     {
       "name": "EPUB first UI",
-      "elapsedMs": 55
+      "elapsedMs": 51
     },
     {
       "name": "EPUB 3 first chapter, image and routing",
-      "elapsedMs": 76
+      "elapsedMs": 70
     },
     {
       "name": "EPUB TOC, cross-chapter anchor, typography and resize",
-      "elapsedMs": 123
+      "elapsedMs": 126
     },
     {
       "name": "EPUB 2 NCX and RTL",
-      "elapsedMs": 65
+      "elapsedMs": 68
     },
     {
       "name": "Scripts, forms, popups, external URLs, CSS and host mutation blocked",
-      "elapsedMs": 64
+      "elapsedMs": 61
     },
     {
       "name": "Embedded font and safe SVG resources",
@@ -32,30 +32,30 @@
     },
     {
       "name": "Missing optional image preserves readable chapter text",
-      "elapsedMs": 37
+      "elapsedMs": 36
     },
     {
       "name": "EPUB local errors and protected content",
-      "elapsedMs": 61
+      "elapsedMs": 60
     },
     {
       "name": "FB2 first UI and bounded live resources",
-      "elapsedMs": 32,
+      "elapsedMs": 33,
       "liveChapters": 3,
       "liveUrls": 0,
-      "jsHeapBytes": 16100000
+      "jsHeapBytes": 24500000
     },
     {
       "name": "FB2 namespaces, cover, structures, notes and return after chapter unload",
-      "elapsedMs": 170
+      "elapsedMs": 154
     },
     {
       "name": "FB2 ZIP and UTF-16 / Windows-1251 encoding",
-      "elapsedMs": 151
+      "elapsedMs": 149
     },
     {
       "name": "FB2 safe mapping and resource release on switching",
-      "elapsedMs": 39
+      "elapsedMs": 41
     },
     {
       "name": "CBZ first page, cover, natural sorting, RTL spreads and keyboard",
@@ -63,7 +63,7 @@
     },
     {
       "name": "300-page CBZ first UI",
-      "elapsedMs": 26
+      "elapsedMs": 28
     },
     {
       "name": "300-page CBZ is virtualized and supports jumps, scrolling and resize",
@@ -71,29 +71,29 @@
     },
     {
       "name": "8MP spread decode",
-      "elapsedMs": 81,
+      "elapsedMs": 60,
       "liveUrls": 4,
-      "jsHeapBytes": 16100000
+      "jsHeapBytes": 24500000
     },
     {
       "name": "Eight-megapixel pages stay within the four-page window",
-      "elapsedMs": 81
+      "elapsedMs": 61
     },
     {
       "name": "JPEG, PNG, GIF, WebP and AVIF use the existing image decoder",
-      "elapsedMs": 52
+      "elapsedMs": 55
     },
     {
       "name": "ZIP64 and damaged/oversized comic pages",
-      "elapsedMs": 111
+      "elapsedMs": 108
     },
     {
       "name": "File switching releases every book URL and iframe",
-      "elapsedMs": 39
+      "elapsedMs": 34
     },
     {
       "name": "Chinese homepage enters isolated viewer with localized controls",
-      "elapsedMs": 269
+      "elapsedMs": 270
     }
   ],
   "attacks": [],

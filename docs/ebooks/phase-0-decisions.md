@@ -1,5 +1,7 @@
 # 阶段 0：证据与实现决策
 
+> 历史记录：libmobi/libarchive 在阶段 0 尚未采用；此结论已由 [阶段 4–5 决策](phase-4-5-decisions.md) 更新。DjVu/CHM 状态不变。
+
 2026-09-05。阶段 0 的首批交付门禁已通过；实际阅读交付为 EPUB 2/3 reflowable 与 CBZ。当时 FB2 只有固定语料；阶段 3 的实现与预算增量见 [验证记录](verification.md#阶段-3fb2-与共享阅读层)。MOBI、DjVu、RAR/7z、CHM 没有浏览器阅读实现，保持 planned/blocked。
 
 ## ZIP 读取边界

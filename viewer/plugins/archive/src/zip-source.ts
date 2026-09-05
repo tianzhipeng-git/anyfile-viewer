@@ -2,10 +2,8 @@ import { Reader, ZipReader, type Entry } from "@zip.js/zip.js/lib/zip-core-custo
 import { ViewerError } from "@anyfile/viewer-protocol";
 import { BOOK_ZIP_LIMITS, readBookZipCatalog, safeBookPath } from "./zip-catalog";
 
-export class ProtectedBookError extends Error {}
-export function checkBookAbort(signal: AbortSignal) {
-  if (signal.aborted) throw new DOMException("Aborted", "AbortError");
-}
+import { ProtectedBookError, checkBookAbort } from "./book-source";
+export { ProtectedBookError, checkBookAbort } from "./book-source";
 class FileReader extends Reader<Blob> {
   constructor(
     private file: Blob,

@@ -1,4 +1,4 @@
-# 阶段 0–3 验证记录
+# 阶段 0–5 验证记录
 
 ## 阶段 0–2 基线
 
@@ -71,3 +71,47 @@ EBOOK_TEST_URL=http://localhost:3107 pnpm test:ebooks:browser
 全部 XML 在上述输入预算内由浏览器 DOMParser 同步解析并保留 DOM；这不是流式 XML 或可中途终止的 Worker parser。取消覆盖文件读取后的异步边界和逐章 HTML 映射；映射每 256 节点让出事件循环。图片在章节需要时才从 base64 解码，未预解码整本书；销毁后清空 XML/资源索引。单元测试与固定样例只证明声明子集，不代表所有传统编码、SVG binary、复杂排版或大书极限已验证。
 
 三章的像素预算最多约 183 MiB RGBA8 基础像素，另加 XML DOM、编码字节和浏览器内部副本；JS heap 指标不包含原生图片/GPU 内存，预算不是浏览器总内存硬保证。PNG 封面有直接 FB2 浏览器证据；其他原生图片通过已有图片检查/浏览器解码能力实现，尚未为 FB2 逐组合验收。
+
+## 阶段 4–5
+
+2026-09-05，Node.js 24.4.0、pnpm 10.32.1、Chromium 145.0.7632.6，macOS arm64。以下新增记录覆盖前文阶段 0–3 的历史状态；当前范围以 [支持矩阵](support-matrix.md) 和 [实际方案](phase-4-5-decisions.md) 为准。
+
+- `pnpm test`：**788 项通过**；`pnpm lint`：通过，无警告；`pnpm build`：通过，包含插件加载与运行资产门禁。
+- 新增生产浏览器 **29 组验收通过**；原 EPUB/FB2/CBZ **18 组回归通过**。两套脚本均为 0 个攻击域请求、0 个未捕获 pageerror。原始结果：[阶段 4–5](evidence/phase45-browser.json)、[既有格式回归](evidence/browser.json)。
+- `/en/view` 首包 **215.0 KiB gzip**，仍低于 225 KiB 上限。MOBI probe **716 bytes gzip**，初始 viewer 入口 **11,376 bytes gzip**；漫画 probe **3,335 bytes**，初始 viewer 入口 **45,587 bytes**。这是构建报告中的初始动态入口集合；后续 Worker 和 native 模块另计，不能把入口大小当作全部冷启动传输量。
+- native 模块：libmobi JS + WASM **50.3 KiB gzip**（WASM 原始 103,836 bytes）；漫画 JS + WASM **79.0 KiB gzip**（WASM 原始 173,586 bytes）。低于 2 MiB 单资源 / 4 MiB 冷启动门槛，使用版本化同源资产。普通 ZIP/TAR 的浏览器测试断言不初始化或请求漫画 native decoder；MOBI 与漫画 parser 不进入彼此 probe 或 `/view` 首包。
+- 在两个独立临时目录从锁定源码重建，四个 JS/WASM 文件均逐字节一致：[重建证据](evidence/decoder-reproducibility.json)。运行产物、源码/adapter/许可和哈希由 `prepare:ebooks` 校验；没有把构建工具加入应用安装、test 或 build 流程。
+
+### 新增组合与交互证据
+
+1. 自有 Calibre 样例的 MOBI7 PalmDOC 压缩、无压缩、Huffman、KF8、MOBI7/KF8 联合文件，验证正文、图片、五项目录、排版设置与资源释放。
+2. 联合文件有多 KF8 part，末章正文没有重复；MOBI7 空分页标记后的章节保留，目录可进入后续 anchor。
+3. 原始和压缩 PalmDOC 的 Windows-1252 `café`、纯文本显示；任意 PDB 和极端 record count 不进入 decoder。
+4. 从 raw MOBI 注入的脚本、事件、iframe、form、远程图片和外部导航被清理；验证真正未经 Calibre 清理的恶意输入。MOBI 原始 HTML 用 inert template 解析；PalmDOC 的 `<script>` 字样按文本保留。
+5. DRM / RAR 文件加密 / RAR5 头部加密显示稳定不支持状态；循环 Huffman、重叠 offset、text 长度超限、重复路径、截断归档被拒绝。
+6. CBT USTAR、RAR4 Stored、RAR5 Stored/固实、7z Copy/LZMA/LZMA2，验证自然顺序、页码、RTL、双页、键盘、窄窗口和跳到第 250 页。
+7. 同一个文件的最多四页图片 URL 窗口、文件切换后的 0 Worker/iframe/URL；打开期间阻断模块初始化后取消、快速交替 MOBI/漫画并销毁。单元测试另外覆盖并发页请求中取消一页、超时终止以及重复 dispose。
+8. 英文和简体中文 UI、WASM MIME 与 immutable 缓存响应。截图：[KF8 窄窗口](evidence/mobi-narrow.png)、[固实漫画窄窗口](evidence/solid-comic-narrow.png)。
+
+### 测量与边界
+
+最终合成样本运行中，KF8 和联合文件各自“打开 + 图片/目录断言 + 排版设置 + 关闭”约 **53 ms**；300 页固实 RAR5 的“打开 + 跳页/方向/双页 + 窄窗截图 + 关闭”约 **78 ms**，LZMA2 7z 对应交互约 **46 ms**。这些是各验收步骤总时长，**不是单独首屏时间**，也不是性能承诺。
+
+MOBI/KF8 的 WASM 在样例中保留 16 MiB memory；300 页 RAR5 为 16 MiB，LZMA2 为 20,185,088 bytes。两种 300 页压缩样例展开的编码资源仅 65,100 bytes，证明的是固实读取/缓存/页数行为，不能据此声称大书峰值内存或展开极限已被实测。原生内存增长上限均为 256 MiB；仍须另加输入/输出 JS 副本、DOM 和图片/GPU。JSON 中主线程 heap 与 decoder memory 分开记录。
+
+RAR4 的其他压缩组合、任意复杂 KF8 出版物、PAX/GNU TAR、7z 其他算法、其他浏览器没有在本阶段被标为 verified。MOBI 的等级保持 3，输入/part 限制和重建成本已公开，未把控件数量当作完整 Kindle 支持。
+
+### 重跑
+
+```sh
+pnpm install --frozen-lockfile
+pnpm test
+pnpm lint
+pnpm build
+pnpm exec next start --port 3107
+# 另一个终端
+EBOOK_TEST_URL=http://localhost:3107 pnpm test:ebooks:browser
+EBOOK_TEST_URL=http://localhost:3107 pnpm test:ebooks:phase45
+```
+
+普通测试使用已经入库的自有样例，不需要 Calibre/RAR 或网络。需要重建样例时见 [语料说明](fixtures/phase45/README.md)；需要重建 WASM 时见 [构建配方](../../tools/ebook-decoders-build/README.md)。这些生成流程与应用构建分离。
