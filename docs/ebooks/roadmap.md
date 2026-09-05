@@ -1,6 +1,6 @@
 # 电子书查看实施路线图
 
-- 状态：规划，阶段 0 尚未开始
+- 状态：阶段 0 首批门禁与阶段 1–2 已交付（2026-09-05）；阶段 3 以后未实施
 - 范围：流式电子书、漫画归档、固定页电子书和历史二进制电子书
 - 相关文档：[架构](architecture.md)、[格式清单](format-inventory.md)、[支持矩阵](support-matrix.md)
 
@@ -26,6 +26,11 @@
 
 ## 2. 阶段 0：证据、安全和依赖 spike
 
+已完成首批交付门禁。详见 [决策与预算](phase-0-decisions.md)、[固定语料](fixtures/manifest.json)、[候选审计](evidence/dependency-spike.json)。
+
+阶段 0 的重型候选采用先许可/架构、后构建的停止门禁：未通过采用决策的方案保留 planned/blocked，不生成实验运行资产；浏览器 Worker/WASM、初始化、内存和取消测试仍是后续阶段 4–7 的必经条件。本次样例/header/原生索引 spike 不等于这些 decoder 已通过浏览器验收。CHM 目前只有 ITSF 反例，正常 topic 阅读语料也保留在阶段 7。
+
+
 ### 工作项
 
 - 按格式清单建立 EPUB、CBZ、FB2 的首批正常/反例固定语料及 manifest/hash；
@@ -47,6 +52,9 @@
 - 资源预算有基准数据，未通过的格式保持 planned/blocked。
 
 ## 3. 阶段 1：EPUB 2/3 reflowable
+
+已交付 `epub-reader`，等级 4；EPUB 2/NCX、EPUB 3/nav、LTR/RTL、内部 anchor、连续章节、字体/图片、排版与安全测试见 [验证记录](verification.md)。当前最多当前及前后共三章，基础 CSS 为显式白名单；fixed-layout、MathML、竖排、媒体叠加和字体混淆未纳入 verified。缺失可选图片保留正文并给出局部提示。
+
 
 ### 范围
 
@@ -77,6 +85,9 @@
 - 生产构建确认 EPUB 完整实现只在选择 EPUB 后加载。
 
 ## 4. 阶段 2：CBZ 漫画阅读
+
+已交付 `comic-book-reader`，等级 4；ZIP/ZIP64、五种原生静态图片、自然排序、ComicInfo、封面/双页/RTL、键盘、缩放与连续虚拟化已验收。最多四页活跃资源；800 万像素与 300 页基准见 [验证记录](verification.md)。动画 GIF/WebP/APNG 按帧数计入预算；无有界帧数的 AVIF 动画不纳入阅读路径。
+
 
 ### 范围
 

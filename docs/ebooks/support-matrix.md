@@ -9,33 +9,49 @@
 | 格式/组合 | 当前插件 | 当前结果 | 当前等级 | 状态 | 主要限制 |
 |---|---|---|---:|---|---|
 | PDF / 无密码或可输入密码 | `pdfjs-pdf` | PDF.js 分页 Canvas、缩放、适宽 | probe 为 4 | implemented | 无文本层；不是专用 ebook UI；完整真实证据状态需沿 PDF 文档维护 |
-| EPUB / ZIP 签名匹配 | `archive-metadata-viewer` | 列出容器条目和压缩信息 | 2 | implemented | 不解析 OCF、OPF、spine、nav/NCX 或正文，不可连续阅读 |
-| CBZ / ZIP 签名匹配 | `archive-metadata-viewer` | 列出图片条目和压缩信息 | 2 | implemented | 不排序页面、不解码图片、无单/双页或 RTL 阅读 |
+| EPUB 2/3 reflowable / UTF-8 XML / 无加密 | `epub-reader` | OPF、spine、nav/NCX、正文、资源、连续阅读 | 4 | verified | CSS 白名单；不支持 fixed-layout、字体混淆、MathML、媒体叠加或脚本 |
+| EPUB 归档检查 | `archive-metadata-viewer` | 列出容器条目和压缩信息，手动备选 | 2 | implemented | 不提供正文阅读 |
+| CBZ / ZIP、ZIP64 / Stored、Deflate / 无加密 | `comic-book-reader` | 自然页序、单/双页、滚动、RTL、ComicInfo、适宽/适高 | 4 | verified | 5,000 页、每页 16 MiB、800 万像素；具体图片组合见下表 |
+| CBZ 归档检查 | `archive-metadata-viewer` | 列出图片条目和压缩信息，手动备选 | 2 | implemented | 不提供漫画阅读 |
 | TXT / HTML / Markdown | `ace-code-text` | 代码/文本查看 | 按该插件现状 | implemented | 不提供电子书目录、排版、资源解析或章节导航 |
 | MOBI/AZW/FB2/DjVu/CHM/CBR/CB7/CBT | 无专用插件 | 可能仅剩通用十六进制或无候选 | 0–1 | not implemented | 不能宣传为电子书阅读支持 |
 
-当前仓库没有 `@anyfile/rendering-publication`、`@anyfile/rendering-comic` 或专用电子书阅读器。实现专用 EPUB/CBZ 插件后，通用 archive 插件仍可作为低等级备选，但专用 probe 必须返回更高的真实等级。
+当前有独立 EPUB/CBZ 阅读器；没有 `@anyfile/rendering-publication` 或 `@anyfile/rendering-comic` 共享阅读包。两个插件只共享归档读取与已有原生图片能力。真实注册竞争测试确认专用等级 4、archive 等级 2、hex 等级 1；不会自动回退。组合证据见 [验证记录](verification.md)。
 
 ## 2. 规划目标矩阵
 
 | 格式组合 | 计划插件 | 首期范围 | 目标等级上限 | 状态 | 关键缺口 |
 |---|---|---|---:|---|---|
-| EPUB 3 reflowable / 无 DRM | `epub-reader` | metadata、spine、nav、XHTML/CSS、常见图片/字体、滚动阅读 | 4 | planned | parser/renderer 选型、安全隔离和固定语料 |
-| EPUB 2 / 无 DRM | `epub-reader` | OPF、NCX、XHTML、常见资源 | 4 | planned | NCX 与老旧 CSS/编码证据 |
+| EPUB 3 reflowable / 无 DRM | `epub-reader` | metadata、spine、nav、XHTML/CSS、常见图片/字体、滚动阅读 | 4 | verified | UTF-8 XHTML、基础 CSS；字体/SVG/图片及安全证据已落地 |
+| EPUB 2 / 无 DRM | `epub-reader` | OPF、NCX、XHTML、常见资源 | 4 | verified | UTF-8 OPF/NCX；传统编码与复杂老旧 CSS 未纳入 |
 | EPUB 3 fixed-layout / 无 DRM | `epub-reader` | viewport、page-spread、方向、SVG/图片页 | 3–4 | planned | spread 与跨浏览器排版 |
 | EPUB media overlays / scripted content | `epub-reader` | 首期不执行脚本；overlay 后续评估 | 0–3 | deferred | 音文同步、安全和媒体 codec |
-| CBZ | `comic-book-reader` | 图片排序、ComicInfo、单/双页、RTL、虚拟化 | 4–5 | planned | 按页 ZIP 读取和图片预算 |
-| FB2 / FB2 ZIP | `fictionbook-reader` | 章节、脚注、诗歌、图片、metadata | 4 | planned | XML adapter、编码、base64 预算 |
+| CBZ | `comic-book-reader` | 图片排序、ComicInfo、单/双页、RTL、虚拟化 | 4 | verified | JPEG/PNG/GIF/WebP/静态 AVIF；动画按帧数计入预算，不含 AVIF 动画 |
+| FB2 / FB2 ZIP | `fictionbook-reader` | 章节、脚注、诗歌、图片、metadata | 4 | planned | 已有原始 FB2 正常/实体/深度语料；尚无 XML adapter 或注册路径 |
 | MOBI7 / PalmDOC / 无 DRM | `mobi-reader` | 正文、目录、metadata、图片 | 3–4 | planned spike | parser、Huffman、编码与许可 |
 | KF8/AZW3 / 无 DRM | `mobi-reader` | KF8 HTML/CSS、目录、常见资源 | 3–4 | planned spike | 双格式边界和 CSS/资源语义 |
 | CBR RAR4/RAR5 | `comic-book-reader` | 与 CBZ 等价的页面 UI | 4–5 | planned spike | decoder、随机访问、固实压缩、许可 |
 | CB7 / CBT | `comic-book-reader` | 与 CBZ 等价的页面 UI | 4–5 | candidate | 7z/TAR 解压路径和内存 |
-| DjVu single/multipage | `djvu-reader` | 页面渲染、缩略图、导航；文本层按证据 | 3–4 | planned spike | decoder 许可、性能和文本坐标 |
+| DjVu single/multipage | `djvu-reader` | 页面渲染、缩略图、导航；文本层按证据 | 3–4 | blocked | GPL 分发方案未通过采用门禁；只有样例/许可 spike |
 | CHM | `chm-reader` | contents/index、topic HTML、内部导航 | 3–4 | planned spike | LZX、编码、HTML 安全与索引 |
 | 历史/厂商格式 | 独立评估 | 先 metadata 或主要正文 spike | 1–3 | candidate | 需求、样例、parser、许可 |
 | 任意 DRM 组合 | 无 | 只检测并说明 | 不声明阅读等级 | blocked | 不解密、不规避保护 |
 
 目标等级是完成范围的上限，不是预先承诺。缺少关键内容、顺序、图片、布局或导航时必须降低。
+
+## 2.1 已验证的资源与阅读组合
+
+| 组合 | 证据 | 边界 |
+|---|---|---|
+| EPUB 2 NCX / EPUB 3 nav / LTR / RTL | `epub2.epub`、`epub3.epub`、`rtl.epub` | 单 OPF，UTF-8 XML，线性 XHTML spine；不支持 SVG spine |
+| EPUB 内嵌 PNG、TTF、SVG | `resources.epub` | SVG 作为图片清理；白名单绘图元素，不执行主动内容；字体上限见预算 |
+| EPUB 章节与锚点 | 生产浏览器目录、跨章 `#p12`、字号/主题/宽度/resize | 三章窗口；阅读位置只在当前实例中保存 |
+| CBZ JPEG、PNG、GIF、WebP、静态 AVIF | `image-formats.cbz` + 原生图片 decoder | GIF/WebP/APNG 的帧数参与像素预算；AVIF 动画暂不纳入 |
+| CBZ ZIP64、目录层级和自然排序 | `zip64.cbz`、`pages.cbz` | 不支持分卷、加密或其他压缩方法 |
+| ComicInfo 封面/DoublePage/manga | `manga.cbz` | Image 必须为有效且不重复的自然页序索引；类型不隐式重新排列页面 |
+| 大文件与资源预算 | `hundreds.cbz`、`pixel-budget.cbz`、各类反例 | 当前及邻页有界持有；详见 [阶段 0 决策](phase-0-decisions.md) |
+
+`verified` 的浏览器证据是 Chromium 145.0.7632.6；不是其他浏览器或全部出版物变体已经测试的声明。DRM/字体混淆返回稳定不支持 UI；probe 等级用于有界结构路由，完整内容与保护标记仍由 open 校验。
 
 ## 3. 等级口径
 

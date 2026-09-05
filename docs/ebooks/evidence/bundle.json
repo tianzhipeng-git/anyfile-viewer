@@ -1,0 +1,32 @@
+{
+  "initialViewGzipKiB": 214.5,
+  "plugins": {
+    "epub-reader": {
+      "manifestSourceGzipBytes": 267,
+      "probeGzipBytes": 2637,
+      "probeFiles": [
+        "static/chunks/8160.48e118822e6540ba.js"
+      ],
+      "viewerGzipBytes": 47418,
+      "viewerFiles": [
+        "static/chunks/2007.7c10a35a78d4a655.js",
+        "static/chunks/8264.0ed1f3d1ac6368bd.js",
+        "static/chunks/8827.17e50de87c62c0c8.js"
+      ]
+    },
+    "comic-book-reader": {
+      "manifestSourceGzipBytes": 292,
+      "probeGzipBytes": 2651,
+      "probeFiles": [
+        "static/chunks/2851.798c312de1512f06.js"
+      ],
+      "viewerGzipBytes": 44933,
+      "viewerFiles": [
+        "static/chunks/5750.589aafc15d260d57.js",
+        "static/chunks/8264.0ed1f3d1ac6368bd.js",
+        "static/chunks/8827.17e50de87c62c0c8.js"
+      ]
+    }
+  },
+  "runtimeAssetsAdded": 0
+}

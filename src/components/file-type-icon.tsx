@@ -1,3 +1,5 @@
+import { epubManifest } from "@anyfile/epub-reader/manifest";
+import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
 import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
 import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
@@ -137,7 +139,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "document",
     icon: FileTextIcon,
-    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest)
+    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, epubManifest, comicBookManifest)
       .filter((extension) => extension !== ".ai"),
   },
   {

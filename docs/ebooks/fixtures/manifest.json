@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    {
+      "file": "bomb.cbz",
+      "bytes": 33755,
+      "sha256": "2c37d6a498c670190d3d37da54fc5340150057bf638466570f3a3a4620a03570",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "bomb",
+      "parameters": {
+        "entries": 1,
+        "declaredExpandedBytes": 34603008
+      }
+    },
+    {
+      "file": "damaged-image.cbz",
+      "bytes": 116,
+      "sha256": "dec3234281eddf6543305b24d48dbb51631365539db18f1c6362c7c0c2f86f60",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "damaged-image",
+      "parameters": {
+        "entries": 1,
+        "declaredExpandedBytes": 6
+      }
+    },
+    {
+      "file": "deep.epub",
+      "bytes": 4243,
+      "sha256": "11f0672cbaa909f18d2b70df175f74e7aa09ca1ce33a9503eca2755f93507921",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "deep",
+      "parameters": {
+        "entries": 12,
+        "declaredExpandedBytes": 16379
+      }
+    },
+    {
+      "file": "deep.fb2",
+      "bytes": 1571,
+      "sha256": "342fc68834cea88762f66bb4eff25c7019b25fd817b527ad19e497842422dd83",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "deep"
+    },
+    {
+      "file": "drm.epub",
+      "bytes": 4759,
+      "sha256": "b5b3b8b6fe0d14dfb325d6446a2dc362ce1c02d39624b3b2c9aa4793d5430972",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "drm",
+      "parameters": {
+        "entries": 13,
+        "declaredExpandedBytes": 18671
+      }
+    },
+    {
+      "file": "duplicate.cbz",
+      "bytes": 426,
+      "sha256": "980a0187c2d67dc590ba4072d47ee006ddd530b2cddd4933f276857f860fc45a",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "duplicate",
+      "parameters": {
+        "entries": 2,
+        "declaredExpandedBytes": 434
+      }
+    },
+    {
+      "file": "empty.cbz",
+      "bytes": 126,
+      "sha256": "893cc86d6f0def0e26679662d4add5c37d9ca01426d14a4f5c55f76ed9c846c6",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "empty",
+      "parameters": {
+        "entries": 1,
+        "declaredExpandedBytes": 8
+      }
+    },
+    {
+      "file": "encrypted.cbz",
+      "bytes": 1112,
+      "sha256": "1116ae5b91c439de3440ec8c55f71cf9856a47e4703df976d4d94514755e9925",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "encrypted",
+      "parameters": {
+        "entries": 5,
+        "declaredExpandedBytes": 1085
+      }
+    },
+    {
+      "file": "entity.epub",
+      "bytes": 4580,
+      "sha256": "276a689fba031805e9dcb19e7cf15ead17937253f13c95ccd158dc8f5f7ad2a8",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "entity",
+      "parameters": {
+        "entries": 12,
+        "declaredExpandedBytes": 18573
+      }
+    },
+    {
+      "file": "entity.fb2",
+      "bytes": 104,
+      "sha256": "1420588aa0312f5042ec701ced5b622fd1ac81f87909f164111dd6077f7e86c5",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "entity"
+    },
+    {
+      "file": "epub2.epub",
+      "bytes": 4618,
+      "sha256": "5fbe071ffeb7c7fad420f71aa0003111efc9d0656b2baef9953e0f07d8b26a53",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "epub2",
+      "parameters": {
+        "entries": 12,
+        "declaredExpandedBytes": 18642
+      }
+    },
+    {
+      "file": "epub3.epub",
+      "bytes": 4622,
+      "sha256": "57875296dd01d87545b77a5be89011de6f9bf58697da51aa9a91e986ab19cb22",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "epub3",
+      "parameters": {
+        "entries": 12,
+        "declaredExpandedBytes": 18658
+      }
+    },
+    {
+      "file": "huge-pixels.cbz",
+      "bytes": 225,
+      "sha256": "022f53345631617a5f198b495468a399b70dcf497b9abacfd67e777757891742",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "huge-pixels",
+      "parameters": {
+        "entries": 1,
+        "declaredExpandedBytes": 217
+      }
+    },
+    {
+      "file": "hundreds.cbz",
+      "bytes": 61606,
+      "sha256": "d29e14a22a827268c8690b5b34c000c4c9c863dda437e1afadac6652f7949296",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "hundreds",
+      "parameters": {
+        "entries": 300,
+        "declaredExpandedBytes": 65100
+      }
+    },
+    {
+      "file": "image-formats.cbz",
+      "bytes": 3096,
+      "sha256": "956564ee2cfe3bc5e1b690c3867fea8f1c626e3405e5e4a3ff08b7405f41552f",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "Apache-2.0 generated image fixtures",
+      "purpose": "image-formats",
+      "parameters": {
+        "entries": 5,
+        "declaredExpandedBytes": 3071
+      }
+    },
+    {
+      "file": "large-chapter.epub",
+      "bytes": 6216,
+      "sha256": "3b77ca0152db5ae8b58745881ab2092eef41b6955369392d2d965c3411ae3380",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "large-chapter",
+      "parameters": {
+        "entries": 12,
+        "declaredExpandedBytes": 2112585
+      }
+    },
+    {
+      "file": "legacy-names.cbz",
+      "bytes": 426,
+      "sha256": "3632db8f7c6103bea1fe83cb7d55dabd4c036a31f2f31496b4accb38e2c30b32",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "legacy-names",
+      "parameters": {
+        "entries": 2,
+        "declaredExpandedBytes": 434
+      }
+    },
+    {
+      "file": "malicious.epub",
+      "bytes": 5853,
+      "sha256": "26839a0c3c06261bc8468d8c08c774be88c393dcad878701a7c537eaf4b720ff",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "malicious",
+      "parameters": {
+        "entries": 12,
+        "declaredExpandedBytes": 21752
+      }
+    },
+    {
+      "file": "manga.cbz",
+      "bytes": 1315,
+      "sha256": "9ff2e226cb89f533f7915d135efd0820f3eb7b80abe825a7ca2a671954f72cfd",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "manga",
+      "parameters": {
+        "entries": 6,
+        "declaredExpandedBytes": 1225
+      }
+    },
+    {
+      "file": "many-entries.cbz",
+      "bytes": 947899,
+      "sha256": "2ab0e9845ab7b437ef572b2cf40de2bf151e58adb2990601a665472e255e2cd1",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "many-entries",
+      "parameters": {
+        "entries": 10001,
+        "declaredExpandedBytes": 10001
+      }
+    },
+    {
+      "file": "missing-image.epub",
+      "bytes": 4392,
+      "sha256": "6b49fbb9df3d0a58e204a45742eadc389854d20fafa8df0c7588555fce1554ad",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "missing-image",
+      "parameters": {
+        "entries": 11,
+        "declaredExpandedBytes": 18441
+      }
+    },
+    {
+      "file": "missing-spine.epub",
+      "bytes": 4055,
+      "sha256": "57bbd81c796d87498ba6fe2855b05f68dcdbe705cf438ea5f4583fedfe9586ca",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "missing-spine",
+      "parameters": {
+        "entries": 11,
+        "declaredExpandedBytes": 15432
+      }
+    },
+    {
+      "file": "normal.fb2",
+      "bytes": 257,
+      "sha256": "85805cef161bdbb46b585446f8414797edd261ab97f18bb2ffff74a6a5302f5f",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "normal"
+    },
+    {
+      "file": "pages.cbz",
+      "bytes": 1112,
+      "sha256": "12d7af7144f144993c5ef193799e7dd14d7c28c99714bd2931e4c710a4ffc8ae",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "pages",
+      "parameters": {
+        "entries": 5,
+        "declaredExpandedBytes": 1085
+      }
+    },
+    {
+      "file": "pixel-budget.cbz",
+      "bytes": 2866,
+      "sha256": "6dbd6f8926857f05f2d39fd28769da3788095f0b48212332fe66c51f5567064a",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "pixel-budget",
+      "parameters": {
+        "entries": 6,
+        "declaredExpandedBytes": 193536
+      }
+    },
+    {
+      "file": "resources.epub",
+      "bytes": 21132,
+      "sha256": "d78f0dd422cc3c0541afb47fdcf1804602a4c376b740d6a7b64a8505c6b82775",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0 + OFL-1.1",
+      "purpose": "resources",
+      "parameters": {
+        "entries": 14,
+        "declaredExpandedBytes": 54411
+      }
+    },
+    {
+      "file": "rtl.epub",
+      "bytes": 4959,
+      "sha256": "bd4172ab1fbb351beec0d465a434fc7d79c50c4e5818bfb25f1437bdbeb5c089",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "rtl",
+      "parameters": {
+        "entries": 12,
+        "declaredExpandedBytes": 18978
+      }
+    },
+    {
+      "file": "traversal.cbz",
+      "bytes": 230,
+      "sha256": "a53367bc5a4b4f5476eddb2a90ed1e93ffe6dcbc451cf082adc7e6fd853624ab",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "traversal",
+      "parameters": {
+        "entries": 1,
+        "declaredExpandedBytes": 217
+      }
+    },
+    {
+      "file": "zip64.cbz",
+      "bytes": 1188,
+      "sha256": "2f5ce3631dbe17f718a9a2fa9fa1bec2fc11657b1b67895951c205764864d5b0",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "zip64",
+      "parameters": {
+        "entries": 5,
+        "declaredExpandedBytes": 1085
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "file": "fonts/Abel-Regular.ttf",
+      "source": "https://raw.githubusercontent.com/google/fonts/3b99d83d2625944fc0b8bd328d793fa819b92381/ofl/abel/Abel-Regular.ttf",
+      "sha256": "8809dcad25318225052f88333e208c5aad4adcb7b2c934c135735ec19aa410b4",
+      "license": "OFL-1.1"
+    },
+    {
+      "file": "fonts/OFL.txt",
+      "source": "https://raw.githubusercontent.com/google/fonts/3b99d83d2625944fc0b8bd328d793fa819b92381/ofl/abel/OFL.txt",
+      "sha256": "4f4bc3806a1e55789c6ef75ca5fc628297b05292f74966474dc0d40324abc609",
+      "license": "OFL-1.1"
+    },
+    {
+      "file": "viewer/plugins/browser-image/examples/sample.jpg",
+      "source": "viewer/plugins/browser-image/scripts/generate-examples.mjs",
+      "sha256": "a73a0fbda81e8d5dae1c309d3019eb4b3f252047749fed29f6f2765703dfec6d",
+      "license": "Apache-2.0 original generated fixtures"
+    },
+    {
+      "file": "viewer/plugins/browser-image/examples/sample.png",
+      "source": "viewer/plugins/browser-image/scripts/generate-examples.mjs",
+      "sha256": "1e805f0e2e9725ebcaa6a3598ec95ef69acc719a26f69b36f9925794ae02d434",
+      "license": "Apache-2.0 original generated fixtures"
+    },
+    {
+      "file": "viewer/plugins/browser-image/examples/animated.gif",
+      "source": "viewer/plugins/browser-image/scripts/generate-examples.mjs",
+      "sha256": "521bccac91e6c00e071cac14baefd393c3d9067479695fc0b93c2b355777c7a9",
+      "license": "Apache-2.0 original generated fixtures"
+    },
+    {
+      "file": "viewer/plugins/browser-image/examples/sample-lossless-alpha.webp",
+      "source": "viewer/plugins/browser-image/scripts/generate-examples.mjs",
+      "sha256": "cdb6900dcd81828e423258610210a5b5e447983fa7188c838bb0156bf55f841c",
+      "license": "Apache-2.0 original generated fixtures"
+    },
+    {
+      "file": "viewer/plugins/browser-image/examples/sample.avif",
+      "source": "viewer/plugins/browser-image/scripts/generate-examples.mjs",
+      "sha256": "8ed9a1beea0d80ca1981a02d383eb194eddf9a79489c8fa778569481af0ed273",
+      "license": "Apache-2.0 original generated fixtures"
+    }
+  ]
+}

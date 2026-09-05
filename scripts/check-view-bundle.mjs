@@ -37,6 +37,9 @@ if (gzipBytes > maximumGzipBytes) {
 
 const initialCode = Buffer.concat(contents).toString("utf8");
 const deferredImplementationMarkers = [
+  "anyfile-epub-reader__viewport",
+  "anyfile-comic-reader__viewport",
+  "ZIP index limit exceeded.",
   "anyfile-rendering-3d",
   "THREE.WebGLRenderer",
   "THREE.GLTFLoader",

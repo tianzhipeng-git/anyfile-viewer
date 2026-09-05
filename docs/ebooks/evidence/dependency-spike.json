@@ -1,0 +1,297 @@
+{
+  "schemaVersion": 1,
+  "samplePolicy": "Upstream research samples downloaded into a temporary directory only; not redistributed as publication fixtures. Source/license locations and hashes retained. Native header/index checks are not browser decoder support.",
+  "candidates": [
+    {
+      "commitDate": "2026-03-24T04:19:57Z",
+      "candidate": "epub.js",
+      "repository": "https://github.com/futurepress/epub.js",
+      "revision": "eee359d0790002115a1156a9833c54f4bcd44c1d",
+      "files": [
+        {
+          "path": "license",
+          "url": "https://raw.githubusercontent.com/futurepress/epub.js/eee359d0790002115a1156a9833c54f4bcd44c1d/license",
+          "bytes": 1516,
+          "gzipBytes": 834,
+          "sha256": "8663e726f4194e1a34913b223c2e4745ed06f3ec645a66a41ab70b735070b692"
+        },
+        {
+          "path": "package.json",
+          "url": "https://raw.githubusercontent.com/futurepress/epub.js/eee359d0790002115a1156a9833c54f4bcd44c1d/package.json",
+          "bytes": 2448,
+          "gzipBytes": 932,
+          "sha256": "00018967670a35f19505d594cf1c94e5067774e0bf434415d63d64ce99009da3"
+        },
+        {
+          "path": "src/archive.js",
+          "url": "https://raw.githubusercontent.com/futurepress/epub.js/eee359d0790002115a1156a9833c54f4bcd44c1d/src/archive.js",
+          "bytes": 5573,
+          "gzipBytes": 1633,
+          "sha256": "620e5e4ad4f634c789aceec9eab563c3e353e598d6c0abb6167220e51e7ff630"
+        },
+        {
+          "path": "src/managers/views/iframe.js",
+          "url": "https://raw.githubusercontent.com/futurepress/epub.js/eee359d0790002115a1156a9833c54f4bcd44c1d/src/managers/views/iframe.js",
+          "bytes": 19915,
+          "gzipBytes": 5193,
+          "sha256": "ab700a110306c7e4716df790313b8055971cd92ca94b004289cded46ee283302"
+        }
+      ],
+      "browserRuntime": "not adopted; no Worker/WASM shipped",
+      "npmBaseline": {
+        "version": "0.3.93",
+        "license": "BSD-2-Clause",
+        "tarballBytes": 2228717,
+        "sha256": "180b33059ca15e2b4f129eb7fef6cae0bf6005c02af5194d13e5cb48378d538f",
+        "dependencies": {
+          "jszip": "^3.7.1",
+          "lodash": "^4.17.21",
+          "core-js": "^3.18.3",
+          "marks-pane": "^1.0.9",
+          "localforage": "^1.10.0",
+          "path-webpack": "0.0.3",
+          "event-emitter": "^0.3.5",
+          "@xmldom/xmldom": "^0.7.5",
+          "@types/localforage": "0.0.34"
+        },
+        "runtimeBytes": 223875,
+        "runtimeGzipBytes": 63569
+      }
+    },
+    {
+      "commitDate": "2024-10-29T17:49:48Z",
+      "candidate": "libmobi",
+      "repository": "https://github.com/bfabiszewski/libmobi",
+      "revision": "906274205c11944b628da1c553b255acb1af7c55",
+      "files": [
+        {
+          "path": "COPYING",
+          "url": "https://raw.githubusercontent.com/bfabiszewski/libmobi/906274205c11944b628da1c553b255acb1af7c55/COPYING",
+          "bytes": 7651,
+          "gzipBytes": 2634,
+          "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+        },
+        {
+          "path": "tests/samples/sample-unicode-uncompressed.mobi",
+          "url": "https://raw.githubusercontent.com/bfabiszewski/libmobi/906274205c11944b628da1c553b255acb1af7c55/tests/samples/sample-unicode-uncompressed.mobi",
+          "bytes": 658770,
+          "gzipBytes": 403874,
+          "sha256": "9419834c41bf2e7e9ccb78a870e679d56dc4a0a380c5afae3168a2fb5827412d",
+          "headerSpike": {
+            "databaseTypeCreator": "BOOKMOBI",
+            "records": 93,
+            "palmdocCompression": 1,
+            "encryption": 0,
+            "mobiVersion": 6,
+            "recordMobiVersions": [
+              6,
+              8
+            ]
+          }
+        },
+        {
+          "path": "tests/samples/sample-unicode-huffdic.mobi",
+          "url": "https://raw.githubusercontent.com/bfabiszewski/libmobi/906274205c11944b628da1c553b255acb1af7c55/tests/samples/sample-unicode-huffdic.mobi",
+          "bytes": 484776,
+          "gzipBytes": 411913,
+          "sha256": "560dda58429878a64f73381ffddfcf1a59809e7c669a5222666257df8976a68f",
+          "headerSpike": {
+            "databaseTypeCreator": "BOOKMOBI",
+            "records": 101,
+            "palmdocCompression": 17480,
+            "encryption": 0,
+            "mobiVersion": 6,
+            "recordMobiVersions": [
+              6,
+              8
+            ]
+          }
+        },
+        {
+          "path": "tests/samples/sample-cp1252.mobi",
+          "url": "https://raw.githubusercontent.com/bfabiszewski/libmobi/906274205c11944b628da1c553b255acb1af7c55/tests/samples/sample-cp1252.mobi",
+          "bytes": 108476,
+          "gzipBytes": 82340,
+          "sha256": "e77aa8f99d65f12bc7b5d71f272a2a4a8f36fe6d5c00e9b95c8a926b145ad088",
+          "headerSpike": {
+            "databaseTypeCreator": "BOOKMOBI",
+            "records": 33,
+            "palmdocCompression": 2,
+            "encryption": 0,
+            "mobiVersion": 6,
+            "recordMobiVersions": [
+              6
+            ]
+          }
+        },
+        {
+          "path": "tests/samples/sample-ncx.mobi",
+          "url": "https://raw.githubusercontent.com/bfabiszewski/libmobi/906274205c11944b628da1c553b255acb1af7c55/tests/samples/sample-ncx.mobi",
+          "bytes": 28999,
+          "gzipBytes": 4575,
+          "sha256": "bb33217f3369d8ca6c5a373ca8e21a151be5494f5de6623aa9e7f42fb5fed743",
+          "headerSpike": {
+            "databaseTypeCreator": "BOOKMOBI",
+            "records": 26,
+            "palmdocCompression": 2,
+            "encryption": 0,
+            "mobiVersion": 6,
+            "recordMobiVersions": [
+              6,
+              8
+            ]
+          }
+        },
+        {
+          "path": "tests/samples/sample-multimedia.mobi",
+          "url": "https://raw.githubusercontent.com/bfabiszewski/libmobi/906274205c11944b628da1c553b255acb1af7c55/tests/samples/sample-multimedia.mobi",
+          "bytes": 565041,
+          "gzipBytes": 483273,
+          "sha256": "a301cce8187f1f1ea9562196c46328ca75585da280d4b742827cebd4698697c9",
+          "headerSpike": {
+            "databaseTypeCreator": "BOOKMOBI",
+            "records": 99,
+            "palmdocCompression": 2,
+            "encryption": 0,
+            "mobiVersion": 7,
+            "recordMobiVersions": [
+              7,
+              8
+            ]
+          }
+        }
+      ],
+      "browserRuntime": "not adopted; no Worker/WASM shipped"
+    },
+    {
+      "commitDate": "2026-08-10T09:23:37Z",
+      "candidate": "DjVu.js",
+      "repository": "https://github.com/RussCoder/djvujs",
+      "revision": "eca3e69c966f3b7fcf0453f39029bc1e409fea8a",
+      "files": [
+        {
+          "path": "LICENSE.md",
+          "url": "https://raw.githubusercontent.com/RussCoder/djvujs/eca3e69c966f3b7fcf0453f39029bc1e409fea8a/LICENSE.md",
+          "bytes": 1304,
+          "gzipBytes": 684,
+          "sha256": "5b2baaa4c209fb62dc5fc90270a1ac8935ea88e1c554fbe11e1e52dd3560420e"
+        },
+        {
+          "path": "library/package.json",
+          "url": "https://raw.githubusercontent.com/RussCoder/djvujs/eca3e69c966f3b7fcf0453f39029bc1e409fea8a/library/package.json",
+          "bytes": 447,
+          "gzipBytes": 240,
+          "sha256": "e398f3eed4d59e9357098ec113a0b1bb1d4c95ff9847773fba89706f87ca477b"
+        },
+        {
+          "path": "library/assets/DjVu3Spec_bundled.djvu",
+          "url": "https://raw.githubusercontent.com/RussCoder/djvujs/eca3e69c966f3b7fcf0453f39029bc1e409fea8a/library/assets/DjVu3Spec_bundled.djvu",
+          "bytes": 489402,
+          "gzipBytes": 475144,
+          "sha256": "2f5e8995c86902daf2038fa8833b6e0dec63cf5aac69202f6b5cd349f1bc6bbc",
+          "headerSpike": {
+            "signatureHex": "41542654464f524d000777ae444a564d"
+          }
+        }
+      ],
+      "browserRuntime": "not adopted; no Worker/WASM shipped"
+    },
+    {
+      "commitDate": "2026-09-05T01:23:14Z",
+      "candidate": "libarchive",
+      "repository": "https://github.com/libarchive/libarchive",
+      "revision": "ddf8247381814977c2f55a59f48d17460f7d00f0",
+      "files": [
+        {
+          "path": "COPYING",
+          "url": "https://raw.githubusercontent.com/libarchive/libarchive/ddf8247381814977c2f55a59f48d17460f7d00f0/COPYING",
+          "bytes": 3089,
+          "gzipBytes": 1447,
+          "sha256": "30e556b3959e3985d66efefec5eaac51d4995053caa1d3cffe6eb916f146f229"
+        },
+        {
+          "path": "libarchive/test/test_read_format_rar.rar.uu",
+          "url": "https://raw.githubusercontent.com/libarchive/libarchive/ddf8247381814977c2f55a59f48d17460f7d00f0/libarchive/test/test_read_format_rar.rar.uu",
+          "bytes": 505,
+          "gzipBytes": 380,
+          "sha256": "d1e75b4120995bce82fc4e72ebf8b80d18ea69fa34ac62de383b8393f92afa09",
+          "decodedBytes": 336,
+          "decodedSha256": "d421b86f6290aefad61b2a36737253b2b30fe27c156bd95abfc230f24fe0307e",
+          "nativeIndexSpike": {
+            "tool": "macOS bsdtar (system libarchive); not browser evidence",
+            "exitCode": 0,
+            "entries": [
+              "test.txt",
+              "testlink",
+              "testdir/test.txt",
+              "testdir",
+              "testemptydir"
+            ],
+            "stderr": ""
+          }
+        },
+        {
+          "path": "libarchive/test/test_read_format_rar5_stored.rar.uu",
+          "url": "https://raw.githubusercontent.com/libarchive/libarchive/ddf8247381814977c2f55a59f48d17460f7d00f0/libarchive/test/test_read_format_rar5_stored.rar.uu",
+          "bytes": 203,
+          "gzipBytes": 207,
+          "sha256": "ec73ba623a8e8eee4909dcdf45f0526ff9adc1d856d054ce742e6c1ba1fb5fa8",
+          "decodedBytes": 109,
+          "decodedSha256": "35d75e315d164d2e329afc28f7d844f013271b4fcffd4ddd78efcdd114a383a7",
+          "nativeIndexSpike": {
+            "tool": "macOS bsdtar (system libarchive); not browser evidence",
+            "exitCode": 0,
+            "entries": [
+              "helloworld.txt"
+            ],
+            "stderr": ""
+          }
+        },
+        {
+          "path": "libarchive/test/test_read_format_7zip_copy.7z.uu",
+          "url": "https://raw.githubusercontent.com/libarchive/libarchive/ddf8247381814977c2f55a59f48d17460f7d00f0/libarchive/test/test_read_format_7zip_copy.7z.uu",
+          "bytes": 266,
+          "gzipBytes": 212,
+          "sha256": "159ba2bd67aa046d01b7e08cbae994a1096be71a09039b6c9561559be81f353f",
+          "decodedBytes": 158,
+          "decodedSha256": "67a85f85950c4aaa524eb3f22be1fbac586e90c76de21e10fc1c2ce7685e04c2",
+          "nativeIndexSpike": {
+            "tool": "macOS bsdtar (system libarchive); not browser evidence",
+            "exitCode": 0,
+            "entries": [
+              "file1"
+            ],
+            "stderr": ""
+          }
+        }
+      ],
+      "browserRuntime": "not adopted; no Worker/WASM shipped"
+    },
+    {
+      "commitDate": "2026-07-21T12:54:20Z",
+      "candidate": "libmspack",
+      "repository": "https://github.com/kyz/libmspack",
+      "revision": "55d501976171397ccd5d5a7a1ca7da065b1d9a06",
+      "files": [
+        {
+          "path": "libmspack/COPYING.LIB",
+          "url": "https://raw.githubusercontent.com/kyz/libmspack/55d501976171397ccd5d5a7a1ca7da065b1d9a06/libmspack/COPYING.LIB",
+          "bytes": 26430,
+          "gzipBytes": 9365,
+          "sha256": "a190dc9c8043755d90f8b0a75fa66b9e42d4af4c980bf5ddc633f0124db3cee7"
+        },
+        {
+          "path": "libmspack/test/test_files/chmd/encints-32bit-both.chm",
+          "url": "https://raw.githubusercontent.com/kyz/libmspack/55d501976171397ccd5d5a7a1ca7da065b1d9a06/libmspack/test/test_files/chmd/encints-32bit-both.chm",
+          "bytes": 4292,
+          "gzipBytes": 365,
+          "sha256": "6f93c7087beff90799fe7bd2ce8aea803aa26b6d330d147fd6cde8cd9a393c65",
+          "headerSpike": {
+            "signatureHex": "49545346020000005800000001000000"
+          }
+        }
+      ],
+      "browserRuntime": "not adopted; no Worker/WASM shipped"
+    }
+  ]
+}

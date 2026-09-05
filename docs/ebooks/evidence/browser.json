@@ -1,0 +1,87 @@
+{
+  "browser": "145.0.7632.6",
+  "base": "http://localhost:3107",
+  "results": [
+    {
+      "name": "English homepage enters isolated viewer",
+      "elapsedMs": 275
+    },
+    {
+      "name": "EPUB first UI",
+      "elapsedMs": 55
+    },
+    {
+      "name": "EPUB 3 first chapter, image and routing",
+      "elapsedMs": 108
+    },
+    {
+      "name": "EPUB TOC, cross-chapter anchor, typography and resize",
+      "elapsedMs": 235
+    },
+    {
+      "name": "EPUB 2 NCX and RTL",
+      "elapsedMs": 144
+    },
+    {
+      "name": "Scripts, forms, popups, external URLs, CSS and host mutation blocked",
+      "elapsedMs": 94
+    },
+    {
+      "name": "Embedded font and safe SVG resources",
+      "elapsedMs": 78
+    },
+    {
+      "name": "Missing optional image preserves readable chapter text",
+      "elapsedMs": 71
+    },
+    {
+      "name": "EPUB local errors and protected content",
+      "elapsedMs": 75
+    },
+    {
+      "name": "CBZ first page, cover, natural sorting, RTL spreads and keyboard",
+      "elapsedMs": 98
+    },
+    {
+      "name": "300-page CBZ first UI",
+      "elapsedMs": 27
+    },
+    {
+      "name": "300-page CBZ is virtualized and supports jumps, scrolling and resize",
+      "elapsedMs": 102
+    },
+    {
+      "name": "8MP spread decode",
+      "elapsedMs": 78,
+      "liveUrls": 4,
+      "jsHeapBytes": 16184337
+    },
+    {
+      "name": "Eight-megapixel pages stay within the four-page window",
+      "elapsedMs": 79
+    },
+    {
+      "name": "JPEG, PNG, GIF, WebP and AVIF use the existing image decoder",
+      "elapsedMs": 66
+    },
+    {
+      "name": "ZIP64 and damaged/oversized comic pages",
+      "elapsedMs": 113
+    },
+    {
+      "name": "File switching releases every book URL and iframe",
+      "elapsedMs": 73
+    },
+    {
+      "name": "Chinese homepage enters isolated viewer with localized controls",
+      "elapsedMs": 287
+    }
+  ],
+  "attacks": [],
+  "errors": [],
+  "limits": {
+    "epubLiveChapters": 3,
+    "comicLivePages": 4
+  },
+  "heapBytes": 6599467
+}

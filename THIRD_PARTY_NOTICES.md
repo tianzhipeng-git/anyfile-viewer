@@ -112,3 +112,13 @@ preliminary evaluation and unmet integration requirements are recorded in
 
 - occt-import-js 0.0.23-anyfile.1: LGPL-2.1, with Open CASCADE LGPL-2.1 and OCCT exception. Complete notices, pinned corresponding source links and build patch are in `third_party/occt-import-js/0.0.23-anyfile.1/` and copied to `/vendor/occt-import-js/0.0.23-anyfile.1/`.
 - laz-perf 0.0.7-anyfile.1: Apache-2.0. Upstream source, license and WASM provenance are in `third_party/laz-perf/0.0.7-anyfile.1/`, copied beside the runtime.
+
+## Ebook test fixtures: Abel font
+
+`docs/ebooks/fixtures/fonts/Abel-Regular.ttf` and the generated `resources.epub`
+contain the Abel font from Google Fonts commit
+`3b99d83d2625944fc0b8bd328d793fa819b92381` (`ofl/abel`).
+The font is distributed under the SIL Open Font License 1.1. The complete notice
+and license are preserved in `docs/ebooks/fixtures/fonts/OFL.txt`; exact source
+URLs and SHA-256 hashes are in `docs/ebooks/fixtures/manifest.json`.
+This is a test input, not an application runtime font.

@@ -72,6 +72,19 @@ for (const [id, plugin] of Object.entries(policy.plugins)) {
   console.log(`${id}: manifest ${(manifestBytes / 1024).toFixed(1)} KiB source gzip; probe ${((probe?.bytes ?? 0) / 1024).toFixed(1)} KiB; viewer ${(viewer.bytes / 1024).toFixed(1)} KiB`);
 }
 
+for (const [id, ownMarker, otherMarker] of [
+  ["epub-reader", "anyfile-epub-reader__viewport", "anyfile-comic-reader__viewport"],
+  ["comic-book-reader", "anyfile-comic-reader__viewport", "anyfile-epub-reader__viewport"],
+]) {
+  const entry = report.plugins[id];
+  const code = (await Promise.all(entry.viewerFiles.map((file) => readFile(join(projectRoot, ".next", file), "utf8")))).join("\n");
+  if (!code.includes(ownMarker) || code.includes(otherMarker)) throw new Error(`${id} renderer is not isolated in its own dynamic entry`);
+  const probeCode = (await Promise.all(entry.probeFiles.map((file) => readFile(join(projectRoot, ".next", file), "utf8")))).join("\n");
+  for (const marker of [ownMarker, otherMarker, "ZIP expansion limit exceeded.", "Chapter resource count exceeded."]) {
+    if (probeCode.includes(marker)) throw new Error(`${id} probe imports a decoder or renderer: ${marker}`);
+  }
+}
+
 await writeFile(
   join(projectRoot, ".next/diagnostics/viewer-bundle-report.json"),
   `${JSON.stringify(report, null, 2)}\n`,

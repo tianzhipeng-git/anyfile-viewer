@@ -161,9 +161,16 @@ describe("viewer protocol", () => {
     await expect(resolution).rejects.toMatchObject({ name: "AbortError" });
   });
 
+  it.each([["epub3.epub", "epub-reader"], ["pages.cbz", "comic-book-reader"]])("prefers the book reader while retaining archive inspection for %s", async (name, id) => {
+    const file = new File([readFileSync(join(process.cwd(), "docs/ebooks/fixtures", name))], name);
+    const result = await resolveViewerRegistrations(file, viewerRegistrations, { signal: new AbortController().signal });
+    expect(result.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([[id, 4], ["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
+  });
+
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-exchange", "point-cloud", "print-3d", "mesh-3d"]);
+      .toEqual(["comic-book-reader", "epub-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-exchange", "point-cloud", "print-3d", "mesh-3d"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),

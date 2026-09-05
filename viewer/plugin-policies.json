@@ -444,6 +444,16 @@
       "directory": "word",
       "package": "@anyfile/word-viewer",
       "runtimeSets": []
+    },
+    "epub-reader": {
+      "directory": "epub",
+      "package": "@anyfile/epub-reader",
+      "runtimeSets": []
+    },
+    "comic-book-reader": {
+      "directory": "comic-book",
+      "package": "@anyfile/comic-book-reader",
+      "runtimeSets": []
     }
   }
 }

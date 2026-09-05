@@ -1,0 +1,1 @@
+<!DOCTYPE FictionBook [<!ENTITY x SYSTEM "https://ebook.invalid/entity">]><FictionBook>&x;</FictionBook>

@@ -1,6 +1,6 @@
 # 电子书查看架构
 
-- 状态：规划，尚未实施专用电子书 runtime 或阅读器插件
+- 状态：EPUB 2/3 reflowable 与 CBZ 已交付；其他格式与共享阅读层仍为规划
 - 适用范围：EPUB、FB2、MOBI/Kindle、漫画归档、DjVu、CHM 等本地只读阅读
 - 相关文档：[格式清单](format-inventory.md)、[支持矩阵](support-matrix.md)、[实施路线图](roadmap.md)
 
@@ -180,10 +180,10 @@ CHM 需要解析 ITSF/ITSP 目录、LZX 数据块和 contents/index，再把 top
 
 书内内容必须被视为恶意输入：
 
-- 使用没有 `allow-scripts`、`allow-same-origin`、表单、弹窗或顶层导航权限的 sandbox iframe；
+- 使用仅允许 `allow-same-origin` 的 sandbox iframe，始终不授予脚本、表单、弹窗或顶层导航权限；由父页面受信代码操作清理后的正文 DOM，决策与实测依据见 [阶段 0 决策](phase-0-decisions.md)；
 - 移除 `script`、事件属性、`iframe`、`object`、`embed`、表单和自动播放媒体；
 - 清理 CSS 中的远程 `url()`、`@import`、危险 SVG 引用和宿主越界定位；
-- 内部链接只导航到已解析的 spine/resource；外部链接要求用户显式点击，并只允许审核过的协议；
+- 内部链接只导航到已解析的 spine/resource；当前外部链接移除 href，不启用导航；
 - 禁止自动发出远程图片、字体、音视频、脚本和 iframe 请求；
 - 只为当前实例创建最少 Object URL，并在章节卸载或 `dispose()` 时撤销；
 - XML parser 禁止外部实体、DTD 网络解析和 XSLT 执行；
@@ -211,7 +211,7 @@ CHM 需要解析 ITSF/ITSP 目录、LZX 数据块和 contents/index，再把 top
 - 全文搜索索引不是首期前置条件；若以后增加，必须增量构建且可取消；
 - 达到边界返回 `resource-limit`，不能依赖浏览器 OOM。
 
-具体数值由阶段 0 基准确定，不在架构阶段统一猜测。
+当前数值、测量口径和执行位置见 [阶段 0 决策](phase-0-decisions.md)。
 
 ## 8. 加载、错误与生命周期
 
@@ -234,7 +234,7 @@ CHM 需要解析 ITSF/ITSP 目录、LZX 数据块和 contents/index，再把 top
 | 展开、DOM、图片、页数或内存超过已定预算 | `resource-limit` |
 | 无法归类的初始化失败 | `open-failed` |
 
-DRM 是已识别但不支持的内容能力，不伪装成文件损坏。具体是插件内稳定状态还是 `open()` 错误，在阶段 0 用协议一致性测试确定。
+DRM 是已识别但不支持的内容能力，不伪装成文件损坏。当前 EPUB/CBZ 返回插件内稳定不支持状态及可销毁 controller；不把已识别加密状态伪装成损坏，不等待密码。
 
 ## 9. 依赖决策
 
@@ -245,7 +245,7 @@ DRM 是已识别但不支持的内容能力，不伪装成文件损坏。具体�
 3. 可裁剪、可在 Worker 中终止、可复现构建的 C/C++/Rust WASM；
 4. 无安全边界、只能整书转码、需要上传、许可证不兼容或长期无人维护的方案拒绝。
 
-EPUB.js、libmobi、DjVu.js 和 libarchive 只列为 spike 候选。选用前必须用固定语料验证能力，不能根据 README 或底层库的理论格式列表直接进入 Manifest。
+EPUB.js 经比较未采用；libmobi、DjVu.js 和 libarchive 的固定样例/许可与未通过门禁见 [阶段 0 决策](phase-0-decisions.md)，尚不是运行依赖。选用前必须用固定语料验证能力，不能根据 README 或底层库的理论格式列表直接进入 Manifest。
 
 ## 10. 规范与候选上游
 

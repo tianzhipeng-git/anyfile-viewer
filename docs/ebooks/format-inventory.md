@@ -1,8 +1,10 @@
 # 电子书格式候选清单
 
-- 状态：候选范围，不是当前 Manifest 或已实现能力清单
+- 状态：EPUB 2/3 reflowable 与 CBZ 已交付；本文其他条目继续作为候选范围，不能当作 Manifest 清单
 - 口径：以真实阅读内容、版本、布局、压缩和 DRM 组合为单位
 - 相关文档：[架构](architecture.md)、[支持矩阵](support-matrix.md)、[路线图](roadmap.md)
+
+已实现组合与固定证据以 [支持矩阵](support-matrix.md) 为准；阶段 0 的候选许可、MOBI7/KF8、RAR4/5/7z、DjVu、CHM 样例与未通过门禁见 [决策记录](phase-0-decisions.md)。
 
 ## 1. 纳入原则
 

@@ -1,3 +1,5 @@
+import { avifDimensions } from "./avif-dimensions";
+
 export type BrowserImageFormat = "JPEG" | "PNG" | "APNG" | "GIF" | "WebP" | "AVIF" | "BMP" | "ICO" | "CUR";
 
 export interface ImageFileInfo {
@@ -253,7 +255,7 @@ function inspectAvif(bytes: Uint8Array, complete: boolean): ImageFileInfo | unde
   if (!brands.includes("avif") && !brands.includes("avis")) return undefined;
   if (complete && !hasCompleteAvifContainer(bytes)) return undefined;
   // AVIF uses `avis` in the major or compatible brands to signal an image sequence.
-  return { format: "AVIF", animated: brands.includes("avis") };
+  return { format: "AVIF", animated: brands.includes("avis"), ...avifDimensions(bytes) };
 }
 
 function inspectBmp(bytes: Uint8Array, complete: boolean): ImageFileInfo | undefined {

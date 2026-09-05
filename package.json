@@ -28,7 +28,9 @@
     "test": "pnpm test:app && pnpm --recursive --if-present test",
     "test:app": "vitest run",
     "prepare:laz": "node scripts/prepare-laz-assets.mjs",
-    "prepare:occt": "node scripts/prepare-occt-assets.mjs"
+    "prepare:occt": "node scripts/prepare-occt-assets.mjs",
+    "test:ebooks:browser": "node scripts/verify-ebook-browser.mjs",
+    "fixtures:ebooks": "python3 scripts/generate-ebook-fixtures.py"
   },
   "dependencies": {
     "@anyfile/i18n": "workspace:*",
@@ -80,7 +82,9 @@
     "@anyfile/mesh-3d-viewer": "workspace:*",
     "@anyfile/print-3d-viewer": "workspace:*",
     "@anyfile/point-cloud-viewer": "workspace:*",
-    "@anyfile/cad-exchange-viewer": "workspace:*"
+    "@anyfile/cad-exchange-viewer": "workspace:*",
+    "@anyfile/epub-reader": "workspace:*",
+    "@anyfile/comic-book-reader": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -90,6 +94,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.3.3",
     "happy-dom": "20.11.6",
+    "playwright": "1.58.2",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "4.1.11"

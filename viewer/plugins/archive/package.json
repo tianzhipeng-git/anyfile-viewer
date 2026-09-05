@@ -6,7 +6,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./manifest": "./src/manifest.ts",
-    "./probe": "./src/probe.ts"
+    "./probe": "./src/probe.ts",
+    "./zip-catalog": "./src/zip-catalog.ts",
+    "./zip-source": "./src/zip-source.ts"
   },
   "scripts": {
     "test": "vitest run"
