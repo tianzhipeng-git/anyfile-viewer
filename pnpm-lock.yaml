@@ -56,6 +56,12 @@ importers:
       '@anyfile/excel-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/excel
+      '@anyfile/ffmpeg-audio-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/ffmpeg-audio
+      '@anyfile/ffmpeg-video-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/ffmpeg-video
       '@anyfile/fictionbook-reader':
         specifier: workspace:*
         version: link:viewer/plugins/fictionbook
@@ -206,6 +212,19 @@ importers:
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
   viewer/dev-binary-core:
+    devDependencies:
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/ffmpeg-playback:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
     devDependencies:
       happy-dom:
         specifier: 20.11.6
@@ -573,6 +592,44 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/ffmpeg-audio:
+    dependencies:
+      '@anyfile/ffmpeg-playback':
+        specifier: workspace:*
+        version: link:../../ffmpeg-playback
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/ffmpeg-video:
+    dependencies:
+      '@anyfile/ffmpeg-playback':
+        specifier: workspace:*
+        version: link:../../ffmpeg-playback
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6

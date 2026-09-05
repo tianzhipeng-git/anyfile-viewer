@@ -6,7 +6,7 @@
 - 第二批 MPEG-TS 已完成：单 program 的 AVC/HEVC + AAC/MP3/video-only，覆盖 188-byte TS 与 192-byte M2TS 真实播放证据。
 - 第三批普通 QuickTime 已完成：AVC + PCM S16LE、HEVC video-only；与原生 AVC/AAC MOV 按内容 probe 竞争。
 - 第四批 Ogg Video 已完成：OGV.js 1.9.0 软件解码 Theora + Vorbis/Opus/video-only，Worker/WASM 仅在 Ogg 完整路径加载。
-- AVI、MPEG-PS、MPEG-1/2 Video、AC-3/DTS 的依赖 spike 在阶段 2 内以“没有可直接接入的合适 provider”闭环；它们不是阶段 2 已声明范围，也不阻塞本阶段完成。阶段 2 完成后的产品决策是将受控 `ffmpeg-video` fallback 正式列为阶段 3，并与音频阶段 3 共享底层运行资产，见 [FFmpeg 音视频播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
+- AVI、MPEG-PS、MPEG-1/2 Video、AC-3/DTS 的依赖 spike 在阶段 2 内以“没有可直接接入的合适 provider”闭环；它们不是阶段 2 已声明范围，也不阻塞本阶段完成。阶段 2 完成后的产品决策是将受控 `ffmpeg-video` fallback 正式列为阶段 3，并与音频阶段 3 共享底层运行资产，见 [FFmpeg 音视频播放架构](ffmpeg-playback-runtime-plan.md)。
 
 ## Summary
 

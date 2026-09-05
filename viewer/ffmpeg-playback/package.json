@@ -1,0 +1,7 @@
+{
+  "name": "@anyfile/ffmpeg-playback", "version": "1.0.0", "private": true, "type": "module",
+  "exports": { ".": "./src/index.ts", "./probe-io": "./src/probe-io.ts" },
+  "scripts": { "test": "vitest run" },
+  "dependencies": { "@anyfile/viewer-protocol": "workspace:*" },
+  "devDependencies": { "vitest": "4.1.11", "happy-dom": "20.11.6" }
+}

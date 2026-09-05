@@ -1,3 +1,5 @@
+import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
+import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { epubManifest } from "@anyfile/epub-reader/manifest";
@@ -129,7 +131,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
       ...djiOsmoManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".osv"),
       ...goProMaxManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".360"),
       ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".lrv" || extension === ".insv"),
-      ...manifestExtensions(browserVideoManifest, nonNativeVideoManifest)
+      ...manifestExtensions(browserVideoManifest, nonNativeVideoManifest, ffmpegVideoManifest)
         .filter((extension) => extension !== ".ts"),
     ],
   },
@@ -166,7 +168,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "audio",
     icon: FileAudioIcon,
-    extensions: manifestExtensions(browserAudioManifest, nonNativeAudioManifest)
+    extensions: manifestExtensions(browserAudioManifest, nonNativeAudioManifest, ffmpegAudioManifest)
       .filter((extension) => ![".mp4", ".webm", ".ogg"].includes(extension)),
   },
   {

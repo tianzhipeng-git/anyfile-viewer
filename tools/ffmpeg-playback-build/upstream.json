@@ -1,0 +1,9 @@
+{
+  "artifactVersion": "9.0.1-anyfile.1",
+  "version": "9.0.1",
+  "url": "https://ffmpeg.org/releases/ffmpeg-9.0.1.tar.xz",
+  "sha256": "cf38e0e28c7e5605942c4a77755349b0145804a397af37eb1fb4c77cb237f635",
+  "emscripten": "4.0.10",
+  "image": "emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7",
+  "platform": "linux/amd64"
+}

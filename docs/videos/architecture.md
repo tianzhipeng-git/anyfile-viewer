@@ -1,6 +1,6 @@
 # 视频查看架构
 
-- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 规划独立 `ffmpeg-video` 插件并与 `ffmpeg-audio` 共享 FFmpeg 播放 runtime，专业视频顺延为阶段 4
+- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 已实现独立 `ffmpeg-video` 首批 AVI，并与 `ffmpeg-audio` 的 AIFF/AIFC 共享 FFmpeg 播放 runtime，专业视频属于阶段 4
 - 适用范围：浏览器本地打开的视频文件
 - 不包含：独立音频、流媒体、DRM、编辑、转码和服务端处理；独立音频见[音频查看架构](../audio/architecture.md)
 
@@ -84,7 +84,7 @@ File
 | FFmpeg video fallback | 前两条路径未覆盖、并在阶段 3 逐项验收的 AVI、MPEG-PS/ASF 等普通组合 | 共享 decode-only FFmpeg Worker/WASM + 视频 adapter + 最小播放管线 |
 | professional video | MOV/MXF 中的 ProRes、DNx、timecode 等 | 领域 demux/decoder + 专业交互（阶段 4） |
 
-这些边界是控制依赖和产品语义的规划工具，不是公共接口。阶段 1 使用 `browser-video`；阶段 2 的 Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 组合使用 `non-native-video`；阶段 3 使用独立 `ffmpeg-video`，但与 `ffmpeg-audio` 共享一份底层运行资产，具体见 [FFmpeg 音视频播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
+这些边界是控制依赖和产品语义的规划工具，不是公共接口。阶段 1 使用 `browser-video`；阶段 2 的 Matroska、MPEG-TS、普通 QuickTime 与 Ogg Theora 组合使用 `non-native-video`；阶段 3 使用独立 `ffmpeg-video`，但与 `ffmpeg-audio` 共享一份底层运行资产，具体见 [FFmpeg 音视频播放架构](ffmpeg-playback-runtime-plan.md)。
 
 不规划面向用户的 metadata-only 视频插件。容器和轨道解析只服务于 probe、错误诊断及实际播放管线；不能播放主要内容的候选返回 0，不以“可检查 metadata”占据视频查看器位置。
 
@@ -193,7 +193,7 @@ opening abort、active abort、切换文件和重复 dispose 必须走同一套�
 - `viewer-rendering` 的 `ResourceScope`；
 - 现有主题变量、内部滚动规范和动态加载门禁。
 
-暂不创建 `MediaDocument`、`MediaPlayer`、`TrackModel` 或统一媒体工具栏。阶段 3 的 FFmpeg spike 与一个真实 `non-native-audio` vertical slice 成功后，只提取播放所需的最小内部 provider 和 PCM scheduler 边界：音视频可以复用 Web Audio 时钟、PCM lookahead、gain、seek generation、结束和清理；Canvas、视频帧背压与 A/V sync 仍属于视频层。独立音频和阶段 4 专业视频保留自己的内容模型，内部边界不加入公共插件协议。
+暂不创建 `MediaDocument`、`MediaPlayer`、`TrackModel` 或统一媒体工具栏。当前 `@anyfile/ffmpeg-playback` 为两个 FFmpeg 调用方实现最小交错流播放会话，保留 Mediabunny/OGV.js 原有路径：音视频可以复用 Web Audio 时钟、PCM lookahead、gain、seek generation、结束和清理；Canvas、视频帧背压与 A/V sync 仍属于视频层。独立音频和阶段 4 专业视频保留自己的内容模型，内部边界不加入公共插件协议。
 
 ## 13. 参考资料
 

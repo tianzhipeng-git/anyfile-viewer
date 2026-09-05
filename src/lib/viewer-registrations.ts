@@ -1,3 +1,5 @@
+import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
+import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { epubManifest } from "@anyfile/epub-reader/manifest";
@@ -136,6 +138,28 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/non-native-audio-viewer");
       return viewerPackage.nonNativeAudioViewer;
+    },
+  },
+  {
+    manifest: ffmpegVideoManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/ffmpeg-video-viewer/probe");
+      return probePackage.probeFfmpegVideo(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/ffmpeg-video-viewer");
+      return viewerPackage.ffmpegVideoViewer;
+    },
+  },
+  {
+    manifest: ffmpegAudioManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/ffmpeg-audio-viewer/probe");
+      return probePackage.probeFfmpegAudio(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/ffmpeg-audio-viewer");
+      return viewerPackage.ffmpegAudioViewer;
     },
   },
   {

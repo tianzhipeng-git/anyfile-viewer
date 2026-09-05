@@ -172,7 +172,7 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 4. 只有小型资源、必须同源的 Worker 或尚未迁移的 fallback 才进入 Vercel 部署产物。
 5. CDN 和 fallback 必须指向同一依赖版本，并由构建门禁交叉校验。
 
-未来 FFmpeg 等大型运行时应在选型阶段按相同口径测量；预计达到门槛时，先设计资产发布和回退，不等接入完成后再迁移。
+大型运行时应在选型阶段按相同口径测量；预计达到门槛时，先设计资产发布和回退，不等接入完成后再迁移。
 
 ### 当前运行时资产实现
 
@@ -184,17 +184,19 @@ SQLite 是独立插件，只依赖 `sql.js`。打开 SQLite 文件不会加载 D
 | DuckDB WASM / Worker | 锁定的 npm 包 | MVP/EH WASM 约 38/33 MiB | DuckDB 插件被选中并初始化时 | jsDelivr → R2 → 同源 | 单个 WASM 远超门槛 |
 | HEIF decoder / WASM | 审核过的源码构建产物 | 主要 WASM 约 1.17 MiB | 已识别为 HEVC 的 HEIF 原生解码失败后 | 同源 | 小于门槛，且只作为条件 fallback |
 | stet PostScript / WASM | 审核过的源码构建产物 | WASM 约 13.0 MiB raw、10.3 MiB gzip | EPS/PS 插件被选中时 | jsDelivr commit → R2 → 同源 | 模块 Worker 依次从三个同版本来源动态导入 glue 并实例化 WASM；每次失败都销毁 Worker，详见 `docs/postscript/architecture.md` |
+| FFmpeg glue / WASM | 审核过的源码构建产物 | WASM 约 11.3 MiB raw、4.48 MiB gzip | `ffmpeg-video` 或 `ffmpeg-audio` 被选中时 | R2 → 同源；模块 Worker 同源 | 两插件共用一份版本资产，见[FFmpeg 音视频播放架构](videos/ffmpeg-playback-runtime-plan.md) |
 | LibRaw Worker / WASM | 锁定的 npm 包及补充许可材料 | 主要 WASM 约 1.38 MiB | RAW 插件被选中时 | 同源 | 小于门槛，并有 pthread/Worker 同源隔离约束 |
 | JXL Worker / WASM | bundler 产物 | 构建时持续检查 | JXL 插件被选中时 | `/_next/static` | 可正确拆分并使用内容哈希路径 |
 
 新增或升级依赖时，如果没有引入新的资产类型、分发链路或运行边界，只更新本表和对应实现约束，不再新增散落的依赖专章。确实需要一套独立架构时，应建立对应架构文档，并从本表链接过去。
 
-以下三项还包含本节直接负责的 prepare 或外部部署操作；LibRaw 的许可证与准备约束见第 4 节，JXL 的响应头约束见第 5 节：
+以下运行时还包含本节直接负责的 prepare 或外部部署操作；LibRaw 的许可证与准备约束见第 4 节，JXL 的响应头约束见第 5 节：
 
 - **PDF.js**：`pnpm dev` 和 `pnpm build` 先运行 `scripts/prepare-pdfjs-assets.mjs`，把锁定版本 `pdfjs-dist` 的 `cmaps/`、`standard_fonts/`、`iccs/` 和 `wasm/` 原目录复制到 `public/vendor/pdfjs/<version>/`。这些目录分别提供复合字体字符映射、标准字体、ICC 色彩配置，以及 JBIG2、OpenJPEG、QCMS 和官方 JavaScript 解码回退。目录是生成产物，不提交仓库；版本目录避免升级后缓存混用。
 - **DuckDB**：JavaScript API 由应用打包，并显式导入包公开的 `dist/duckdb-browser.mjs` 子路径，避免 Next.js 的服务端构建目标误选包含动态 Node `require()` 的入口。运行时使用 `getJsDelivrBundles()` 取得与已安装包一致的官方 URL，用 `selectBundle()` 选择 MVP 或 EH，再按 jsDelivr、`assets.anyfile.top` 同版本镜像、构建产物中的同版本本地资源依次尝试。切换来源时遵守前述清理和失败分类规则。
 - **HEIF**：`pnpm prepare:heif` 校验 `third_party/heif-wasm/1.23.2-anyfile.1/build-info.json` 中的大小和 SHA-256，再把 decoder、WASM、许可证与源码说明复制到 `/vendor/libheif/1.23.2-anyfile.1/`，构建门禁交叉校验运行时 URL 与产物版本。probe 不导入这些资产；独立 Worker 只在原生实际解码失败后动态导入同源 glue 并加载 WASM。`/vendor/libheif/:path*` 返回与其他同源 Worker/WASM 一致的 COEP/CORP 头；CSP 只需允许同源 Worker 和 WebAssembly。
 - **stet**：`pnpm prepare:stet` 校验 `third_party/stet-wasm/0.8.1-anyfile.1/build-info.json`，再把 PS/EPS-only glue、WASM、许可证和源码说明复制到 `/vendor/stet/0.8.1-anyfile.1/`。轻量 probe 不导入运行时；完整插件被选择后才创建模块 Worker。运行时先使用 jsDelivr 上包含审核产物的完整 Git commit URL，再回退到 `assets.anyfile.top` 的同版本 R2 镜像，最后回退到版本化同源路径。每个来源只尝试一次，初始化失败时销毁对应 Worker；文件解释或渲染错误不切换来源。构建门禁同时校验三组版本化 URL 和回退实现仍位于延迟插件 chunk。
+- **FFmpeg**：`pnpm prepare:ffmpeg` 校验 `third_party/ffmpeg-playback/9.0.1-anyfile.1/` 的文件清单和 SHA-256，将运行资产、配置、许可证、源码与重链接材料复制到同版本 `/vendor/ffmpeg-playback/`。模块 Worker 从同源创建，glue/WASM 按 `https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/` → 同源初始化；每个失败实例先销毁，文件解码错误不触发回退。R2 使用 `anyfile-bucket` 的同版本路径，发布完整 prepare 目录并逐文件校验哈希、MIME、CORS/CORP 与缓存。WASM gzip 门禁为 5 MiB，完整构建检查首包、probe 与无关插件边界。
 
 DuckDB 当前生产 bucket 为 `anyfile-bucket`，公开资产域名为 `https://assets.anyfile.top`。`1.32.0` 的 MVP/EH 单线程 WASM 与 Worker 保持 npm 包原文件名，发布在：
 

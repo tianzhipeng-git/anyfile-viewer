@@ -19,6 +19,8 @@ const eslintConfig = defineConfig([
     "public/vendor/occt-import-js/**",
     "public/vendor/laz-perf/**",
     "third_party/heif-wasm/**",
+    "third_party/ffmpeg-playback/**",
+    "public/vendor/ffmpeg-playback/**",
     "third_party/stet-wasm/**",
     "third_party/occt-import-js/**",
     "third_party/laz-perf/**",

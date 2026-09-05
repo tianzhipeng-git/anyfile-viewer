@@ -122,3 +122,18 @@ The font is distributed under the SIL Open Font License 1.1. The complete notice
 and license are preserved in `docs/ebooks/fixtures/fonts/OFL.txt`; exact source
 URLs and SHA-256 hashes are in `docs/ebooks/fixtures/manifest.json`.
 This is a test input, not an application runtime font.
+
+## FFmpeg playback runtime 9.0.1-anyfile.1
+
+The FFmpeg audio/video fallback plugins use an unmodified FFmpeg 9.0.1
+LGPL-2.1-or-later decode-only build with Emscripten 4.0.10 (MIT runtime).
+GPL/nonfree features, external library autodetection, encoding, muxing,
+filters, devices, network and URL protocols are disabled. Project C/Worker
+adapter code remains Apache-2.0. Runtime, license texts, exact corresponding
+source and relinkable materials are distributed together in
+`third_party/ffmpeg-playback/9.0.1-anyfile.1/` and prepared at the matching
+`/vendor/ffmpeg-playback/9.0.1-anyfile.1/` path. See its SOURCE.md and
+build-info.json for provenance, configuration, replacement/rebuild instructions
+and artifact hashes. Copyright licenses do not grant third-party codec
+patent rights; deployment jurisdictions and distribution terms remain the
+distributor's responsibility.

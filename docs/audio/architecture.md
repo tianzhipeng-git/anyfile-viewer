@@ -1,6 +1,6 @@
 # 音频查看架构
 
-- 状态：阶段 0 已完成；`browser-audio` 与 `non-native-audio` 已实现，跨浏览器完整验证继续按支持矩阵补证
+- 状态：阶段 0 已完成；`browser-audio`、`non-native-audio` 与首批 AIFF/AIFC 的 `ffmpeg-audio` 已实现，跨浏览器完整验证继续按支持矩阵补证
 - 适用范围：浏览器本地打开的独立音频与 audio-only 容器文件
 - 不包含：视频内音频、流媒体、DRM、录音、编辑、转码和服务端处理
 
@@ -145,10 +145,10 @@ File
 FFmpeg 只作为最后一层。底层共享：
 
 ```text
-@anyfile/ffmpeg-playback-runtime（内部边界）
+@anyfile/ffmpeg-playback（内部 workspace）
   ├── Worker endpoint / client
   ├── project C adapter
-  ├── WORKERFS 或经验证的同步分片 I/O
+  ├── WORKERFS + 单文件 custom AVIO
   ├── libavformat / libavcodec / libavutil
   ├── libswscale（视频使用）
   └── libswresample（音视频音轨共同使用）
@@ -166,7 +166,7 @@ FFmpeg 只作为最后一层。底层共享：
 
 底层 C/session API 支持按选定轨道输出有所有权约定的有界事件。音频 adapter 只接收 metadata/state/error 和 Float32 PCM，不暴露 FFmpeg 指针或 CLI。
 
-详细方案见[FFmpeg 音视频播放 fallback 接入方案](../videos/ffmpeg-playback-runtime-plan.md)。
+详细方案见[FFmpeg 音视频播放架构](../videos/ffmpeg-playback-runtime-plan.md)。
 
 ## 9. Probe 与资源边界
 
@@ -235,7 +235,7 @@ opening abort、active abort、文件切换和重复 dispose 走统一清理逻�
 - [音频格式支持矩阵](support-matrix.md)
 - [音频查看实施路线图](roadmap.md)
 - [视频查看架构](../videos/architecture.md)
-- [FFmpeg 音视频播放 fallback 接入方案](../videos/ffmpeg-playback-runtime-plan.md)
+- [FFmpeg 音视频播放架构](../videos/ffmpeg-playback-runtime-plan.md)
 - [格式查看器插件协议](../viewer-plugin-protocol.md)
 - [查看器插件渲染规范](../viewer-render-tips.md)
 - [共享 UI 与渲染基础设施决策记录](../viewer-ui-and-rendering-proposal.md)

@@ -1,6 +1,6 @@
 # 视频查看实施路线图
 
-- 状态：阶段 0、阶段 1 与阶段 2 已于 2026-08-30 完成基准环境验收；阶段 3 规划独立 `ffmpeg-video` 并与音频阶段 3 共享 FFmpeg 播放 runtime，原专业能力阶段顺延为阶段 4
+- 状态：阶段 0、阶段 1 与阶段 2 已于 2026-08-30 完成基准环境验收；阶段 3 已交付独立 `ffmpeg-video` 的首批 AVI，并与音频阶段 3 共享 FFmpeg 播放 runtime，专业能力属于阶段 4
 - 范围：浏览器本地打开的视频文件；包含文件内音频和字幕轨道，不包含独立音频文件；独立音频见[音频查看实施路线图](../audio/roadmap.md)
 - 产品结果：播放主要节目，不交付只能检查 metadata、轨道结构、封面或首帧的视频插件
 - 核心目标：在满足播放与资源安全底线后，优先扩大可播放的容器 × 视频 codec × 音频 codec 组合
@@ -147,7 +147,7 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 - Ogg 增加 Theora + Vorbis/Opus/video-only 软件播放路径，锁定 OGV.js 1.9.0，仅分发 Ogg 所需 Worker/WASM 与许可证；AudioContext 在用户播放手势后才恢复；
 - Ogg 与 Mediabunny 完整实现分别动态加载，manifest/probe、首包和无关格式均不包含软件 decoder；
 - AVI/MPEG-PS 与 MPEG-1/2/AC-3/DTS 已完成依赖 spike，但阶段 2 未形成满足体积、裁剪、许可和维护边界的 provider，不作为阶段 2 的虚假支持；
-- 阶段 2 至此完成；后续以阶段 3 的独立 `ffmpeg-video` fallback 承接剩余高价值普通格式，并与 `ffmpeg-audio` 共享底层运行资产，具体方案见 [FFmpeg 音视频播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
+- 阶段 2 至此完成；后续以阶段 3 的独立 `ffmpeg-video` fallback 承接剩余高价值普通格式，并与 `ffmpeg-audio` 共享底层运行资产，具体方案见 [FFmpeg 音视频播放架构](ffmpeg-playback-runtime-plan.md)。
 
 ### 转入阶段 3 的覆盖候选
 
@@ -181,23 +181,17 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 
 ## 5. 阶段 3：FFmpeg 播放 fallback
 
-阶段 3 新增独立的 `ffmpeg-video` 插件，覆盖浏览器原生与 `non-native-video` 均不能播放、但共享 FFmpeg runtime 能以可接受成本完成端到端播放的高价值普通格式。它不替换前两条轻量路径，也不在前两条路径失败后由宿主自动重试；各插件通过扩展名候选、轻量 probe、真实支持等级和稳定注册顺序竞争。
+`ffmpeg-video` 与 `ffmpeg-audio` 共用 `@anyfile/ffmpeg-playback` 和同一版本的 Worker/WASM 资产，独立维护 probe、manifest 与 UI。架构和资源边界见[FFmpeg 音视频播放架构](ffmpeg-playback-runtime-plan.md)。
 
-底层 FFmpeg Worker/WASM、C bridge、构建配方、版本化资产和 Worker client 与音频阶段 3 共用一套精确版本产物；`ffmpeg-video` 与 `ffmpeg-audio` 仍保留独立 manifest、probe、UI、支持矩阵和验收，不能合并成万能媒体插件，也不能在两个 plugin chunk 中复制 WASM。
+当前支持 AVI MPEG-4 Part 2 + MP3 或 video-only，Chromium 播放及生命周期证据见[播放验证](ffmpeg-playback-delivery.md)。
 
-本阶段不直接采用完整 `ffmpeg.wasm` CLI，也不接入完整 libav.js/libmedia 分发。项目从锁定的 FFmpeg 官方源码构建只读、解码用途的 Worker/WASM 运行时，关闭程序、编码、封装、滤镜、设备和网络等无关能力，并通过项目自有的窄 C/JS bridge 暴露打开、读取媒体信息、连续解码、seek、flush 和关闭。首个 spike 先验证 AVI、MPEG-PS/VOB、ASF/WMV 三组代表组合，再根据实测体积、首帧、内存、seek、取消、许可和部署结果决定首批 manifest 范围。
+待完成：
 
-详细构建、插件边界、播放接入、分批交付和验收方案见 [FFmpeg 音视频播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)。
+- MPEG-PS/VOB、ASF/WMV 已有底层解码样例，需补有界 probe、主轨语义和完整播放验证。
+- 补齐目标浏览器、长时间播放、真实大文件尾部索引、CPU/进程内存和全量重建一致性证据。
+- 后续按需求增加 FLV、其他 AVI/MPEG-PS/ASF、普通 MOV/3GPP 和未覆盖的 MPEG-TS 组合。
 
-### 完成标准
-
-- FFmpeg 与 Emscripten 版本、源码哈希、构建容器、功能开关、许可证和运行资产均可审计、可重复构建；
-- manifest 和 probe 不加载 FFmpeg，完整运行时只在 `ffmpeg-video` 或 `ffmpeg-audio` 被选中后按需加载，并保持单份版本化资产；
-- 首批声明组合满足首帧、连续画面、应有主音频、A/V sync、基础 seek、结束和重播；
-- 大文件不整体复制进主线程内存，帧、PCM、WASM 内存、索引工作量和并发队列有明确上限；
-- opening abort、active abort、快速 seek、切换与重复 dispose 都能终止 Worker 并释放声音、帧和 DOM；
-- 损坏、截断、不支持 codec、资源超限与环境不支持返回准确结果，不静默丢弃主音频；
-- 未完成端到端证据的 FFmpeg 格式不进入 manifest，也不进入产品支持文案。
+每个新增组合必须具备首帧、连续画面、应有音频、A/V 同步、seek、结束重播、取消和资源释放证据，才能进入 manifest 和支持矩阵。
 
 ## 6. 阶段 4：播放体验与专业能力增强
 
@@ -245,5 +239,5 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 
 - [视频查看架构](architecture.md)
 - [视频格式支持矩阵](support-matrix.md)
-- [FFmpeg 音视频播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)
+- [FFmpeg 音视频播放架构](ffmpeg-playback-runtime-plan.md)
 - [音频查看实施路线图](../audio/roadmap.md)

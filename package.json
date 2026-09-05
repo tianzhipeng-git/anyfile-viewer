@@ -18,10 +18,10 @@
     "prepare:stet": "node scripts/prepare-stet-assets.mjs",
     "prepare:ogv": "node scripts/prepare-ogv-assets.mjs",
     "prepare:licenses": "node scripts/prepare-license-assets.mjs",
-    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif && pnpm prepare:stet && pnpm prepare:ogv && pnpm prepare:laz && pnpm prepare:occt && pnpm prepare:ebooks && pnpm prepare:licenses",
+    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif && pnpm prepare:stet && pnpm prepare:ogv && pnpm prepare:laz && pnpm prepare:occt && pnpm prepare:ebooks && pnpm prepare:licenses && pnpm prepare:ffmpeg",
     "dev": "pnpm prepare:assets && next dev",
     "build": "pnpm prepare:assets && next build --webpack && pnpm check:bundle",
-    "check:bundle": "node scripts/check-view-bundle.mjs && node scripts/check-plugin-bundles.mjs && node scripts/check-plugin-assets.mjs",
+    "check:bundle": "node scripts/check-view-bundle.mjs && node scripts/check-plugin-bundles.mjs && node scripts/check-plugin-assets.mjs && node scripts/check-ffmpeg-bundles.mjs",
     "measure:video-probes": "node scripts/measure-video-probes.mjs",
     "measure:audio-probes": "node scripts/measure-audio-probes.mjs",
     "start": "next start",
@@ -33,7 +33,8 @@
     "test:ebooks:browser": "node scripts/verify-ebook-browser.mjs",
     "fixtures:ebooks": "python3 scripts/generate-ebook-fixtures.py",
     "prepare:ebooks": "node scripts/prepare-ebook-assets.mjs",
-    "test:ebooks:phase45": "node scripts/verify-ebook-phase45-browser.mjs"
+    "test:ebooks:phase45": "node scripts/verify-ebook-phase45-browser.mjs",
+    "prepare:ffmpeg": "node scripts/prepare-ffmpeg-assets.mjs"
   },
   "dependencies": {
     "@anyfile/i18n": "workspace:*",
@@ -89,7 +90,9 @@
     "@anyfile/epub-reader": "workspace:*",
     "@anyfile/comic-book-reader": "workspace:*",
     "@anyfile/fictionbook-reader": "workspace:*",
-    "@anyfile/mobi-reader": "workspace:*"
+    "@anyfile/mobi-reader": "workspace:*",
+    "@anyfile/ffmpeg-video-viewer": "workspace:*",
+    "@anyfile/ffmpeg-audio-viewer": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

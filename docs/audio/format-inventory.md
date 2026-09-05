@@ -102,4 +102,4 @@
 - [音频格式支持矩阵](support-matrix.md)
 - [音频查看架构](architecture.md)
 - [音频查看实施路线图](roadmap.md)
-- [FFmpeg 音视频播放 fallback 接入方案](../videos/ffmpeg-playback-runtime-plan.md)
+- [FFmpeg 音视频播放架构](../videos/ffmpeg-playback-runtime-plan.md)
