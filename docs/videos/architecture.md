@@ -198,7 +198,7 @@ opening abort、active abort、切换文件和重复 dispose 必须走同一套�
 ## 13. 参考资料
 
 - [格式查看器插件协议](../viewer-plugin-protocol.md)
-- [查看器插件渲染规范](../viewer-render-tips.md)
+- [查看器插件渲染规范](../viewer-rendering-guidelines.md)
 - [查看器加载、渲染与部署约定](../viewer-loading-and-deployment.md)
 - [音频查看架构](../audio/architecture.md)
 - [音频查看实施路线图](../audio/roadmap.md)

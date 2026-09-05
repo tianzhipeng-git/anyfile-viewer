@@ -4,7 +4,7 @@
 调用方：`browser-audio`（`media` 模式）、`non-native-audio`（`node` 模式）。
 
 本文只讲“曲线是怎么画出来的”、“点击画布怎么切效果”和“想换效果该改哪个文件”。生命周期、AudioContext 所有权和加载边界见
-[共享 UI 与渲染基础设施决策记录](../../docs/viewer-ui-and-rendering-proposal.md) 与
+[共享 UI 与渲染架构](../../docs/viewer-ui-and-rendering-architecture.md) 与
 [音频查看架构](../../docs/audio/architecture.md)。
 
 ## 数据源

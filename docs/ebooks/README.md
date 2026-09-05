@@ -24,6 +24,6 @@
 - 格式按真实“容器 + 内容版本 + 布局/压缩/加密组合”验收，不按扩展名计数；
 - 用户文件、书名、封面和阅读位置均不得离开浏览器；
 - 文档中的候选依赖必须在实施阶段重新审核精确版本、许可证、CSP、体积、维护状态和固定样例；
-- 实现时同时遵守[查看器插件协议](../viewer-plugin-protocol.md)、[渲染规范](../viewer-render-tips.md)、[共享 UI 与渲染决策](../viewer-ui-and-rendering-proposal.md)、[加载与部署约定](../viewer-loading-and-deployment.md)；自行构建 decoder 时还要遵守[源码构建型第三方依赖规范](../viewer-source-built-dependencies.md)。
+- 实现时同时遵守[查看器插件协议](../viewer-plugin-protocol.md)、[渲染规范](../viewer-rendering-guidelines.md)、[共享 UI 与渲染决策](../viewer-ui-and-rendering-architecture.md)、[加载与部署约定](../viewer-loading-and-deployment.md)；自行构建 decoder 时还要遵守[源码构建型第三方依赖规范](../viewer-source-built-dependencies.md)。
 
 - [阶段 4–5 决策与预算](phase-4-5-decisions.md)：独立 decoder、许可分发、固实归档、实际限制。

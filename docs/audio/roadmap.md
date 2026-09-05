@@ -204,6 +204,6 @@ BlobSource（有界缓存）
 - [视频查看实施路线图](../videos/roadmap.md)
 - [FFmpeg 音视频播放架构](../videos/ffmpeg-playback-runtime-plan.md)
 - [格式查看器插件协议](../viewer-plugin-protocol.md)
-- [查看器插件渲染规范](../viewer-render-tips.md)
+- [查看器插件渲染规范](../viewer-rendering-guidelines.md)
 - [查看器加载、渲染与部署约定](../viewer-loading-and-deployment.md)
 - [源码构建型第三方依赖规范](../viewer-source-built-dependencies.md)

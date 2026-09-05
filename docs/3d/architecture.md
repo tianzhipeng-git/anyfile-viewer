@@ -4,7 +4,7 @@
 - 状态：共享 3D runtime 与首批格式已实施；完整范围仍在推进
 - 适用范围：CAD、3D 打印、CG 场景、通用网格与点云文件的浏览器本地只读查看
 - 不包含：编辑、建模、切片、格式转换、服务端转换、渲染农场和任意远程资产加载
-- 相关文档：[支持矩阵](support-matrix.md)、[实施路线图](roadmap.md)、[共享 UI 与渲染基础设施决策](../viewer-ui-and-rendering-proposal.md)
+- 相关文档：[支持矩阵](support-matrix.md)、[实施路线图](roadmap.md)、[共享 UI 与渲染架构](../viewer-ui-and-rendering-architecture.md)
 
 ## 1. 目标与原则
 
