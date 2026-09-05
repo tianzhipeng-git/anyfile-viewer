@@ -5,7 +5,7 @@
 ## 基本介绍
 
 - **插件 ID**：`excel-workbook`
-- **支持格式**：`.xlsx`、`.xlsm`、`.xlsb`、`.xls`、`.ods`、`.csv`、`.tsv` 及多种遗留格式（见 `manifest.ts` 完整列表）
+- **支持格式**：`.xlsx`、`.xlsm`、`.xlsb`、`.xls`、`.ods`、`.csv`、`.tsv` 及多种遗留格式（见 [src/manifest.ts](src/manifest.ts) 完整列表）
 - **能力**：多工作表切换、分页浏览（每页 100 行）、列标 A/B/C… 显示
 - **示例文件**：`examples/demo.xlsx`
 
@@ -34,16 +34,28 @@
 
 | 包 | 用途 |
 |---|---|
-| `@anyfile/viewer-protocol` | 插件协议 |
-| `@anyfile/viewer-ui` | 分页表格 UI 组件 |
-| `xlsx@0.20.3`（SheetJS CDN 包） | 工作簿解析 |
+| `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `@anyfile/viewer-ui` | 共享分页表格界面 |
+| `xlsx@0.20.3（SheetJS CDN 包）` | SheetJS 工作簿解析 |
 
 ## 已知限制
 
 - 不渲染公式结果以外的 Excel 特性：图表、数据透视表、条件格式、合并单元格布局、宏
 - `.xlsm` 宏会被忽略，不执行
-- 50 MiB / 100 万单元格 / 200 列 / 100 工作表为硬上限，超出报 `resource-limit`
+- 输入 50 MiB、解析 100 万单元格和 100 工作表为资源上限，超出报 `resource-limit`；每表只显示前 200 列，更多列截断显示并提示
 - 大工作簿全量解析进内存，打开阶段可能较慢
 - 部分冷门遗留格式（`.wk1` 等）依赖 SheetJS 兼容性，可能解析失败
-- CSV/TSV 与 Excel 插件共用 manifest 扩展名，实际由 SheetJS 按内容识别
+- CSV/TSV 同时可能进入 data 等插件候选；宿主按 probe 等级和同级注册顺序选择，本插件使用 SheetJS 解析
 - 只读，不可编辑或重新计算公式
+
+## 开发与验证
+
+- [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
+- 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
+- [样例目录](examples/)：用于本地打开检查。
+
+在仓库根目录运行插件测试：
+
+```bash
+pnpm --filter @anyfile/excel-viewer test
+```

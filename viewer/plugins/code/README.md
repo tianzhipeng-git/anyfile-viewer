@@ -7,7 +7,7 @@
 - **插件 ID**：`ace-code-text`
 - **支持格式**：100+ 扩展名（`.js`、`.ts`、`.py`、`.md`、`.json`、`.yaml` 等）及特殊文件名（`Dockerfile`、`Makefile`、`.env` 等）
 - **能力**：语法高亮、行号、内置搜索框（`ext-searchbox`）
-- **MIME 匹配**：`text/*`、`application/json`、`application/xml`、`application/javascript`
+- **MIME 声明（不参与路由）**：`text/*`、`application/json`、`application/xml`、`application/javascript`
 
 ## 实现原理
 
@@ -30,10 +30,10 @@
 
 | 包 | 用途 |
 |---|---|
-| `@anyfile/viewer-protocol` | 插件协议 |
-| `ace-builds@1.44.0` | 代码编辑器与高亮 mode |
+| `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `ace-builds@1.44.0` | 只读代码编辑器与语法高亮 |
 
-Mode 文件按需动态加载，不一次性打入首包。
+高亮模式文件按需动态加载，不一次性打入首包。
 
 ## 已知限制
 
@@ -43,5 +43,16 @@ Mode 文件按需动态加载，不一次性打入首包。
 - 未知扩展名回退到 `plain_text`，无高亮
 - 关闭 Ace Worker，JSON 等语法的实时校验不可用
 - 不自动换行，超宽行需横向滚动
-- CSV/TSV 在此插件与 excel / data 插件间可能冲突，由宿主注册优先级决定
+- CSV 与 excel / data 插件存在候选重叠，先比较 probe 等级，同级再按注册顺序选择；当前 code Manifest 未声明 `.tsv`
 - Markdown 仅语法高亮，不渲染为 HTML
+
+## 开发与验证
+
+- [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
+- 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
+
+在仓库根目录运行插件测试：
+
+```bash
+pnpm --filter @anyfile/code-viewer test
+```

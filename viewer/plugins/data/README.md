@@ -27,7 +27,7 @@
      - JSON → `read_json_auto()`
      - Parquet → `read_parquet()`
      - Arrow → 流式 `RecordBatchReader` + `insertArrowTable()`
-     - DuckDB → 直接 attach，枚举 `information_schema` 表
+     - DuckDB → 以 `READ_ONLY` 和 `useDirectIO` 打开注册文件，枚举 `information_schema.tables`
    - 文件大小上限 2 GiB
 
 3. **查询与展示**
@@ -39,18 +39,31 @@
 
 | 包 | 用途 |
 |---|---|
-| `@anyfile/viewer-protocol` | 插件协议 |
-| `@anyfile/viewer-ui` | 分页表格 UI |
-| `@duckdb/duckdb-wasm@1.32.0` | 浏览器内 SQL 引擎 |
-| `apache-arrow@17.0.0` | Arrow IPC 流解析 |
+| `@anyfile/runtime-assets` | 锁定版本的运行时资产加载与来源回退 |
+| `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `@anyfile/viewer-ui` | 共享分页表格界面 |
+| `@duckdb/duckdb-wasm@1.32.0` | 浏览器内数据读取与 SQL 查询引擎 |
+| `apache-arrow@17.0.0` | Arrow IPC 解析与导入 |
 
 ## 已知限制
 
 - 需要浏览器支持 **WebAssembly + Web Worker**；不满足时报 `unsupported-environment`
-- 首次打开需下载 DuckDB WASM（约数 MB），冷启动较慢
+- 首次打开需加载 DuckDB Worker/WASM，冷启动时间受资产体积与网络缓存影响
 - 2 GiB 文件大小硬上限；超大文件可能 OOM
-- 只读查询，不支持 INSERT/UPDATE/DDL
+- 界面仅提供内置分页查询，不开放用户 SQL 控制台或写入原文件；Arrow 数据在内存表中导入
 - 复杂嵌套 JSON 展平方式由 DuckDB 决定，可能与预期不完全一致
 - 压缩 CSV/JSON 依赖 DuckDB 内置解压，部分非标准压缩可能失败
 - Arrow 流式导入全量加载到内存表，大文件内存压力高
 - 不支持 Excel（`.xlsx`）、SQLite（`.db`）——分别由 excel / sqlite 插件负责
+
+## 开发与验证
+
+- [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
+- 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
+- [样例目录](examples/)：用于本地打开检查。
+
+在仓库根目录运行插件测试：
+
+```bash
+pnpm --filter @anyfile/data-viewer test
+```
