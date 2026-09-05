@@ -56,6 +56,9 @@ importers:
       '@anyfile/excel-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/excel
+      '@anyfile/fictionbook-reader':
+        specifier: workspace:*
+        version: link:viewer/plugins/fictionbook
       '@anyfile/general-raster-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/general-raster
@@ -532,6 +535,9 @@ importers:
       '@anyfile/browser-image-viewer':
         specifier: workspace:*
         version: link:../browser-image
+      '@anyfile/rendering-publication':
+        specifier: workspace:*
+        version: link:../../rendering-publication
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
@@ -564,6 +570,31 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/fictionbook:
+    dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../archive
+      '@anyfile/browser-image-viewer':
+        specifier: workspace:*
+        version: link:../browser-image
+      '@anyfile/rendering-publication':
+        specifier: workspace:*
+        version: link:../../rendering-publication
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6
@@ -1038,6 +1069,12 @@ importers:
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/rendering-publication:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
 
   viewer/runtime-assets:
     devDependencies:

@@ -3,6 +3,7 @@ packages:
   - viewer/i18n
   - viewer/protocol
   - viewer/rendering
+  - viewer/rendering-publication
   - viewer/rendering-3d
   - viewer/runtime-assets
   - viewer/raw-decoder

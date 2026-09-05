@@ -7,7 +7,8 @@ import {
 } from "@anyfile/archive-metadata-viewer/zip-source";
 import { epubManifest } from "./manifest";
 import { parsePublication } from "./publication";
-import { createPublicationViewport } from "./viewport";
+import { createPublicationViewport } from "@anyfile/rendering-publication";
+import { prepareChapter } from "./safe-content";
 import { epubCopy } from "./ui";
 export const epubViewer: FileViewerPlugin = {
   manifest: epubManifest,
@@ -42,7 +43,7 @@ export const epubViewer: FileViewerPlugin = {
       const book = await parsePublication(zip, lifetime.signal);
       checkBookAbort(lifetime.signal);
       context.container.append(root);
-      viewport = createPublicationViewport(root, zip, book, context.locale);
+      viewport = createPublicationViewport(root, { ...book, loadSection: (path, signal) => prepareChapter(zip!, book, path, signal) }, context.locale, copy);
       return { dispose };
     } catch (error) {
       if (error instanceof ProtectedBookError && !lifetime.signal.aborted) {

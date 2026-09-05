@@ -21,14 +21,7 @@ const FONT_TYPES = new Set([
   "application/x-font-ttf",
   "application/x-font-opentype",
 ]);
-export const CONTENT_CSP =
-  "default-src 'none'; script-src 'none'; style-src 'unsafe-inline'; img-src blob:; font-src blob:; connect-src 'none'; frame-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'";
-export interface SafeChapter {
-  html: string;
-  links: { path: string; fragment: string }[];
-  missingResources: number;
-  dispose(): void;
-}
+import { CONTENT_CSP, type SafeChapter } from "@anyfile/rendering-publication";
 export async function prepareChapter(
   zip: BookZip,
   book: Publication,

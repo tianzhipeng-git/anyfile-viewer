@@ -14,6 +14,14 @@
       }
     },
     {
+      "file": "cp1251.fb2",
+      "bytes": 56325,
+      "sha256": "722b34110f9eee21aa2c602a96f526fd6d18e003fb01043c14fe46fcabef39d2",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "cp1251"
+    },
+    {
       "file": "damaged-image.cbz",
       "bytes": 116,
       "sha256": "dec3234281eddf6543305b24d48dbb51631365539db18f1c6362c7c0c2f86f60",
@@ -39,8 +47,8 @@
     },
     {
       "file": "deep.fb2",
-      "bytes": 1571,
-      "sha256": "342fc68834cea88762f66bb4eff25c7019b25fd817b527ad19e497842422dd83",
+      "bytes": 1622,
+      "sha256": "a75bf9408b9097e2e29d15c5adcaead766f7136d4dabfa75f12de17369af06b9",
       "source": "scripts/generate-ebook-fixtures.py",
       "license": "CC0-1.0",
       "purpose": "deep"
@@ -138,6 +146,14 @@
       }
     },
     {
+      "file": "huge-binary.fb2",
+      "bytes": 12639255,
+      "sha256": "cfa8b2b20842ed21e46201ad7af496c0feb4a2b63866e55c701f3bd6359eb637",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "huge-binary"
+    },
+    {
       "file": "huge-pixels.cbz",
       "bytes": 225,
       "sha256": "022f53345631617a5f198b495468a399b70dcf497b9abacfd67e777757891742",
@@ -174,6 +190,14 @@
       }
     },
     {
+      "file": "invalid.fb2",
+      "bytes": 84,
+      "sha256": "d0ee86fe226c33db235a44d82da7705ff2e6485ce38e8a4e5a53e3a495f07d23",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "invalid"
+    },
+    {
       "file": "large-chapter.epub",
       "bytes": 6216,
       "sha256": "3b77ca0152db5ae8b58745881ab2092eef41b6955369392d2d965c3411ae3380",
@@ -208,6 +232,14 @@
         "entries": 12,
         "declaredExpandedBytes": 21752
       }
+    },
+    {
+      "file": "malicious.fb2",
+      "bytes": 57036,
+      "sha256": "c1c701c953cd9483930af9e707aa88b42ac017474c0014d6216f935ac4e0b1eb",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "malicious"
     },
     {
       "file": "manga.cbz",
@@ -258,12 +290,36 @@
       }
     },
     {
+      "file": "multiple-fb2.zip",
+      "bytes": 3460,
+      "sha256": "7661d5b721b070a9abd3f88a228a8d3a0e608521e620f4a739274c80967bdbae",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "multiple-fb2",
+      "parameters": {
+        "entries": 2,
+        "declaredExpandedBytes": 112582
+      }
+    },
+    {
       "file": "normal.fb2",
-      "bytes": 257,
-      "sha256": "85805cef161bdbb46b585446f8414797edd261ab97f18bb2ffff74a6a5302f5f",
+      "bytes": 56291,
+      "sha256": "fc91ed92ef71d102ee507bad46ced4df30a5e88d7405a0a9b306b2b043dafd0c",
       "source": "scripts/generate-ebook-fixtures.py",
       "license": "CC0-1.0",
       "purpose": "normal"
+    },
+    {
+      "file": "normal.fb2.zip",
+      "bytes": 1743,
+      "sha256": "f713a6afc2e3c0623db59cb1dac53deb43f6707056d14c4793539e599bbcd93c",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "normal.fb2",
+      "parameters": {
+        "entries": 1,
+        "declaredExpandedBytes": 56291
+      }
     },
     {
       "file": "pages.cbz",
@@ -314,6 +370,18 @@
       }
     },
     {
+      "file": "single-fb2.zip",
+      "bytes": 1875,
+      "sha256": "33762bad9a3a84b52f40576d9fa18835a0114d15de0376d9ac14e9eeead8d106",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "single-fb2",
+      "parameters": {
+        "entries": 2,
+        "declaredExpandedBytes": 56311
+      }
+    },
+    {
       "file": "traversal.cbz",
       "bytes": 230,
       "sha256": "a53367bc5a4b4f5476eddb2a90ed1e93ffe6dcbc451cf082adc7e6fd853624ab",
@@ -324,6 +392,22 @@
         "entries": 1,
         "declaredExpandedBytes": 217
       }
+    },
+    {
+      "file": "utf16.fb2",
+      "bytes": 112662,
+      "sha256": "3029ace471b5321ef5d7376311772d428bd26aac42d0d23300980803148dcec2",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "utf16"
+    },
+    {
+      "file": "utf16be.fb2",
+      "bytes": 112662,
+      "sha256": "cc6ee55f47688274ce4c43dcfc1ac292860242eca1f24208668a875c59d79110",
+      "source": "scripts/generate-ebook-fixtures.py",
+      "license": "CC0-1.0",
+      "purpose": "utf16be"
     },
     {
       "file": "zip64.cbz",

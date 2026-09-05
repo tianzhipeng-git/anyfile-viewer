@@ -454,6 +454,11 @@
       "directory": "comic-book",
       "package": "@anyfile/comic-book-reader",
       "runtimeSets": []
+    },
+    "fictionbook-reader": {
+      "directory": "fictionbook",
+      "package": "@anyfile/fictionbook-reader",
+      "runtimeSets": []
     }
   }
 }

@@ -4,7 +4,7 @@
 
 - EPUB：EPUB 2/NCX、EPUB 3/nav、RTL、字体/SVG、缺失图片或 spine、DRM 标记、脚本/外部资源/表单、实体、深 DOM、大章节。
 - CBZ：自然排序、嵌套目录、ComicInfo/RTL/跨页、ZIP64、300 页、800 万像素边界、五种原生图片格式、加密、空包、损坏图片、过大像素、重复路径、路径逃逸、展开炸弹、条目超限。
-- FB2：正常、外部实体和过深 section。仅阶段 0 语料，没有注册 FB2 阅读器。
+- FB2：多章节与嵌套目录、两个 body、脚注、诗歌/引用/表格、内嵌 PNG 封面；UTF-8、UTF-16 LE/BE 和 Windows-1251；复合扩展名及普通 ZIP 单主文档、多 FB2 不参与路由；外部实体、过深 section、无效 XML、巨大 base64 和主动内容。
 
 `resources.epub` 包含 Abel 字体；`fonts/Abel-Regular.ttf` 来自 Google Fonts 固定提交 `3b99d83d2625944fc0b8bd328d793fa819b92381`，许可证完整保留于 `fonts/OFL.txt`。作者与版权以该文件为准，字体按 OFL-1.1 提供，不能把其许可证写成 CC0。源码 URL 与 SHA-256 记录在 manifest 的 inputs 中。
 

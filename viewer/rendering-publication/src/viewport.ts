@@ -1,31 +1,28 @@
 import { ViewerError, type Locale } from "@anyfile/viewer-protocol";
-import { type BookZip } from "@anyfile/archive-metadata-viewer/zip-source";
-import { prepareChapter, type SafeChapter } from "./safe-content";
-import { type Publication } from "./publication";
-import { button, epubCopy, select } from "./ui";
-
+import type { PublicationSource, SafeChapter } from "./types";
+import { button, publicationCopy, select } from "./ui";
 export function createPublicationViewport(
   root: HTMLElement,
-  zip: BookZip,
-  book: Publication,
+  book: PublicationSource,
   locale: Locale,
+  copy = publicationCopy(locale),
 ) {
-  const copy = epubCopy(locale);
+  root.classList.add("anyfile-publication-reader");
   const title = document.createElement("span");
   title.textContent = [book.title, book.author].filter(Boolean).join(" · ");
   const toolbar = document.createElement("div");
-  toolbar.className = "anyfile-epub-reader__toolbar";
+  toolbar.className = "anyfile-publication-reader__toolbar";
   const viewport = document.createElement("div");
-  viewport.className = "anyfile-epub-reader__viewport";
+  viewport.className = "anyfile-publication-reader__viewport";
   viewport.tabIndex = 0;
   viewport.setAttribute("aria-label", book.title || copy.contents);
   const style = document.createElement("style");
   style.textContent = `
-.anyfile-epub-reader{height:100%;min-height:0;width:100%;display:flex;flex-direction:column;overflow:hidden;color:var(--viewer-foreground);background:var(--viewer-background);font-family:var(--viewer-font-family)}
-.anyfile-epub-reader__toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-bottom:1px solid var(--viewer-border);flex:none}
-.anyfile-epub-reader__toolbar select{max-width:240px}.anyfile-epub-reader__toolbar button,.anyfile-epub-reader__toolbar select{color:inherit;background:var(--viewer-background);border:1px solid var(--viewer-border);border-radius:5px;padding:5px}
-.anyfile-epub-reader__viewport{flex:1;min-height:0;overflow:auto;position:relative;overflow-anchor:none}.anyfile-epub-reader__chapter{box-sizing:border-box;min-height:400px;border-bottom:1px solid var(--viewer-border)}
-.anyfile-epub-reader__chapter iframe{display:block;width:100%;border:0}.anyfile-epub-reader__toolbar :focus-visible{outline:2px solid var(--viewer-accent)}
+.anyfile-publication-reader{height:100%;min-height:0;width:100%;display:flex;flex-direction:column;overflow:hidden;color:var(--viewer-foreground);background:var(--viewer-background);font-family:var(--viewer-font-family)}
+.anyfile-publication-reader__toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-bottom:1px solid var(--viewer-border);flex:none}
+.anyfile-publication-reader__toolbar select{max-width:240px}.anyfile-publication-reader__toolbar button,.anyfile-publication-reader__toolbar select{color:inherit;background:var(--viewer-background);border:1px solid var(--viewer-border);border-radius:5px;padding:5px}
+.anyfile-publication-reader__viewport{flex:1;min-height:0;overflow:auto;position:relative;overflow-anchor:none}.anyfile-publication-reader__chapter{box-sizing:border-box;min-height:100%;border-bottom:1px solid var(--viewer-border)}
+.anyfile-publication-reader__chapter iframe{display:block;width:100%;border:0}.anyfile-publication-reader__toolbar :focus-visible{outline:2px solid var(--viewer-accent)}
 `;
   let current = 0,
     size = 18,
@@ -40,13 +37,14 @@ export function createPublicationViewport(
     {
       abort: AbortController;
       frame?: HTMLIFrameElement;
+      ready?: boolean;
       chapter?: SafeChapter;
       resize?: ResizeObserver;
     }
   >();
   const slots = book.spine.map((item) => {
     const slot = document.createElement("section");
-    slot.className = "anyfile-epub-reader__chapter";
+    slot.className = "anyfile-publication-reader__chapter";
     slot.setAttribute("aria-label", item.id);
     viewport.append(slot);
     return slot;
@@ -62,7 +60,7 @@ export function createPublicationViewport(
     const doc = active.get(current)?.frame?.contentDocument;
     if (!doc) return undefined;
     const top = viewport.scrollTop - slots[current].offsetTop;
-    const nodes = Array.from(doc.body.querySelectorAll("[id],p,h1,h2,h3,li"));
+    const nodes = Array.from(doc.body.querySelectorAll("p,h1,h2,h3,h4,h5,h6,li,td,th"));
     const node = nodes.find((element) => element.getBoundingClientRect().bottom >= top);
     return node ? { node, index: current } : undefined;
   }
@@ -87,6 +85,7 @@ export function createPublicationViewport(
   }
   function goToAnchor() {
     if (!pending) return;
+    if (!active.get(pending.index)?.ready) return;
     const frame = active.get(pending.index)?.frame,
       doc = frame?.contentDocument;
     if (!doc?.getElementById("book-reader-style")) return;
@@ -95,6 +94,13 @@ export function createPublicationViewport(
       slots[pending.index].offsetTop + (element?.getBoundingClientRect().top ?? 0);
     pending = undefined;
   }
+  const history: { index: number; fragment: string }[] = [];
+  const back = button(copy.back, () => {
+    const target = history.pop();
+    if (target) jump(target.index, target.fragment);
+    back.disabled = !history.length;
+  });
+  back.disabled = true;
   const previous = button(copy.previous, () => jump(current - 1));
   const next = button(copy.next, () => jump(current + 1));
   const toc = select(
@@ -137,6 +143,7 @@ export function createPublicationViewport(
   measure.value = "760";
   toolbar.append(
     title,
+    back,
     previous,
     next,
     toc,
@@ -174,6 +181,7 @@ export function createPublicationViewport(
     const state: {
       abort: AbortController;
       frame?: HTMLIFrameElement;
+      ready?: boolean;
       chapter?: SafeChapter;
       resize?: ResizeObserver;
     } = { abort: new AbortController() };
@@ -181,7 +189,7 @@ export function createPublicationViewport(
     const slot = slots[index];
     slot.textContent = copy.loading;
     try {
-      const chapter = await prepareChapter(zip, book, book.spine[index].path, state.abort.signal);
+      const chapter = await book.loadSection(book.spine[index].path, state.abort.signal);
       if (state.abort.signal.aborted || disposed) {
         chapter.dispose();
         return;
@@ -208,17 +216,29 @@ export function createPublicationViewport(
         };
         state.resize = new ResizeObserver(resize);
         state.resize.observe(doc.body);
+        // Stable generated IDs survive unloading/reloading a chapter during a note jump.
+        for (const link of Array.from(doc.querySelectorAll<HTMLElement>("a[data-book-link]"))) {
+          if (link.id) continue;
+          let id = `book-link-${link.dataset.bookLink}`;
+          while (doc.getElementById(id)) id += "-";
+          link.id = id;
+        }
+        state.ready = true;
         resize();
         doc.addEventListener("click", (event) => {
           event.preventDefault();
           const link = (event.target as Element).closest?.("a[data-book-link]");
           if (!link) return;
           const target = chapter.links[Number(link.getAttribute("data-book-link"))];
-          if (target)
+          if (target) {
+            const origin = link as HTMLElement;
+            history.push({ index, fragment: origin.id });
+            back.disabled = false;
             jump(
               book.spine.findIndex((item) => item.path === target.path),
               target.fragment,
             );
+          }
         });
       };
       frame.srcdoc = chapter.html;

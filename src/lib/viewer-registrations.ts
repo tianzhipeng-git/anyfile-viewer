@@ -1,3 +1,4 @@
+import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { epubManifest } from "@anyfile/epub-reader/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
@@ -43,6 +44,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: comicBookManifest,
     async probe(context) { return (await import("@anyfile/comic-book-reader/probe")).probeComicBook(context); },
     async load() { return (await import("@anyfile/comic-book-reader")).comicBookViewer; },
+  },
+  {
+    manifest: fictionBookManifest,
+    async probe(context) { return (await import("@anyfile/fictionbook-reader/probe")).probeFictionBook(context); },
+    async load() { return (await import("@anyfile/fictionbook-reader")).fictionBookViewer; },
   },
   {
     manifest: epubManifest,

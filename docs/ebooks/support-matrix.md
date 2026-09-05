@@ -14,9 +14,10 @@
 | CBZ / ZIP、ZIP64 / Stored、Deflate / 无加密 | `comic-book-reader` | 自然页序、单/双页、滚动、RTL、ComicInfo、适宽/适高 | 4 | verified | 5,000 页、每页 16 MiB、800 万像素；具体图片组合见下表 |
 | CBZ 归档检查 | `archive-metadata-viewer` | 列出图片条目和压缩信息，手动备选 | 2 | implemented | 不提供漫画阅读 |
 | TXT / HTML / Markdown | `ace-code-text` | 代码/文本查看 | 按该插件现状 | implemented | 不提供电子书目录、排版、资源解析或章节导航 |
-| MOBI/AZW/FB2/DjVu/CHM/CBR/CB7/CBT | 无专用插件 | 可能仅剩通用十六进制或无候选 | 0–1 | not implemented | 不能宣传为电子书阅读支持 |
+| FB2 / FB2 ZIP / 无加密 | `fictionbook-reader` | 正文、嵌套目录、脚注返回、诗歌、表格、封面与图片 | 4 | verified | UTF-8、UTF-16 LE/BE、Windows-1251；32 MiB XML；仅一个主 FB2 |
+| MOBI/AZW/DjVu/CHM/CBR/CB7/CBT | 无专用插件 | 可能仅剩通用十六进制或无候选 | 0–1 | not implemented | 不能宣传为电子书阅读支持 |
 
-当前有独立 EPUB/CBZ 阅读器；没有 `@anyfile/rendering-publication` 或 `@anyfile/rendering-comic` 共享阅读包。两个插件只共享归档读取与已有原生图片能力。真实注册竞争测试确认专用等级 4、archive 等级 2、hex 等级 1；不会自动回退。组合证据见 [验证记录](verification.md)。
+当前有独立 EPUB/CBZ/FB2 阅读器；EPUB、FB2 共用 `@anyfile/rendering-publication`。漫画保持独立，尚无 `@anyfile/rendering-comic`。格式 parser 相互隔离，ZIP 与原生图片能力按实际需要复用。真实注册竞争测试确认专用等级 4、archive 等级 2、hex 等级 1；不会自动回退。组合证据见 [验证记录](verification.md)。
 
 ## 2. 规划目标矩阵
 
@@ -27,7 +28,7 @@
 | EPUB 3 fixed-layout / 无 DRM | `epub-reader` | viewport、page-spread、方向、SVG/图片页 | 3–4 | planned | spread 与跨浏览器排版 |
 | EPUB media overlays / scripted content | `epub-reader` | 首期不执行脚本；overlay 后续评估 | 0–3 | deferred | 音文同步、安全和媒体 codec |
 | CBZ | `comic-book-reader` | 图片排序、ComicInfo、单/双页、RTL、虚拟化 | 4 | verified | JPEG/PNG/GIF/WebP/静态 AVIF；动画按帧数计入预算，不含 AVIF 动画 |
-| FB2 / FB2 ZIP | `fictionbook-reader` | 章节、脚注、诗歌、图片、metadata | 4 | planned | 已有原始 FB2 正常/实体/深度语料；尚无 XML adapter 或注册路径 |
+| FB2 / FB2 ZIP | `fictionbook-reader` | 章节、脚注、诗歌、图片、metadata | 4 | verified | 有界同步 XML；不支持 XSLT、SVG binary、外部资源、复杂样式或加密 |
 | MOBI7 / PalmDOC / 无 DRM | `mobi-reader` | 正文、目录、metadata、图片 | 3–4 | planned spike | parser、Huffman、编码与许可 |
 | KF8/AZW3 / 无 DRM | `mobi-reader` | KF8 HTML/CSS、目录、常见资源 | 3–4 | planned spike | 双格式边界和 CSS/资源语义 |
 | CBR RAR4/RAR5 | `comic-book-reader` | 与 CBZ 等价的页面 UI | 4–5 | planned spike | decoder、随机访问、固实压缩、许可 |
@@ -49,6 +50,8 @@
 | CBZ JPEG、PNG、GIF、WebP、静态 AVIF | `image-formats.cbz` + 原生图片 decoder | GIF/WebP/APNG 的帧数参与像素预算；AVIF 动画暂不纳入 |
 | CBZ ZIP64、目录层级和自然排序 | `zip64.cbz`、`pages.cbz` | 不支持分卷、加密或其他压缩方法 |
 | ComicInfo 封面/DoublePage/manga | `manga.cbz` | Image 必须为有效且不重复的自然页序索引；类型不隐式重新排列页面 |
+| FB2 正文与导航 | `normal.fb2`、`normal.fb2.zip`、`single-fb2.zip`、`utf16.fb2`、`cp1251.fb2` | 多 body、嵌套章节、脚注返回、诗歌/引用/表格、内嵌 PNG 封面；其他原生图片复用已验证 decoder，未逐组合验收 |
+| FB2 安全与生命周期 | `malicious.fb2`、`entity.fb2`、`deep.fb2`、`invalid.fb2`、`huge-binary.fb2`；单元测试与生产浏览器 | 无外部实体/XSLT/网络；打开与章节映射取消、重复销毁与文件切换释放；解析器同步调用不可中途终止 |
 | 大文件与资源预算 | `hundreds.cbz`、`pixel-budget.cbz`、各类反例 | 当前及邻页有界持有；详见 [阶段 0 决策](phase-0-decisions.md) |
 
 `verified` 的浏览器证据是 Chromium 145.0.7632.6；不是其他浏览器或全部出版物变体已经测试的声明。DRM/字体混淆返回稳定不支持 UI；probe 等级用于有界结构路由，完整内容与保护标记仍由 open 校验。

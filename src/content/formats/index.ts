@@ -1,3 +1,4 @@
+import { fb2Format } from "./fb2";
 import { cadExchangeFormats } from "./cad-exchange";
 import { pointFormats } from "./point-cloud";
 import { meshFormats } from "./mesh-3d";
@@ -164,6 +165,7 @@ export const formatContents: readonly FormatContent[] = [
   earFormat,
   eggFormat,
   epubFormat,
+  fb2Format,
   epsFormat,
   etFormat,
   flacFormat,

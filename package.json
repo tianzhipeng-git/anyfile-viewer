@@ -84,7 +84,8 @@
     "@anyfile/point-cloud-viewer": "workspace:*",
     "@anyfile/cad-exchange-viewer": "workspace:*",
     "@anyfile/epub-reader": "workspace:*",
-    "@anyfile/comic-book-reader": "workspace:*"
+    "@anyfile/comic-book-reader": "workspace:*",
+    "@anyfile/fictionbook-reader": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -1,6 +1,6 @@
 # 电子书查看架构
 
-- 状态：EPUB 2/3 reflowable 与 CBZ 已交付；其他格式与共享阅读层仍为规划
+- 状态：EPUB 2/3 reflowable、CBZ 与 FB2 已交付；EPUB/FB2 共用最小章节阅读层
 - 适用范围：EPUB、FB2、MOBI/Kindle、漫画归档、DjVu、CHM 等本地只读阅读
 - 相关文档：[格式清单](format-inventory.md)、[支持矩阵](support-matrix.md)、[实施路线图](roadmap.md)
 
@@ -53,7 +53,7 @@ PDF 继续由 `pdfjs-pdf` 负责；TXT、HTML、Markdown 等继续使用现有�
 
 ### 3.2 两个窄阅读基础设施
 
-不建立包含所有格式可选字段的万能 `EbookDocument`。只有在两个真实插件验证重复后，才提取以下内部包：
+不建立包含所有格式可选字段的万能 `EbookDocument`。`@anyfile/rendering-publication` 已由 EPUB、FB2 两个真实插件验证并提取；下图漫画包仍为规划，漫画代码保持插件内部：
 
 ```text
 @anyfile/rendering-publication
@@ -74,22 +74,19 @@ PDF 继续由 `pdfjs-pdf` 负责；TXT、HTML、Markdown 等继续使用现有�
 
 ### 3.3 格式 adapter 契约
 
-流式出版物可以在插件内部适配为窄接口：
+流式出版物当前通过以下内部接口适配（完整定义见 `viewer/rendering-publication/src/types.ts`）：
 
 ```ts
 interface PublicationSource {
-  readonly metadata: PublicationMetadata
-  readonly readingOrder: readonly PublicationSection[]
-  readonly toc: readonly PublicationTocItem[]
-  readonly layout: "reflowable" | "fixed"
-  readonly pageProgression: "ltr" | "rtl" | "default"
-  loadSection(id: string, signal: AbortSignal): Promise<SafeSection>
-  resolveResource(path: string, signal: AbortSignal): Promise<Blob | null>
-  dispose(): void | Promise<void>
+  title: string;
+  author: string;
+  spine: { id: string; path: string }[];
+  toc: { label: string; path: string; fragment: string }[];
+  loadSection(path: string, signal: AbortSignal): Promise<SafeChapter>;
 }
 ```
 
-该接口只属于电子书内部实现，不进入 `@anyfile/viewer-protocol`，也不是 Worker 消息或持久化格式。`SafeSection` 必须是已经移除主动内容并重写资源引用的受控结果，不能把原始 HTML 字符串直接交给宿主。
+`path` 是 adapter 拥有的不透明章节定位符，不要求是归档路径。EPUB 在闭包里按 entry 读取，FB2 从有界 XML 中取章节结构。`SafeChapter` 只包含已清理的 HTML、内部链接目标、缺失资源计数及幂等 `dispose()`；各格式 adapter 负责主动内容白名单和资源解码，公共层负责无脚本 sandbox、统一 CSP 常量、三章窗口、排版、导航、返回历史与卸载。根 controller 持有格式源并在销毁时释放；不进入 Viewer Protocol，不建立公共归档或 XML parser。
 
 ## 4. 数据路径
 
@@ -119,7 +116,7 @@ File / FB2 ZIP
   → publication viewport
 ```
 
-FB2 不是任意 HTML。adapter 应显式映射标题、段落、诗歌、引用、脚注链接和图片，不用 XSLT 执行不可信样式表。大 `<binary>` 内容应按需解码，并限制单资源和累计解码字节。
+FB2 不是任意 HTML。adapter 应显式映射标题、段落、诗歌、引用、脚注链接和图片，不用 XSLT 执行不可信样式表。大 `<binary>` 内容按当前及相邻章节需要才解码，并限制单资源和累计解码字节。当前原始 XML 最多 32 MiB，使用浏览器 DOMParser 进行有界同步解析；不是流式/Worker XML parser，解析调用本身不能中途终止。异步文件读取与逐章 HTML 映射检查 AbortSignal，映射每 256 节点让出事件循环。完整 XML DOM 在实例内保留，图片字节与 URL 不跨章节缓存，dispose 清空索引与 XML 引用。
 
 ### 4.3 MOBI / PalmDOC / AZW3
 

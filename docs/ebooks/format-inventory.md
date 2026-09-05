@@ -1,6 +1,6 @@
 # 电子书格式候选清单
 
-- 状态：EPUB 2/3 reflowable 与 CBZ 已交付；本文其他条目继续作为候选范围，不能当作 Manifest 清单
+- 状态：EPUB 2/3 reflowable、CBZ 与 FB2 已交付；本文其他条目继续作为候选范围，不能当作 Manifest 清单
 - 口径：以真实阅读内容、版本、布局、压缩和 DRM 组合为单位
 - 相关文档：[架构](architecture.md)、[支持矩阵](support-matrix.md)、[路线图](roadmap.md)
 
@@ -25,7 +25,7 @@
 | EPUB 2 | `.epub` | OCF ZIP + OPF + NCX + XHTML | 与 EPUB 3 共用容器和章节层 | reading order、NCX 目录、常见 CSS/图片 |
 | EPUB 3 fixed-layout | `.epub` | 固定尺寸 XHTML/SVG/图片 | EPUB parser + 固定页 viewport | 页面尺寸、spread、方向和适配 |
 | CBZ | `.cbz` | ZIP + 图片 + 可选 ComicInfo.xml | 已有 ZIP 能力基础上做专用页面读取 | 自然排序、分页、RTL、单/双页、虚拟化 |
-| FB2 | `.fb2` | XML + base64 图片 | Worker XML parser + 受控 HTML adapter | 章节、脚注、诗歌、图片、metadata |
+| FB2 | `.fb2` | XML + base64 图片 | 有界 DOMParser + 受控 HTML adapter（已实现） | 章节、脚注、诗歌、图片、metadata |
 | FB2 ZIP | `.fb2.zip`、部分 `.zip` | 单个主要 FB2 + 资源 | 有界 ZIP + FB2 adapter | 明确选择主文档，不接管普通 ZIP |
 
 ## 3. 第二梯队：独立 spike 后规划

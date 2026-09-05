@@ -29,7 +29,11 @@
 
 `AudioVisualizer` 是共享层第一次超出图片范围，因此单独走 `./audio` 子入口，而不是从根入口重新导出。这样图片插件的 chunk 不会因为根入口而把音频代码纳入模块图；`viewer/rendering/src/index.ts` 也不得反向 import 该模块。它只共享渲染与效果切换交互（DPR、循环起停、analyser 读数、主题色、画布激活循环模式、幂等销毁），音频图所有权仍留在插件：`node` 模式只挂旁路且不关闭调用方的 AudioContext，`media` 模式才自建并自关。这不是 `docs/audio/architecture.md` 禁止的公共 `MediaPlayer` 或统一媒体工具栏。
 
-### 1.3 继续按真实重复提取，不预建万能层
+### 1.3 流式电子书共享章节阅读层
+
+`@anyfile/rendering-publication` 已由 EPUB 与 FB2 两个实际调用方提取。它管理三章窗口、目录与内部链接、返回历史、字号/行高/宽度/主题、无脚本 iframe 和卸载生命周期；仅接收 `loadSection()` 生成的安全章节。XML、ZIP、EPUB 样式清理和 FB2 元素映射仍属于各格式插件，不能从公共包反向导入。实现与限制见 [电子书架构](ebooks/architecture.md)，回归证据见 [电子书验证](ebooks/verification.md)。
+
+### 1.4 继续按真实重复提取，不预建万能层
 
 共享层只吸收已有调用方验证过的重复。PDF 页面、演示文稿、超大图片、图层文档、CAD 和 3D 的内容模型不同；在它们出现共同且稳定的需求前，不建立统一 scene model、通用 renderer adapter 或通用坐标协议。
 

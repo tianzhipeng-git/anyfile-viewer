@@ -1,6 +1,6 @@
 # 阶段 0：证据与实现决策
 
-2026-09-05。阶段 0 的首批交付门禁已通过；实际阅读交付为 EPUB 2/3 reflowable 与 CBZ。FB2 只有固定语料。MOBI、DjVu、RAR/7z、CHM 没有浏览器阅读实现，保持 planned/blocked。
+2026-09-05。阶段 0 的首批交付门禁已通过；实际阅读交付为 EPUB 2/3 reflowable 与 CBZ。当时 FB2 只有固定语料；阶段 3 的实现与预算增量见 [验证记录](verification.md#阶段-3fb2-与共享阅读层)。MOBI、DjVu、RAR/7z、CHM 没有浏览器阅读实现，保持 planned/blocked。
 
 ## ZIP 读取边界
 

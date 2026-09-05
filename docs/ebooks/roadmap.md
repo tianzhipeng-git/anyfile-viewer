@@ -1,6 +1,6 @@
 # 电子书查看实施路线图
 
-- 状态：阶段 0 首批门禁与阶段 1–2 已交付（2026-09-05）；阶段 3 以后未实施
+- 状态：阶段 0 首批门禁与阶段 1–3 已交付（2026-09-05）；阶段 4 以后未实施
 - 范围：流式电子书、漫画归档、固定页电子书和历史二进制电子书
 - 相关文档：[架构](architecture.md)、[格式清单](format-inventory.md)、[支持矩阵](support-matrix.md)
 
@@ -116,7 +116,7 @@
 
 ## 5. 阶段 3：FB2 与最小共享阅读层
 
-阶段 3 用第二个流式文本格式验证重复，再决定是否从 EPUB 提取 `@anyfile/rendering-publication`；未形成真实重复时保持插件内代码。
+已交付 `fictionbook-reader`，等级 4。FB2 与 EPUB 共同使用 `@anyfile/rendering-publication` 的三章视口、目录、排版、隔离 iframe 和清理生命周期；共享接口只接收章节定位符与 `loadSection()`，不导入格式 parser 或 ZIP。支持 UTF-8、UTF-16 LE/BE、Windows-1251、单主文档 FB2 ZIP、元数据、封面、嵌套目录、脚注与返回、诗歌、引用和基本表格。具体边界与证据见 [阶段 3 验证](verification.md#阶段-3fb2-与共享阅读层)。
 
 ### 工作项
 

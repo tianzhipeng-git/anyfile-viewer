@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright";
 
@@ -11,10 +11,14 @@ const browser = await chromium.launch({
   ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
 });
 const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+const bundles = JSON.parse(await readFile(resolve(".next/diagnostics/viewer-bundle-report.json"), "utf8")).plugins;
+const exclusive = (own, other) => bundles[own].viewerFiles.filter(file => !bundles[other].viewerFiles.includes(file));
+const downloads = new Set();
 const attacks = [],
   errors = [],
   results = [];
 page.on("request", (request) => {
+  downloads.add(new URL(request.url()).pathname);
   if (request.url().includes("ebook.invalid")) attacks.push(request.url());
 });
 page.on("pageerror", (error) => errors.push(error.message));
@@ -72,6 +76,7 @@ try {
         document.querySelector('iframe[title="c1"]').contentDocument.querySelector("img")
           .naturalWidth === 80,
     );
+    for (const file of exclusive("fictionbook-reader", "epub-reader")) assert.ok(!downloads.has(`/_next/${file}`), `EPUB loaded FB2: ${file}`);
     results.push({ name: "EPUB first UI", elapsedMs: first });
   });
   await check("EPUB TOC, cross-chapter anchor, typography and resize", async () => {
@@ -79,7 +84,7 @@ try {
     await readyFrame("c4");
     await page.waitForFunction(
       () =>
-        document.querySelector(".anyfile-epub-reader__viewport").scrollTop >=
+        document.querySelector(".anyfile-publication-reader__viewport").scrollTop >=
         document.querySelector('iframe[title="c4"]').parentElement.offsetTop - 5,
     );
     const chapter = await readyFrame("c4");
@@ -165,6 +170,66 @@ try {
     await page.getByRole("alert").filter({ hasText: "safe reading resource limits" }).waitFor();
     await open("drm.epub", ".anyfile-epub-reader");
     await page.getByText("No decryption is attempted.", { exact: false }).waitFor();
+  });
+  await check("FB2 namespaces, cover, structures, notes and return after chapter unload", async () => {
+    await page.goto(`${base}/en/view`);
+    downloads.clear();
+    const first = await open("normal.fb2", ".anyfile-fictionbook-reader");
+    await page.waitForFunction(() => document.querySelector('iframe[title="Chapter 1"]')?.contentDocument?.querySelector("#start1"));
+    const firstFrame = page.frameLocator('iframe[title="Chapter 1"]');
+    assert.match(await firstFrame.locator("body").innerText(), /First verse/);
+    assert.equal(await firstFrame.locator("table").count(), 1);
+    await page.waitForFunction(() => document.querySelector('iframe[title="Chapter 1"]').contentDocument.querySelector("img").naturalWidth === 80);
+    assert.ok(await page.locator("iframe").count() <= 3);
+    for (const file of exclusive("epub-reader", "fictionbook-reader")) assert.ok(!downloads.has(`/_next/${file}`), `FB2 loaded EPUB: ${file}`);
+    await firstFrame.getByRole("link", { name: "Footnote", exact: true }).click();
+    await page.waitForFunction(() => document.querySelector('iframe[title="Notes"]')?.contentDocument?.querySelector("#note"));
+    assert.equal(await page.locator('iframe[title="Chapter 1"]').count(), 0);
+    await page.getByRole("button", { name: "Back to text", exact: true }).click();
+    await page.waitForFunction(() => document.querySelector('iframe[title="Chapter 1"]')?.contentDocument?.querySelector("#start1"));
+    await page.waitForFunction(() => {
+      const frame = document.querySelector('iframe[title="Chapter 1"]');
+      const view = document.querySelector('.anyfile-publication-reader__viewport');
+      const link = frame.contentDocument.querySelector('a[data-book-link]');
+      return Math.abs(view.scrollTop - (frame.parentElement.offsetTop + link.getBoundingClientRect().top)) < 10;
+    });
+    await page.getByLabel("Contents", { exact: true }).selectOption("7");
+    await page.waitForFunction(() => document.querySelector('iframe[title="Chapter 4"]')?.contentDocument?.querySelector("#nested4"));
+    await page.locator('iframe[title="Chapter 4"]').evaluate(frame => {
+      document.querySelector('.anyfile-publication-reader__viewport').scrollTop = frame.parentElement.offsetTop + frame.contentDocument.querySelector('#p4-12').getBoundingClientRect().top;
+    });
+    await page.getByLabel("Font size", { exact: true }).selectOption("26");
+    await page.waitForFunction(() => {
+      const frame = document.querySelector('iframe[title="Chapter 4"]');
+      const view = document.querySelector('.anyfile-publication-reader__viewport');
+      return Math.abs(view.scrollTop - frame.parentElement.offsetTop - frame.contentDocument.querySelector('#p4-12').getBoundingClientRect().top) < 10;
+    });
+    await page.getByLabel("Line height", { exact: true }).selectOption("2");
+    await page.getByLabel("Theme", { exact: true }).selectOption("dark");
+    await page.setViewportSize({ width: 760, height: 450 });
+    await page.screenshot({ path: resolve(output, "fb2-narrow.png") });
+    assert.equal(await page.locator('iframe[title="Chapter 4"]').evaluate(frame => getComputedStyle(frame.contentDocument.body).fontSize), "26px");
+    results.push({ name: "FB2 first UI and bounded live resources", elapsedMs: first, liveChapters: await page.locator("iframe").count(), liveUrls: await page.evaluate(() => window.__bookUrls.size), jsHeapBytes: await page.evaluate(() => performance.memory?.usedJSHeapSize ?? null) });
+    await page.setViewportSize({ width: 1280, height: 900 });
+  });
+  await check("FB2 ZIP and UTF-16 / Windows-1251 encoding", async () => {
+    for (const name of ["normal.fb2.zip", "single-fb2.zip", "utf16.fb2", "utf16be.fb2", "cp1251.fb2"]) {
+      await open(name, ".anyfile-fictionbook-reader");
+      await page.waitForFunction(() => document.querySelector('iframe[title="Chapter 1"]')?.contentDocument?.querySelector("#start1"));
+      if (name === "cp1251.fb2") assert.match(await page.locator(".anyfile-fictionbook-reader").innerText(), /Книга/);
+    }
+  });
+  await check("FB2 safe mapping and resource release on switching", async () => {
+    await open("malicious.fb2", ".anyfile-fictionbook-reader");
+    await page.waitForFunction(() => document.querySelector('iframe[title="Chapter 1"]')?.contentDocument?.querySelector("#start1"));
+    const html = await page.locator('iframe[title="Chapter 1"]').evaluate(frame => frame.contentDocument.documentElement.outerHTML);
+    assert.doesNotMatch(html, /<script|onclick|javascript:|ebook\.invalid/);
+    assert.equal(await page.evaluate(() => window.__ebookAttack), 0);
+    await page.locator('input[type="file"]').setInputFiles({ name: "done.txt", mimeType: "text/plain", buffer: Buffer.from("Done") });
+    await page.locator(".anyfile-fictionbook-reader").waitFor({ state: "detached" });
+    await page.waitForFunction(() => window.__bookUrls.size === 0);
+    assert.equal(await page.locator("iframe").count(), 0);
+    assert.equal(attacks.length, 0);
   });
   await check("CBZ first page, cover, natural sorting, RTL spreads and keyboard", async () => {
     await open("manga.cbz", ".anyfile-comic-reader");
@@ -274,6 +339,9 @@ try {
     assert.equal(await page.evaluate(() => crossOriginIsolated), true);
     await open("pages.cbz", ".anyfile-comic-reader");
     await page.getByRole("button", { name: "下一页", exact: true }).waitFor();
+    await open("normal.fb2", ".anyfile-fictionbook-reader");
+    await page.getByRole("button", { name: "返回正文", exact: true }).waitFor();
+    await page.getByLabel("字号", { exact: true }).selectOption("22");
   });
   assert.deepEqual(errors, []);
   await writeFile(

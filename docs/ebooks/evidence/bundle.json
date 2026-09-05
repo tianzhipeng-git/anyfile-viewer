@@ -1,5 +1,5 @@
 {
-  "initialViewGzipKiB": 214.5,
+  "initialViewGzipKiB": 214.7,
   "plugins": {
     "epub-reader": {
       "manifestSourceGzipBytes": 267,
@@ -7,9 +7,9 @@
       "probeFiles": [
         "static/chunks/8160.48e118822e6540ba.js"
       ],
-      "viewerGzipBytes": 47418,
+      "viewerGzipBytes": 47717,
       "viewerFiles": [
-        "static/chunks/2007.7c10a35a78d4a655.js",
+        "static/chunks/6733.522ae3c4bc764d28.js",
         "static/chunks/8264.0ed1f3d1ac6368bd.js",
         "static/chunks/8827.17e50de87c62c0c8.js"
       ]
@@ -26,7 +26,19 @@
         "static/chunks/8264.0ed1f3d1ac6368bd.js",
         "static/chunks/8827.17e50de87c62c0c8.js"
       ]
+    },
+    "fictionbook-reader": {
+      "manifestSourceGzipBytes": 299,
+      "probeGzipBytes": 3057,
+      "probeFiles": [
+        "static/chunks/6707.4ba51282e96c052b.js"
+      ],
+      "viewerGzipBytes": 46671,
+      "viewerFiles": [
+        "static/chunks/2253.7e002038ad9653f8.js",
+        "static/chunks/8264.0ed1f3d1ac6368bd.js",
+        "static/chunks/8827.17e50de87c62c0c8.js"
+      ]
     }
-  },
-  "runtimeAssetsAdded": 0
+  }
 }

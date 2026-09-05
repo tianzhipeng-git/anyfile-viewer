@@ -1,3 +1,4 @@
+import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
 import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
 import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
@@ -39,7 +40,7 @@ export const viewerManifests: readonly ViewerPluginManifest[] = [
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
   cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
   codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest,
-  dataManifest, archiveMetadataManifest, hexManifest,
+  fictionBookManifest, dataManifest, archiveMetadataManifest, hexManifest,
 ];
 
 export function manifestsForExtension(extension: string) {

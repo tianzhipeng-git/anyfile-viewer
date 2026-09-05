@@ -37,7 +37,8 @@ if (gzipBytes > maximumGzipBytes) {
 
 const initialCode = Buffer.concat(contents).toString("utf8");
 const deferredImplementationMarkers = [
-  "anyfile-epub-reader__viewport",
+  "anyfile-publication-reader__viewport",
+  "FB2 structure limit exceeded.",
   "anyfile-comic-reader__viewport",
   "ZIP index limit exceeded.",
   "anyfile-rendering-3d",

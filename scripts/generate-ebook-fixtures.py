@@ -67,12 +67,28 @@ record=struct.pack('<IQHHIIQQQQ',0x06064b50,44,45,45,0,0,count,count,size,offset
 locator=struct.pack('<IIQI',0x07064b50,0,len(base)-22,1)
 trailer=struct.pack('<IHHHHIIH',0x06054b50,0,0,65535,65535,0xffffffff,0xffffffff,0)
 (ROOT/'zip64.cbz').write_bytes(base[:-22]+record+locator+trailer)
-(ROOT/'normal.fb2').write_text('<FictionBook xmlns="http://www.gribuser.ru/xml/fictionbook/2.0"><description><title-info><book-title>Original fixture</book-title></title-info></description><body><section><title><p>Chapter one</p></title><p>Local reading.</p></section></body></FictionBook>')
+# Original CC0 FictionBook subset and encoding/security fixtures.
+import base64
+fbns='http://www.gribuser.ru/xml/fictionbook/2.0'
+fb=f'<FictionBook xmlns="{fbns}" xmlns:l="http://www.w3.org/1999/xlink"><description><title-info><book-title>Original fixture</book-title><author><first-name>Local</first-name><last-name>Author</last-name></author><coverpage><image l:href="#cover"/></coverpage></title-info></description><body>'
+for i in range(1,6):
+    fb+=f'<section id="c{i}"><title><p>Chapter {i}</p></title><p id="start{i}">Local reading. <a l:href="#note" type="note">Footnote</a></p><subtitle>Verse and quotation</subtitle><poem><stanza><v>First verse</v><v>Second verse</v></stanza><text-author>Poet</text-author></poem><epigraph><p>Epigraph</p></epigraph><cite><p>Quotation</p></cite><table><tr><th>Key</th><td>Value</td></tr></table>'+''.join(f'<p id="p{i}-{j}">Reading paragraph {j}. '+('Readable local text. '*15)+'</p>' for j in range(30))+f'<section id="nested{i}"><title><p>Nested {i}</p></title><p>Nested text.</p></section></section>'
+fb+=f'</body><body name="notes"><section id="note"><title><p>Notes</p></title><p>Footnote explanation.</p></section></body><binary id="cover" content-type="image/png">{base64.b64encode(png()).decode()}</binary></FictionBook>'
+(ROOT/'normal.fb2').write_text(fb)
+save('normal.fb2.zip',[('book.fb2',fb)])
+save('single-fb2.zip',[('nested/book.fb2',fb),('readme.txt','Original CC0 fixture')])
+save('multiple-fb2.zip',[('one.fb2',fb),('two.fb2',fb)])
+(ROOT/'utf16.fb2').write_bytes(('<?xml version="1.0" encoding="UTF-16"?>'+fb).encode('utf-16'))
+(ROOT/'utf16be.fb2').write_bytes(b'\xfe\xff'+('<?xml version="1.0" encoding="UTF-16"?>'+fb).encode('utf-16be'))
+(ROOT/'cp1251.fb2').write_bytes(('<?xml version="1.0" encoding="windows-1251"?>'+fb.replace('Original fixture','Книга')).encode('cp1251'))
+(ROOT/'malicious.fb2').write_text(fb.replace('Local reading.', '<script>parent.__ebookAttack=1</script><image l:href="https://ebook.invalid/image"/><a l:href="javascript:alert(1)">Bad link</a><p onclick="alert(1)">Safe text</p>'))
 (ROOT/'entity.fb2').write_text('<!DOCTYPE FictionBook [<!ENTITY x SYSTEM "https://ebook.invalid/entity">]><FictionBook>&x;</FictionBook>')
-(ROOT/'deep.fb2').write_text('<FictionBook><body>'+'<section>'*80+'<p>Deep</p>'+'</section>'*80+'</body></FictionBook>')
-records=[{'file':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'source':'scripts/generate-ebook-fixtures.py','license':'CC0-1.0 + OFL-1.1' if p.name=='resources.epub' else 'Apache-2.0 generated image fixtures' if p.name=='image-formats.cbz' else 'CC0-1.0','purpose':p.stem} for p in sorted(ROOT.iterdir()) if p.suffix in ['.epub','.cbz','.fb2']]
+(ROOT/'deep.fb2').write_text(f'<FictionBook xmlns="{fbns}"><body>'+'<section>'*80+'<p>Deep</p>'+'</section>'*80+'</body></FictionBook>')
+(ROOT/'invalid.fb2').write_text(f'<FictionBook xmlns="{fbns}"><body></FictionBook>')
+(ROOT/'huge-binary.fb2').write_text(fb.replace('</FictionBook>','<binary id="huge" content-type="image/png">'+'A'*(12*1024*1024)+'</binary></FictionBook>'))
+records=[{'file':p.name,'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest(),'source':'scripts/generate-ebook-fixtures.py','license':'CC0-1.0 + OFL-1.1' if p.name=='resources.epub' else 'Apache-2.0 generated image fixtures' if p.name=='image-formats.cbz' else 'CC0-1.0','purpose':p.stem} for p in sorted(ROOT.iterdir()) if p.suffix in ['.epub','.cbz','.fb2','.zip']]
 for record in records:
-    if record['file'].endswith(('.epub','.cbz')):
+    if record['file'].endswith(('.epub','.cbz','.zip')):
         with zipfile.ZipFile(ROOT/record['file']) as z:
             record['parameters']={'entries':len(z.infolist()),'declaredExpandedBytes':sum(i.file_size for i in z.infolist())}
 inputs=[{'file':'fonts/'+name,'source':'https://raw.githubusercontent.com/google/fonts/3b99d83d2625944fc0b8bd328d793fa819b92381/ofl/abel/'+name,'sha256':hashlib.sha256((ROOT/'fonts'/name).read_bytes()).hexdigest(),'license':'OFL-1.1'} for name in ['Abel-Regular.ttf','OFL.txt']]
