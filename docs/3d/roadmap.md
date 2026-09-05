@@ -1,8 +1,9 @@
 # 3D 文件查看实施路线图
 
-- 状态：规划，阶段 0 尚未开始
+> 实施状态见 [implementation-status.md](implementation-status.md)；本文保留目标设计，不能把全部条目视为已完成。
+- 状态：部分实施；阶段 0–5 已有代码和首轮验证，仍有未完成要求
 - 范围：CAD、通用网格、CG 场景、3D 打印和点云的浏览器本地只读查看
-- 共享基础设施：规划中的 `@anyfile/rendering-3d`，不是可注册的查看器插件
+- 共享基础设施：已建立的 `@anyfile/rendering-3d`，不是可注册的查看器插件
 - 相关文档：[3D 文件查看架构](architecture.md)、[支持矩阵](support-matrix.md)
 
 ## 1. 排序和交付原则

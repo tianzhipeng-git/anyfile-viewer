@@ -93,3 +93,22 @@ licenses. No Anyfile license grants third-party codec patent rights.
 PDF.js support assets retain the upstream CMap, ICC, Foxit-font, and Liberation
 font notices copied into `/vendor/pdfjs/6.2.108/`. Those notices govern the
 corresponding data and font files independently of the Anyfile license.
+
+## 3D viewing additions
+
+- Three.js 0.185.1 — MIT, https://github.com/mrdoob/three.js . Used by the local
+  3D viewport and selected format addons. The upstream license is retained in
+  the installed package (`three/LICENSE`).
+- zip.js 2.8.60 — BSD-3-Clause, https://github.com/gildas-lormeau/zip.js . The
+  existing project dependency is also used for bounded 3MF ZIP extraction.
+- dxf-parser 1.1.2 — MIT, https://github.com/gdsestimating/dxf-parser . Existing
+  DXF parsing dependency, now invoked in a Worker with XYZ output preserved.
+
+No OpenCascade/occt-import-js binary is distributed by these additions. Its
+preliminary evaluation and unmet integration requirements are recorded in
+`docs/3d/dependency-audit.md`.
+
+## CAD and compressed point clouds
+
+- occt-import-js 0.0.23-anyfile.1: LGPL-2.1, with Open CASCADE LGPL-2.1 and OCCT exception. Complete notices, pinned corresponding source links and build patch are in `third_party/occt-import-js/0.0.23-anyfile.1/` and copied to `/vendor/occt-import-js/0.0.23-anyfile.1/`.
+- laz-perf 0.0.7-anyfile.1: Apache-2.0. Upstream source, license and WASM provenance are in `third_party/laz-perf/0.0.7-anyfile.1/`, copied beside the runtime.

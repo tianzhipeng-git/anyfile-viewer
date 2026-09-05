@@ -16,8 +16,12 @@ const eslintConfig = defineConfig([
     "public/vendor/libheif/**",
     "public/vendor/ogv/**",
     "public/vendor/stet/**",
+    "public/vendor/occt-import-js/**",
+    "public/vendor/laz-perf/**",
     "third_party/heif-wasm/**",
     "third_party/stet-wasm/**",
+    "third_party/occt-import-js/**",
+    "third_party/laz-perf/**",
     "next-env.d.ts",
   ]),
 ]);

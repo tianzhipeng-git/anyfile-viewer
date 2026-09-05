@@ -3,6 +3,7 @@ import DxfParser from "dxf-parser";
 export interface CadPoint {
   readonly x: number;
   readonly y: number;
+  readonly z?: number;
 }
 
 export interface CadBounds {
@@ -55,6 +56,8 @@ export interface CadScene {
   readonly bounds: CadBounds;
   readonly entityCount: number;
   readonly layerCount: number;
+  readonly layers: Readonly<Record<string, boolean>>;
+  readonly units?: number;
 }
 
 const MAX_ENTITIES = 200_000;
@@ -76,7 +79,7 @@ const ACI_COLORS = [
   "#c0c0c0",
 ];
 
-const IDENTITY = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 };
+const IDENTITY = { a: 1, b: 0, c: 0, d: 1, e: 0, f: 0, sz: 1, tz: 0 };
 
 interface Transform {
   readonly a: number;
@@ -85,11 +88,14 @@ interface Transform {
   readonly d: number;
   readonly e: number;
   readonly f: number;
+  readonly sz: number;
+  readonly tz: number;
 }
 
 interface CadVertex {
   readonly x?: number;
   readonly y?: number;
+  readonly z?: number;
   readonly bulge?: number;
 }
 
@@ -119,13 +125,14 @@ interface CadEntity {
   readonly name?: string;
   readonly xScale?: number;
   readonly yScale?: number;
+  readonly zScale?: number;
   readonly controlPoints?: readonly CadPoint[];
   readonly fitPoints?: readonly CadPoint[];
   readonly middleOfText?: CadPoint;
   readonly insertionPoint?: CadPoint;
 }
 
-type LayerMap = Record<string, { colorIndex?: number; color?: number; frozen?: boolean }>;
+type LayerMap = Record<string, { colorIndex?: number; color?: number; frozen?: boolean; visible?: boolean }>;
 
 function finite(value: unknown, fallback: number) {
   const number = Number(value);
@@ -133,14 +140,16 @@ function finite(value: unknown, fallback: number) {
 }
 
 function point(value: unknown): CadPoint {
-  const raw = (value ?? {}) as { x?: number; y?: number };
-  return { x: finite(raw.x, 0), y: finite(raw.y, 0) };
+  const raw = (value ?? {}) as { x?: number; y?: number; z?: number };
+  if ([raw.x, raw.y, raw.z].some(value => value !== undefined && !Number.isFinite(value))) throw new Error("Invalid DXF coordinate");
+  return { x: raw.x ?? 0, y: raw.y ?? 0, z: raw.z ?? 0 };
 }
 
 function applyTransform(transform: Transform, value: CadPoint): CadPoint {
   return {
     x: transform.a * value.x + transform.b * value.y + transform.e,
     y: transform.c * value.x + transform.d * value.y + transform.f,
+    z: transform.sz * (value.z ?? 0) + transform.tz,
   };
 }
 
@@ -152,6 +161,8 @@ function compose(parent: Transform, child: Transform): Transform {
     d: parent.c * child.b + parent.d * child.d,
     e: parent.a * child.e + parent.b * child.f + parent.e,
     f: parent.c * child.e + parent.d * child.f + parent.f,
+    sz: parent.sz * child.sz,
+    tz: parent.sz * child.tz + parent.tz,
   };
 }
 
@@ -169,6 +180,8 @@ function insertTransform(insert: CadEntity): Transform {
     d: scaleY * cos,
     e: position.x,
     f: position.y,
+    sz: finite(insert.zScale, 1),
+    tz: position.z ?? 0,
   };
 }
 
@@ -180,7 +193,6 @@ function rgbCss(value: unknown) {
 
 function aciCss(index: number) {
   if (index >= 1 && index < ACI_COLORS.length) return ACI_COLORS[index];
-  if (index > 0 && index <= 255) return `hsl(${(index * 47) % 360} 52% 42%)`;
   return "";
 }
 
@@ -192,8 +204,9 @@ function layerColor(layer: { colorIndex?: number; color?: number } | undefined) 
   return trueColor || "#111111";
 }
 
-function entityColor(entity: CadEntity, layers: LayerMap) {
+function entityColor(entity: CadEntity, layers: LayerMap, blockColor?: string) {
   const colorIndex = finite(entity.colorIndex, Number.NaN);
+  if (colorIndex === 0 && blockColor) return blockColor;
   if (colorIndex === 0 || colorIndex === 256) return layerColor(layers[entity.layer ?? ""]);
   if (Number.isFinite(colorIndex)) {
     const indexed = aciCss(Math.abs(colorIndex));
@@ -231,6 +244,7 @@ function sampleArc(center: CadPoint, radius: number, startAngle: number, endAngl
     result.push({
       x: center.x + Math.cos(angle) * radiusValue,
       y: center.y + Math.sin(angle) * radiusValue,
+      z: center.z ?? 0,
     });
   }
   return result;
@@ -253,7 +267,7 @@ function sampleBulgeArc(start: CadPoint, end: CadPoint, bulge: number) {
   const segments = Math.max(MIN_ARC_SEGMENTS, Math.min(MAX_ARC_SEGMENTS, Math.ceil(Math.abs(theta) / (Math.PI / 18))));
   for (let index = 0; index <= segments; index += 1) {
     const angle = startAngle + (theta * index) / segments;
-    result.push({ x: center.x + Math.cos(angle) * radius, y: center.y + Math.sin(angle) * radius });
+    result.push({ x: center.x + Math.cos(angle) * radius, y: center.y + Math.sin(angle) * radius, z: (start.z ?? 0) + ((end.z ?? 0) - (start.z ?? 0)) * index / segments });
   }
   return result;
 }
@@ -291,6 +305,7 @@ function sampleEllipse(entity: CadEntity) {
     result.push({
       x: center.x + major.x * Math.cos(angle) + minor.x * Math.sin(angle),
       y: center.y + major.y * Math.cos(angle) + minor.y * Math.sin(angle),
+      z: (center.z ?? 0) + (major.z ?? 0) * Math.cos(angle),
     });
   }
   return result;
@@ -319,6 +334,7 @@ export function parseCadScene(source: string): CadScene | undefined {
   const blocks = parsed.blocks ?? {};
   const primitives: CadPrimitive[] = [];
   let entityCount = 0;
+  let vertexCount = 0;
   let bounds: CadBounds = { minX: 0, minY: 0, maxX: 0, maxY: 0, width: 1, height: 1 };
   let hasGeometry = false;
 
@@ -336,6 +352,8 @@ export function parseCadScene(source: string): CadScene | undefined {
   };
 
   const addPrimitive = (primitive: CadPrimitive) => {
+    vertexCount += "points" in primitive ? primitive.points.length : 1;
+    if (vertexCount > 3_000_000) throw new RangeError("DXF geometry budget exceeded.");
     primitives.push(primitive);
     switch (primitive.kind) {
       case "line":
@@ -357,21 +375,22 @@ export function parseCadScene(source: string): CadScene | undefined {
   };
 
   const mapVertex = (value: CadVertex, transform: Transform, base: CadPoint) =>
-    applyTransform(transform, { x: point(value).x - base.x, y: point(value).y - base.y });
+    applyTransform(transform, { x: point(value).x - base.x, y: point(value).y - base.y, z: (point(value).z ?? 0) - (base.z ?? 0) });
 
-  const addPolyline = (vertices: readonly CadVertex[], closed: boolean, transform: Transform, base: CadPoint, entity: CadEntity) => {
-    const points = flattenPolyline(vertices, closed).map((value) => applyTransform(transform, { x: value.x - base.x, y: value.y - base.y }));
-    if (points.length >= 2) addPrimitive({ kind: "polyline", points, closed, color: entityColor(entity, layers), layer: entity.layer ?? "" });
+  const addPolyline = (vertices: readonly CadVertex[], closed: boolean, transform: Transform, base: CadPoint, entity: CadEntity, color: string) => {
+    const points = flattenPolyline(vertices, closed).map((value) => applyTransform(transform, { x: value.x - base.x, y: value.y - base.y, z: (value.z ?? 0) - (base.z ?? 0) }));
+    if (points.length >= 2) addPrimitive({ kind: "polyline", points, closed, color, layer: entity.layer ?? "" });
   };
 
-  const collect = (entities: readonly CadEntity[], transform: Transform, base: CadPoint, depth: number) => {
+  const collect = (entities: readonly CadEntity[], transform: Transform, base: CadPoint, depth: number, blockLayer = "", blockColor?: string) => {
     if (depth > MAX_BLOCK_DEPTH) return;
-    for (const entity of entities) {
+    for (const rawEntity of entities) {
+      const entity = (!rawEntity.layer || rawEntity.layer === "0") && blockLayer ? { ...rawEntity, layer: blockLayer } : rawEntity;
       entityCount += 1;
       if (entityCount > MAX_ENTITIES) throw new RangeError("DXF contains too many entities.");
       if (entity.visible === false) continue;
       const type = entity.type?.toUpperCase();
-      const color = entityColor(entity, layers);
+      const color = entityColor(entity, layers, blockColor);
       const layerName = entity.layer ?? "";
 
       switch (type) {
@@ -388,24 +407,24 @@ export function parseCadScene(source: string): CadScene | undefined {
           break;
         }
         case "LWPOLYLINE":
-          addPolyline((entity.vertices ?? []) as CadVertex[], Boolean(entity.shape), transform, base, entity);
+          addPolyline((entity.vertices ?? []) as CadVertex[], Boolean(entity.shape), transform, base, entity, color);
           break;
         case "POLYLINE":
-          addPolyline((entity.vertices ?? []) as CadVertex[], Boolean(entity.shape), transform, base, entity);
+          addPolyline((entity.vertices ?? []) as CadVertex[], Boolean(entity.shape), transform, base, entity, color);
           break;
         case "CIRCLE": {
           const center = point(entity.center);
-          const points = sampleArc(center, finite(entity.radius, 0), 0, Math.PI * 2).map((value) => applyTransform(transform, { x: value.x - base.x, y: value.y - base.y }));
+          const points = sampleArc(center, finite(entity.radius, 0), 0, Math.PI * 2).map((value) => applyTransform(transform, { x: value.x - base.x, y: value.y - base.y, z: (value.z ?? 0) - (base.z ?? 0) }));
           if (points.length >= 2) addPrimitive({ kind: "polyline", points, closed: true, color, layer: layerName });
           break;
         }
         case "ARC": {
-          const points = sampleArc(point(entity.center), finite(entity.radius, 0), finite(entity.startAngle, 0), finite(entity.endAngle, 0)).map((value) => applyTransform(transform, { x: value.x - base.x, y: value.y - base.y }));
+          const points = sampleArc(point(entity.center), finite(entity.radius, 0), finite(entity.startAngle, 0), finite(entity.endAngle, 0)).map((value) => applyTransform(transform, { x: value.x - base.x, y: value.y - base.y, z: (value.z ?? 0) - (base.z ?? 0) }));
           if (points.length >= 2) addPrimitive({ kind: "polyline", points, closed: false, color, layer: layerName });
           break;
         }
         case "ELLIPSE": {
-          const points = sampleEllipse(entity).map((value) => applyTransform(transform, { x: value.x - base.x, y: value.y - base.y }));
+          const points = sampleEllipse(entity).map((value) => applyTransform(transform, { x: value.x - base.x, y: value.y - base.y, z: (value.z ?? 0) - (base.z ?? 0) }));
           if (points.length >= 2) addPrimitive({ kind: "polyline", points, closed: Math.abs(finite(entity.endAngle, Math.PI * 2) - finite(entity.startAngle, 0)) >= Math.PI * 2 - 1e-9, color, layer: layerName });
           break;
         }
@@ -459,8 +478,9 @@ export function parseCadScene(source: string): CadScene | undefined {
         case "INSERT": {
           const block = blocks[entity.name ?? ""] as { position?: CadPoint; entities?: readonly CadEntity[] } | undefined;
           if (!block || !block.entities?.length) break;
-          const child = compose(transform, insertTransform(entity));
-          collect(block.entities, child, point(block.position), depth + 1);
+          const position = point(entity.position);
+          const child = compose(transform, insertTransform({ ...entity, position: { x: position.x - base.x, y: position.y - base.y, z: (position.z ?? 0) - (base.z ?? 0) } }));
+          collect(block.entities, child, point(block.position), depth + 1, layerName, color);
           break;
         }
         default:
@@ -483,5 +503,7 @@ export function parseCadScene(source: string): CadScene | undefined {
     },
     entityCount,
     layerCount: Object.keys(layers).length,
+    layers: Object.fromEntries(Object.entries(layers).map(([name, layer]) => [name, !layer.frozen && layer.visible !== false && (layer.colorIndex ?? 1) >= 0])),
+    units: typeof parsed.header?.$INSUNITS === "number" ? parsed.header.$INSUNITS : undefined,
   };
 }

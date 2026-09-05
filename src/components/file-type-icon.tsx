@@ -1,3 +1,7 @@
+import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
+import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
+import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
+import { mesh3dManifest } from "@anyfile/mesh-3d-viewer/manifest";
 import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
 import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
@@ -164,7 +168,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "model",
     icon: BoxIcon,
-    extensions: [".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
+    extensions: [...manifestExtensions(cadExchangeManifest, mesh3dManifest, print3dManifest, pointCloudManifest), ".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
   },
   {
     kind: "design",

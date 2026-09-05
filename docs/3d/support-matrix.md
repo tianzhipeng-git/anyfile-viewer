@@ -6,13 +6,20 @@
 
 ## 1. 当前已实现能力
 
-| 格式/组合 | 当前插件 | 当前结果 | 当前等级口径 | 状态 | 主要限制 |
-|---|---|---|---:|---|---|
-| ASCII DXF 常见二维图元 | `cad-2d` | Canvas 2D 几何预览 | 3 | `verified` | 合并显示全部图层；仅使用 XY；没有图层开关、CAD 原生视图、布局或三维相机 |
-| ASCII DXF 三维 `LINE` 线框 | `cad-2d` | 只显示 XY 投影 | probe 返回 3，实际能力至多 2，存在待修正错配 | `implemented` | Z 被忽略，不能切换前/侧/等轴测或自由旋转；不得宣传为三维支持 |
-| USDZ package | `archive` | 有界列出包内条目 | 2 | `implemented` | 不解析 USD scene，不渲染几何、材质、动画或 AR placement |
+完整范围、限制、预算和证据见 [实施记录](implementation-status.md)，依赖判断见 [依赖审核](dependency-audit.md)。
 
-当前仓库没有 `@anyfile/rendering-3d`，也没有已注册的 STL、OBJ、PLY、glTF/GLB、3MF、STEP、IGES 或点云渲染插件。
+| 格式 | 插件 | 当前能力 | 等级 | 验证状态 |
+|---|---|---|---:|---|
+| ASCII DXF | cad-2d（保留唯一已有 ID） | XYZ 几何、标准视图、orbit、图层显隐 | 3 | implemented；bridge.dxf 真实 Chrome smoke 通过，完整矩阵待补 |
+| ASCII/binary STL | mesh-3d | 三角网格、尺寸、线框、可取消 Worker | 3 | implemented；固定样例与 Chrome smoke 通过 |
+| OBJ/MTL | mesh-3d | 网格、对象、本地材质与简单漫反射纹理 | 3 | implemented；几何 smoke 通过，关联材质矩阵待补 |
+| PLY / OFF | mesh-3d | 网格/点（PLY）、基础凸多边形（OFF） | 3 | implemented；固定样例 smoke 通过，binary PLY 证据待补 |
+| glTF / GLB | mesh-3d | glTF 2.0 场景、材质与动画入口 | 3 | implemented；GLB 几何 smoke 通过，动画/关联资源矩阵待补 |
+| 3MF / AMF | print-3d | 构建几何、单位；3MF 组件与变换 | 3 | implemented；固定样例 smoke 与结构测试通过 |
+| ASCII PCD / XYZ | point-cloud | 有界渐进代表性抽样 | 2 | implemented；5000 点固定样例 smoke 通过；非完整 LOD |
+| USDZ package | archive | 有界列出包内条目，无 USD 几何 | 2 | implemented |
+
+`implemented` 和单个 smoke 通过不等于原文定义的完整 `verified`。
 
 ## 2. 规划候选矩阵
 
@@ -20,22 +27,22 @@
 
 | 格式族 | 代表扩展名 | 领域 | 计划路径 | 首个有意义目标 | 当前状态 |
 |---|---|---|---|---|---|
-| DXF | `.dxf` | CAD | DXF parser → line/mesh adapter → `rendering-3d` | 保留 XYZ、图层、标准视图和 orbit；二维文件不回归 | planned |
-| STL | `.stl` | 网格/打印 | ASCII/binary parser → indexed mesh | 几何、法线、尺寸、orbit 和资源上限 | planned |
-| glTF / GLB | `.gltf`, `.glb` | CG | glTF loader + workspace resolver | 层级、mesh、常见 PBR 材质、纹理、相机；动画按证据声明 | planned |
-| OBJ / MTL | `.obj`, `.mtl` | 网格/CG | OBJ parser + workspace MTL/texture resolver | 多对象、材质和合法关联纹理 | planned |
-| PLY | `.ply` | 网格/点 | ASCII/binary parser | mesh/point、顶点颜色和大小边界 | planned |
-| OFF | `.off` | 网格 | 轻量 parser | 几何与颜色的基础查看 | planned |
-| 3MF | `.3mf` | 3D 打印 | 有界 ZIP/XML parser | 构件、单位、颜色/材质、尺寸与构建信息 | planned |
-| AMF | `.amf` | 3D 打印 | 有界 XML parser | 对象、单位、材质与几何 | candidate |
-| STEP | `.step`, `.stp` | 精确 CAD | CAD Worker/WASM → tessellation | 装配、名称、颜色、单位、实体面与边线 | planned spike |
-| IGES | `.iges`, `.igs` | 精确 CAD | CAD Worker/WASM → tessellation | 常见曲面/实体的可见几何与单位 | planned spike |
-| BREP | `.brep` | 精确 CAD | CAD Worker/WASM → tessellation | 拓扑与 tessellated 显示 | candidate |
+| DXF | `.dxf` | CAD | DXF parser → line/mesh adapter → `rendering-3d` | 保留 XYZ、图层、标准视图和 orbit；二维文件不回归 | implemented，见第 1 节及限制 |
+| STL | `.stl` | 网格/打印 | ASCII/binary parser → indexed mesh | 几何、法线、尺寸、orbit 和资源上限 | implemented，见第 1 节及限制 |
+| glTF / GLB | `.gltf`, `.glb` | CG | glTF loader + workspace resolver | 层级、mesh、常见 PBR 材质、纹理、相机；动画按证据声明 | implemented，见第 1 节及限制 |
+| OBJ / MTL | `.obj`, `.mtl` | 网格/CG | OBJ parser + workspace MTL/texture resolver | 多对象、材质和合法关联纹理 | implemented，见第 1 节及限制 |
+| PLY | `.ply` | 网格/点 | ASCII/binary parser | mesh/point、顶点颜色和大小边界 | implemented，见第 1 节及限制 |
+| OFF | `.off` | 网格 | 轻量 parser | 几何与颜色的基础查看 | implemented，见第 1 节及限制 |
+| 3MF | `.3mf` | 3D 打印 | 有界 ZIP/XML parser | 构件、单位、颜色/材质、尺寸与构建信息 | implemented，见第 1 节及限制 |
+| AMF | `.amf` | 3D 打印 | 有界 XML parser | 未压缩对象/单位/几何与常量材质颜色 | implemented 子集 |
+| STEP | `.step`, `.stp` | 精确 CAD | CAD Worker/WASM → tessellation | 装配、名称、颜色、单位、实体面与边线 | implemented 子集 |
+| IGES | `.iges`, `.igs` | 精确 CAD | CAD Worker/WASM → tessellation | 常见曲面/实体的可见几何与单位 | implemented 子集 |
+| BREP | `.brep` | 精确 CAD | CAD Worker/WASM → tessellation | 拓扑与 tessellated 显示；单位未知 | implemented 子集 |
 | DWG | `.dwg` | CAD | 许可和 parser 独立评估 | 不以 DXF parser 或服务端转换冒充支持 | blocked pending provider |
 | FBX / DAE / 3DS | `.fbx`, `.dae`, `.3ds` | CG | 按格式动态 loader | 常见静态 mesh、层级与材质 | candidate |
 | USD / USDZ | `.usd`, `.usda`, `.usdc`, `.usdz` | CG/AR | USD-aware runtime 独立评估 | composition、引用、mesh、材质和动画的明确子集 | blocked pending provider |
-| LAS / LAZ | `.las`, `.laz` | 点云 | Worker parser/decompressor + LOD | 分块点云、属性着色与点预算 | candidate |
-| PCD / XYZ | `.pcd`, `.xyz` | 点云 | 流式/分块 parser | 常见字段、点颜色和有界预览 | candidate |
+| LAS / LAZ | `.las`, `.laz` | 点云 | Worker + 有界 LAZ WASM | 坐标抽样预览，不显示属性；LAZ 压缩输入上限 64 MiB | implemented Lv.2 子集 |
+| PCD / XYZ | `.pcd`, `.xyz` | 点云 | 流式 Worker / 代表性抽样 | ASCII XYZ 几何；点属性待完成 | implemented 子集 |
 | E57 | `.e57` | 点云 | 专用 Worker/WASM | 扫描分组、坐标和有界点加载 | candidate |
 | G-code toolpath | `.gcode` 等 | 3D 打印 | 流式指令 parser → line segments | 分层刀路/打印路径查看，不模拟实际打印 | candidate |
 

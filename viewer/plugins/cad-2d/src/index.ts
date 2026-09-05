@@ -8,9 +8,9 @@ import {
 
 import { cad2dManifest } from "./manifest";
 import { abortError, CAD_INPUT_LIMIT, readDxfText } from "./read";
-import { parseCadScene } from "./scene";
-import { createCadViewerElements, type CadViewerElements } from "./ui";
-import { Cad2dViewport } from "./viewport";
+import { readCadScene } from "./parse";
+import { create3dViewer } from "@anyfile/rendering-3d";
+import { cadDocument } from "./adapter-3d";
 
 function copyFor(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, {
@@ -21,7 +21,6 @@ function copyFor(locale: OpenViewerContext["locale"]) {
       ready: "DXF 工程图已打开",
       invalid: "文件内容不是有效或完整的 DXF 工程图。",
       limit: `DXF 文件大小不能超过 ${CAD_INPUT_LIMIT / 1024 / 1024} MiB。`,
-      unsupported: "当前浏览器缺少 Canvas 2D 能力。",
     },
     en: {
       reading: "Reading DXF drawing…",
@@ -30,7 +29,6 @@ function copyFor(locale: OpenViewerContext["locale"]) {
       ready: "DXF drawing opened",
       invalid: "The file is not a valid, complete DXF drawing.",
       limit: `DXF input must not exceed ${CAD_INPUT_LIMIT / 1024 / 1024} MiB.`,
-      unsupported: "This browser lacks Canvas 2D support.",
     },
   });
 }
@@ -39,8 +37,7 @@ async function openCad2d(context: OpenViewerContext): Promise<ViewerController> 
   const { container, file, reportProgress, signal, locale } = context;
   const copy = copyFor(locale);
   let root: HTMLDivElement | undefined;
-  let elements: CadViewerElements | undefined;
-  let viewport: Cad2dViewport | undefined;
+  let viewport: ReturnType<typeof create3dViewer> | undefined;
   let disposed = false;
 
   const dispose = () => {
@@ -62,15 +59,13 @@ async function openCad2d(context: OpenViewerContext): Promise<ViewerController> 
     if (signal.aborted) throw abortError();
 
     reportProgress({ stage: "parsing", message: copy.parsing, loaded: file.size, total: file.size });
-    const scene = parseCadScene(source);
+    const scene = await readCadScene(source, signal);
     if (!scene) throw new ViewerError("invalid-file", copy.invalid);
     if (signal.aborted) throw abortError();
 
     reportProgress({ stage: "rendering", message: copy.rendering });
-    elements = createCadViewerElements(file.name, scene, locale);
-    root = elements.root;
-    container.append(root);
-    viewport = new Cad2dViewport(elements, scene);
+    viewport = create3dViewer(container, cadDocument(scene), locale, file.name);
+    root = viewport.root;
     signal.addEventListener("abort", dispose, { once: true });
     reportProgress({ stage: "ready", message: copy.ready });
     return { dispose };
@@ -81,9 +76,6 @@ async function openCad2d(context: OpenViewerContext): Promise<ViewerController> 
     }
     if (error instanceof RangeError) {
       throw new ViewerError("resource-limit", copy.limit, { cause: error });
-    }
-    if (error instanceof Error && error.message === "Canvas 2D is unavailable.") {
-      throw new ViewerError("unsupported-environment", copy.unsupported, { cause: error });
     }
     throw new ViewerError("invalid-file", copy.invalid, { cause: error });
   }

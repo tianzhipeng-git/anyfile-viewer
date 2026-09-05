@@ -37,6 +37,9 @@ if (gzipBytes > maximumGzipBytes) {
 
 const initialCode = Buffer.concat(contents).toString("utf8");
 const deferredImplementationMarkers = [
+  "anyfile-rendering-3d",
+  "THREE.WebGLRenderer",
+  "THREE.GLTFLoader",
   "ace-builds",
   "Starting DuckDB",
   "Starting SQLite",

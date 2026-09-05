@@ -8,61 +8,254 @@
     "coldStartRuntimeGzipMiB": 4
   },
   "plugins": {
-    "ace-code-text": { "directory": "code", "package": "@anyfile/code-viewer", "runtimeSets": [] },
-    "archive-metadata-viewer": { "directory": "archive", "package": "@anyfile/archive-metadata-viewer", "runtimeSets": [] },
-    "browser-audio": { "directory": "browser-audio", "package": "@anyfile/browser-audio-viewer", "runtimeSets": [] },
-    "browser-image": { "directory": "browser-image", "package": "@anyfile/browser-image-viewer", "runtimeSets": [] },
-    "browser-video": { "directory": "browser-video", "package": "@anyfile/browser-video-viewer", "runtimeSets": [] },
-    "cad-2d": { "directory": "cad-2d", "package": "@anyfile/cad-2d-viewer", "runtimeSets": [] },
+    "ace-code-text": {
+      "directory": "code",
+      "package": "@anyfile/code-viewer",
+      "runtimeSets": []
+    },
+    "archive-metadata-viewer": {
+      "directory": "archive",
+      "package": "@anyfile/archive-metadata-viewer",
+      "runtimeSets": []
+    },
+    "browser-audio": {
+      "directory": "browser-audio",
+      "package": "@anyfile/browser-audio-viewer",
+      "runtimeSets": []
+    },
+    "browser-image": {
+      "directory": "browser-image",
+      "package": "@anyfile/browser-image-viewer",
+      "runtimeSets": []
+    },
+    "browser-video": {
+      "directory": "browser-video",
+      "package": "@anyfile/browser-video-viewer",
+      "runtimeSets": []
+    },
+    "cad-exchange": {
+      "directory": "cad-exchange",
+      "package": "@anyfile/cad-exchange-viewer",
+      "runtimeSets": [
+        {
+          "id": "occt-import-js",
+          "version": "0.0.23-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/occt-import-js/0.0.23-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "cad-import",
+              "assetPatterns": [
+                "public/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+                "public/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "r2",
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/cad-exchange/src/runtime.ts",
+            "viewer/plugins/cad-exchange/src/worker-client.ts"
+          ],
+          "requiredMarkers": [
+            "0.0.23-anyfile.1",
+            "https://assets.anyfile.top/vendor/occt-import-js/",
+            "`/vendor/occt-import-js/",
+            "initializeRuntimeFromSources",
+            "OCCT_ASSET_SOURCES"
+          ]
+        }
+      ]
+    },
+    "point-cloud": {
+      "directory": "point-cloud",
+      "package": "@anyfile/point-cloud-viewer",
+      "runtimeSets": [
+        {
+          "id": "laz-perf",
+          "version": "0.0.7-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/laz-perf/0.0.7-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "laz",
+              "assetPatterns": [
+                "public/vendor/laz-perf/0.0.7-anyfile.1/laz-perf.js",
+                "public/vendor/laz-perf/0.0.7-anyfile.1/laz-perf.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ]
+        }
+      ]
+    },
+    "print-3d": {
+      "directory": "print-3d",
+      "package": "@anyfile/print-3d-viewer",
+      "runtimeSets": []
+    },
+    "mesh-3d": {
+      "directory": "mesh-3d",
+      "package": "@anyfile/mesh-3d-viewer",
+      "runtimeSets": []
+    },
+    "cad-2d": {
+      "directory": "cad-2d",
+      "package": "@anyfile/cad-2d-viewer",
+      "runtimeSets": []
+    },
     "camera-raw": {
       "directory": "camera-raw",
       "package": "@anyfile/camera-raw-viewer",
-      "runtimeSets": [{
-        "id": "libraw",
-        "version": "1.6.0",
-        "versionPackageJson": "node_modules/libraw-wasm/package.json",
-        "assetPatterns": ["public/vendor/libraw/1.6.0/**"],
-        "coldStartGroups": [{ "id": "raw-decode", "assetPatterns": ["public/vendor/libraw/1.6.0/index.js", "public/vendor/libraw/1.6.0/worker.js", "public/vendor/libraw/1.6.0/libraw.js", "public/vendor/libraw/1.6.0/libraw.wasm"] }],
-        "sources": ["same-origin"]
-      }]
+      "runtimeSets": [
+        {
+          "id": "libraw",
+          "version": "1.6.0",
+          "versionPackageJson": "node_modules/libraw-wasm/package.json",
+          "assetPatterns": [
+            "public/vendor/libraw/1.6.0/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "raw-decode",
+              "assetPatterns": [
+                "public/vendor/libraw/1.6.0/index.js",
+                "public/vendor/libraw/1.6.0/worker.js",
+                "public/vendor/libraw/1.6.0/libraw.js",
+                "public/vendor/libraw/1.6.0/libraw.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ]
+        }
+      ]
     },
-    "dev-array-viewer": { "directory": "dev-array", "package": "@anyfile/dev-array-viewer", "runtimeSets": [] },
-    "dev-source-map-viewer": { "directory": "dev-source-map", "package": "@anyfile/dev-source-map-viewer", "runtimeSets": [] },
-    "dev-wasm-viewer": { "directory": "dev-wasm", "package": "@anyfile/dev-wasm-viewer", "runtimeSets": [] },
-    "dji-osmo": { "directory": "dji-osmo", "package": "@anyfile/dji-osmo-viewer", "runtimeSets": [] },
+    "dev-array-viewer": {
+      "directory": "dev-array",
+      "package": "@anyfile/dev-array-viewer",
+      "runtimeSets": []
+    },
+    "dev-source-map-viewer": {
+      "directory": "dev-source-map",
+      "package": "@anyfile/dev-source-map-viewer",
+      "runtimeSets": []
+    },
+    "dev-wasm-viewer": {
+      "directory": "dev-wasm",
+      "package": "@anyfile/dev-wasm-viewer",
+      "runtimeSets": []
+    },
+    "dji-osmo": {
+      "directory": "dji-osmo",
+      "package": "@anyfile/dji-osmo-viewer",
+      "runtimeSets": []
+    },
     "duckdb-data": {
       "directory": "data",
       "package": "@anyfile/data-viewer",
-      "runtimeSets": [{
-        "id": "duckdb",
-        "version": "1.32.0",
-        "versionPackageJson": "viewer/plugins/data/node_modules/@duckdb/duckdb-wasm/package.json",
-        "assetPatterns": [".next/static/media/duckdb-*.wasm", ".next/static/media/duckdb-*.worker.*.js"],
-        "coldStartGroups": [
-          { "id": "mvp", "assetPatterns": [".next/static/media/duckdb-mvp.*.wasm", ".next/static/media/duckdb-browser-mvp.worker.*.js"] },
-          { "id": "eh", "assetPatterns": [".next/static/media/duckdb-eh.*.wasm", ".next/static/media/duckdb-browser-eh.worker.*.js"] }
-        ],
-        "sources": ["jsdelivr", "r2", "same-origin"],
-        "implementationFiles": ["viewer/plugins/data/src/duckdb-runtime.ts", "viewer/plugins/data/src/duckdb-session.ts"],
-        "requiredMarkers": ["@duckdb/duckdb-wasm/dist/duckdb-browser.mjs", "getJsDelivrBundles", "https://assets.anyfile.top/vendor/duckdb/1.32.0", "LOCAL_BUNDLES"]
-      }]
+      "runtimeSets": [
+        {
+          "id": "duckdb",
+          "version": "1.32.0",
+          "versionPackageJson": "viewer/plugins/data/node_modules/@duckdb/duckdb-wasm/package.json",
+          "assetPatterns": [
+            ".next/static/media/duckdb-*.wasm",
+            ".next/static/media/duckdb-*.worker.*.js"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "mvp",
+              "assetPatterns": [
+                ".next/static/media/duckdb-mvp.*.wasm",
+                ".next/static/media/duckdb-browser-mvp.worker.*.js"
+              ]
+            },
+            {
+              "id": "eh",
+              "assetPatterns": [
+                ".next/static/media/duckdb-eh.*.wasm",
+                ".next/static/media/duckdb-browser-eh.worker.*.js"
+              ]
+            }
+          ],
+          "sources": [
+            "jsdelivr",
+            "r2",
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/data/src/duckdb-runtime.ts",
+            "viewer/plugins/data/src/duckdb-session.ts"
+          ],
+          "requiredMarkers": [
+            "@duckdb/duckdb-wasm/dist/duckdb-browser.mjs",
+            "getJsDelivrBundles",
+            "https://assets.anyfile.top/vendor/duckdb/1.32.0",
+            "LOCAL_BUNDLES"
+          ]
+        }
+      ]
     },
-    "excel-workbook": { "directory": "excel", "package": "@anyfile/excel-viewer", "runtimeSets": [] },
-    "general-raster": { "directory": "general-raster", "package": "@anyfile/general-raster-viewer", "runtimeSets": [] },
-    "gopro-max": { "directory": "gopro-max", "package": "@anyfile/gopro-max-viewer", "runtimeSets": [] },
-    "hex-viewer": { "directory": "hex", "package": "@anyfile/hex-viewer", "runtimeSets": [] },
-    "http-archive": { "directory": "har", "package": "@anyfile/har-viewer", "runtimeSets": [] },
+    "excel-workbook": {
+      "directory": "excel",
+      "package": "@anyfile/excel-viewer",
+      "runtimeSets": []
+    },
+    "general-raster": {
+      "directory": "general-raster",
+      "package": "@anyfile/general-raster-viewer",
+      "runtimeSets": []
+    },
+    "gopro-max": {
+      "directory": "gopro-max",
+      "package": "@anyfile/gopro-max-viewer",
+      "runtimeSets": []
+    },
+    "hex-viewer": {
+      "directory": "hex",
+      "package": "@anyfile/hex-viewer",
+      "runtimeSets": []
+    },
+    "http-archive": {
+      "directory": "har",
+      "package": "@anyfile/har-viewer",
+      "runtimeSets": []
+    },
     "insta360": {
       "directory": "insta360",
       "package": "@anyfile/insta360-viewer",
-      "runtimeSets": [{
-        "id": "libraw",
-        "version": "1.6.0",
-        "versionPackageJson": "node_modules/libraw-wasm/package.json",
-        "assetPatterns": ["public/vendor/libraw/1.6.0/**"],
-        "coldStartGroups": [{ "id": "x6-dng", "assetPatterns": ["public/vendor/libraw/1.6.0/index.js", "public/vendor/libraw/1.6.0/worker.js", "public/vendor/libraw/1.6.0/libraw.js", "public/vendor/libraw/1.6.0/libraw.wasm"] }],
-        "sources": ["same-origin"]
-      }]
+      "runtimeSets": [
+        {
+          "id": "libraw",
+          "version": "1.6.0",
+          "versionPackageJson": "node_modules/libraw-wasm/package.json",
+          "assetPatterns": [
+            "public/vendor/libraw/1.6.0/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "x6-dng",
+              "assetPatterns": [
+                "public/vendor/libraw/1.6.0/index.js",
+                "public/vendor/libraw/1.6.0/worker.js",
+                "public/vendor/libraw/1.6.0/libraw.js",
+                "public/vendor/libraw/1.6.0/libraw.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ]
+        }
+      ]
     },
     "modern-raster": {
       "directory": "modern-raster",
@@ -72,73 +265,185 @@
           "id": "jxl-oxide",
           "version": "0.12.6",
           "versionPackageJson": "viewer/plugins/modern-raster/node_modules/jxl-oxide-wasm/package.json",
-          "assetPatterns": [".next/static/media/jxl_oxide_wasm_bg.*.wasm"],
-          "coldStartGroups": [{ "id": "jxl-fallback", "assetPatterns": [".next/static/media/jxl_oxide_wasm_bg.*.wasm"] }],
-          "sources": ["same-origin"]
+          "assetPatterns": [
+            ".next/static/media/jxl_oxide_wasm_bg.*.wasm"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "jxl-fallback",
+              "assetPatterns": [
+                ".next/static/media/jxl_oxide_wasm_bg.*.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ]
         },
         {
           "id": "libheif",
           "version": "1.23.2-anyfile.1",
-          "assetPatterns": ["public/vendor/libheif/1.23.2-anyfile.1/**"],
-          "coldStartGroups": [{ "id": "heif-fallback", "assetPatterns": ["public/vendor/libheif/1.23.2-anyfile.1/heif-decoder.js", "public/vendor/libheif/1.23.2-anyfile.1/heif-decoder.wasm"] }],
-          "sources": ["same-origin"]
+          "assetPatterns": [
+            "public/vendor/libheif/1.23.2-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "heif-fallback",
+              "assetPatterns": [
+                "public/vendor/libheif/1.23.2-anyfile.1/heif-decoder.js",
+                "public/vendor/libheif/1.23.2-anyfile.1/heif-decoder.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ]
         }
       ]
     },
-    "non-native-audio": { "directory": "non-native-audio", "package": "@anyfile/non-native-audio-viewer", "runtimeSets": [] },
+    "non-native-audio": {
+      "directory": "non-native-audio",
+      "package": "@anyfile/non-native-audio-viewer",
+      "runtimeSets": []
+    },
     "non-native-video": {
       "directory": "non-native-video",
       "package": "@anyfile/non-native-video-viewer",
-      "runtimeSets": [{
-        "id": "ogv",
-        "version": "1.9.0",
-        "versionPackageJson": "viewer/plugins/non-native-video/node_modules/ogv/package.json",
-        "assetPatterns": ["public/vendor/ogv/1.9.0/**"],
-        "coldStartGroups": [{ "id": "ogg-video", "assetPatterns": ["public/vendor/ogv/1.9.0/ogv.js", "public/vendor/ogv/1.9.0/ogv-demuxer-ogg-wasm.wasm", "public/vendor/ogv/1.9.0/ogv-decoder-audio-vorbis-wasm.wasm", "public/vendor/ogv/1.9.0/ogv-decoder-video-theora-wasm.wasm"] }],
-        "sources": ["same-origin"]
-      }]
+      "runtimeSets": [
+        {
+          "id": "ogv",
+          "version": "1.9.0",
+          "versionPackageJson": "viewer/plugins/non-native-video/node_modules/ogv/package.json",
+          "assetPatterns": [
+            "public/vendor/ogv/1.9.0/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "ogg-video",
+              "assetPatterns": [
+                "public/vendor/ogv/1.9.0/ogv.js",
+                "public/vendor/ogv/1.9.0/ogv-demuxer-ogg-wasm.wasm",
+                "public/vendor/ogv/1.9.0/ogv-decoder-audio-vorbis-wasm.wasm",
+                "public/vendor/ogv/1.9.0/ogv-decoder-video-theora-wasm.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ]
+        }
+      ]
     },
     "pdfjs-pdf": {
       "directory": "pdf",
       "package": "@anyfile/pdf-viewer",
-      "runtimeSets": [{
-        "id": "pdfjs",
-        "version": "6.2.108",
-        "versionPackageJson": "node_modules/pdfjs-dist/package.json",
-        "assetPatterns": [".next/static/media/pdf.worker.min.*.mjs", "public/vendor/pdfjs/6.2.108/**"],
-        "coldStartGroups": [{ "id": "base-worker", "assetPatterns": [".next/static/media/pdf.worker.min.*.mjs"] }],
-        "sources": ["same-origin"]
-      }]
+      "runtimeSets": [
+        {
+          "id": "pdfjs",
+          "version": "6.2.108",
+          "versionPackageJson": "node_modules/pdfjs-dist/package.json",
+          "assetPatterns": [
+            ".next/static/media/pdf.worker.min.*.mjs",
+            "public/vendor/pdfjs/6.2.108/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "base-worker",
+              "assetPatterns": [
+                ".next/static/media/pdf.worker.min.*.mjs"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ]
+        }
+      ]
     },
-    "photoshop-document": { "directory": "photoshop", "package": "@anyfile/photoshop-viewer", "runtimeSets": [] },
-    "pixelmator-pxd": { "directory": "pixelmator-pxd", "package": "@anyfile/pixelmator-pxd-viewer", "runtimeSets": [] },
+    "photoshop-document": {
+      "directory": "photoshop",
+      "package": "@anyfile/photoshop-viewer",
+      "runtimeSets": []
+    },
+    "pixelmator-pxd": {
+      "directory": "pixelmator-pxd",
+      "package": "@anyfile/pixelmator-pxd-viewer",
+      "runtimeSets": []
+    },
     "postscript-document": {
       "directory": "postscript",
       "package": "@anyfile/postscript-viewer",
-      "runtimeSets": [{
-        "id": "stet",
-        "version": "0.8.1-anyfile.1",
-        "assetPatterns": ["public/vendor/stet/0.8.1-anyfile.1/**"],
-        "coldStartGroups": [{ "id": "postscript", "assetPatterns": ["public/vendor/stet/0.8.1-anyfile.1/stet_wasm.js", "public/vendor/stet/0.8.1-anyfile.1/stet_wasm_bg.wasm"] }],
-        "sources": ["jsdelivr", "r2", "same-origin"],
-        "implementationFiles": ["viewer/plugins/postscript/src/runtime.ts"],
-        "requiredMarkers": ["cdn.jsdelivr.net/gh/", "https://assets.anyfile.top/vendor/stet/", "LOCAL_ASSET_ROOT"]
-      }]
+      "runtimeSets": [
+        {
+          "id": "stet",
+          "version": "0.8.1-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/stet/0.8.1-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "postscript",
+              "assetPatterns": [
+                "public/vendor/stet/0.8.1-anyfile.1/stet_wasm.js",
+                "public/vendor/stet/0.8.1-anyfile.1/stet_wasm_bg.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "jsdelivr",
+            "r2",
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/postscript/src/runtime.ts"
+          ],
+          "requiredMarkers": [
+            "cdn.jsdelivr.net/gh/",
+            "https://assets.anyfile.top/vendor/stet/",
+            "LOCAL_ASSET_ROOT"
+          ]
+        }
+      ]
     },
-    "powerpoint-presentation": { "directory": "powerpoint", "package": "@anyfile/powerpoint-viewer", "runtimeSets": [] },
-    "safe-svg": { "directory": "svg", "package": "@anyfile/safe-svg-viewer", "runtimeSets": [] },
+    "powerpoint-presentation": {
+      "directory": "powerpoint",
+      "package": "@anyfile/powerpoint-viewer",
+      "runtimeSets": []
+    },
+    "safe-svg": {
+      "directory": "svg",
+      "package": "@anyfile/safe-svg-viewer",
+      "runtimeSets": []
+    },
     "sqlite-database": {
       "directory": "sqlite",
       "package": "@anyfile/sqlite-viewer",
-      "runtimeSets": [{
-        "id": "sqljs",
-        "version": "1.14.2",
-        "versionPackageJson": "viewer/plugins/sqlite/node_modules/sql.js/package.json",
-        "assetPatterns": [".next/static/media/sql-wasm.*.wasm"],
-        "coldStartGroups": [{ "id": "sqlite", "assetPatterns": [".next/static/media/sql-wasm.*.wasm"] }],
-        "sources": ["same-origin"]
-      }]
+      "runtimeSets": [
+        {
+          "id": "sqljs",
+          "version": "1.14.2",
+          "versionPackageJson": "viewer/plugins/sqlite/node_modules/sql.js/package.json",
+          "assetPatterns": [
+            ".next/static/media/sql-wasm.*.wasm"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "sqlite",
+              "assetPatterns": [
+                ".next/static/media/sql-wasm.*.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ]
+        }
+      ]
     },
-    "word-document": { "directory": "word", "package": "@anyfile/word-viewer", "runtimeSets": [] }
+    "word-document": {
+      "directory": "word",
+      "package": "@anyfile/word-viewer",
+      "runtimeSets": []
+    }
   }
 }

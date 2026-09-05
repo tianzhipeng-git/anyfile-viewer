@@ -21,6 +21,8 @@ node_modules/
 /public/vendor/libheif/
 /public/vendor/ogv/
 /public/vendor/stet/
+/public/vendor/occt-import-js/
+/public/vendor/laz-perf/
 
 # production
 /build

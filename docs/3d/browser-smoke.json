@@ -1,0 +1,94 @@
+{
+  "environment": "Local Google Chrome, headless WebGL, macOS arm64; localhost production build",
+  "date": "2026-09-05",
+  "notes": [
+    "Small mostly warm fixtures; firstVisibleMs is canvas mount latency, not a GPU timing query.",
+    "The initial point-cloud status lag was corrected and separately rechecked at 5000 vertices, dimensions 2 x 2 x 4.999.",
+    "A separate --disable-webgl run showed the expected unsupported-environment message."
+  ],
+  "runs": [
+    {
+      "file": "viewer/plugins/mesh-3d/examples/tetra.stl",
+      "firstVisibleMs": 109,
+      "status": "12 vertices \u00b7 Dimensions: 1.0000 \u00d7 1.0000 \u00d7 1.0000 \u00b7 Units unknown",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "file": "viewer/plugins/mesh-3d/examples/binary.stl",
+      "firstVisibleMs": 36,
+      "status": "12 vertices \u00b7 Dimensions: 1.0000 \u00d7 1.0000 \u00d7 1.0000 \u00b7 Units unknown",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "file": "viewer/plugins/mesh-3d/examples/tetra.glb",
+      "firstVisibleMs": 30,
+      "status": "12 vertices \u00b7 Dimensions: 1.0000 \u00d7 1.0000 \u00d7 1.0000 \u00b7 m",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "file": "viewer/plugins/mesh-3d/examples/tetra.obj",
+      "firstVisibleMs": 33,
+      "status": "12 vertices \u00b7 Dimensions: 1.0000 \u00d7 1.0000 \u00d7 1.0000 \u00b7 Units unknown",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "file": "viewer/plugins/mesh-3d/examples/tetra.ply",
+      "firstVisibleMs": 31,
+      "status": "4 vertices \u00b7 Dimensions: 1.0000 \u00d7 1.0000 \u00d7 1.0000 \u00b7 Units unknown",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "file": "viewer/plugins/mesh-3d/examples/tetra.off",
+      "firstVisibleMs": 33,
+      "status": "4 vertices \u00b7 Dimensions: 1.0000 \u00d7 1.0000 \u00d7 1.0000 \u00b7 Units unknown",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "file": "viewer/plugins/print-3d/examples/tetra.3mf",
+      "firstVisibleMs": 39,
+      "status": "4 vertices \u00b7 Dimensions: 10.000 \u00d7 10.000 \u00d7 10.000 \u00b7 millimeter",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "file": "viewer/plugins/print-3d/examples/tetra.amf",
+      "firstVisibleMs": 29,
+      "status": "4 vertices \u00b7 Dimensions: 10.000 \u00d7 10.000 \u00d7 10.000 \u00b7 millimeter",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "file": "viewer/plugins/point-cloud/examples/helix.xyz",
+      "firstVisibleMs": 88,
+      "status": "4,096 vertices \u00b7 Dimensions: 2.0000 \u00d7 2.0000 \u00d7 4.0950 \u00b7 Units unknown \u00b7 Representative sample; point attributes are not displayed",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "file": "viewer/plugins/point-cloud/examples/helix.pcd",
+      "firstVisibleMs": 30,
+      "status": "4,096 vertices \u00b7 Dimensions: 2.0000 \u00d7 2.0000 \u00d7 4.0950 \u00b7 Units unknown \u00b7 Representative sample; point attributes are not displayed",
+      "workers": 0,
+      "roots": 1
+    },
+    {
+      "contextLost": "Graphics context lost. Waiting for recovery\u2026"
+    },
+    {
+      "contextRestored": "522 vertices \u00b7 Dimensions: 0.11181 \u00d7 0.089746 \u00d7 0.039991 \u00b7 Units unknown"
+    },
+    {
+      "afterSwitch": {
+        "roots": 0,
+        "workers": 0
+      },
+      "errors": []
+    }
+  ]
+}

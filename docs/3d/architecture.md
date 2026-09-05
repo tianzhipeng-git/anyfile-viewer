@@ -1,6 +1,7 @@
 # 3D 文件查看架构
 
-- 状态：规划，尚未实施共享 3D runtime 或通用 3D 查看器
+> 实施状态见 [implementation-status.md](implementation-status.md)；本文保留目标设计，不能把全部条目视为已完成。
+- 状态：共享 3D runtime 与首批格式已实施；完整范围仍在推进
 - 适用范围：CAD、3D 打印、CG 场景、通用网格与点云文件的浏览器本地只读查看
 - 不包含：编辑、建模、切片、格式转换、服务端转换、渲染农场和任意远程资产加载
 - 相关文档：[支持矩阵](support-matrix.md)、[实施路线图](roadmap.md)、[共享 UI 与渲染基础设施决策](../viewer-ui-and-rendering-proposal.md)
@@ -279,6 +280,8 @@ Three.js loader 的默认 URL 行为不能绕过这些规则。需要使用受�
 - 依赖使用精确版本，许可证和运行资产可审计；
 - 达到 2 MiB 单资源或 4 MiB 典型冷启动门槛的资产按加载部署约定接入外部资产链路；
 - 生产构建门禁检查 Three.js 和各类 loader 不进入 `/view` 初始 JavaScript，也不进入非 3D 插件。
+
+当前 OCCT `0.0.23-anyfile.1` 使用 `R2 → 同源`，LAZ 小型运行时保持同源。OCCT 只对初始化失败回退，每次重建并清理 Worker；用户文件在初始化成功后才 transfer，解析错误不重试。精确路径、体积和发布验证见 [依赖审计](dependency-audit.md)。
 
 是否共享 bundler 生成的 Three.js chunk 以生产构建结果为准，不能通过静态导入网站壳强制共享。
 

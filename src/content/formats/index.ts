@@ -1,3 +1,6 @@
+import { cadExchangeFormats } from "./cad-exchange";
+import { pointFormats } from "./point-cloud";
+import { meshFormats } from "./mesh-3d";
 import type { FormatContent } from "../types";
 
 import { goPro360Format } from "./360";
@@ -129,6 +132,8 @@ import { zlibFormat } from "./zlib";
 import { zstFormat } from "./zst";
 
 export const formatContents: readonly FormatContent[] = [
+  ...cadExchangeFormats, ...meshFormats,
+  ...pointFormats,
   goPro360Format,
   lotus123Format,
   threeGpFormat,

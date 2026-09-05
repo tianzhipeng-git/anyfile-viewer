@@ -1,0 +1,46 @@
+{
+  "artifactVersion": "0.0.7-anyfile.1",
+  "source": {
+    "url": "https://github.com/hobuinc/laz-perf/archive/d0d3047e05221421fa0b02b3da4e93797edb2c52.tar.gz",
+    "commit": "d0d3047e05221421fa0b02b3da4e93797edb2c52",
+    "sha256": "3827d5ac477a2e7bdf8a093db79ffee7f93d4b2f50fce19c820830d72d845bde"
+  },
+  "toolchain": {
+    "emscripten": "3.1.69",
+    "host": "linux-amd64 Docker",
+    "cmake": "3.27.9",
+    "dockerRecipeImage": "emscripten/emsdk@sha256:9d6522879357a363ada61862481cc12c5f772d5e9738b8addf95d38490cdc6ea",
+    "dockerRebuildVerified": true,
+    "repeatBuildByteIdentical": true,
+    "crossHostByteIdentical": false,
+    "BINARYEN_CORES": 1
+  },
+  "buildRecipeSha256": "8e7a6888481ae3b312a3685a13a5cf5bdb9055d6e583d635ac8ff8e1a34a8ce3",
+  "artifacts": {
+    "laz-perf.wasm": {
+      "bytes": 216386,
+      "sha256": "e5449381f4fab8a2222fd5380edad160421f0a05ed1ed6c437362cb3ea8cb5bd"
+    },
+    "CMakeLists.txt": {
+      "bytes": 834,
+      "sha256": "8e7a6888481ae3b312a3685a13a5cf5bdb9055d6e583d635ac8ff8e1a34a8ce3"
+    },
+    "SOURCE.md": {
+      "bytes": 1343,
+      "sha256": "cba966959f5b1a516e59974e0004010d31b150200438afb9f3985a6ca235c96c"
+    },
+    "build.sh": {
+      "bytes": 947,
+      "sha256": "b63ddbd80029fa73ec65b11d52f2007adf744e12d6cfb17930fca31fa1cc5a24"
+    },
+    "COPYING": {
+      "bytes": 11347,
+      "sha256": "959f77033ba56a3b146faf5c02f9162071f2d0bff4b8b6f1c2193a4b41127d39"
+    },
+    "laz-perf.js": {
+      "bytes": 46598,
+      "sha256": "ebccd0c9ed3fb00db8e6b72487e97977fe286c8d530fe1c43a8ae5dd05fa530f"
+    }
+  },
+  "projectBaseRevision": "45bc1672b610ca58d38244a482337b13e54d9009"
+}

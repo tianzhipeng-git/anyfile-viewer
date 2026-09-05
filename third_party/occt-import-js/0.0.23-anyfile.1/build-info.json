@@ -1,0 +1,72 @@
+{
+  "artifactVersion": "0.0.23-anyfile.1",
+  "upstream": {
+    "occt-import-js": {
+      "commit": "c2148e54b456b571238d35cac037d304053d64b2",
+      "archiveSha256": "2bd3799b2ac56cbf3f0df6300a51c8890e137bd001462702b356f621e33ff192"
+    },
+    "occt": {
+      "commit": "d2abb6d844231cb8f29be6894440874a4700e4a5",
+      "archiveSha256": "2715d89a1bc44dfd34dab88f729c445ea93f6b57d6539b0c89614a80ae144a6c"
+    }
+  },
+  "toolchain": {
+    "emscripten": "3.1.69",
+    "releaseHash": "8fe01288bc35668c13316324336ea00195dfb814",
+    "host": "darwin-arm64",
+    "cmake": "3.27.9",
+    "dockerRecipeImage": "emscripten/emsdk@sha256:9d6522879357a363ada61862481cc12c5f772d5e9738b8addf95d38490cdc6ea",
+    "dockerRebuildVerified": false
+  },
+  "flags": [
+    "-Oz",
+    "-fwasm-exceptions",
+    "-sALLOW_MEMORY_GROWTH=1",
+    "-sMAXIMUM_MEMORY=268435456",
+    "-sINITIAL_MEMORY=33554432",
+    "-sABORTING_MALLOC=0",
+    "-sDYNAMIC_EXECUTION=0",
+    "-sEXPORT_ES6=1",
+    "-sENVIRONMENT=worker"
+  ],
+  "patchSha256": "6f507ecc3e5cd2af4e3e65efa31d4630cfe9aa0e996dfc39e2e55c54d53541c5",
+  "artifacts": {
+    "LICENSE.md": {
+      "bytes": 26526,
+      "sha256": "20c17d8b8c48a600800dfd14f95d5cb9ff47066a9641ddeab48dc54aec96e331"
+    },
+    "OCCT_LGPL_EXCEPTION.txt": {
+      "bytes": 663,
+      "sha256": "04580a884ea6cea294402649ff7b5cbb167d47462d1340a4ed33e550db10a81b"
+    },
+    "occt-import-js.js": {
+      "bytes": 93068,
+      "sha256": "ff5c79cd4d07b42fff1a1f20338b3fcdcb32ab8e0fcf35bf30cdaaff20783eb6"
+    },
+    "SOURCE.md": {
+      "bytes": 1182,
+      "sha256": "d1a4b4046092315f2e0fba83c304c178f898090306e23761baeb833007e7d186"
+    },
+    "LICENSE_LGPL_21.txt": {
+      "bytes": 26434,
+      "sha256": "e237fa56668030e928551ddd60f05df5fe957f75eab874bbd017e085ed722e7c"
+    },
+    "occt-import-js.wasm": {
+      "bytes": 7593381,
+      "sha256": "1ccb9a879f426aa8805823f9649c1143d709bd9b0e782884a3850aaeb82c72ef"
+    },
+    "patch-source.py": {
+      "bytes": 3188,
+      "sha256": "6f507ecc3e5cd2af4e3e65efa31d4630cfe9aa0e996dfc39e2e55c54d53541c5"
+    },
+    "README.md": {
+      "bytes": 1857,
+      "sha256": "b956ab84e99b45fe910c421d9d705014f4b0ab752b8187f9b1e30f33c0e9f96e"
+    },
+    "build.sh": {
+      "bytes": 1308,
+      "sha256": "a204d8c8d66e059515ec5d753aacc19bfd53fd7c3d713dff530b1f3fe4d19d90"
+    }
+  },
+  "projectBaseRevision": "45bc1672b610ca58d38244a482337b13e54d9009"
+}

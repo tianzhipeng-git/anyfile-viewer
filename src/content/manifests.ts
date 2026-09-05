@@ -1,3 +1,7 @@
+import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
+import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
+import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
+import { mesh3dManifest } from "@anyfile/mesh-3d-viewer/manifest";
 import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
 import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
@@ -33,7 +37,7 @@ import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
 export const viewerManifests: readonly ViewerPluginManifest[] = [
   djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
-  safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
+  cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
   codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest,
   dataManifest, archiveMetadataManifest, hexManifest,
 ];

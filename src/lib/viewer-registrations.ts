@@ -1,3 +1,7 @@
+import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
+import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
+import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
+import { mesh3dManifest } from "@anyfile/mesh-3d-viewer/manifest";
 import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
 import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
@@ -336,6 +340,26 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
       const viewerPackage = await import("@anyfile/cad-2d-viewer");
       return viewerPackage.cad2dViewer;
     },
+  },
+  {
+    manifest: cadExchangeManifest,
+    async probe(context) { return (await import("@anyfile/cad-exchange-viewer/probe")).probeCadExchange(context); },
+    async load() { return (await import("@anyfile/cad-exchange-viewer")).cadExchangeViewer; },
+  },
+  {
+    manifest: pointCloudManifest,
+    async probe(context) { return (await import("@anyfile/point-cloud-viewer/probe")).probePointCloud(context); },
+    async load() { return (await import("@anyfile/point-cloud-viewer")).pointCloudViewer; },
+  },
+  {
+    manifest: print3dManifest,
+    async probe(context) { return (await import("@anyfile/print-3d-viewer/probe")).probePrint3d(context); },
+    async load() { return (await import("@anyfile/print-3d-viewer")).print3dViewer; },
+  },
+  {
+    manifest: mesh3dManifest,
+    async probe(context) { return (await import("@anyfile/mesh-3d-viewer/probe")).probeMesh3d(context); },
+    async load() { return (await import("@anyfile/mesh-3d-viewer")).mesh3dViewer; },
   },
   {
     manifest: hexManifest,
