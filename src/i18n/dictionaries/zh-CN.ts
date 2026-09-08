@@ -2,9 +2,8 @@ import type { AppDictionary } from "../types";
 
 const dictionary = {
   metadata: {
-    siteTitle: "Anyfile — 免费在线文件查看器", siteDescription: "免费的在线文件查看器：快速、私密地打开文档、图片、音视频、代码与数据文件，无需上传、注册账户或安装软件。",
-    viewerTitle: "免费在线文件查看器", viewerDescription: "使用快速、私密的在线查看器打开受支持文件。完全免费，文件留在当前设备，无需上传。",
-    noUploadSuffix: " 无需上传。",
+    siteTitle: "免费在线文件查看器 — 无需上传", siteDescription: "免费的在线文件查看器：快速、私密地打开文档、图片、音视频、代码与数据文件，无需上传、注册账户或安装软件。",
+    viewerTitle: "免费在线文件查看器 — 无需上传", viewerDescription: "使用快速、私密的在线查看器打开受支持文件。完全免费，文件留在当前设备，无需上传。",
   },
   common: {
     home: "首页", mainNavigation: "主要导航", openFile: "打开文件", openFolder: "打开文件夹",
@@ -42,11 +41,11 @@ const dictionary = {
       { title: "Apache-2.0", description: "通过宽松的开源许可证使用、研究并继续构建这个项目。" },
     ],
   },
-  category: { home: "首页", viewerSuffix: "查看器", localSuffix: " 所有处理都在当前设备完成。", formats: "种格式", choose: "支持的格式" },
+  category: { home: "首页", viewerSuffix: "查看器", formats: "种格式", choose: "支持的格式" },
   format: {
     viewerSuffix: "查看器", metadataDescription: "在浏览器本地查看 {name}。{description}",
     browserNativeView: "浏览器原生查看", pluginView: "专用插件查看", headline: "{name}，打开就看。",
-    privacySuffix: " 无需上传，处理仅在浏览器本地进行。", choose: "选择 .{extension} 文件",
+    choose: "选择 .{extension} 文件",
     benefits: [
       { title: "更快", description: "跳过文件上传与云端处理队列。" },
       { title: "更私密", description: "文件内容不会发送到 Anyfile 服务器。" },

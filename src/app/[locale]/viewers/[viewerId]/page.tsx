@@ -26,7 +26,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   if (!isPublishedLocale(locale)) return {};
   const viewer = getPanoramaViewer(viewerId, locale);
   if (!viewer) return {};
-  return localizedPageMetadata({ locale, path: `/viewers/${viewerId}`, title: viewer.title, description: viewer.description });
+  return localizedPageMetadata({ locale, path: `/viewers/${viewerId}`, title: viewer.searchTitle, description: viewer.description });
 }
 
 export default async function PanoramaViewerPage({ params }: { params: Promise<{ locale: string; viewerId: string }> }) {
@@ -52,7 +52,7 @@ export default async function PanoramaViewerPage({ params }: { params: Promise<{
       <div className="flex max-w-4xl flex-col items-start gap-6">
         <p className="text-sm font-semibold text-primary">{viewer.eyebrow}</p>
         <h1 className="display-title text-5xl leading-none sm:text-6xl">{viewer.title}</h1>
-        <p className="max-w-3xl text-xl leading-8 text-muted-foreground">{viewer.introduction}</p>
+        <p className="max-w-3xl text-xl leading-8 text-muted-foreground">{viewer.description}</p>
         <div className="flex flex-wrap gap-2">{viewer.formatExtensions.map((extension) => <Badge key={extension} variant="secondary">.{extension}</Badge>)}</div>
         <IsolationBoundaryLink className={cn(buttonVariants({ size: "lg" }))} href={localePath(locale, "/view")}>
           {viewer.openLabel}<ArrowRightIcon data-icon="inline-end" />
@@ -62,7 +62,7 @@ export default async function PanoramaViewerPage({ params }: { params: Promise<{
 
     <section className="bg-foreground py-16 text-background"><div className="content-shell grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
       <div><MonitorPlayIcon className="mb-4 size-7 text-primary" aria-hidden="true" /><h2 className="display-title text-3xl">{locale === "zh-CN" ? "已验证机型" : "Verified cameras"}</h2><div className="mt-6 flex flex-wrap gap-2">{viewer.models.map((model) => <Badge className="border-background/20 text-background" key={model} variant="outline">{model}</Badge>)}</div></div>
-      <div><h2 className="display-title text-3xl">{locale === "zh-CN" ? "可以查看什么" : "What you can view"}</h2><ul className="mt-6 flex flex-col gap-4">{viewer.highlights.map((item) => <li className="flex gap-3" key={item}><CheckIcon className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><span className="leading-7 opacity-80">{item}</span></li>)}</ul></div>
+      <div><h2 className="display-title text-3xl">{locale === "zh-CN" ? "可以查看什么" : "What you can view"}</h2><div data-nosnippet className="mt-6 leading-7 opacity-80">{viewer.introduction}</div><ul className="mt-6 flex flex-col gap-4">{viewer.highlights.map((item) => <li className="flex gap-3" key={item}><CheckIcon className="mt-1 size-5 shrink-0 text-primary" aria-hidden="true" /><span className="leading-7 opacity-80">{item}</span></li>)}</ul></div>
     </div></section>
 
     <section className="bg-muted py-16 sm:py-20"><div className="content-shell flex flex-col gap-8">

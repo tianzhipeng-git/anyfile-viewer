@@ -10,7 +10,7 @@ export const panoramaViewerContents: readonly PanoramaViewerContent[] = [
       en: {
         name: "Insta360",
         eyebrow: "INSTA360 ORIGINAL MEDIA VIEWER",
-        title: "Open Insta360 files online without uploading",
+        title: "Open Insta360 Files Online",
         description: "View supported INSV, INSP, LRV and DNG originals from Insta360 cameras in an interactive 360° browser viewer.",
         introduction: "Skip the import queue when you only need to check a shot. Anyfile validates supported Insta360 layouts, decodes the selected media on this device and maps both lenses into an interactive panorama. Your original file is never sent to an Anyfile server.",
         openLabel: "Open an Insta360 file",
@@ -34,7 +34,7 @@ export const panoramaViewerContents: readonly PanoramaViewerContent[] = [
       "zh-CN": {
         name: "Insta360",
         eyebrow: "INSTA360 原始素材查看器",
-        title: "无需上传，在线打开 Insta360 文件",
+        title: "在线打开 Insta360 文件",
         description: "在浏览器中把受支持的 INSV、INSP、LRV 与 DNG 原片作为交互式 360° 全景查看。",
         introduction: "只想检查拍摄内容时，无需等待导入。Anyfile 会校验受支持的 Insta360 布局，在当前设备解码所选素材，并把两路镜头映射成交互式全景。原始文件不会发送到 Anyfile 服务器。",
         openLabel: "打开 Insta360 文件",

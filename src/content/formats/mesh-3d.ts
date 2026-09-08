@@ -11,14 +11,14 @@ const formats = [
 ];
 export const meshFormats = formats.map(([extension, en, zh]) => defineFormat(extension, "engineering", 3, {
   name: extension.toUpperCase(), title: `Open ${extension.toUpperCase()} Models Online`,
-  description: `View ${extension.toUpperCase()} geometry locally without uploading your model.`,
+  description: `View ${extension.toUpperCase()} 3D models, rotate them and zoom in on shapes and surfaces.`,
   introduction: `${extension.toUpperCase()}: ${en}. Models open in a local, interactive WebGL viewport.`,
   canShow: [en, "Standard views, orbit, zoom and object visibility"],
   limitations: ["64 MiB input limit; WebGL 2 required", "Advanced compression and some material features are not supported"],
   faq: [{ question: `Are my ${extension.toUpperCase()} files uploaded?`, answer: "No. Geometry and related resources stay in your browser. Select the containing folder for external resources." }],
 }, {
   name: extension.toUpperCase(), title: `在线打开 ${extension.toUpperCase()} 模型`,
-  description: `不上传模型，在本地查看 ${extension.toUpperCase()} 几何。`,
+  description: `查看 ${extension.toUpperCase()} 3D 模型，旋转并放大检查外形与表面。`,
   introduction: `${extension.toUpperCase()}：${zh}。模型在本地 WebGL 视口中交互显示。`,
   canShow: [zh, "标准视图、旋转、缩放与对象显隐"],
   limitations: ["输入最大 64 MiB，需要 WebGL 2", "暂不支持高级压缩与部分材质特性"],

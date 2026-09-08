@@ -29,7 +29,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     ...pageMetadata,
     metadataBase: siteUrl(),
-    title: { default: dictionary.metadata.siteTitle, template: `%s — Anyfile` },
   };
 }
 
