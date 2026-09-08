@@ -171,7 +171,7 @@ GLB 优先，因为它能以单文件验证 mesh、节点、材质、纹理和 a
 - STEP/STP 的常见 AP203/AP214/AP242 静态几何子集；
 - IGES 的常见曲面/实体子集；
 - BREP 仅在同一 kernel 路径有清晰证据后加入；
-- DWG 保持独立 provider/许可评审，不通过服务端转换或扩展名改名绕过。
+- DWG 已通过独立 LibreDWG Worker 接入，并提供 GPL 对应源码分发；后续改进复杂注释、字体与布局保真度，详见 [实现记录](dwg-implementation.md)。
 
 ### 完成标准
 

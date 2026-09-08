@@ -28,6 +28,8 @@ const eslintConfig = defineConfig([
     "third_party/comic-archive/**",
     "public/vendor/libmobi/**",
     "public/vendor/comic-archive/**",
+    "third_party/libredwg/**",
+    "public/vendor/libredwg/**",
     "next-env.d.ts",
   ]),
 ]);

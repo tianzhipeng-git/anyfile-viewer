@@ -1,3 +1,4 @@
+import { dwgFormat } from "./dwg";
 import { mobiFormats, comicArchiveFormats } from "./ebook-archives";
 import { fb2Format } from "./fb2";
 import { cadExchangeFormats } from "./cad-exchange";
@@ -134,7 +135,7 @@ import { zlibFormat } from "./zlib";
 import { zstFormat } from "./zst";
 
 export const formatContents: readonly FormatContent[] = [
-  ...cadExchangeFormats, ...meshFormats,
+  dwgFormat, ...cadExchangeFormats, ...meshFormats,
   ...pointFormats,
   goPro360Format,
   lotus123Format,

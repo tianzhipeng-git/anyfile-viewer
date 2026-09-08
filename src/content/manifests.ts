@@ -1,3 +1,4 @@
+import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
@@ -40,7 +41,7 @@ import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
 export const viewerManifests: readonly ViewerPluginManifest[] = [
   djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
-  cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
+  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, harManifest,
   codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest,
   comicBookManifest, mobiManifest, fictionBookManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
 ];

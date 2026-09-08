@@ -1,0 +1,99 @@
+{
+  "artifactVersion": "0.14-anyfile.1",
+  "upstream": {
+    "artifactVersion": "0.14-anyfile.1",
+    "core": {
+      "version": "0.14",
+      "url": "https://github.com/LibreDWG/libredwg/releases/download/0.14/libredwg-0.14.tar.gz",
+      "sha256": "cb6ee0b078c6d9e0f09d66f1feac33ba6342df88ae544e9f9335fab475218351"
+    },
+    "bindings": {
+      "version": "0.7.10",
+      "commit": "5909bd2bb87fa1168838e1295188f3ee603618eb",
+      "url": "https://codeload.github.com/mlightcad/libredwg-web/tar.gz/5909bd2bb87fa1168838e1295188f3ee603618eb",
+      "sha256": "821f1f42101a4605b320469e407f0b0c1a880235865a2e7a87c368af98f92fa2"
+    },
+    "npm": {
+      "url": "https://registry.npmjs.org/@mlightcad/libredwg-web/-/libredwg-web-0.7.10.tgz",
+      "integrity": "sha512-L9wnwQn8cgHIr6I5El/8TgKSXaRacW9vytSpsU19xufmrnAAqEEGcW0MU92PgEiDKuQtU4GBenERIDfSrbY99g=="
+    },
+    "image": "emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7",
+    "emscripten": "4.0.10"
+  },
+  "flags": [
+    "read-only",
+    "release",
+    "no-debug",
+    "no-dxf",
+    "no-json",
+    "-O2",
+    "emmalloc",
+    "DYNAMIC_EXECUTION=0"
+  ],
+  "stackBytes": 5242880,
+  "stackOverflowCheck": 2,
+  "initialMemoryBytes": 67108864,
+  "maximumMemoryBytes": 536870912,
+  "artifacts": {
+    "COPYING": {
+      "bytes": 35147,
+      "sha256": "8ceb4b9ee5adedde47b31e975c1d90c73ad27b6b165a1dcd80c7c545eb65b903"
+    },
+    "SOURCE.md": {
+      "bytes": 1503,
+      "sha256": "49267ea872a21271a907bda7329965fbdd9c5e2924bf11e9a296b165ac3d772e"
+    },
+    "bindings-npm.tgz": {
+      "bytes": 2522950,
+      "sha256": "4556d5ee55b20fbc02cc4edc301b701153be9c61e19bfe01f3d71373685e656b"
+    },
+    "bindings-source.tar.gz": {
+      "bytes": 23630419,
+      "sha256": "821f1f42101a4605b320469e407f0b0c1a880235865a2e7a87c368af98f92fa2"
+    },
+    "build-in-container.sh": {
+      "bytes": 1608,
+      "sha256": "695da83b243e99f2edb34f23335410db90b6b76064a90255cf1a49710c79fa2e"
+    },
+    "build.sh": {
+      "bytes": 419,
+      "sha256": "1e1c8da5eea882c43c6f61ef76725df91916aed29937887caa0c25f71de85a1a"
+    },
+    "dist/libredwg-web.js": {
+      "bytes": 269613,
+      "sha256": "04b939a1d51527d8d0d0947aad77008133284dd82c6f40231091f50db206f85e"
+    },
+    "fetch.mjs": {
+      "bytes": 1036,
+      "sha256": "04008e891f275aaae85a20ae664f837a2a890504fd3e56c8eb7d59d04eeea38a"
+    },
+    "libredwg-source.tar.gz": {
+      "bytes": 21755478,
+      "sha256": "cb6ee0b078c6d9e0f09d66f1feac33ba6342df88ae544e9f9335fab475218351"
+    },
+    "package.json": {
+      "bytes": 18,
+      "sha256": "1239d4d885dcad42201a27ed9324f8f0f760b78700d8db9ced39a511cffe7eae"
+    },
+    "upstream.json": {
+      "bytes": 865,
+      "sha256": "7596dc69f40c1c3511be5502f145d96432f33bd8e96e8a1ee249e77d4db69c9b"
+    },
+    "wasm/libredwg-web.js": {
+      "bytes": 102999,
+      "sha256": "42d732f707f0c1bac7ace0dc8eb461f5ced7d50adefb149b0efca9ecc139e885"
+    },
+    "wasm/libredwg-web.js.symbols": {
+      "bytes": 146734,
+      "sha256": "15ae69fb44861109a3fc538184c7f4fdd6910bd673fbfc709fc2b0fad2a6cac0"
+    },
+    "wasm/libredwg-web.wasm": {
+      "bytes": 8608403,
+      "sha256": "2e15e4e06f1f16c3bb165a87f835826c04daae83361142b0c4978f01a1f17f32"
+    },
+    "write-build-info.mjs": {
+      "bytes": 1121,
+      "sha256": "cc4e7ae65fc94217b14d707e498e4fd2a5323e2dc34e9651149db419b2886da0"
+    }
+  }
+}

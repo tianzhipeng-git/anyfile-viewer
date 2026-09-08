@@ -177,7 +177,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-exchange", "point-cloud", "print-3d", "mesh-3d"]);
+      .toEqual(["comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "cad-exchange", "point-cloud", "print-3d", "mesh-3d"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),

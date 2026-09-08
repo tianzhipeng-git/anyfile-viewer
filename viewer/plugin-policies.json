@@ -616,6 +616,43 @@
           ]
         }
       ]
+    },
+    "cad-dwg": {
+      "directory": "cad-dwg",
+      "package": "@anyfile/cad-dwg-viewer",
+      "runtimeSets": [
+        {
+          "id": "libredwg",
+          "version": "0.14-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/libredwg/0.14-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "kernel",
+              "assetPatterns": [
+                "public/vendor/libredwg/0.14-anyfile.1/dist/libredwg-web.js",
+                "public/vendor/libredwg/0.14-anyfile.1/wasm/libredwg-web.js",
+                "public/vendor/libredwg/0.14-anyfile.1/wasm/libredwg-web.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "r2",
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/cad-dwg/src/runtime.ts",
+            "viewer/plugins/cad-dwg/src/worker-client.ts"
+          ],
+          "requiredMarkers": [
+            "0.14-anyfile.1",
+            "https://assets.anyfile.top/vendor/libredwg/",
+            "/vendor/libredwg/",
+            "initializeRuntimeFromSources"
+          ]
+        }
+      ]
     }
   }
 }

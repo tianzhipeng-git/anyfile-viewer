@@ -1,0 +1,31 @@
+{
+  "upstream": "LibreDWG/libredwg",
+  "commit": "7eb90a9f933623729f82781cb1d68de2e50593f3",
+  "storage": "Downloaded into ignored local test cache; not redistributed in this repository.",
+  "fixtures": [
+    {
+      "name": "example_2000.dwg",
+      "url": "https://raw.githubusercontent.com/LibreDWG/libredwg/7eb90a9f933623729f82781cb1d68de2e50593f3/test/test-data/example_2000.dwg",
+      "bytes": 582572,
+      "sha256": "34574244d7556d1ef7b437443d9b3d1ad8662e1c669c42d80cff6a8a19799be9"
+    },
+    {
+      "name": "example_2010.dwg",
+      "url": "https://raw.githubusercontent.com/LibreDWG/libredwg/7eb90a9f933623729f82781cb1d68de2e50593f3/test/test-data/example_2010.dwg",
+      "bytes": 450071,
+      "sha256": "457fb3d06cacd16dd945b7342651bebdefde03d7eca0d1bd5743c6730e436634"
+    },
+    {
+      "name": "example_2018.dwg",
+      "url": "https://raw.githubusercontent.com/LibreDWG/libredwg/7eb90a9f933623729f82781cb1d68de2e50593f3/test/test-data/example_2018.dwg",
+      "bytes": 149218,
+      "sha256": "7bc7721224003062b237845842b7a976e46771c37eba6833b9ed3712e7a5a65a"
+    },
+    {
+      "name": "Dynblocks.dwg",
+      "url": "https://raw.githubusercontent.com/LibreDWG/libredwg/7eb90a9f933623729f82781cb1d68de2e50593f3/test/test-data/2018/Dynblocks.dwg",
+      "bytes": 2179277,
+      "sha256": "95cc558d02a2596d13ce2a8da30e22c734a5fba7e0ba990fcf203955674c7f88"
+    }
+  ]
+}

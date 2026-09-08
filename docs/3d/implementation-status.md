@@ -53,7 +53,7 @@
 
 - 完整的 CAD 对抗样例覆盖、上游 parser 通告问题的解决；
 - E57 parser 集成与完整点云 LOD/导航；
-- 可选的 DWG/USD provider、FBX/DAE/3DS 和 G-code 工作；
+- 可选的 USD provider、FBX/DAE/3DS 和 G-code 工作；
 - 更高级的压缩、完整材质/打印语义，以及源文件相机 UI；
 - 完整的对抗样例矩阵、JS/WASM/GPU 峰值内存测量、持续交互基准，以及 Chrome/Edge/Firefox/Safari 覆盖；
 - 测量、剖切、爆炸视图以及其他条件性增强能力。
@@ -69,3 +69,7 @@
 Docker LAZ 重建方面：在锁定的 Linux/amd64 镜像中，两次干净构建产出了相同的 JS/WASM SHA-256。当前审查产物使用的就是该 Docker 输出。OCCT 的 Docker 全量重建在通告审查期间被中断；其原生产物和 recipe 已保留，但跨构建验证仍未完成。
 
 额外浏览器检查也已通过：glTF + external buffer、OBJ + MTL、binary little-endian PLY 和 binary big-endian PLY；页面没有错误。样例选择器选择了多个真实本地文件，以覆盖已授权的内存工作区读取路径。
+
+## DWG 正式接入
+
+`cad-dwg` 已注册，识别 AC1012–AC1032 中已列明的文件签名，在独立 Worker 中运行自建 LibreDWG 0.14。基础文字、缓存标注、图块 OCS 与基点变换、实心填充及基础图案填充进入正式适配器。采用模型空间集合，避免混入转换器返回的布局对象。详细限制与验收见 [DWG 实现记录](dwg-implementation.md)。

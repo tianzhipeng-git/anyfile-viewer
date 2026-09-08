@@ -10,7 +10,7 @@ export const dxfFormat = defineFormat("dxf", "engineering", 3,
     limitations: ["DXF binary files are not rendered", "Hatches, dimensions and advanced styling are simplified", "DWG native drawings are not included in this viewer"],
     faq: [{
       question: "Can Anyfile open DWG files?",
-      answer: "Not in this viewer. DXF is the open interchange form of CAD drawings, while DWG requires a separate proprietary parser.",
+      answer: "Yes. Anyfile opens DWG with its separate local DWG viewer; this viewer handles ASCII DXF.",
     }],
   },
   {
@@ -22,7 +22,7 @@ export const dxfFormat = defineFormat("dxf", "engineering", 3,
     limitations: ["不渲染二进制 DXF", "剖面线、标注和高级样式会被简化", "此查看器不包含原生 DWG 图档"],
     faq: [{
       question: "Anyfile 能打开 DWG 文件吗？",
-      answer: "当前查看器不能。DXF 是 CAD 图档的开放交换格式，而 DWG 需要独立的专有解析器。",
+      answer: "可以，Anyfile 使用独立的本地 DWG 查看器打开 DWG；此查看器处理 ASCII DXF。",
     }],
   },
   {

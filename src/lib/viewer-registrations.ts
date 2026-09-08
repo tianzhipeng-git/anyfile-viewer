@@ -1,3 +1,4 @@
+import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
@@ -388,6 +389,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
       const viewerPackage = await import("@anyfile/cad-2d-viewer");
       return viewerPackage.cad2dViewer;
     },
+  },
+  {
+    manifest: dwgManifest,
+    async probe(context) { return (await import("@anyfile/cad-dwg-viewer/probe")).probeDwg(context); },
+    async load() { return (await import("@anyfile/cad-dwg-viewer")).dwgViewer; },
   },
   {
     manifest: cadExchangeManifest,

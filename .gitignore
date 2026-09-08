@@ -46,3 +46,6 @@ next-env.d.ts
 docs/tasks/
 
 __pycache__/
+
+/public/source/
+/third_party/libredwg/**/*.log

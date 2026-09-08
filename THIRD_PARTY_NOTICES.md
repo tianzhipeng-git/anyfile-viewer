@@ -137,3 +137,9 @@ build-info.json for provenance, configuration, replacement/rebuild instructions
 and artifact hashes. Copyright licenses do not grant third-party codec
 patent rights; deployment jurisdictions and distribution terms remain the
 distributor's responsibility.
+
+## DWG integration: GNU LibreDWG and libredwg-web
+
+The original project source remains Apache-2.0 where applicable. The DWG-enabled combined distribution is subject to GPLv3; Worker isolation does not waive these obligations. Original component notices remain applicable. No warranty is provided.
+
+GNU LibreDWG 0.14 is GPL-3.0-or-later; mlightcad/libredwg-web 0.7.10 is GPL-3.0. Exact source archives, license text, the source-build recipe and artifact hashes ship under `/vendor/libredwg/0.14-anyfile.1/`. The viewer links to `/source/dwg.html`, including a matching application-source download, source dependency links and build instructions.

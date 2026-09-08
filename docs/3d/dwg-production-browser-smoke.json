@@ -1,0 +1,49 @@
+{
+  "date": "2026-09-09",
+  "browser": "Real Google Chrome through CUA extension",
+  "page": "http://127.0.0.1:4178/production.html",
+  "implementation": "Production cad-dwg plugin, production Worker and 0.14-anyfile.1 runtime",
+  "inputMethod": "Explicit fixture whitelist on loopback; no remote drawing upload",
+  "r2Success": {
+    "file": "architectural_-_annotation_scaling_and_multileaders.dwg",
+    "created": 1,
+    "terminated": 1,
+    "activeWorkers": 0,
+    "canvases": 1,
+    "readyMs": 2114.574999988079,
+    "visible": "Architectural model-space drawing with linework, text, cached dimensions, leaders and basic hatch geometry; layer controls and source link visible",
+    "renderedVertices": 27082,
+    "renderedTriangles": 196,
+    "parserWarnings": 72
+  },
+  "sameOriginFallback": {
+    "trigger": "R2 initialization exceeded the 20-second attempt budget during earlier runs",
+    "createdPerOpen": 2,
+    "terminatedPerOpen": 2,
+    "canvases": 1,
+    "readyMs": 21011.74500000477,
+    "note": "Direct navigation to asset metadata also reported ERR_BLOCKED_BY_CLIENT in this session; later R2 initialization succeeded. Browser settings were not changed."
+  },
+  "cancellation": {
+    "trigger": "Abort 20 ms after posting the open request to the initialized Worker",
+    "lastRequestType": "open",
+    "created": 2,
+    "terminated": 2,
+    "activeWorkers": 0,
+    "canvases": 0,
+    "result": "AbortError"
+  },
+  "limitations": [
+    "Viewport-ready timings include initialization and scene creation, not an exact first-painted-frame measurement",
+    "Native file picker automation is not covered",
+    "No per-object comparison with AutoCAD or ODA; no other browser certification"
+  ],
+  "repeatThreeTimes": {
+    "created": 5,
+    "terminated": 5,
+    "activeWorkers": 0,
+    "canvases": 1,
+    "lastReadyMs": 1001.1200000047684,
+    "note": "Three additional completed opens after the success and cancellation cases; each used the R2 source without fallback."
+  }
+}

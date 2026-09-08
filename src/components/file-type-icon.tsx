@@ -1,3 +1,4 @@
+import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
@@ -180,7 +181,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     kind: "design",
     icon: PaletteIcon,
     extensions: [
-      ...manifestExtensions(pixelmatorPxdManifest, photoshopManifest, cad2dManifest),
+      ...manifestExtensions(pixelmatorPxdManifest, photoshopManifest, cad2dManifest, dwgManifest),
       ...pdfManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".ai"),
       ".psb", ".fig", ".sketch", ".xd", ".indd",
     ],

@@ -12,8 +12,11 @@ if (!projectLicense.includes("Apache License") || !projectLicense.includes("Vers
   throw new Error("The Apache-2.0 project license text is missing");
 }
 const thirdPartyNotices = await readFile(join(projectRoot, "THIRD_PARTY_NOTICES.md"), "utf8").catch(() => "");
-for (const marker of ["MPL-2.0", "CDDL-1.0", "LGPL-3.0-or-later", "libvips", "HEVC patent"]) {
+for (const marker of ["MPL-2.0", "CDDL-1.0", "LGPL-3.0-or-later", "libvips", "HEVC patent", "LibreDWG", "GPLv3"]) {
   if (!thirdPartyNotices.includes(marker)) throw new Error(`Third-party notices are missing ${marker}`);
+}
+for (const file of ["source/dwg.html", "source/application.tar.gz", "source/THIRD_PARTY_NOTICES.md", "vendor/libredwg/0.14-anyfile.1/COPYING"]) {
+  await readFile(join(projectRoot, "public", file));
 }
 const html = await readFile(join(projectRoot, ".next/server/app/en/view.html"), "utf8");
 const assets = [...new Set(
