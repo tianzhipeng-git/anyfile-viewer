@@ -1,0 +1,52 @@
+{
+  "date": "2026-09-08T13:47:31.194Z",
+  "browser": "145.0.7632.6",
+  "os": {
+    "type": "Darwin",
+    "release": "24.6.0",
+    "arch": "arm64"
+  },
+  "results": [
+    {
+      "name": "AVI real first frame; silent open; runtime fallback",
+      "milliseconds": 860.600167
+    },
+    {
+      "name": "AVI audible playback and pause",
+      "milliseconds": 880.2922920000001
+    },
+    {
+      "name": "AVI forward/backward and rapid seek, volume, end, replay",
+      "milliseconds": 3797.471666
+    },
+    {
+      "name": "Switching to AIFF closes previous audio and Worker",
+      "milliseconds": 2280.7397499999997
+    },
+    {
+      "name": "aiff-s24.aiff playback",
+      "milliseconds": 1284.967999999999
+    },
+    {
+      "name": "aifc-f32.aifc playback",
+      "milliseconds": 1300.1250419999997
+    },
+    {
+      "name": "avi-video-only.avi playback",
+      "milliseconds": 1865.4468340000003
+    },
+    {
+      "name": "avi-1080p.avi playback",
+      "milliseconds": 1852.1501670000016
+    },
+    {
+      "name": "Narrow/short player keeps controls accessible",
+      "milliseconds": 63.48795799999971
+    },
+    {
+      "name": "Valid silence and corrupt PCM handling",
+      "milliseconds": 1944.5837079999983
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,66 @@
+{
+  "artifactVersion": "0.8.1-anyfile.1",
+  "upstream": {
+    "stet": {
+      "version": "0.8.1",
+      "tag": "v0.8.1",
+      "commit": "a61c70796f25e0d0a8f5eaa04992cb7cd222aa07",
+      "url": "https://github.com/AndyCappDev/stet/archive/refs/tags/v0.8.1.tar.gz",
+      "sha256": "78a1140a4fad3862325f04402e746f590b4fb82664127e9416d97a2052be0510"
+    }
+  },
+  "toolchain": {
+    "rustc": "1.94.0 (4a4ef493e 2026-03-02)",
+    "wasmPack": "0.14.0",
+    "wasmBindgen": "0.2.114",
+    "wasmOpt": "version 125",
+    "target": "wasm32-unknown-unknown",
+    "buildHost": "aarch64-apple-darwin",
+    "container": null
+  },
+  "flags": [
+    "wasm-pack build",
+    "--target web",
+    "--release",
+    "lto=true",
+    "codegen-units=1",
+    "opt-level=3"
+  ],
+  "features": {
+    "postscript": true,
+    "eps": true,
+    "pdfReader": false,
+    "threads": false,
+    "unsafeEval": false
+  },
+  "recipeSha256": "070f0a2ffdd7f95e2ef770a3b734ced590e64cf89cdfe64bb00d46a088a3d74b",
+  "smokeTestSha256": "36d6006c362c121ae4ffb87a386917a9de4c1ba13c37fd42646fa9db1f06e814",
+  "metadataWriterSha256": "5fa2aef6b8d78021fbbb427ee31e1c2519674832e43ac2a6ae897ea54399615b",
+  "builtAt": "2026-09-04T10:08:14.025Z",
+  "artifacts": {
+    "stet_wasm.js": {
+      "bytes": 19526,
+      "sha256": "90969ddcdaff5a7f4fc825faa0abbf56183cb47e535b4b6c2e7796a54eefc581"
+    },
+    "stet_wasm_bg.wasm": {
+      "bytes": 13600486,
+      "sha256": "79c0cd444a303ad1e29dd8340a80ac4cc9f91a4aa3ec6dd607783971fa5dafdd"
+    },
+    "LICENSE-APACHE": {
+      "bytes": 10283,
+      "sha256": "281755c6f4d045a464a29eb720c3e7586175c621352675dce144ca74bd1228cb"
+    },
+    "LICENSE-MIT": {
+      "bytes": 1069,
+      "sha256": "4e27c8bbd00f817fb6fb96e8ca8eada8f0983a50a38fe3114ba8f977d31f654b"
+    },
+    "SOURCE.md": {
+      "bytes": 625,
+      "sha256": "7cb4b892f09f471bf7890136fc276c9a2cb1c062c3b472a1f8ceab39ad4c9d08"
+    },
+    "THIRD_PARTY_NOTICES.md": {
+      "bytes": 573,
+      "sha256": "52d5ee5aafdaaa5f4f0625374980ea8d4ffdf645af90d5ee2d03699a30a60207"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "@anyfile/print-3d-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts",
+    "./probe": "./src/probe.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anyfile/rendering-3d": "workspace:*",
+    "@anyfile/viewer-protocol": "workspace:*",
+    "three": "0.185.1",
+    "@zip.js/zip.js": "2.8.60"
+  },
+  "devDependencies": {
+    "@types/three": "0.185.4",
+    "vitest": "4.1.11",
+    "happy-dom": "20.11.6"
+  }
+}

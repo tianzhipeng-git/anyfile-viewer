@@ -99,15 +99,28 @@
 
 ## 4. 阶段 2：non-native-audio
 
-已实现 `non-native-audio` workspace 插件，首个完整 vertical slice 为带安全 seek index 的单主音轨 `.mka`，声明 Opus、Vorbis、FLAC 与 AAC。Mediabunny 只存在于完整实现 chunk；`open()` 在不创建 `AudioContext` 的前提下解码首个 PCM buffer，首次播放手势才建立 Web Audio 输出链。
+已实现 `non-native-audio` workspace 插件。当前声明范围：
+
+- 带安全 seek index 的单主音轨 `.mka`（Opus、Vorbis、FLAC、AAC）；
+- browser-audio 拒绝的 WAVE A-law / μ-law（Mediabunny 软件 PCM 路径）。
+
+Mediabunny 只存在于完整实现 chunk；`open()` 在不创建 `AudioContext` 的前提下解码首个 PCM buffer，首次播放手势才建立 Web Audio 输出链。
+
+阶段 2 候选中尚未进入支持声明、并已记录阻塞原因的组合：
+
+- WAVE ADPCM：Mediabunny 明确不支持 → 留给 FFmpeg；
+- M4A HE-AAC / ADTS 非 LC：本机锁定 FFmpeg 无法生成可用样例，WebCodecs 证据未建立；
+- M4A ALAC：Mediabunny 不识别 → FFmpeg；
+- Ogg FLAC：Mediabunny Ogg 仅 Vorbis/Opus；
+- 与 browser-audio 已覆盖的 Ogg/WebM/FLAC/ADTS AAC-LC 同组合：不抢轻路径。
 
 新增单一 `non-native-audio` workspace 插件，承接浏览器媒体元素不能稳定播放、但 Mediabunny 能分片 demux且 PCM/WebCodecs 能解码的明确组合。
 
 首批 spike 候选：
 
 - `.mka` Matroska audio-only 的 Opus、Vorbis、FLAC、AAC 子集；
-- 原生路径失败但 Mediabunny PCM 能安全输出的 WAVE 变体；
-- 原生路径失败但目标环境 `AudioDecoder` 能解码的 ADTS、Ogg、FLAC、M4A/WebM 具体组合。
+- 原生路径失败但 Mediabunny PCM 能安全输出的 WAVE 变体（已交付 A-law / μ-law）；
+- 原生路径失败但目标环境 `AudioDecoder` 能解码的 ADTS、Ogg、FLAC、M4A/WebM 具体组合（见上，当前阻塞）。
 
 不是所有 Mediabunny `ALL_FORMATS` 或 codec enum 都进入 manifest。每一组合仍需独立 probe、`track.canDecode()`、首 buffer、seek 和真实输出证据。
 
@@ -142,44 +155,17 @@ BlobSource（有界缓存）
 
 ## 5. 阶段 3：共享 FFmpeg runtime 与 ffmpeg-audio
 
-阶段 3 与视频 `ffmpeg-video` 共用一个从锁定 FFmpeg 官方源码构建的 decode-only Worker/WASM runtime，但新增独立 `ffmpeg-audio` 插件。
+`ffmpeg-audio` 与 `ffmpeg-video` 共用 `@anyfile/ffmpeg-playback` 和同一版本的 Worker/WASM 资产，独立维护 probe、manifest 与 UI。架构和资源边界见[FFmpeg 音视频播放架构](../videos/ffmpeg-playback-runtime-plan.md)。
 
-### 3.0 共同 runtime spike
+当前支持 AIFF S16BE/S24BE 与 AIFC F32BE，Chromium 播放及生命周期证据见[播放验证](../videos/ffmpeg-playback-delivery.md)。
 
-在视频代表组合之外增加：
+待完成：
 
-1. AIFF/AIFC + PCM 代表组合；
-2. ASF audio-only + WMA 代表组合；
-3. APE 代表版本/压缩等级；
-4. audio-only、video、attached picture、多主轨、损坏、截断、不支持 codec 和资源超限对照。
+- ASF audio-only WMA 已有底层解码样例，需补独立 probe 和完整播放验证；APE 需先建立固定样例并测量解码、seek 与资源成本。
+- 补齐目标浏览器、长时间播放、真实大文件尾部索引、CPU/进程内存和全量重建一致性证据。
+- 后续按需求评估 Musepack、AMR、AC-3/E-AC-3、Sun/NeXT、RealAudio 和更多 WAV/AIFF/WMA/APE 变体。
 
-记录：
-
-- JS/Worker/WASM raw 与 gzip 体积，以及增加音频 demuxer/decoder 的增量；
-- 初始化、首 buffer、持续实时解码、CPU 和峰值/稳定内存；
-- 前后/快速 seek 延迟与文件读取量；
-- 大于 2 GiB 偏移、尾部索引、超大 tag 和无索引行为；
-- abort flag 与 Worker terminate 的取消完成时间；
-- configure 输出、许可证、对应源码、专利与部署要求。
-
-### 3.1 ffmpeg-audio 插件交付
-
-只有代表组合通过体积、实时解码、内存、seek、取消、许可和部署门槛后才：
-
-- 锁定共同 FFmpeg/Emscripten 版本和构建配置；
-- 确定首批 AIFF/WMA/APE 或其他高价值组合；
-- 实现独立 audio probe、manifest 和 registration；
-- 通过共享 runtime audio adapter 输出 Float32 PCM；
-- 接入音频 session 的 Web Audio scheduler；
-- 添加固定样例、真实浏览器 smoke、prepare、哈希、许可证和 bundle 门禁。
-
-FFmpeg 资产只保留一份版本化产物。`ffmpeg-audio` 与 `ffmpeg-video` 分别加载 adapter/client，但请求同一精确版本的 runtime URL；不能复制 WASM，也不能合并成一个对用户可见的万能插件。
-
-### 3.2 按证据扩展
-
-后续按真实需求评估 Musepack、AMR、AC-3/E-AC-3、Sun/NeXT、RealAudio 和更多 WAV/AIFF/WMA/APE 变体。每批只增加有固定样例、独立 probe 和完整播放证据的组合。
-
-详细构建与运行时方案见[FFmpeg 音视频播放 fallback 接入方案](../videos/ffmpeg-playback-runtime-plan.md)。
+每个新增组合必须具备固定样例、有界 probe、完整播放与生命周期证据，才能进入 manifest 和支持矩阵。
 
 ## 6. 阶段 4：播放体验与领域增强
 
@@ -216,8 +202,8 @@ FFmpeg 资产只保留一份版本化产物。`ffmpeg-audio` 与 `ffmpeg-video` 
 - [音频格式支持矩阵](support-matrix.md)
 - [音频查看架构](architecture.md)
 - [视频查看实施路线图](../videos/roadmap.md)
-- [FFmpeg 音视频播放 fallback 接入方案](../videos/ffmpeg-playback-runtime-plan.md)
+- [FFmpeg 音视频播放架构](../videos/ffmpeg-playback-runtime-plan.md)
 - [格式查看器插件协议](../viewer-plugin-protocol.md)
-- [查看器插件渲染规范](../viewer-render-tips.md)
+- [查看器插件渲染规范](../viewer-rendering-guidelines.md)
 - [查看器加载、渲染与部署约定](../viewer-loading-and-deployment.md)
 - [源码构建型第三方依赖规范](../viewer-source-built-dependencies.md)

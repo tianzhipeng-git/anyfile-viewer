@@ -1,0 +1,806 @@
+{
+  "date": "2026-09-05T14:52:55.196Z",
+  "browser": "145.0.7632.6",
+  "os": "Darwin 24.6.0 arm64",
+  "cpu": "Apple M3 Pro",
+  "artifacts": {
+    "ffmpeg-playback.js": {
+      "bytes": 68764,
+      "gzipBytes": 19203,
+      "sha256": "202dcfd58d349c8b154d78f9c156c009d4e2fb279635d1a97bc5875bf16f0aba"
+    },
+    "ffmpeg-playback.wasm": {
+      "bytes": 11808469,
+      "gzipBytes": 4699547,
+      "sha256": "49d683df5fd63e0770c645ddf5e1dd32e560d93c315c613c8dfe6e79a30187cb"
+    },
+    "ffmpeg-playback.worker.js": {
+      "bytes": 2925,
+      "gzipBytes": 1265,
+      "sha256": "00d3cde0a44cc1913ec87c20ff6031b34b0f4ba65294f3a714c58e8335c86615"
+    }
+  },
+  "fixtureHashes": {
+    "aifc-f32.aifc": "d7f330d25643f3beda82a337275f4cd02cd797355c94078ce9ac3be2f78331f5",
+    "aiff-s16.aiff": "27d0a8d66273c9b6ec06f74ff5e222c72efdbc9c92f40f8b81b124d1045707af",
+    "aiff-s24.aiff": "7234365c9a95a1d51799c9d00fe5a17a8684d6dd9c2c4d9d23015f036394c0f0",
+    "aiff-silence.aiff": "5e2edc4250f4f944e45149905e38579e2965ecabd4ba7a529ad71be63f81b3e3",
+    "asf-multiple-audio.wma": "e8a4a09511d19666644f46d77998ff44fdedfab01666161d2616eee8d30bbcd0",
+    "asf-wma1.wma": "c0cfa1119abaa6e15794572dd836d9c303257f37281e667f60fe3dff2d3ae26a",
+    "asf-wma2.wma": "a2fda3dd6ec4bfce8eea411ae2a4b48532c50be8f7471bf35d2191f084419321",
+    "asf-wmv2-wma2.wmv": "41d89172c5f2096d7a0675d964ad65ae6e3471b72c07542da50c3469d9125cb6",
+    "avi-1080p.avi": "60712dd3bb4a537529da31c5946cbc06476484991eff8acc674784d1003876a7",
+    "avi-mpeg4-mp3.avi": "d4a84e75430cec1149c56f04145d9d23499996885c3aa697b3032a3b801af82c",
+    "avi-video-only.avi": "d58102b436fa9335b6b1691a47a0e78265995a6592df30584fbe1a90d6af3f4c",
+    "corrupt.avi": "38723a2e5e8a17aa7950dc008209944e898f69a7bd10a23c839d341e935fd5ca",
+    "mp3-cover.mp3": "5be4f2db480f44c53364bad9dce8a5cd713888e9b5c082fc9afa2cab9971f958",
+    "nonfinite-pcm.aifc": "d484334a09fd4a1fc31c73ed67086cd038988086142471b7fadd0b712adae33e",
+    "oversized.avi": "e546ff38a1b0e3b14e9aa63f6797b32c179c84d22166e39299367d2987351072",
+    "ps-mpeg2-ac3.vob": "7e5eb493803b3c16221b5e1d1f10e7d66bbb22f3dc2e864a807316c12d78e911",
+    "ps-mpeg2-mp2.mpg": "7f4b01f3f03e9ea01051609513ea765e9e6259f441145aa95eb4b3e1fe6fee24",
+    "truncated.avi": "92f08094b861fa2bad060a4e9f4c05eb1b4719d8da8c3e3fecc66e2909b750dc",
+    "unknown-codec.avi": "764ffe4716802174effd6d80b8ff96d3d58420e79839f19fbdd411e534d2711f"
+  },
+  "fixtures": {
+    "avi-mpeg4-mp3.avi": {
+      "info": {
+        "duration": 4.056,
+        "origin": 0,
+        "video": true,
+        "audio": true,
+        "width": 320,
+        "height": 240,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "mpeg4",
+        "audioCodec": "mp3"
+      },
+      "initializedMs": 47.764999985694885,
+      "complete": {
+        "frames": 100,
+        "buffers": 168,
+        "peak": 0.08400262892246246,
+        "end": 4.04,
+        "first": {
+          "audio": 3.0850000083446503,
+          "video": 6.060000002384186
+        },
+        "milliseconds": 54.59000000357628
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 5,
+          "milliseconds": 1.6050000190734863,
+          "end": 4.04
+        },
+        {
+          "time": 0.5,
+          "events": 33,
+          "milliseconds": 4.255000025033951,
+          "end": 4.04
+        },
+        {
+          "time": 3,
+          "events": 5,
+          "milliseconds": 1.0049999952316284,
+          "end": 4.04
+        },
+        {
+          "time": 0,
+          "events": 2,
+          "milliseconds": 1.1500000059604645,
+          "end": 4.04
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 1014226
+      }
+    },
+    "ps-mpeg2-ac3.vob": {
+      "info": {
+        "duration": 4,
+        "origin": 0.534667,
+        "video": true,
+        "audio": true,
+        "width": 320,
+        "height": 240,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "mpeg2video",
+        "audioCodec": "ac3"
+      },
+      "initializedMs": 45.6700000166893,
+      "complete": {
+        "frames": 100,
+        "buffers": 125,
+        "peak": 0.08839501440525055,
+        "end": 4.005333,
+        "first": {
+          "audio": 1.4899999797344208,
+          "video": 5.340000003576279
+        },
+        "milliseconds": 48.75
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 94,
+          "milliseconds": 8.555000007152557,
+          "end": 4.005333
+        },
+        {
+          "time": 0.5,
+          "events": 46,
+          "milliseconds": 6.609999984502792,
+          "end": 4.005333
+        },
+        {
+          "time": 3,
+          "events": 148,
+          "milliseconds": 14.379999995231628,
+          "end": 4.005333
+        },
+        {
+          "time": 0,
+          "events": 3,
+          "milliseconds": 2.1099999845027924,
+          "end": 4.005333
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 2157570
+      }
+    },
+    "ps-mpeg2-mp2.mpg": {
+      "info": {
+        "duration": 4.010022,
+        "origin": 0.529978,
+        "video": true,
+        "audio": true,
+        "width": 320,
+        "height": 240,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "mpeg2video",
+        "audioCodec": "mp2"
+      },
+      "initializedMs": 39.90999999642372,
+      "complete": {
+        "frames": 100,
+        "buffers": 167,
+        "peak": 0.088592529296875,
+        "end": 4.010022,
+        "first": {
+          "audio": 1.3199999928474426,
+          "video": 4.929999977350235
+        },
+        "milliseconds": 44.604999989271164
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 112,
+          "milliseconds": 11.450000017881393,
+          "end": 4.010022
+        },
+        {
+          "time": 0.5,
+          "events": 49,
+          "milliseconds": 10.134999990463257,
+          "end": 4.010022
+        },
+        {
+          "time": 3,
+          "events": 180,
+          "milliseconds": 17.639999985694885,
+          "end": 4.010022
+        },
+        {
+          "time": 0,
+          "events": 2,
+          "milliseconds": 2.0299999713897705,
+          "end": 4.010022
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 2693778
+      }
+    },
+    "asf-wmv2-wma2.wmv": {
+      "info": {
+        "duration": 4.086,
+        "origin": 0,
+        "video": true,
+        "audio": true,
+        "width": 320,
+        "height": 240,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "wmv2",
+        "audioCodec": "wmav2"
+      },
+      "initializedMs": 38.3299999833107,
+      "complete": {
+        "frames": 100,
+        "buffers": 93,
+        "peak": 0.10121212154626846,
+        "end": 4.053333333333333,
+        "first": {
+          "video": 4.5250000059604645,
+          "audio": 6.230000019073486
+        },
+        "milliseconds": 39.67500001192093
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 25,
+          "milliseconds": 3.1649999916553497,
+          "end": 4.053333333333333
+        },
+        {
+          "time": 0.5,
+          "events": 22,
+          "milliseconds": 3.4749999940395355,
+          "end": 4.053333333333333
+        },
+        {
+          "time": 3,
+          "events": 26,
+          "milliseconds": 3.060000002384186,
+          "end": 4.053333333333333
+        },
+        {
+          "time": 0,
+          "events": 3,
+          "milliseconds": 1.405000001192093,
+          "end": 4.053333333333333
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 1025259
+      }
+    },
+    "avi-video-only.avi": {
+      "info": {
+        "duration": 4,
+        "origin": 0,
+        "video": true,
+        "audio": false,
+        "width": 320,
+        "height": 240,
+        "sampleRate": 0,
+        "channels": 0,
+        "videoCodec": "mpeg4",
+        "audioCodec": ""
+      },
+      "initializedMs": 37.99000000953674,
+      "complete": {
+        "frames": 100,
+        "buffers": 0,
+        "peak": 0,
+        "end": 4.04,
+        "first": {
+          "video": 4.134999990463257
+        },
+        "milliseconds": 30.384999990463257
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 1,
+          "milliseconds": 1.050000011920929,
+          "end": 4.04
+        },
+        {
+          "time": 0.5,
+          "events": 12,
+          "milliseconds": 3.2899999916553497,
+          "end": 4.04
+        },
+        {
+          "time": 3,
+          "events": 1,
+          "milliseconds": 0.3449999988079071,
+          "end": 4.04
+        },
+        {
+          "time": 0,
+          "events": 1,
+          "milliseconds": 1.1349999904632568,
+          "end": 4.04
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 705210
+      }
+    },
+    "aiff-s16.aiff": {
+      "info": {
+        "duration": 4,
+        "origin": 0,
+        "video": false,
+        "audio": true,
+        "width": 0,
+        "height": 0,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "",
+        "audioCodec": "pcm_s16be"
+      },
+      "initializedMs": 36.59000000357628,
+      "complete": {
+        "frames": 0,
+        "buffers": 188,
+        "peak": 0.08837890625,
+        "end": 4,
+        "first": {
+          "audio": 1.3100000023841858
+        },
+        "milliseconds": 13.145000010728836
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 1,
+          "milliseconds": 0.7549999952316284,
+          "end": 4
+        },
+        {
+          "time": 0.5,
+          "events": 1,
+          "milliseconds": 0.48499998450279236,
+          "end": 3.9999999999999996
+        },
+        {
+          "time": 3,
+          "events": 1,
+          "milliseconds": 0.5,
+          "end": 4
+        },
+        {
+          "time": 0,
+          "events": 1,
+          "milliseconds": 0.42000001668930054,
+          "end": 4
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 2849536
+      }
+    },
+    "aiff-s24.aiff": {
+      "info": {
+        "duration": 4,
+        "origin": 0,
+        "video": false,
+        "audio": true,
+        "width": 0,
+        "height": 0,
+        "sampleRate": 48000,
+        "channels": 1,
+        "videoCodec": "",
+        "audioCodec": "pcm_s24be"
+      },
+      "initializedMs": 40.43000000715256,
+      "complete": {
+        "frames": 0,
+        "buffers": 141,
+        "peak": 0.124969482421875,
+        "end": 3.9999999999999996,
+        "first": {
+          "audio": 1.280000001192093
+        },
+        "milliseconds": 9.215000003576279
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 1,
+          "milliseconds": 0.6299999952316284,
+          "end": 3.9999999999999996
+        },
+        {
+          "time": 0.5,
+          "events": 1,
+          "milliseconds": 0.5,
+          "end": 3.9999999999999996
+        },
+        {
+          "time": 3,
+          "events": 1,
+          "milliseconds": 0.5150000154972076,
+          "end": 4
+        },
+        {
+          "time": 0,
+          "events": 1,
+          "milliseconds": 0.445000022649765,
+          "end": 3.9999999999999996
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 2153536
+      }
+    },
+    "aifc-f32.aifc": {
+      "info": {
+        "duration": 4,
+        "origin": 0,
+        "video": false,
+        "audio": true,
+        "width": 0,
+        "height": 0,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "",
+        "audioCodec": "pcm_f32be"
+      },
+      "initializedMs": 36.83500000834465,
+      "complete": {
+        "frames": 0,
+        "buffers": 375,
+        "peak": 0.08836676925420761,
+        "end": 4,
+        "first": {
+          "audio": 1.3299999833106995
+        },
+        "milliseconds": 21.564999997615814
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 1,
+          "milliseconds": 0.7199999988079071,
+          "end": 3.9999999999999996
+        },
+        {
+          "time": 0.5,
+          "events": 1,
+          "milliseconds": 0.44999998807907104,
+          "end": 3.9999999999999996
+        },
+        {
+          "time": 3,
+          "events": 1,
+          "milliseconds": 0.48000001907348633,
+          "end": 4
+        },
+        {
+          "time": 0,
+          "events": 1,
+          "milliseconds": 0.42500001192092896,
+          "end": 4
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 5633536
+      }
+    },
+    "asf-wma1.wma": {
+      "info": {
+        "duration": 4,
+        "origin": 0,
+        "video": false,
+        "audio": true,
+        "width": 0,
+        "height": 0,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "",
+        "audioCodec": "wmav1"
+      },
+      "initializedMs": 38.33000001311302,
+      "complete": {
+        "frames": 0,
+        "buffers": 93,
+        "peak": 0.10226801037788391,
+        "end": 4.053333333333333,
+        "first": {
+          "audio": 1.7750000059604645
+        },
+        "milliseconds": 11.814999997615814
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 1,
+          "milliseconds": 1.7950000166893005,
+          "end": 4.053333333333333
+        },
+        {
+          "time": 0.5,
+          "events": 2,
+          "milliseconds": 0.7549999952316284,
+          "end": 4.053333333333333
+        },
+        {
+          "time": 3,
+          "events": 1,
+          "milliseconds": 0.675000011920929,
+          "end": 4.053333333333333
+        },
+        {
+          "time": 0,
+          "events": 1,
+          "milliseconds": 0.5499999821186066,
+          "end": 4.053333333333333
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 452008
+      }
+    },
+    "asf-wma2.wma": {
+      "info": {
+        "duration": 4,
+        "origin": 0,
+        "video": false,
+        "audio": true,
+        "width": 0,
+        "height": 0,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "",
+        "audioCodec": "wmav2"
+      },
+      "initializedMs": 36.474999994039536,
+      "complete": {
+        "frames": 0,
+        "buffers": 93,
+        "peak": 0.10121212154626846,
+        "end": 4.053333333333333,
+        "first": {
+          "audio": 1.8700000047683716
+        },
+        "milliseconds": 11.935000002384186
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 1,
+          "milliseconds": 1.8299999833106995,
+          "end": 4.053333333333333
+        },
+        {
+          "time": 0.5,
+          "events": 2,
+          "milliseconds": 0.8350000083446503,
+          "end": 4.053333333333333
+        },
+        {
+          "time": 3,
+          "events": 1,
+          "milliseconds": 0.7299999892711639,
+          "end": 4.053333333333333
+        },
+        {
+          "time": 0,
+          "events": 1,
+          "milliseconds": 0.6550000011920929,
+          "end": 4.053333333333333
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 452088
+      }
+    },
+    "avi-1080p.avi": {
+      "info": {
+        "duration": 4.056,
+        "origin": 0,
+        "video": true,
+        "audio": true,
+        "width": 1920,
+        "height": 1080,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "mpeg4",
+        "audioCodec": "mp3"
+      },
+      "initializedMs": 45.45500001311302,
+      "complete": {
+        "frames": 100,
+        "buffers": 168,
+        "peak": 0.08400262892246246,
+        "end": 4.04,
+        "first": {
+          "audio": 8.46000000834465,
+          "video": 14.939999997615814
+        },
+        "milliseconds": 532.580000013113
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 5,
+          "milliseconds": 6.765000015497208,
+          "end": 4.04
+        },
+        {
+          "time": 0.5,
+          "events": 33,
+          "milliseconds": 39.730000019073486,
+          "end": 4.04
+        },
+        {
+          "time": 3,
+          "events": 5,
+          "milliseconds": 6.844999998807907,
+          "end": 4.04
+        },
+        {
+          "time": 0,
+          "events": 2,
+          "milliseconds": 9.625,
+          "end": 4.04
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 6095156
+      }
+    },
+    "aiff-silence.aiff": {
+      "info": {
+        "duration": 4,
+        "origin": 0,
+        "video": false,
+        "audio": true,
+        "width": 0,
+        "height": 0,
+        "sampleRate": 48000,
+        "channels": 2,
+        "videoCodec": "",
+        "audioCodec": "pcm_s16be"
+      },
+      "initializedMs": 39.24499997496605,
+      "complete": {
+        "frames": 0,
+        "buffers": 188,
+        "peak": 0,
+        "end": 4,
+        "first": {
+          "audio": 1.3349999785423279
+        },
+        "milliseconds": 12.564999997615814
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 1,
+          "milliseconds": 0.7299999892711639,
+          "end": 4
+        },
+        {
+          "time": 0.5,
+          "events": 1,
+          "milliseconds": 0.550000011920929,
+          "end": 3.9999999999999996
+        },
+        {
+          "time": 3,
+          "events": 1,
+          "milliseconds": 0.4399999976158142,
+          "end": 4
+        },
+        {
+          "time": 0,
+          "events": 1,
+          "milliseconds": 0.47999998927116394,
+          "end": 4
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 2849536
+      }
+    },
+    "mp3-cover.mp3": {
+      "info": {
+        "duration": 4,
+        "origin": 0.023021,
+        "video": false,
+        "audio": true,
+        "width": 0,
+        "height": 0,
+        "sampleRate": 48000,
+        "channels": 1,
+        "videoCodec": "",
+        "audioCodec": "mp3"
+      },
+      "initializedMs": 40.75999999046326,
+      "complete": {
+        "frames": 0,
+        "buffers": 168,
+        "peak": 0.11960069835186005,
+        "end": 3.9999998333333333,
+        "first": {
+          "audio": 0.9149999916553497
+        },
+        "milliseconds": 9.254999995231628
+      },
+      "seeks": [
+        {
+          "time": 2,
+          "events": 1,
+          "milliseconds": 0.33500000834465027,
+          "end": 3.9999998333333333
+        },
+        {
+          "time": 0.5,
+          "events": 1,
+          "milliseconds": 0.08500000834465027,
+          "end": 3.9999998333333333
+        },
+        {
+          "time": 3,
+          "events": 1,
+          "milliseconds": 0.06999999284744263,
+          "end": 3.9999998333333333
+        },
+        {
+          "time": 0,
+          "events": 1,
+          "milliseconds": 0.06499999761581421,
+          "end": 3.9999998333333333
+        }
+      ],
+      "stats": {
+        "heapBytes": 33554432,
+        "readBytes": 32704
+      }
+    }
+  },
+  "rejection": {
+    "asf-multiple-audio.wma:false": {
+      "expected": "unsupported-media",
+      "actual": "unsupported-media"
+    },
+    "oversized.avi:true": {
+      "expected": "resource-limit",
+      "actual": "resource-limit"
+    },
+    "unknown-codec.avi:true": {
+      "expected": "unsupported-media",
+      "actual": "unsupported-media"
+    },
+    "nonfinite-pcm.aifc:false": {
+      "expected": "invalid-file",
+      "actual": "invalid-file"
+    },
+    "corrupt.avi:true": {
+      "expected": "invalid-file",
+      "actual": "invalid-file"
+    },
+    "truncated.avi:true": {
+      "expected": "invalid-file",
+      "actual": "invalid-file"
+    },
+    "aiff-s16.aiff:true": {
+      "expected": "unsupported-media",
+      "actual": "unsupported-media"
+    },
+    "asf-wmv2-wma2.wmv:false": {
+      "expected": "unsupported-media",
+      "actual": "unsupported-media"
+    }
+  },
+  "openingAbortMs": 0.18000000715255737,
+  "activeAbortMs": 0.10000002384185791,
+  "largeFile": {
+    "offset": 4294967313,
+    "value": 99
+  }
+}

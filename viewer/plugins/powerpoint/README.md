@@ -33,8 +33,8 @@
 
 | 包 | 用途 |
 |---|---|
-| `@anyfile/viewer-protocol` | 插件协议 |
-| `@aiden0z/pptx-renderer@1.2.4` | PPTX → DOM 渲染 |
+| `@aiden0z/pptx-renderer@1.2.4` | PPTX 幻灯片渲染 |
+| `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
 
 ## 已知限制
 
@@ -46,3 +46,14 @@
 - 演讲者备注、批注不展示
 - 整文件读入内存；幻灯片/媒体懒加载仅优化渲染阶段
 - 只读预览，不可编辑或导出
+
+## 开发与验证
+
+- [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
+- 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
+
+在仓库根目录运行插件测试：
+
+```bash
+pnpm --filter @anyfile/powerpoint-viewer test
+```

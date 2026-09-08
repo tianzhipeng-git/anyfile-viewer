@@ -161,9 +161,23 @@ describe("viewer protocol", () => {
     await expect(resolution).rejects.toMatchObject({ name: "AbortError" });
   });
 
+  it.each([["epub3.epub", "epub-reader"], ["pages.cbz", "comic-book-reader"], ["normal.fb2.zip", "fictionbook-reader"], ["single-fb2.zip", "fictionbook-reader"]])("prefers the book reader while retaining archive inspection for %s", async (name, id) => {
+    const file = new File([readFileSync(join(process.cwd(), "docs/ebooks/fixtures", name))], name);
+    const result = await resolveViewerRegistrations(file, viewerRegistrations, { signal: new AbortController().signal });
+    expect(result.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([[id, 4], ["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
+  });
+
+  it.each(["rar4.cbr", "rar5.cbr", "pages.cbt"])("keeps the archive alternative for %s", async name => {
+    const file = new File([readFileSync(join(process.cwd(), "docs/ebooks/fixtures/phase45", name))], name);
+    const result = await resolveViewerRegistrations(file, viewerRegistrations, { signal: new AbortController().signal });
+    expect(result.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["comic-book-reader", 4], ["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
+  });
+
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "safe-svg", "pdfjs-pdf", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer"]);
+      .toEqual(["comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "cad-exchange", "point-cloud", "print-3d", "mesh-3d"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),
@@ -179,6 +193,30 @@ describe("viewer protocol", () => {
       { signal: new AbortController().signal },
     );
     expect(invalidPdf.map(({ registration: item }) => item.manifest.id)).toEqual(["hex-viewer"]);
+
+    const modernIllustrator = await resolveViewerRegistrations(
+      new File(["%PDF-1.7\n% Illustrator data"], "artwork.ai"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(modernIllustrator.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["pdfjs-pdf", 4], ["hex-viewer", 1]]);
+
+    const legacyIllustrator = await resolveViewerRegistrations(
+      new File(["%!PS-Adobe-3.0 EPSF-3.0\n%%Creator: Adobe Illustrator\n"], "artwork.ai"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(legacyIllustrator.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["postscript-document", 3], ["hex-viewer", 1]]);
+
+    const epsi = await resolveViewerRegistrations(
+      new File(["%!PS-Adobe-3.0 EPSF-3.0\n"], "artwork.epsi"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(epsi.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["postscript-document", 3], ["hex-viewer", 1]]);
 
     const sqlite = await resolveViewerRegistrations(
       new File(["SQLite format 3\0payload"], "database.db"),
@@ -239,6 +277,30 @@ describe("viewer protocol", () => {
     expect(mka.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["non-native-audio", 3], ["hex-viewer", 1]]);
 
+    const waveAlawBytes = readFileSync(join(
+      process.cwd(),
+      "viewer/plugins/non-native-audio/examples/wave-alaw.wav",
+    ));
+    const waveAlaw = await resolveViewerRegistrations(
+      new File([waveAlawBytes], "tone.wav"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(waveAlaw.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["non-native-audio", 3], ["hex-viewer", 1]]);
+
+    const wavePcmBytes = readFileSync(join(
+      process.cwd(),
+      "viewer/plugins/browser-audio/examples/wave-s16le.wav",
+    ));
+    const wavePcm = await resolveViewerRegistrations(
+      new File([wavePcmBytes], "tone.wav"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(wavePcm.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["browser-audio", 3], ["hex-viewer", 1]]);
+
     const transportStreamBytes = readFileSync(join(
       process.cwd(),
       "viewer/plugins/non-native-video/examples/ts-avc-aac.ts.fixture",
@@ -291,19 +353,32 @@ describe("viewer protocol", () => {
       .toEqual([["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
 
     const officeBytes = readFileSync(join(process.cwd(), "viewer/plugins/archive/examples/archive.zip"));
-    for (const [name, expected] of [
-      ["document.docx", "word-document"],
-      ["workbook.xlsx", "excel-workbook"],
-      ["workbook.ods", "excel-workbook"],
-      ["slides.pptx", "powerpoint-presentation"],
+    for (const [name, expected, level] of [
+      ["document.docx", "word-document", 4],
+      ["workbook.xlsx", "excel-workbook", 3],
+      ["workbook.ods", "excel-workbook", 3],
+      ["slides.pptx", "powerpoint-presentation", 4],
     ] as const) {
       const resolved = await resolveViewerRegistrations(
         new File([officeBytes], name), viewerRegistrations,
         { signal: new AbortController().signal },
       );
       expect(resolved.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
-        .toEqual([[expected, 4], ["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
+        .toEqual([[expected, level], ["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
     }
+  });
+
+  it.each(["records.csv", "records.tsv"])("routes %s to main-content table viewers", async (name) => {
+    const resolved = await resolveViewerRegistrations(
+      new File(["name,value\nAlice,42\n"], name), viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    const tables = resolved.filter(({ registration }) =>
+      ["excel-workbook", "duckdb-data"].includes(registration.manifest.id),
+    );
+    expect(tables.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["excel-workbook", 3], ["duckdb-data", 3]]);
+    expect(resolved[0].registration.manifest.id).toBe("excel-workbook");
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {
@@ -356,6 +431,12 @@ describe("viewer protocol", () => {
       .toEqual(["browser-audio", "hex-viewer"]);
     expect(findViewerRegistrations("tone.mka", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["non-native-audio", "hex-viewer"]);
+    expect(findViewerRegistrations("clip.avi", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["ffmpeg-video", "hex-viewer"]);
+    expect(findViewerRegistrations("tone.aiff", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["ffmpeg-audio", "hex-viewer"]);
+    expect(findViewerRegistrations("tone.wav", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["browser-audio", "non-native-audio", "hex-viewer"]);
     expect(findViewerRegistrations("photo.avif", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-image", "hex-viewer"]);
     expect(findViewerRegistrations("photo.jpg", viewerRegistrations).map(({ manifest: item }) => item.id))
@@ -388,6 +469,8 @@ describe("viewer protocol", () => {
       .toEqual(["safe-svg", "ace-code-text", "hex-viewer"]);
     expect(findViewerRegistrations("vector.svgz", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["safe-svg", "hex-viewer"]);
+    expect(findViewerRegistrations("drawing.dxf", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["cad-2d", "hex-viewer"]);
     expect(findViewerRegistrations("report.docx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["word-document", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("slides.pptx", viewerRegistrations).map(({ manifest: item }) => item.id))

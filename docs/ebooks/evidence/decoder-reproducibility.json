@@ -1,0 +1,26 @@
+[
+  {
+    "file": "mobi.wasm",
+    "identical": true,
+    "sha256": "5497cfeacbc655693f18e2fc3fb783d1efa4c122a063f749e00af85c77cbf1d4",
+    "bytes": 103836
+  },
+  {
+    "file": "mobi.js",
+    "identical": true,
+    "sha256": "ddde8705cc82344ef622123ad410501e0a0692b7473592ef82d53e41c8d891e8",
+    "bytes": 10881
+  },
+  {
+    "file": "comic-archive.js",
+    "identical": true,
+    "sha256": "6bcca92b8a7555af42abf3dc523b021cca406238d52ceaa12e8ddb5faf5a8ffb",
+    "bytes": 16704
+  },
+  {
+    "file": "comic-archive.wasm",
+    "identical": true,
+    "sha256": "258233ef8e55423487f597de01bc85e00df5085c24a6420a65ac30ca420effca",
+    "bytes": 173586
+  }
+]

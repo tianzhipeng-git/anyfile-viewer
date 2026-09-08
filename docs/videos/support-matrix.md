@@ -1,6 +1,6 @@
 # 视频格式支持矩阵
 
-- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 `ffmpeg-video` 已规划、尚未实现，并与音频阶段 3 共享 FFmpeg runtime；专业视频顺延为阶段 4
+- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 已交付首批 AVI，并与音频阶段 3 共享 FFmpeg runtime；专业视频属于阶段 4
 - 事实来源：固定真实样例、目标环境中的真实播放、自动协议测试和锁定依赖
 - 覆盖口径：以实际可播放的容器 × 视频 codec × 音频 codec 组合计数，不以扩展名数量或最高支持等级计数
 
@@ -74,7 +74,7 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | MPEG-TS，188-byte，单 program | AVC/H.264 Baseline，8-bit 4:2:0 | AAC，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
 | MPEG-TS，188-byte，单 program | HEVC Main，8-bit 4:2:0 | MP3，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
 | M2TS，192-byte，单 program | AVC/H.264 Baseline，8-bit 4:2:0 | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only、seek 与 resize 通过 |
-| AVI | MPEG-4 Part 2/Xvid 等首批代表组合 | MP3 等首批代表组合 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 spike；通过体积、seek、内存、取消、许可和真实播放后才确定声明子集 |
+| AVI，单 RIFF、idx1、单主视频 | MPEG-4 Part 2，FMP4/XVID/DIVX/DX50/MP4V，最多 1080p 像素 | MP3 mono/stereo 或 video-only，8–96 kHz | FFmpeg video fallback | 3 | implemented | 3 | Chromium 145.0.7632.6 / Darwin 24.6.0 arm64；真实播放、声音、seek、重播与切换通过；不支持 OpenDML/多主轨，见[播放验证](ffmpeg-playback-delivery.md) |
 | MPEG-PS/VOB | MPEG-2 Video 等首批代表组合 | AC-3/MP2 等 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 spike；不包含 DVD 菜单、分支和加密语义 |
 | ASF/WMV | Windows Media Video 首批代表组合 | WMA 首批代表组合 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 spike；具体 codec/profile 以固定样例和端到端证据为准 |
 | MPEG-TS | MPEG-1/2 Video、AC-3、多 program/多主音频等未声明组合 | 对应音频 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 按具体组合评估；多 program/多主音频仍需独立轨道语义 |
@@ -83,6 +83,7 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | Ogg Video | Theora | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only 不创建 AudioContext |
 | 3GPP，尾部 `moov` | AVC/H.264 Constrained Baseline L1.3 | AAC-LC，48 kHz，单声道 | browser video | 3 | verified | 3–4 | Chromium 151 / macOS 15.6.1；真实播放通过 |
 | Insta360 X3 成对 INSV，严格匹配 `_00`/`_10`，每文件单鱼眼 2880×2880 | AVC/H.264 Main，8-bit 4:2:0，full range，29.97 fps | AAC-LC，48 kHz，双声道；仅 `_00` 输出声音 | insta360 | 3 | verified | 3 | Chrome 152.0.7977.65 / macOS 15.6.1；双视频连续播放、同步 seek、较短时长、结束与重播通过；无 gyro/FlowState |
+| Insta360 X4 单文件双视频轨 INSV，每轨 3840×3840 | HEVC Main，8-bit 4:2:0，BT.709，29.97 fps | AAC-LC，48 kHz，双声道 | insta360 → FFmpeg 软件回退 | 3 | verified | 3 | Chromium 145 / macOS arm64；每路显示 1920²，播放/音频/seek/EOF/重播与清理通过；约 2.8 组双帧/秒，频繁缓冲，不保证实时，见 [INSV 验证](insv-ffmpeg-playback.md) |
 | DJI Osmo 360 `.osv`，MP4 尾部 `moov`，双鱼眼视频轨 3840×3840 | HEVC Main 10，`hvc1`，10-bit 4:2:0，25/29.97 fps | AAC-LC，48 kHz，双声道；忽略 `djmd`/`dbgi` 与 MJPEG 缩略轨 | dji-osmo | 3 | implemented | 3 | 三段 OQ001 真实原片（最大 4.30 GB）完成有界结构探测、FFmpeg 双轨解码与三样例跨镜头投影标定；WebCodecs/WebGL 连续播放待目标浏览器复验；无 gyro、稳定与 HDR 精确输出 |
 | GoPro MAX `.360`，MP4 尾部 `moov`，双 EAC 视频轨 4096×1344 | HEVC Main，`hvc1`，8-bit 4:2:0 | AAC-LC，48 kHz，双声道；忽略辅助 4 声道 Ambisonic PCM | gopro-max | 3 | implemented | 3 | 真实样例有界 probe 与 FFmpeg 双轨 EAC 几何校验通过；WebCodecs/WebGL 连续播放待目标浏览器复验；无 GPMF、gyro、稳定或空间音频 |
 | GoPro MAX2 `.360`，MP4 尾部 `moov`，双 EAC 视频轨 5952×1920 | HEVC Main，`hvc1`，8-bit 4:2:0 | AAC-LC，48 kHz，双声道；忽略辅助 4 声道 Ambisonic PCM | gopro-max | 3 | implemented | 3 | 真实样例有界 probe 与 FFmpeg 双轨 EAC 几何校验通过；WebCodecs/WebGL 连续播放待目标浏览器复验；无 GPMF、gyro、稳定或空间音频 |
@@ -218,5 +219,5 @@ Next.js 的 JavaScript 浏览器基线不代表对应媒体 codec 可用。视�
 
 - [视频查看实施路线图](roadmap.md)
 - [视频查看架构](architecture.md)
-- [FFmpeg 音视频播放 fallback 接入方案](ffmpeg-playback-runtime-plan.md)
+- [FFmpeg 音视频播放架构](ffmpeg-playback-runtime-plan.md)
 - [音频格式支持矩阵](../audio/support-matrix.md)

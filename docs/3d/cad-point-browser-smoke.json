@@ -1,0 +1,47 @@
+{
+  "report": [
+    {
+      "file": "cube.stp",
+      "ms": 1113,
+      "status": "72 vertices · 12 triangles · Dimensions: 300.00 × 300.00 × 300.00 · mm",
+      "workers": 0
+    },
+    {
+      "file": "Cube 10x10.igs",
+      "ms": 500,
+      "status": "72 vertices · 12 triangles · Dimensions: 10.000 × 10.000 × 10.000 · mm",
+      "workers": 0
+    },
+    {
+      "file": "as1_pe_203.brep",
+      "ms": 500,
+      "status": "18,924 vertices · 6,088 triangles · Dimensions: 5080.0 × 2209.8 × 3810.0 · Units unknown",
+      "workers": 0
+    },
+    {
+      "file": "helix.las",
+      "ms": 347,
+      "status": "5,000 vertices · Dimensions: 2.0000 × 2.0000 × 4.9990 · Units unknown · Representative sample; point attributes are not displayed",
+      "workers": 0
+    },
+    {
+      "file": "point10.laz",
+      "ms": 398,
+      "status": "1,065 vertices · Dimensions: 998.81 × 1387.4 × 54.800 · Units unknown · Representative sample; point attributes are not displayed",
+      "workers": 0
+    },
+    {
+      "file": "missing-texture.gltf",
+      "ms": 347,
+      "status": "12 vertices · 4 triangles · Dimensions: 1.0000 × 1.0000 × 1.0000 · m · Some textures are missing or unsupported; geometry remains visible.",
+      "workers": 0
+    },
+    {
+      "file": "animated.gltf",
+      "ms": 346,
+      "status": "12 vertices · 4 triangles · Dimensions: 1.0000 × 1.0000 × 1.0000 · m",
+      "workers": 0
+    }
+  ],
+  "errors": []
+}

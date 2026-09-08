@@ -1,3 +1,4 @@
+import { AudioVisualizer } from "@anyfile/viewer-rendering/audio";
 import type { WrappedAudioBuffer } from "mediabunny";
 import { MAX_BUFFER_BYTES, MAX_BUFFER_SECONDS, PCM_LOOKAHEAD_SECONDS } from "./limits";
 import type { AudioDescription } from "./media-inspection";
@@ -9,6 +10,7 @@ export class AudioPlaybackSession {
   readonly #media: AudioDescription;
   readonly #elements: PlayerElements;
   readonly #copy: PlayerCopy;
+  readonly #visualizer: AudioVisualizer;
   readonly #listeners: Array<() => void> = [];
   readonly #iterators = new Set<AudioIterator>();
   readonly #sources = new Set<AudioBufferSourceNode>();
@@ -28,12 +30,19 @@ export class AudioPlaybackSession {
 
   constructor(media: AudioDescription, elements: PlayerElements, copy: PlayerCopy) {
     this.#media = media; this.#elements = elements; this.#copy = copy; this.#position = media.startTimestamp;
+    this.#visualizer = new AudioVisualizer(elements.visualizer);
   }
 
   initialize() {
     this.#listen(this.#elements.play, "click", () => void this.#toggle());
     this.#listen(this.#elements.seek, "input", () => void this.seek(Number(this.#elements.seek.value)).catch(() => this.#showFailure()));
     this.#listen(this.#elements.volume, "input", () => { if (this.#gain) this.#gain.gain.value = Number(this.#elements.volume.value); });
+  }
+
+  #setPlayState(state: "play" | "pause" | "replay") {
+    this.#elements.play.dataset.state = state;
+    this.#elements.play.setAttribute("aria-label", this.#copy[state]);
+    this.#visualizer.setActive(state === "pause");
   }
 
   #listen(target: EventTarget, type: string, listener: EventListener) {
@@ -48,6 +57,9 @@ export class AudioPlaybackSession {
       this.#gain = this.#audioContext.createGain();
       this.#gain.gain.value = Number(this.#elements.volume.value);
       this.#gain.connect(this.#audioContext.destination);
+      // Side branch only: the audible gain → destination path and the AudioContext itself
+      // stay owned by this session, so the visualizer never closes them.
+      this.#visualizer.attach({ kind: "node", node: this.#gain });
     }
     await this.#audioContext.resume();
   }
@@ -60,14 +72,14 @@ export class AudioPlaybackSession {
     this.#cancelPipeline();
     const generation = this.#generation;
     this.#playing = true; this.#clockMedia = this.#position; this.#clockWall = this.#audioContext!.currentTime;
-    this.#elements.play.textContent = this.#copy.pause;
+    this.#setPlayState("pause");
     void this.#runAudio(generation).catch(() => this.#showFailure());
     this.#updateTimeline();
   }
 
   pause() {
     if (this.#disposed || !this.#playing) return;
-    this.#position = this.currentPosition(); this.#playing = false; this.#elements.play.textContent = this.#copy.play;
+    this.#position = this.currentPosition(); this.#playing = false; this.#setPlayState("play");
     this.#cancelPipeline(); updateTime(this.#elements, this.#position, this.#media.duration);
   }
 
@@ -78,7 +90,7 @@ export class AudioPlaybackSession {
     this.#position = Math.min(this.#media.duration, Math.max(this.#media.startTimestamp, position));
     updateTime(this.#elements, this.#position, this.#media.duration);
     if (request !== this.#seekRequest || this.#disposed) return;
-    this.#elements.play.textContent = this.#position >= this.#media.duration ? this.#copy.replay : this.#copy.play;
+    this.#setPlayState(this.#position >= this.#media.duration ? "replay" : "play");
     if (this.#resumeAfterSeek && this.#position < this.#media.duration) { this.#resumeAfterSeek = false; await this.play(); }
   }
 
@@ -116,7 +128,7 @@ export class AudioPlaybackSession {
   #updateTimeline = () => {
     if (!this.#playing || this.#disposed) return;
     const position = this.currentPosition(); updateTime(this.#elements, position, this.#media.duration);
-    if (position >= this.#media.duration) { this.#position = this.#media.duration; this.#playing = false; this.#elements.play.textContent = this.#copy.replay; this.#cancelPipeline(); return; }
+    if (position >= this.#media.duration) { this.#position = this.#media.duration; this.#playing = false; this.#setPlayState("replay"); this.#cancelPipeline(); return; }
     this.#animationFrame = requestAnimationFrame(this.#updateTimeline);
   };
 
@@ -124,6 +136,7 @@ export class AudioPlaybackSession {
 
   #cancelPipeline() {
     this.#generation += 1;
+    this.#visualizer.setActive(false);
     for (const iterator of this.#iterators) void iterator.return(undefined); this.#iterators.clear();
     for (const source of this.#sources) { try { source.stop(); } catch { /* Already ended. */ } source.disconnect(); } this.#sources.clear();
     if (this.#animationFrame !== null) cancelAnimationFrame(this.#animationFrame); this.#animationFrame = null;
@@ -140,6 +153,7 @@ export class AudioPlaybackSession {
     if (this.#disposed) return;
     this.#disposed = true; this.#seekRequest += 1; this.#playing = false; this.#cancelPipeline();
     for (const remove of this.#listeners.splice(0)) remove();
+    this.#visualizer.dispose();
     this.#gain?.disconnect();
     // Mediabunny owns sink/decoder lifetimes through Input; disposing it cancels all sink operations.
     this.#media.input.dispose();

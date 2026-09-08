@@ -2,9 +2,8 @@ import type { AppDictionary } from "../types";
 
 const dictionary = {
   metadata: {
-    siteTitle: "Anyfile — 免费在线文件查看器", siteDescription: "免费的在线文件查看器：快速、私密地打开文档、图片、音视频、代码与数据文件，无需上传、注册账户或安装软件。",
-    viewerTitle: "免费在线文件查看器", viewerDescription: "使用快速、私密的在线查看器打开受支持文件。完全免费，文件留在当前设备，无需上传。",
-    noUploadSuffix: " 无需上传。",
+    siteTitle: "免费在线文件查看器 — 无需上传", siteDescription: "免费的在线文件查看器：快速、私密地打开文档、图片、音视频、代码与数据文件，无需上传、注册账户或安装软件。",
+    viewerTitle: "免费在线文件查看器 — 无需上传", viewerDescription: "使用快速、私密的在线查看器打开受支持文件。完全免费，文件留在当前设备，无需上传。",
   },
   common: {
     home: "首页", mainNavigation: "主要导航", openFile: "打开文件", openFolder: "打开文件夹",
@@ -15,8 +14,7 @@ const dictionary = {
     about: "关于", privacy: "隐私政策", contact: "联系", resources: "Anyfile", email: "邮箱", sourceCode: "开源地址",
   },
   nav: {
-    imagesVideo: "图片与音视频", documents: "文档", codeData: "数据",
-    developerArtifacts: "开发者", panorama360: "360° 全景", threeD: "3D", design: "设计",
+    media: "图片与媒体", reading: "文档与阅读", designEngineering: "设计与工程", dataDevelopment: "数据与开发",
   },
   home: {
     localFirst: "免费在线文件查看器", title: "在线打开文件，无需上传。",
@@ -31,8 +29,6 @@ const dictionary = {
     ],
     formatsEyebrow: "支持的格式", formatsTitle: "找到你要打开的格式。",
     formatsDescription: "从浏览器原生支持到专用查看器插件，统一在清晰的类别中。", browseCount: "浏览 {count} 种格式",
-    panoramaEyebrow: "相机原始素材", panoramaTitle: "剪辑之前，直接打开全景相机原片。",
-    panoramaDescription: "在本地预览受支持的 Insta360、GoPro MAX 与 DJI Osmo 360 原片，无需先导出平面视频，也无需上传大型素材。",
     openSourceEyebrow: "开源项目", openSourceTitle: "不仅查看文件，也可以检查查看器本身。",
     openSourceDescription: "Anyfile 完全开源。你可以审查本地文件如何被处理、验证隐私设计，也可以帮助项目支持更多少见格式。",
     openSourceCta: "在 GitHub 查看源码",
@@ -42,11 +38,11 @@ const dictionary = {
       { title: "Apache-2.0", description: "通过宽松的开源许可证使用、研究并继续构建这个项目。" },
     ],
   },
-  category: { home: "首页", viewerSuffix: "查看器", localSuffix: " 所有处理都在当前设备完成。", formats: "种格式", choose: "支持的格式" },
+  category: { home: "首页", viewerSuffix: "查看器", formats: "种格式", choose: "支持的格式" },
   format: {
     viewerSuffix: "查看器", metadataDescription: "在浏览器本地查看 {name}。{description}",
     browserNativeView: "浏览器原生查看", pluginView: "专用插件查看", headline: "{name}，打开就看。",
-    privacySuffix: " 无需上传，处理仅在浏览器本地进行。", choose: "选择 .{extension} 文件",
+    choose: "选择 .{extension} 文件",
     benefits: [
       { title: "更快", description: "跳过文件上传与云端处理队列。" },
       { title: "更私密", description: "文件内容不会发送到 Anyfile 服务器。" },
@@ -60,7 +56,7 @@ const dictionary = {
     pickerFailed: "无法打开文件夹选择器。", droppedEmpty: "拖放内容中没有可读取的文件。",
     accessErrorTitle: "无法访问本地文件",
     collapseSidebar: "收起文件栏", expandSidebar: "展开文件栏", chooseLocalFile: "选择本地文件",
-    unopenedTitle: "尚未打开工作区", unopenedDescription: "授权文件或文件夹后，这里会显示句柄树。",
+    unopenedTitle: "尚未打开工作区", unopenedDescription: "选择或拖动文件/文件夹，这里会显示文件树",
     preview: "预览区", unknownType: "未知类型", workspaceFiles: "工作区文件",
   },
   viewer: {

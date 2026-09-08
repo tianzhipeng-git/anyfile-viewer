@@ -1,0 +1,26 @@
+{
+  "name": "@anyfile/cad-exchange-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts",
+    "./probe": "./src/probe.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anyfile/runtime-assets": "workspace:*",
+    "@anyfile/rendering-3d": "workspace:*",
+    "@anyfile/viewer-protocol": "workspace:*",
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@types/three": "0.185.4",
+    "vitest": "4.1.11",
+    "happy-dom": "20.11.6",
+    "@anyfile/viewer-test": "workspace:*"
+  }
+}

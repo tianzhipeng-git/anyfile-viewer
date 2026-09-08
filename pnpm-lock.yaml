@@ -20,15 +20,24 @@ importers:
       '@anyfile/browser-video-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/browser-video
+      '@anyfile/cad-2d-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/cad-2d
+      '@anyfile/cad-dwg-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/cad-dwg
+      '@anyfile/cad-exchange-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/cad-exchange
       '@anyfile/camera-raw-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/camera-raw
       '@anyfile/code-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/code
-      '@anyfile/data-viewer':
+      '@anyfile/comic-book-reader':
         specifier: workspace:*
-        version: link:viewer/plugins/data
+        version: link:viewer/plugins/comic-book
       '@anyfile/dev-array-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/dev-array
@@ -41,9 +50,24 @@ importers:
       '@anyfile/dji-osmo-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/dji-osmo
+      '@anyfile/duckdb-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/duckdb
+      '@anyfile/epub-reader':
+        specifier: workspace:*
+        version: link:viewer/plugins/epub
       '@anyfile/excel-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/excel
+      '@anyfile/ffmpeg-audio-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/ffmpeg-audio
+      '@anyfile/ffmpeg-video-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/ffmpeg-video
+      '@anyfile/fictionbook-reader':
+        specifier: workspace:*
+        version: link:viewer/plugins/fictionbook
       '@anyfile/general-raster-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/general-raster
@@ -62,6 +86,12 @@ importers:
       '@anyfile/insta360-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/insta360
+      '@anyfile/mesh-3d-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/mesh-3d
+      '@anyfile/mobi-reader':
+        specifier: workspace:*
+        version: link:viewer/plugins/mobi
       '@anyfile/modern-raster-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/modern-raster
@@ -74,9 +104,24 @@ importers:
       '@anyfile/pdf-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/pdf
+      '@anyfile/photoshop-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/photoshop
+      '@anyfile/pixelmator-pxd-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/pixelmator-pxd
+      '@anyfile/point-cloud-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/point-cloud
+      '@anyfile/postscript-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/postscript
       '@anyfile/powerpoint-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/powerpoint
+      '@anyfile/print-3d-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/print-3d
       '@anyfile/safe-svg-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/svg
@@ -156,6 +201,9 @@ importers:
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6
+      playwright:
+        specifier: 1.58.2
+        version: 1.58.2
       tailwindcss:
         specifier: ^4
         version: 4.3.3
@@ -167,6 +215,19 @@ importers:
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
   viewer/dev-binary-core:
+    devDependencies:
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/ffmpeg-playback:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
     devDependencies:
       happy-dom:
         specifier: 20.11.6
@@ -210,6 +271,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -249,6 +313,93 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/cad-2d:
+    dependencies:
+      '@anyfile/rendering-3d':
+        specifier: workspace:*
+        version: link:../../rendering-3d
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      dxf-parser:
+        specifier: 1.1.2
+        version: 1.1.2
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      '@types/three':
+        specifier: 0.185.4
+        version: 0.185.4
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/cad-dwg:
+    dependencies:
+      '@anyfile/rendering-3d':
+        specifier: workspace:*
+        version: link:../../rendering-3d
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      '@mlightcad/libredwg-web':
+        specifier: 0.7.10
+        version: 0.7.10
+      '@types/three':
+        specifier: 0.185.4
+        version: 0.185.4
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/cad-exchange:
+    dependencies:
+      '@anyfile/rendering-3d':
+        specifier: workspace:*
+        version: link:../../rendering-3d
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      '@types/three':
+        specifier: 0.185.4
+        version: 0.185.4
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6
@@ -297,20 +448,17 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
-  viewer/plugins/data:
+  viewer/plugins/comic-book:
     dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../archive
+      '@anyfile/browser-image-viewer':
+        specifier: workspace:*
+        version: link:../browser-image
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
-      '@anyfile/viewer-ui':
-        specifier: workspace:*
-        version: link:../../ui
-      '@duckdb/duckdb-wasm':
-        specifier: 1.32.0
-        version: 1.32.0
-      apache-arrow:
-        specifier: 17.0.0
-        version: 17.0.0
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -407,6 +555,59 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
+  viewer/plugins/duckdb:
+    dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
+      '@duckdb/duckdb-wasm':
+        specifier: 1.32.0
+        version: 1.32.0
+      apache-arrow:
+        specifier: 17.0.0
+        version: 17.0.0
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/epub:
+    dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../archive
+      '@anyfile/browser-image-viewer':
+        specifier: workspace:*
+        version: link:../browser-image
+      '@anyfile/rendering-publication':
+        specifier: workspace:*
+        version: link:../../rendering-publication
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
   viewer/plugins/excel:
     dependencies:
       '@anyfile/viewer-protocol':
@@ -425,6 +626,69 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/ffmpeg-audio:
+    dependencies:
+      '@anyfile/ffmpeg-playback':
+        specifier: workspace:*
+        version: link:../../ffmpeg-playback
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/ffmpeg-video:
+    dependencies:
+      '@anyfile/ffmpeg-playback':
+        specifier: workspace:*
+        version: link:../../ffmpeg-playback
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/fictionbook:
+    dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../archive
+      '@anyfile/browser-image-viewer':
+        specifier: workspace:*
+        version: link:../browser-image
+      '@anyfile/rendering-publication':
+        specifier: workspace:*
+        version: link:../../rendering-publication
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6
@@ -516,6 +780,9 @@ importers:
       '@anyfile/browser-video-viewer':
         specifier: workspace:*
         version: link:../browser-video
+      '@anyfile/ffmpeg-playback':
+        specifier: workspace:*
+        version: link:../../ffmpeg-playback
       '@anyfile/raw-decoder':
         specifier: workspace:*
         version: link:../../raw-decoder
@@ -528,6 +795,53 @@ importers:
       mediabunny:
         specifier: 1.55.3
         version: 1.55.3
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/mesh-3d:
+    dependencies:
+      '@anyfile/rendering-3d':
+        specifier: workspace:*
+        version: link:../../rendering-3d
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
+    devDependencies:
+      '@types/three':
+        specifier: 0.185.4
+        version: 0.185.4
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/mobi:
+    dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../archive
+      '@anyfile/browser-image-viewer':
+        specifier: workspace:*
+        version: link:../browser-image
+      '@anyfile/rendering-publication':
+        specifier: workspace:*
+        version: link:../../rendering-publication
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -569,6 +883,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
       mediabunny:
         specifier: 1.55.3
         version: 1.55.3
@@ -624,6 +941,97 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
+  viewer/plugins/photoshop:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      ag-psd:
+        specifier: 31.0.2
+        version: 31.0.2
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/pixelmator-pxd:
+    dependencies:
+      '@anyfile/general-raster-viewer':
+        specifier: workspace:*
+        version: link:../general-raster
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      '@zip.js/zip.js':
+        specifier: 2.8.60
+        version: 2.8.60
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/point-cloud:
+    dependencies:
+      '@anyfile/rendering-3d':
+        specifier: workspace:*
+        version: link:../../rendering-3d
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
+    devDependencies:
+      '@types/three':
+        specifier: 0.185.4
+        version: 0.185.4
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/postscript:
+    dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
   viewer/plugins/powerpoint:
     dependencies:
       '@aiden0z/pptx-renderer':
@@ -636,6 +1044,31 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/plugins/print-3d:
+    dependencies:
+      '@anyfile/rendering-3d':
+        specifier: workspace:*
+        version: link:../../rendering-3d
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@zip.js/zip.js':
+        specifier: 2.8.60
+        version: 2.8.60
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
+    devDependencies:
+      '@types/three':
+        specifier: 0.185.4
+        version: 0.185.4
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6
@@ -736,6 +1169,43 @@ importers:
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/rendering-3d:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      three:
+        specifier: 0.185.1
+        version: 0.185.1
+    devDependencies:
+      '@types/three':
+        specifier: 0.185.4
+        version: 0.185.4
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
+
+  viewer/rendering-publication:
+    dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../plugins/archive
+      '@anyfile/browser-image-viewer':
+        specifier: workspace:*
+        version: link:../plugins/browser-image
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
+
+  viewer/runtime-assets:
+    devDependencies:
       vitest:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
@@ -935,6 +1405,9 @@ packages:
     peerDependenciesMeta:
       '@types/react':
         optional: true
+
+  '@dimforge/rapier3d-compat@0.12.0':
+    resolution: {integrity: sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow==}
 
   '@dotenvx/dotenvx@1.75.1':
     resolution: {integrity: sha512-/BITOC9dmS/edY2zQwZNicQ059O6RKabtQfyEafV0nGtfYRNHYy1DIPiYVcov40+tob9hfmBnbR963dS+EQ1DQ==}
@@ -1220,6 +1693,10 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@mlightcad/libredwg-web@0.7.10':
+    resolution: {integrity: sha512-L9wnwQn8cgHIr6I5El/8TgKSXaRacW9vytSpsU19xufmrnAAqEEGcW0MU92PgEiDKuQtU4GBenERIDfSrbY99g==}
+    engines: {node: '>=20'}
 
   '@modelcontextprotocol/sdk@1.30.0':
     resolution: {integrity: sha512-xKd8OIzlqNzcqcNumGAa6g+PW2kjD5vrpcKOnfldAUPP3j7lnqMPwlTXQm8gF+UwH72z0lqaRbjr9hqGz0eITA==}
@@ -1603,6 +2080,9 @@ packages:
   '@ts-morph/common@0.27.0':
     resolution: {integrity: sha512-Wf29UqxWDpc+i61k3oIOzcUfQt79PIT9y/MWfAGlrkjg6lBC1hwDECLXPVJAhWjiGbfBCxZd65F/LIZF3+jeJQ==}
 
+  '@tweenjs/tween.js@23.1.3':
+    resolution: {integrity: sha512-vJmvvwFxYuGnF2axRtPYocag6Clbb5YS7kLL+SO/TeVFzHqDIWrNKYtcsPMibjDx9O+bu+psAy9NKfWklassUA==}
+
   '@tybys/wasm-util@0.10.3':
     resolution: {integrity: sha512-F3fo1MYrRJYL3zER0OUOmkutjr1Vp23m7OsSgp7nq4SP6OqX6C/56XFIPAl5bt3zaBRjmW7SGz3u/6LwFpYcOg==}
 
@@ -1650,8 +2130,17 @@ packages:
   '@types/sql.js@1.4.11':
     resolution: {integrity: sha512-QXIx38p2ZThJaK9vP5ZdqdlRe1FG9I8SmCZOS7FHfB/2qPAjZwkL7/vlfPg6N/oWHuuOaGg/P/IRwfP2W0kWVQ==}
 
+  '@types/stats.js@0.17.4':
+    resolution: {integrity: sha512-jIBvWWShCvlBqBNIZt0KAshWpvSjhkwkEu4ZUcASoAvhmrgAUI2t1dXrjSL4xXVLB4FznPrIsX3nKXFl/Dt4vA==}
+
+  '@types/three@0.185.4':
+    resolution: {integrity: sha512-gAsBIC07NIFrxjbf7tH2t71c38uulFfk/RFoC7FNBSjMRAQ8J1x/RBvusX0N5PJouaYFJawXQqfCQ0RKUx/1nA==}
+
   '@types/validate-npm-package-name@4.0.2':
     resolution: {integrity: sha512-lrpDziQipxCEeK5kWxvljWYhUvOiB2A9izZd9B2AFarYAkqZshb4lPbRs7zKEic6eGtH8V/2qJW+dPp9OtF6bw==}
+
+  '@types/webxr@0.5.24':
+    resolution: {integrity: sha512-h8fgEd/DpoS9CBrjEQXR+dIDraopAEfu4wYVNY2tEPwk60stPWhvZMf4Foo5FakuQ7HFZoa8WceaWFervK2Ovg==}
 
   '@types/whatwg-mimetype@3.0.2':
     resolution: {integrity: sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA==}
@@ -1943,6 +2432,9 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
+  ag-psd@31.0.2:
+    resolution: {integrity: sha512-5s5PvqbomPIIJ9YjL6robz55rT4RYPiQkww4brisyZEb5jzlHB1EKh47IJg7gIFj0RUrD0cMgdntM907qaZjXA==}
+
   ajv-formats@2.1.1:
     resolution: {integrity: sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA==}
     peerDependencies:
@@ -2069,6 +2561,9 @@ packages:
   balanced-match@4.0.4:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
     engines: {node: 18 || 20 || >=22}
+
+  base64-js@1.5.1:
+    resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
 
   baseline-browser-mapping@2.11.20:
     resolution: {integrity: sha512-H0ulySigv6icDJ1F7SjtdCD6PrhTpdYCmP0CactWy1+ekh0AFd0o1Wn5T8b+hnTmdBx19u9yhL6wvCylXMY7zw==}
@@ -2349,6 +2844,9 @@ packages:
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
+
+  dxf-parser@1.1.2:
+    resolution: {integrity: sha512-GPTumUvRkounlIazLIyJMmTWt+nlg+ksS0Hdm8jWvejmZKBTz6gvHTam76wRm4PQMma5sgKLThblQyeIJcH79Q==}
 
   echarts@6.1.0:
     resolution: {integrity: sha512-q0yaFPggC9FUdsWH4blavRWFmxdrIodbkoKNAjJudAI6CA9gNPxHtV2RcZNEepZVlk4yvBYkOkbk6HIVpIyHZA==}
@@ -2688,6 +3186,11 @@ packages:
   fs-extra@11.4.0:
     resolution: {integrity: sha512-EQsFzMUJkCKGr1ePqlYADkIUmHW1s3ZXr5Yqy6wbGrfUCphpl2maM/kyOIRA2HpP3AaFQTZXD4ldjek+nccddA==}
     engines: {node: '>=14.14'}
+
+  fsevents@2.3.2:
+    resolution: {integrity: sha512-xiqMQR4xAeHTuB9uWm+fFRcIOgKBMiOBP+eXiyT7jsgVCq1bkVygt00oASowB7EdtpOHaaPgKt812P9ab+DDKA==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
 
   fsevents@2.3.3:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
@@ -3327,6 +3830,10 @@ packages:
     resolution: {integrity: sha512-i24m8rpwhmPIS4zscNzK6MSEhk0DUWa/8iYQWxhffV8jkI4Phvs3F+quL5xvS0gdQR0FyTCMMH33Y78dDTzzIw==}
     engines: {node: '>=18'}
 
+  loglevel@1.9.2:
+    resolution: {integrity: sha512-HgMmCqIJSAKqo68l0rS2AanEWfkxaZ5wNiEFb5ggm08lDs9Xl2KxBlX3PTcaD2chBM1gXAYf491/M2Rv8Jwayg==}
+    engines: {node: '>= 0.6.0'}
+
   loose-envify@1.4.0:
     resolution: {integrity: sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==}
     hasBin: true
@@ -3363,6 +3870,9 @@ packages:
   merge2@1.4.1:
     resolution: {integrity: sha512-8q7VEgMJW4J8tcfVPy8g09NcQwZdbwFEqhe/WZkoIzjn/3TGDwtOCYtXGxA3O8tPzpczCCDgv+P2P5y00ZJOOg==}
     engines: {node: '>= 8'}
+
+  meshoptimizer@1.1.1:
+    resolution: {integrity: sha512-oRFNWJRDA/WTrVj7NWvqa5HqE1t9MYDj2VaWirQCzCCrAd2GHrqR/sQezCxiWATPNlKTcRaPRHPJwIRoPBAp5g==}
 
   micromatch@4.0.8:
     resolution: {integrity: sha512-PXwfBhYu0hBCPw8Dn0E+WDYb7af3dSLVWKi3HGv84IdF4TyFoC0ysxFd0Goxw7nSv4T/PzEJQxsYsEiFCKo2BA==}
@@ -3556,6 +4066,9 @@ packages:
   pako@1.0.11:
     resolution: {integrity: sha512-4hLB8Py4zZce5s4yd9XzopqwVv/yGNhV1Bl8NTmCq1763HeK2+EwVTv+leGeL13Dnh2wfbqowVPXCIO0z4taYw==}
 
+  pako@2.1.0:
+    resolution: {integrity: sha512-w+eufiZ1WuJYgPXbV/PO3NCMEc3xqylkKHzp8bxp1uW4qaSNQUkwmLLEc3kKsfz8lpV1F8Ht3U1Cm+9Srog2ug==}
+
   pako@2.2.0:
     resolution: {integrity: sha512-zJq6RP/5q+TO2OpFV3FHzlPnFjmkb7Nc99a5SNjJE+uu/PkpChs+NIZSSzbBoD+6kjiISXjfYdwj1ZRQ81dz/w==}
 
@@ -3628,6 +4141,16 @@ packages:
   pkg-up@3.1.0:
     resolution: {integrity: sha512-nDywThFk1i4BQK4twPQ6TA4RT8bDY96yeuCVBWL3ePARCiEKDRSrNGbFIgUJpLp+XeIR65v8ra7WuJOFUBtkMA==}
     engines: {node: '>=8'}
+
+  playwright-core@1.58.2:
+    resolution: {integrity: sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.58.2:
+    resolution: {integrity: sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   possible-typed-array-names@1.1.0:
     resolution: {integrity: sha512-/+5VFTchJDoVj3bhoqi6UeymcD00DAwb1nJwamzPvHEszJ4FpF6SNNbUbOS8yI56qHzdV8eK0qEfOSiodkTdxg==}
@@ -4013,6 +4536,9 @@ packages:
   tapable@2.3.3:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
+
+  three@0.185.1:
+    resolution: {integrity: sha512-5aojFCXKwnjBRZvUnt3WFfEcvUJgkN5LlijRFN95hMy8WVkG4I0QNcJE+OuWvuJ0bOdStrbfXn0pkd6/QyiAlg==}
 
   tiny-invariant@1.3.3:
     resolution: {integrity: sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==}
@@ -4578,6 +5104,8 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.18
 
+  '@dimforge/rapier3d-compat@0.12.0': {}
+
   '@dotenvx/dotenvx@1.75.1':
     dependencies:
       '@dotenvx/primitives': 0.8.0
@@ -4837,6 +5365,8 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
+
+  '@mlightcad/libredwg-web@0.7.10': {}
 
   '@modelcontextprotocol/sdk@1.30.0(zod@3.25.76)':
     dependencies:
@@ -5100,6 +5630,8 @@ snapshots:
       minimatch: 10.2.6
       path-browserify: 1.0.1
 
+  '@tweenjs/tween.js@23.1.3': {}
+
   '@tybys/wasm-util@0.10.3':
     dependencies:
       tslib: 2.8.1
@@ -5147,7 +5679,20 @@ snapshots:
       '@types/emscripten': 1.41.5
       '@types/node': 20.19.43
 
+  '@types/stats.js@0.17.4': {}
+
+  '@types/three@0.185.4':
+    dependencies:
+      '@dimforge/rapier3d-compat': 0.12.0
+      '@tweenjs/tween.js': 23.1.3
+      '@types/stats.js': 0.17.4
+      '@types/webxr': 0.5.24
+      fflate: 0.8.3
+      meshoptimizer: 1.1.1
+
   '@types/validate-npm-package-name@4.0.2': {}
+
+  '@types/webxr@0.5.24': {}
 
   '@types/whatwg-mimetype@3.0.2': {}
 
@@ -5382,6 +5927,11 @@ snapshots:
 
   acorn@8.18.0: {}
 
+  ag-psd@31.0.2:
+    dependencies:
+      base64-js: 1.5.1
+      pako: 2.1.0
+
   ajv-formats@2.1.1(ajv@8.20.0):
     optionalDependencies:
       ajv: 8.20.0
@@ -5524,6 +6074,8 @@ snapshots:
   balanced-match@1.0.2: {}
 
   balanced-match@4.0.4: {}
+
+  base64-js@1.5.1: {}
 
   baseline-browser-mapping@2.11.20: {}
 
@@ -5786,6 +6338,10 @@ snapshots:
       es-errors: 1.3.0
       gopd: 1.2.0
 
+  dxf-parser@1.1.2:
+    dependencies:
+      loglevel: 1.9.2
+
   echarts@6.1.0:
     dependencies:
       tslib: 2.3.0
@@ -5943,8 +6499,8 @@ snapshots:
       '@next/eslint-plugin-next': 16.3.3(eslint@9.39.4(jiti@2.7.0))
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-jsx-a11y: 6.10.2(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react: 7.37.5(eslint@9.39.4(jiti@2.7.0))
       eslint-plugin-react-hooks: 7.1.1(eslint@9.39.4(jiti@2.7.0))
@@ -5966,7 +6522,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0)):
+  eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       '@nolyfill/is-core-module': 1.0.39
       debug: 4.4.3
@@ -5977,22 +6533,22 @@ snapshots:
       tinyglobby: 0.2.17
       unrs-resolver: 1.12.2
     optionalDependencies:
-      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-plugin-import: 2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
+  eslint-module-utils@2.14.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       debug: 3.2.7
     optionalDependencies:
       '@typescript-eslint/parser': 8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0)(eslint@9.39.4(jiti@2.7.0))
+      eslint-import-resolver-typescript: 3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
     transitivePeerDependencies:
       - supports-color
 
-  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0)):
+  eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)):
     dependencies:
       '@rtsao/scc': 1.1.0
       array-includes: 3.1.9
@@ -6003,7 +6559,7 @@ snapshots:
       doctrine: 2.1.0
       eslint: 9.39.4(jiti@2.7.0)
       eslint-import-resolver-node: 0.3.10
-      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1)(eslint@9.39.4(jiti@2.7.0))
+      eslint-module-utils: 2.14.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint-import-resolver-node@0.3.10)(eslint-import-resolver-typescript@3.10.1(eslint-plugin-import@2.32.0(@typescript-eslint/parser@8.68.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0)))(eslint@9.39.4(jiti@2.7.0))
       hasown: 2.0.4
       is-core-module: 2.16.2
       is-glob: 4.0.3
@@ -6319,6 +6875,9 @@ snapshots:
       graceful-fs: 4.2.11
       jsonfile: 6.2.1
       universalify: 2.0.1
+
+  fsevents@2.3.2:
+    optional: true
 
   fsevents@2.3.3:
     optional: true
@@ -6874,6 +7433,8 @@ snapshots:
       chalk: 5.6.2
       is-unicode-supported: 1.3.0
 
+  loglevel@1.9.2: {}
+
   loose-envify@1.4.0:
     dependencies:
       js-tokens: 4.0.0
@@ -6904,6 +7465,8 @@ snapshots:
   merge-stream@2.0.0: {}
 
   merge2@1.4.1: {}
+
+  meshoptimizer@1.1.1: {}
 
   micromatch@4.0.8:
     dependencies:
@@ -7116,6 +7679,8 @@ snapshots:
 
   pako@1.0.11: {}
 
+  pako@2.1.0: {}
+
   pako@2.2.0: {}
 
   parent-module@1.0.1:
@@ -7166,6 +7731,14 @@ snapshots:
   pkg-up@3.1.0:
     dependencies:
       find-up: 3.0.0
+
+  playwright-core@1.58.2: {}
+
+  playwright@1.58.2:
+    dependencies:
+      playwright-core: 1.58.2
+    optionalDependencies:
+      fsevents: 2.3.2
 
   possible-typed-array-names@1.1.0: {}
 
@@ -7675,6 +8248,8 @@ snapshots:
   tailwindcss@4.3.3: {}
 
   tapable@2.3.3: {}
+
+  three@0.185.1: {}
 
   tiny-invariant@1.3.3: {}
 

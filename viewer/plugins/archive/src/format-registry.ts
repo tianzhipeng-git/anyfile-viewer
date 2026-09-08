@@ -11,7 +11,7 @@ const EXTENSIONS: readonly (readonly [string, ArchiveFormatId])[] = [
   ...[".zip", ".jar", ".war", ".ear", ".apk", ".aab", ".ipa", ".epub", ".odt",
     ".ods", ".odp", ".odg", ".odf", ".docx", ".xlsx", ".pptx", ".nupkg", ".snupkg",
     ".vsix", ".whl", ".xpi", ".cbz", ".kmz", ".usdz", ".egg", ".pyz", ".pyzw"].map((item) => [item, "zip"] as const),
-  [".rar", "rar"],
+  [".rar", "rar"], [".cbr", "rar"], [".cbt", "tar"],
   [".tar", "tar"], [".gz", "gzip"], [".xz", "xz"], [".zst", "zstd"],
   [".bz2", "bzip2"], [".lz4", "lz4"], [".zlib", "zlib"], [".zz", "zlib"],
   [".dfl", "deflate"], [".br", "brotli"],

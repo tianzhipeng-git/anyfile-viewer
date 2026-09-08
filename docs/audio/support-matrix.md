@@ -1,6 +1,6 @@
 # 音频格式支持矩阵
 
-- 状态：阶段 0 已完成；阶段 1、2 组合已实现并在当前 Chromium 环境验证，完整目标浏览器矩阵仍在补证
+- 状态：阶段 0 已完成；阶段 1、2 与阶段 3 首批 AIFF/AIFC 组合已实现并在当前 Chromium 环境验证，完整目标浏览器矩阵仍在补证
 - 覆盖口径：以实际可播放的容器/裸码流 × codec/profile/sample format × 声道组合计数，不以扩展名数量计数
 
 网站 catalog 和文件图标只能概括已经交付的格式入口，不能替代本表的组合级证据。只有达到 `implemented` 或 `verified`、并能播放主要音频节目的具体组合，才可以进入支持文案。
@@ -27,19 +27,20 @@
 | MP3 frame stream | 其他 Layer/version/free-format 变体 | 待定 | browser/non-native/FFmpeg audio | 0 | candidate | 3 | 按真实频率与解码证据逐项增加 |
 | RIFF/WAVE | PCM S16LE | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 原生播放通过 |
 | RIFF/WAVE | PCM S24LE / PCM F32LE | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 原生播放通过，其他环境待补证 |
-| RIFF/WAVE | A-law / μ-law | mono/stereo | non-native/FFmpeg audio | 0 | candidate | 3 | 以 Mediabunny PCM 路径和真实浏览器输出为准 |
-| RIFF/WAVE | IMA/MS ADPCM 等 | 具体 block layout | FFmpeg audio | 0 | candidate | 3 | 不因扩展名为 WAV 自动支持 |
+| RIFF/WAVE | A-law / μ-law | 8 kHz mono（合成样例）；有界 fmt/data 证据 | non-native audio | 3 | implemented | 3 | 阶段 2 扩展；Mediabunny 软件 PCM 路径；browser-audio 对同扩展名 PCM 仍优先 |
+| RIFF/WAVE | IMA/MS ADPCM 等 | 具体 block layout | FFmpeg audio | 0 | candidate | 3 | Mediabunny WAVE 明确不支持 ADPCM；不因扩展名为 WAV 自动支持 |
 | M4A/MP4 audio-only | AAC-LC | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 真实播放及 MP4 视频互斥通过 |
-| M4A/MP4 audio-only | HE-AAC/HE-AACv2 | profile、SBR/PS 待定 | browser/non-native/FFmpeg audio | 0 | candidate | 3 | 环境差异和 duration/gapless 需独立证据 |
-| M4A/MP4 audio-only | ALAC | 16/24-bit，mono/stereo | browser/FFmpeg audio | 0 | candidate | 3 | 先测原生路径，再决定 fallback |
+| M4A/MP4 audio-only | HE-AAC/HE-AACv2 | profile、SBR/PS 待定 | browser/non-native/FFmpeg audio | 0 | blocked | 3 | 当前锁定 FFmpeg 构建无法生成 HE-AAC 固定样例；WebCodecs 证据未建立 |
+| M4A/MP4 audio-only | ALAC | 16/24-bit，mono/stereo | FFmpeg audio | 0 | planned | 3 | Mediabunny 1.55.3 不识别 `alac` sample entry；保持 FFmpeg 路径 |
 | Ogg audio-only | Vorbis | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 播放及 Theora 互斥通过 |
 | Ogg audio-only | Opus | 48 kHz，stereo，pre-skip | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 时长、seek、结束和重播通过 |
-| Ogg audio-only | FLAC | 常见位深/声道 | browser/non-native audio | 0 | candidate | 3 | 按真实环境能力决定路径 |
+| Ogg audio-only | FLAC | 常见位深/声道 | FFmpeg audio | 0 | blocked | 3 | Mediabunny Ogg 仅识别 Vorbis/Opus，`getCodec()` 对 Ogg FLAC 为 null |
 | WebM audio-only | Opus/Vorbis | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 播放及 WebM 视频互斥通过 |
 | Matroska audio-only | Opus/Vorbis/FLAC/AAC | 48 kHz stereo，单个主音轨，存在可用 seek index | non-native audio | 3 | implemented | 3 | 阶段 2；四个 `.mka` 固定样例在 Chromium 连续输出、seek、结束和重播通过 |
 | native FLAC | FLAC | 16/24-bit，48 kHz stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 播放通过，picture block 与 metadata 有界跳过 |
 | ADTS | AAC-LC | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 原生播放通过，其他环境待补证 |
-| AIFF/AIFC | PCM S16BE/S24BE/F32BE 等 | mono/stereo | FFmpeg audio | 0 | planned | 3 | FFmpeg 首批 audio spike |
+| ADTS | AAC Main / 非 LC profile | 合成对照或真实流 | non-native/FFmpeg audio | 0 | blocked | 3 | 现有 `adts-main` 反例仅为 bit-flip，Mediabunny 无法读取；本机 FFmpeg 无可用 Main/HE 编码器 |
+| AIFF；AIFC `fl32` | AIFF PCM S16BE/S24BE；AIFC PCM F32BE | mono/stereo，整数采样率 8–96 kHz | FFmpeg audio | 3 | implemented | 3 | Chromium 145.0.7632.6 / Darwin 24.6.0 arm64；首 PCM、非静音/静音播放、seek、结束与清理通过，见[播放验证](../videos/ffmpeg-playback-delivery.md) |
 | ASF audio-only | WMA v1/v2 首批代表组合 | mono/stereo | FFmpeg audio | 0 | planned | 3 | 与 ASF/WMV 视频共享 runtime，独立音频证据 |
 | APE | Monkey's Audio | 代表版本/压缩等级 | FFmpeg audio | 0 | candidate | 3 | 测 CPU、内存、seek 和取消后再决定 |
 | Musepack | SV7/SV8 | mono/stereo | FFmpeg audio | 0 | deferred | 3 | 后续按真实需求 |
@@ -95,4 +96,4 @@ probe 返回 0 不能代替完整插件校验。`open()` 必须独立复验真�
 - [音频查看架构](architecture.md)
 - [音频查看实施路线图](roadmap.md)
 - [视频格式支持矩阵](../videos/support-matrix.md)
-- [FFmpeg 音视频播放 fallback 接入方案](../videos/ffmpeg-playback-runtime-plan.md)
+- [FFmpeg 音视频播放架构](../videos/ffmpeg-playback-runtime-plan.md)

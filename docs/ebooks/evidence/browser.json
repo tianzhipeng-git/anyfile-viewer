@@ -1,0 +1,106 @@
+{
+  "browser": "145.0.7632.6",
+  "base": "http://localhost:3107",
+  "results": [
+    {
+      "name": "English homepage enters isolated viewer",
+      "elapsedMs": 177
+    },
+    {
+      "name": "EPUB first UI",
+      "elapsedMs": 51
+    },
+    {
+      "name": "EPUB 3 first chapter, image and routing",
+      "elapsedMs": 70
+    },
+    {
+      "name": "EPUB TOC, cross-chapter anchor, typography and resize",
+      "elapsedMs": 126
+    },
+    {
+      "name": "EPUB 2 NCX and RTL",
+      "elapsedMs": 68
+    },
+    {
+      "name": "Scripts, forms, popups, external URLs, CSS and host mutation blocked",
+      "elapsedMs": 61
+    },
+    {
+      "name": "Embedded font and safe SVG resources",
+      "elapsedMs": 35
+    },
+    {
+      "name": "Missing optional image preserves readable chapter text",
+      "elapsedMs": 36
+    },
+    {
+      "name": "EPUB local errors and protected content",
+      "elapsedMs": 60
+    },
+    {
+      "name": "FB2 first UI and bounded live resources",
+      "elapsedMs": 33,
+      "liveChapters": 3,
+      "liveUrls": 0,
+      "jsHeapBytes": 24500000
+    },
+    {
+      "name": "FB2 namespaces, cover, structures, notes and return after chapter unload",
+      "elapsedMs": 154
+    },
+    {
+      "name": "FB2 ZIP and UTF-16 / Windows-1251 encoding",
+      "elapsedMs": 149
+    },
+    {
+      "name": "FB2 safe mapping and resource release on switching",
+      "elapsedMs": 41
+    },
+    {
+      "name": "CBZ first page, cover, natural sorting, RTL spreads and keyboard",
+      "elapsedMs": 98
+    },
+    {
+      "name": "300-page CBZ first UI",
+      "elapsedMs": 28
+    },
+    {
+      "name": "300-page CBZ is virtualized and supports jumps, scrolling and resize",
+      "elapsedMs": 66
+    },
+    {
+      "name": "8MP spread decode",
+      "elapsedMs": 60,
+      "liveUrls": 4,
+      "jsHeapBytes": 24500000
+    },
+    {
+      "name": "Eight-megapixel pages stay within the four-page window",
+      "elapsedMs": 61
+    },
+    {
+      "name": "JPEG, PNG, GIF, WebP and AVIF use the existing image decoder",
+      "elapsedMs": 55
+    },
+    {
+      "name": "ZIP64 and damaged/oversized comic pages",
+      "elapsedMs": 108
+    },
+    {
+      "name": "File switching releases every book URL and iframe",
+      "elapsedMs": 34
+    },
+    {
+      "name": "Chinese homepage enters isolated viewer with localized controls",
+      "elapsedMs": 270
+    }
+  ],
+  "attacks": [],
+  "errors": [],
+  "limits": {
+    "epubLiveChapters": 3,
+    "comicLivePages": 4
+  },
+  "heapBytes": 10000000
+}

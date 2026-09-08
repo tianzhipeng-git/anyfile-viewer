@@ -1,0 +1,103 @@
+[
+  {
+    "name": "polyline2d_line_2007.dwg",
+    "parserWarnings": 0,
+    "heapBytes": 67108864,
+    "entities": 1,
+    "vertices": 4,
+    "texts": 0,
+    "warnings": {}
+  },
+  {
+    "name": "architectural_-_annotation_scaling_and_multileaders.dwg",
+    "parserWarnings": 72,
+    "heapBytes": 67108864,
+    "entities": 1921,
+    "vertices": 26602,
+    "texts": 80,
+    "warnings": {
+      "layout-objects": 44,
+      "polyline-width": 67,
+      "hatch-dashes": 468,
+      "multileader-block": 3
+    }
+  },
+  {
+    "name": "example_2000.dwg",
+    "parserWarnings": 64,
+    "heapBytes": 67108864,
+    "entities": 248,
+    "vertices": 221991,
+    "texts": 15,
+    "warnings": {
+      "layout-objects": 4,
+      "XLINE": 1,
+      "spline-data": 2,
+      "RAY": 1,
+      "hatch-dashes": 2,
+      "WIPEOUT": 2,
+      "3DSOLID": 1,
+      "text-alignment": 1,
+      "TOLERANCE": 1,
+      "ACAD_TABLE": 1,
+      "MLINE": 1
+    }
+  },
+  {
+    "name": "example_2010.dwg",
+    "parserWarnings": 68,
+    "heapBytes": 67108864,
+    "entities": 250,
+    "vertices": 221993,
+    "texts": 17,
+    "warnings": {
+      "layout-objects": 4,
+      "XLINE": 1,
+      "spline-data": 2,
+      "RAY": 1,
+      "hatch-dashes": 2,
+      "WIPEOUT": 2,
+      "3DSOLID": 1,
+      "text-alignment": 1,
+      "TOLERANCE": 1,
+      "ACAD_TABLE": 1,
+      "MLINE": 1
+    }
+  },
+  {
+    "name": "example_2018.dwg",
+    "parserWarnings": 68,
+    "heapBytes": 67108864,
+    "entities": 250,
+    "vertices": 221993,
+    "texts": 17,
+    "warnings": {
+      "layout-objects": 4,
+      "XLINE": 1,
+      "spline-data": 2,
+      "attribute-multiline": 4,
+      "RAY": 1,
+      "hatch-dashes": 2,
+      "WIPEOUT": 2,
+      "3DSOLID": 1,
+      "text-alignment": 1,
+      "TOLERANCE": 1,
+      "ACAD_TABLE": 1,
+      "MLINE": 1
+    }
+  },
+  {
+    "name": "Dynblocks.dwg",
+    "parserWarnings": 64,
+    "heapBytes": 67108864,
+    "entities": 36236,
+    "vertices": 83274,
+    "texts": 13,
+    "warnings": {
+      "layout-objects": 4,
+      "polyline-width": 24,
+      "hatch-pattern": 2,
+      "spline-data": 6
+    }
+  }
+]

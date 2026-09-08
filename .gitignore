@@ -16,10 +16,9 @@ node_modules/
 # next.js
 /.next/
 /out/
-/public/vendor/pdfjs/
-/public/vendor/libraw/
-/public/vendor/libheif/
-/public/vendor/ogv/
+
+# Generated deployment assets; recreated by pnpm prepare:assets
+/public/vendor/
 
 # production
 /build
@@ -47,3 +46,6 @@ next-env.d.ts
 docs/tasks/
 
 __pycache__/
+
+/public/source/
+/third_party/libredwg/**/*.log

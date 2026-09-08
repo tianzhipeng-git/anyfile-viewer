@@ -1,5 +1,7 @@
 import type { PublishedLocale } from "../i18n/config";
 
+import { withViewerBenefits } from "./viewer-copy";
+
 import { categoryContents } from "./categories";
 import { formatContents } from "./formats";
 import { manifestsForExtension, viewerManifests } from "./manifests";
@@ -16,7 +18,7 @@ export function getFormat(extension: string, locale: PublishedLocale) {
   const normalized = extension.toLowerCase();
   const content = publishedFormats.find((item) => item.extension === normalized || item.aliases?.includes(normalized));
   if (!content) return undefined;
-  return { ...content, ...content.copy[locale], pluginIds: manifestsForExtension(content.extension).map(({ id }) => id) };
+  return { ...content, ...withViewerBenefits(content.copy[locale], locale), pluginIds: manifestsForExtension(content.extension).map(({ id }) => id) };
 }
 
 export function getCategory(slug: string, locale: PublishedLocale) {
@@ -24,7 +26,7 @@ export function getCategory(slug: string, locale: PublishedLocale) {
   if (!content) return undefined;
   const extensions = content.formatExtensions
     ?? publishedFormats.filter(({ categoryId }) => categoryId === slug).map(({ extension }) => extension);
-  return { ...content, ...content.copy[locale], extensions };
+  return { ...content, ...withViewerBenefits(content.copy[locale], locale), extensions };
 }
 
 export function getCategories(locale: PublishedLocale) {
@@ -40,7 +42,7 @@ export function getCategoryFormats(slug: string, locale: PublishedLocale) {
 export function getPanoramaViewer(viewerId: string, locale: PublishedLocale) {
   const content = publishedPanoramaViewers.find((item) => item.viewerId === viewerId);
   if (!content) return undefined;
-  return { ...content, ...content.copy[locale] };
+  return { ...content, ...withViewerBenefits(content.copy[locale], locale) };
 }
 
 export function getPanoramaViewers(locale: PublishedLocale) {
@@ -63,6 +65,9 @@ export function getPlugin(pluginId: string, locale: PublishedLocale) {
   if (!content || !manifest) return undefined;
   return {
     ...content, ...content.copy[locale], manifest,
+    description: locale === "zh-CN"
+      ? `${manifest.name[locale] ?? manifest.name.en}：了解支持的文件格式、查看限制和开源许可。文件无需上传。`
+      : `${manifest.name.en}: explore supported file formats, viewing limits and open-source credits. Your files are never uploaded.`,
     formats: publishedFormats.filter(({ extension }) => manifestsForExtension(extension).some(({ id }) => id === pluginId)).map(({ extension }) => getFormat(extension, locale)!),
   };
 }

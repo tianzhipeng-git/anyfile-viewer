@@ -11,9 +11,9 @@
 - `viewer/plugins/browser-audio/examples/`
 - `viewer/plugins/non-native-audio/examples/`
 
-两个目录都有 `generate.sh`、反例生成脚本和 `manifest.sha256`。正常文件均由 FFmpeg 8.0 从 997 Hz 合成音生成，不包含第三方录音。覆盖 MP3 CBR/Xing VBR、ID3/APIC、WAVE S16LE/S24LE/F32LE、WAVE ADPCM 对照、M4A AAC-LC/ALAC 对照、Ogg Vorbis/Opus/Theora 对照、WebM Opus/视频对照、FLAC 16/24-bit/picture、ADTS AAC-LC/profile 对照、AIFF、WMA，以及 `.mka` Opus/Vorbis/FLAC/AAC 和 video/corrupt/truncated 对照。
+两个目录都有 `generate.sh`、反例生成脚本和 `manifest.sha256`。正常文件均由 FFmpeg 8.0 从 997 Hz 合成音生成，不包含第三方录音。覆盖 MP3 CBR/Xing VBR、ID3/APIC、WAVE S16LE/S24LE/F32LE、WAVE ADPCM 对照、M4A AAC-LC/ALAC 对照、Ogg Vorbis/Opus/Theora 对照、WebM Opus/视频对照、FLAC 16/24-bit/picture、ADTS AAC-LC/profile 对照、AIFF、WMA，以及 `.mka` Opus/Vorbis/FLAC/AAC、WAVE A-law / μ-law 和 video/corrupt/truncated/ADPCM 对照。
 
-当前 FFmpeg 构建没有 Monkey's Audio encoder；APE 样例保持阻塞，不能用来源或许可不明的下载文件填充，也没有进入任何 manifest 或支持声明。VBRI 和 mono 组合同样没有被当前组合级矩阵宣称为已验证。
+当前 FFmpeg 构建没有 Monkey's Audio encoder，也没有可用的 HE-AAC / AAC Main 编码器；APE 与 HE-AAC 样例保持阻塞，不能用来源或许可不明的下载文件填充，也没有进入任何 manifest 或支持声明。VBRI 和 mono 组合同样没有被当前组合级矩阵宣称为已验证。
 
 ## 2. Probe 测量与资源门禁
 
@@ -49,9 +49,10 @@ pnpm measure:audio-probes
 通过本地生产构建 `/view` 打开固定样例：
 
 - 阶段 1 的 15 个正常样例（含 ID3/APIC、FLAC picture 与 WebM Vorbis）均取得真实可播放数据和有限 duration；基础 12 组合进一步记录到 `readyState = 4`、`muted = false`、`volume = 1`，用户手势后 `currentTime` 连续推进；MP3 的暂停后位置稳定、Home/End seek 和重播通过。
-- 阶段 2 的 `.mka` Opus、Vorbis、FLAC、AAC 均完成首 buffer 解码；点击播放后 seek 位置推进且没有 alert 错误。暂停后位置保持不变，音量 0.25 生效，seek 到末尾显示 Replay，重播后位置从 0 继续推进。
+- 阶段 2 的 `.mka` Opus、Vorbis、FLAC、AAC 与 WAVE A-law / μ-law 均完成首 buffer 解码路径与单元测试覆盖；`.mka` 组合此前已在 Chromium 完成连续输出、seek、结束和重播。WAVE A-law / μ-law 依赖 Mediabunny 软件 PCM（`AudioDecoder` 类存在即可），真实浏览器听音补证仍按支持矩阵 `implemented` 口径处理。
 - 420 × 260 viewport 中播放、seek 和音量均可见。真实检查发现音量曾被响应式 CSS 隐藏，改为紧凑四列布局后复测通过。
 - 连续文件切换、opening/active abort、重复 dispose、source/iterator/Input/AudioContext 清理由单元测试覆盖。
+- 阶段 2 扩展调研确认：Ogg FLAC、ALAC、WAVE ADPCM、HE-AAC/ADTS Main 不能在当前 Mediabunny + 锁定 FFmpeg 证据下进入支持声明，已回写支持矩阵为 `blocked` / `planned`。
 
 ## 4. 加载与回归证据
 

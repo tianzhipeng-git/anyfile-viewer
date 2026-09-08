@@ -6,6 +6,11 @@ under their own licenses. The exact installed versions are locked by
 `pnpm-lock.yaml`; `pnpm licenses list --prod` provides the complete installed
 production dependency closure.
 
+The optional EPS/PostScript viewer also uses a source-built `stet` 0.8.1
+WebAssembly runtime under Apache-2.0 OR MIT. Exact source, hashes, build
+instructions, and license texts are published with
+`/vendor/stet/0.8.1-anyfile.1/`.
+
 ## Browser application dependencies
 
 | Component | Version | License | Source |
@@ -14,6 +19,7 @@ production dependency closure.
 | `@base-ui/react` | 1.7.0 | MIT | <https://github.com/mui/base-ui> |
 | `@duckdb/duckdb-wasm` | 1.32.0 | MIT | <https://github.com/duckdb/duckdb-wasm> |
 | `@zip.js/zip.js` | 2.8.60 | BSD-3-Clause | <https://github.com/gildas-lormeau/zip.js> |
+| `ag-psd` | 31.0.2 | MIT | <https://github.com/Agamnentzar/ag-psd> |
 | Ace | 1.44.0 | BSD-3-Clause | <https://github.com/ajaxorg/ace> |
 | Apache Arrow JS | 17.0.0 | Apache-2.0 | <https://github.com/apache/arrow-js> |
 | class-variance-authority | 0.7.1 | Apache-2.0 | <https://github.com/joe-bell/cva> |
@@ -87,3 +93,53 @@ licenses. No Anyfile license grants third-party codec patent rights.
 PDF.js support assets retain the upstream CMap, ICC, Foxit-font, and Liberation
 font notices copied into `/vendor/pdfjs/6.2.108/`. Those notices govern the
 corresponding data and font files independently of the Anyfile license.
+
+## 3D viewing additions
+
+- Three.js 0.185.1 — MIT, https://github.com/mrdoob/three.js . Used by the local
+  3D viewport and selected format addons. The upstream license is retained in
+  the installed package (`three/LICENSE`).
+- zip.js 2.8.60 — BSD-3-Clause, https://github.com/gildas-lormeau/zip.js . The
+  existing project dependency is also used for bounded 3MF ZIP extraction.
+- dxf-parser 1.1.2 — MIT, https://github.com/gdsestimating/dxf-parser . Existing
+  DXF parsing dependency, now invoked in a Worker with XYZ output preserved.
+
+No OpenCascade/occt-import-js binary is distributed by these additions. Its
+preliminary evaluation and unmet integration requirements are recorded in
+`docs/3d/dependency-audit.md`.
+
+## CAD and compressed point clouds
+
+- occt-import-js 0.0.23-anyfile.1: LGPL-2.1, with Open CASCADE LGPL-2.1 and OCCT exception. Complete notices, pinned corresponding source links and build patch are in `third_party/occt-import-js/0.0.23-anyfile.1/` and copied to `/vendor/occt-import-js/0.0.23-anyfile.1/`.
+- laz-perf 0.0.7-anyfile.1: Apache-2.0. Upstream source, license and WASM provenance are in `third_party/laz-perf/0.0.7-anyfile.1/`, copied beside the runtime.
+
+## Ebook test fixtures: Abel font
+
+`docs/ebooks/fixtures/fonts/Abel-Regular.ttf` and the generated `resources.epub`
+contain the Abel font from Google Fonts commit
+`3b99d83d2625944fc0b8bd328d793fa819b92381` (`ofl/abel`).
+The font is distributed under the SIL Open Font License 1.1. The complete notice
+and license are preserved in `docs/ebooks/fixtures/fonts/OFL.txt`; exact source
+URLs and SHA-256 hashes are in `docs/ebooks/fixtures/manifest.json`.
+This is a test input, not an application runtime font.
+
+## FFmpeg playback runtime 9.0.1-anyfile.1
+
+The FFmpeg audio/video fallback plugins use an unmodified FFmpeg 9.0.1
+LGPL-2.1-or-later decode-only build with Emscripten 4.0.10 (MIT runtime).
+GPL/nonfree features, external library autodetection, encoding, muxing,
+filters, devices, network and URL protocols are disabled. Project C/Worker
+adapter code remains Apache-2.0. Runtime, license texts, exact corresponding
+source and relinkable materials are distributed together in
+`third_party/ffmpeg-playback/9.0.1-anyfile.1/` and prepared at the matching
+`/vendor/ffmpeg-playback/9.0.1-anyfile.1/` path. See its SOURCE.md and
+build-info.json for provenance, configuration, replacement/rebuild instructions
+and artifact hashes. Copyright licenses do not grant third-party codec
+patent rights; deployment jurisdictions and distribution terms remain the
+distributor's responsibility.
+
+## DWG integration: GNU LibreDWG and libredwg-web
+
+The original project source remains Apache-2.0 where applicable. The DWG-enabled combined distribution is subject to GPLv3; Worker isolation does not waive these obligations. Original component notices remain applicable. No warranty is provided.
+
+GNU LibreDWG 0.14 is GPL-3.0-or-later; mlightcad/libredwg-web 0.7.10 is GPL-3.0. Exact source archives, license text, the source-build recipe and artifact hashes ship under `/vendor/libredwg/0.14-anyfile.1/`. The viewer links to `/source/dwg.html`, including a matching application-source download, source dependency links and build instructions.

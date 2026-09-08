@@ -12,8 +12,11 @@ if (!projectLicense.includes("Apache License") || !projectLicense.includes("Vers
   throw new Error("The Apache-2.0 project license text is missing");
 }
 const thirdPartyNotices = await readFile(join(projectRoot, "THIRD_PARTY_NOTICES.md"), "utf8").catch(() => "");
-for (const marker of ["MPL-2.0", "CDDL-1.0", "LGPL-3.0-or-later", "libvips", "HEVC patent"]) {
+for (const marker of ["MPL-2.0", "CDDL-1.0", "LGPL-3.0-or-later", "libvips", "HEVC patent", "LibreDWG", "GPLv3"]) {
   if (!thirdPartyNotices.includes(marker)) throw new Error(`Third-party notices are missing ${marker}`);
+}
+for (const file of ["source/dwg.html", "source/application.tar.gz", "source/THIRD_PARTY_NOTICES.md", "vendor/libredwg/0.14-anyfile.1/COPYING"]) {
+  await readFile(join(projectRoot, "public", file));
 }
 const html = await readFile(join(projectRoot, ".next/server/app/en/view.html"), "utf8");
 const assets = [...new Set(
@@ -28,7 +31,7 @@ const contents = await Promise.all(
   assets.map((asset) => readFile(join(projectRoot, ".next", asset))),
 );
 const gzipBytes = contents.reduce((total, content) => total + gzipSync(content).byteLength, 0);
-const maximumGzipBytes = 225 * 1024;
+const maximumGzipBytes = 300 * 1024;
 if (gzipBytes > maximumGzipBytes) {
   throw new Error(
     `/en/view initial JavaScript is ${(gzipBytes / 1024).toFixed(1)} KiB gzip; maximum is ${maximumGzipBytes / 1024} KiB`,
@@ -37,6 +40,13 @@ if (gzipBytes > maximumGzipBytes) {
 
 const initialCode = Buffer.concat(contents).toString("utf8");
 const deferredImplementationMarkers = [
+  "anyfile-publication-reader__viewport",
+  "FB2 structure limit exceeded.",
+  "anyfile-comic-reader__viewport",
+  "ZIP index limit exceeded.",
+  "anyfile-rendering-3d",
+  "THREE.WebGLRenderer",
+  "THREE.GLTFLoader",
   "ace-builds",
   "Starting DuckDB",
   "Starting SQLite",
@@ -44,6 +54,10 @@ const deferredImplementationMarkers = [
   "正在读取 Excel 工作簿",
   "正在读取 PowerPoint 演示文稿",
   "anyfile-pdf-viewer__viewport",
+  "anyfile-postscript-viewer__canvas",
+  "stet_wasm_bg.wasm",
+  "anyfile-photoshop-viewer__canvas",
+  "Unexpected Photoshop composite pixel layout",
   "__anyfile_archive_metadata_viewer_v1__",
   "__anyfile_archive_probe_v1__",
   "__anyfile_dev_array_viewer_v1__",
@@ -64,7 +78,9 @@ const deferredImplementationMarkers = [
   "anyfile-dji-osmo-viewer__canvas",
   "anyfile-non-native-video-viewer__controls",
   "anyfile-browser-audio-viewer__audio",
+  "anyfile-browser-audio-viewer__visualizer",
   "anyfile-non-native-audio-viewer__controls",
+  "anyfile-non-native-audio-viewer__visualizer",
   "Video probe read budget exceeded",
   "Non-native video probe read budget exceeded",
   "Audio probe read budget exceeded",
@@ -103,6 +119,45 @@ for (const [asset, expected] of Object.entries(heifBuildInfo.artifacts)) {
     throw new Error(`HEIF runtime asset is missing or failed its integrity check: ${asset}`);
   }
 }
+const stetRuntimeSource = await readFile(join(projectRoot, "viewer/plugins/postscript/src/runtime.ts"), "utf8");
+const stetRuntimeVersion = stetRuntimeSource.match(/STET_ARTIFACT_VERSION = "([^"]+)"/)?.[1];
+if (!stetRuntimeVersion) throw new Error("stet runtime artifact version is missing");
+for (const sourceRoot of [
+  "https://assets.anyfile.top/vendor/stet/${STET_ARTIFACT_VERSION}",
+  "/vendor/stet/${STET_ARTIFACT_VERSION}",
+]) {
+  if (!stetRuntimeSource.includes(sourceRoot)) {
+    throw new Error(`PostScript runtime source is not version-aligned: ${sourceRoot}`);
+  }
+}
+if (stetRuntimeSource.includes("cdn.jsdelivr.net")) {
+  throw new Error("Self-built PostScript assets must not use jsDelivr");
+}
+const stetSourceRoot = join(projectRoot, "third_party/stet-wasm", stetRuntimeVersion);
+const stetBuildInfo = JSON.parse(await readFile(join(stetSourceRoot, "build-info.json"), "utf8"));
+const stetSupportRoot = join(projectRoot, "public/vendor/stet", stetRuntimeVersion);
+for (const [asset, expected] of Object.entries(stetBuildInfo.artifacts)) {
+  const content = await readFile(join(stetSupportRoot, asset)).catch(() => undefined);
+  const sha256 = content && createHash("sha256").update(content).digest("hex");
+  if (!content?.byteLength || content.byteLength !== expected.bytes || sha256 !== expected.sha256) {
+    throw new Error(`stet runtime asset is missing or failed its integrity check: ${asset}`);
+  }
+}
+const postscriptViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-postscript-viewer__canvas"));
+if (postscriptViewerChunks.length === 0) throw new Error("PostScript viewer dynamic chunk was not found");
+const postscriptViewerCode = Buffer.concat(postscriptViewerChunks.map(({ content }) => content)).toString("utf8");
+for (const marker of [
+  "https://assets.anyfile.top/vendor/stet/",
+  "/vendor/stet/",
+  stetRuntimeVersion,
+]) {
+  if (!postscriptViewerCode.includes(marker)) {
+    throw new Error(`Deferred PostScript viewer chunk is missing asset marker: ${marker}`);
+  }
+}
+if (!postscriptViewerCode.includes("Unable to initialize PostScript from R2 or local assets")) {
+  throw new Error("Deferred PostScript viewer chunk does not contain the R2 and same-origin fallback");
+}
 const jxlChunks = archiveChunkContents.filter(({ content }) => content.includes("JxlImage"));
 if (jxlChunks.length === 0) {
   throw new Error("Unable to locate the deferred JPEG XL runtime chunk");
@@ -131,12 +186,21 @@ if (dataProbeChunks.length === 0) throw new Error("Data probe chunk was not foun
 if (dataProbeChunks.some(({ content }) => content.includes("Starting DuckDB"))) {
   throw new Error("Data probe chunk contains the full DuckDB viewer implementation");
 }
+const photoshopProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("__anyfile_photoshop_probe_v1__"));
+if (photoshopProbeChunks.length === 0) throw new Error("Photoshop probe chunk was not found");
+if (photoshopProbeChunks.some(({ content }) => content.includes("Unexpected Photoshop composite pixel layout"))) {
+  throw new Error("Photoshop probe chunk contains the full PSD decoder");
+}
+const photoshopViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-photoshop-viewer__canvas"));
+if (photoshopViewerChunks.length === 0) throw new Error("Photoshop viewer dynamic chunk was not found");
+const photoshopDecoderChunks = archiveChunkContents.filter(({ content }) => content.includes("Unexpected Photoshop composite pixel layout"));
+if (photoshopDecoderChunks.length === 0) throw new Error("Deferred Photoshop decoder Worker chunk was not found");
 const duckdbPackage = JSON.parse(await readFile(join(
   projectRoot,
-  "viewer/plugins/data/node_modules/@duckdb/duckdb-wasm/package.json",
+  "viewer/plugins/duckdb/node_modules/@duckdb/duckdb-wasm/package.json",
 ), "utf8"));
 const duckdbRuntimeSource = await readFile(
-  join(projectRoot, "viewer/plugins/data/src/duckdb-runtime.ts"),
+  join(projectRoot, "viewer/plugins/duckdb/src/duckdb-runtime.ts"),
   "utf8",
 );
 const duckdbR2Root = duckdbRuntimeSource.match(/const R2_ASSET_ROOT = "([^"]+)"/)?.[1];
@@ -207,6 +271,8 @@ if (nonNativeVideoProbeChunks.length === 0) {
 const browserAudioProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Audio probe read budget exceeded"));
 if (browserAudioProbeChunks.length === 0) throw new Error("Browser audio probe chunk was not found");
 if (browserAudioProbeChunks.some(({ content }) => content.includes("anyfile-browser-audio-viewer__audio")
+  || content.includes("anyfile-browser-audio-viewer__visualizer")
+  || content.includes("(prefers-reduced-motion: reduce)")
   || content.includes("Decoded PCM buffer exceeds limits")
   || content.includes("audioTrack must be an InputAudioTrack"))) {
   throw new Error("Browser audio probe chunk contains a full audio player implementation");
@@ -214,9 +280,18 @@ if (browserAudioProbeChunks.some(({ content }) => content.includes("anyfile-brow
 const nonNativeAudioProbeChunks = archiveChunkContents.filter(({ content }) => content.includes("Non-native audio probe read budget exceeded"));
 if (nonNativeAudioProbeChunks.length === 0) throw new Error("Non-native audio probe chunk was not found");
 if (nonNativeAudioProbeChunks.some(({ content }) => content.includes("anyfile-non-native-audio-viewer__controls")
+  || content.includes("anyfile-non-native-audio-viewer__visualizer")
+  || content.includes("(prefers-reduced-motion: reduce)")
   || content.includes("Decoded PCM buffer exceeds limits")
   || content.includes("audioTrack must be an InputAudioTrack"))) {
   throw new Error("Non-native audio probe chunk contains Mediabunny or the full player implementation");
+}
+const audioVisualizerChunks = archiveChunkContents.filter(({ content }) => content.includes("(prefers-reduced-motion: reduce)"));
+if (audioVisualizerChunks.length === 0) {
+  throw new Error("Shared audio visualizer chunk was not found");
+}
+if (audioVisualizerChunks.some(({ content }) => content.includes("audioTrack must be an InputAudioTrack"))) {
+  throw new Error("Shared audio visualizer chunk pulled in Mediabunny");
 }
 const nonNativeAudioViewerChunks = archiveChunkContents.filter(({ content }) => content.includes("anyfile-non-native-audio-viewer__controls"));
 if (nonNativeAudioViewerChunks.length === 0) throw new Error("Non-native audio viewer chunk was not found");

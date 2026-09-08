@@ -34,8 +34,8 @@
 
 | 包 | 用途 |
 |---|---|
-| `@anyfile/viewer-protocol` | 插件协议 |
-| `docx-preview@0.4.0` | DOCX → HTML 转换 |
+| `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `docx-preview@0.4.0` | DOCX 到 HTML 的只读排版 |
 
 ## 已知限制
 
@@ -43,6 +43,18 @@
 - 30 MiB 文件大小硬上限
 - 复杂排版（分栏、文本框、SmartArt、嵌入 OLE 对象）可能丢失或错位
 - 不渲染修订记录、批注、脚注/尾注的完整交互
-- 嵌入字体若系统缺失，会回退到 Web 安全字体
+- 字体呈现依赖文档内嵌字体和浏览器可用字体；所需字体不可用时会发生字体回退
 - 整文件读入内存，大文档受浏览器内存限制
 - 只读预览，不可编辑或导出
+
+## 开发与验证
+
+- [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
+- 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
+- [样例目录](examples/)：用于本地打开检查。
+
+在仓库根目录运行插件测试：
+
+```bash
+pnpm --filter @anyfile/word-viewer test
+```

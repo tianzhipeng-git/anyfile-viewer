@@ -1,0 +1,1072 @@
+{
+  "browser": "145.0.7632.6",
+  "results": [
+    {
+      "name": "MOBI text, images, contents and links: uncompressed.mobi",
+      "elapsedMs": 90,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "MOBI text, images, contents and links: mobi7.mobi",
+      "elapsedMs": 42,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "MOBI text, images, contents and links: huffman.mobi",
+      "elapsedMs": 41,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "MOBI text, images, contents and links: kf8.azw3",
+      "elapsedMs": 53,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "MOBI text, images, contents and links: joint.mobi",
+      "elapsedMs": 53,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "PalmDOC encoding and text: palmdoc.pdb",
+      "elapsedMs": 31,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "PalmDOC encoding and text: palmdoc-compressed.prc",
+      "elapsedMs": 36,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Narrow KF8 navigation and image resource lifecycle",
+      "elapsedMs": 66,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Raw malicious MOBI: inert parse, no script/network/navigation",
+      "elapsedMs": 35,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "ZIP and TAR do not initialize comic WASM",
+      "elapsedMs": 69,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Protected content: drm.azw",
+      "elapsedMs": 33,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Protected content: encrypted.cbr",
+      "elapsedMs": 32,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Protected content: encrypted-headers.cbr",
+      "elapsedMs": 34,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Malformed or resource-limited: offset.mobi",
+      "elapsedMs": 10,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Malformed or resource-limited: bomb.mobi",
+      "elapsedMs": 9,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Malformed or resource-limited: cyclic-huffman.mobi",
+      "elapsedMs": 9,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Malformed or resource-limited: duplicate.cbr",
+      "elapsedMs": 18,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Malformed or resource-limited: damaged.cbr",
+      "elapsedMs": 16,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Comic ordering, jump and release: rar4.cbr",
+      "elapsedMs": 58,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        }
+      ]
+    },
+    {
+      "name": "Comic ordering, jump and release: rar5.cbr",
+      "elapsedMs": 49,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        }
+      ]
+    },
+    {
+      "name": "Comic ordering, jump and release: pages.cb7",
+      "elapsedMs": 49,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 1085
+        }
+      ]
+    },
+    {
+      "name": "Comic ordering, jump and release: pages.cbt",
+      "elapsedMs": 49,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 1085
+        }
+      ]
+    },
+    {
+      "name": "Comic ordering, jump and release: solid-rar5.cbr",
+      "elapsedMs": 78,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 65100
+        }
+      ]
+    },
+    {
+      "name": "Comic ordering, jump and release: solid-lzma2.cb7",
+      "elapsedMs": 46,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 65100
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 65100
+        }
+      ]
+    },
+    {
+      "name": "Comic ordering, jump and release: copy.cb7",
+      "elapsedMs": 49,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 65100
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 65100
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 65100
+        }
+      ]
+    },
+    {
+      "name": "Opening abort terminates a Worker waiting for runtime initialization",
+      "elapsedMs": 18,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 65100
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 65100
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 65100
+        }
+      ]
+    },
+    {
+      "name": "Rapid opening cancellation and repeated file switches",
+      "elapsedMs": 48,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 1085
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 65100
+        },
+        {
+          "heapBytes": 20185088,
+          "encodedBytes": 65100
+        },
+        {
+          "heapBytes": 16777216,
+          "encodedBytes": 65100
+        }
+      ]
+    },
+    {
+      "name": "Chinese protected state and reader controls",
+      "elapsedMs": 121,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    },
+    {
+      "name": "Runtime response headers and byte sizes",
+      "elapsedMs": 22,
+      "workers": 0,
+      "urls": 0,
+      "heapBytes": 10000000,
+      "decodeMeasurements": [
+        {
+          "heapBytes": 16777216
+        }
+      ]
+    }
+  ],
+  "attacks": [],
+  "errors": [],
+  "runtimeRequests": [
+    "http://localhost:3107/vendor/libmobi/0.12-anyfile.1/mobi.js",
+    "http://localhost:3107/vendor/libmobi/0.12-anyfile.1/mobi.wasm",
+    "http://localhost:3107/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.js",
+    "http://localhost:3107/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.wasm"
+  ],
+  "bundle": {
+    "mobi": {
+      "manifestSourceGzipBytes": 310,
+      "probeGzipBytes": 716,
+      "probeFiles": [
+        "static/chunks/8303.1bd8a30fafa7aaff.js"
+      ],
+      "viewerGzipBytes": 11376,
+      "viewerFiles": [
+        "static/chunks/2084.7051b3fa86684549.js",
+        "static/chunks/4022.9b1cac76e49fef45.js"
+      ]
+    },
+    "comic": {
+      "manifestSourceGzipBytes": 316,
+      "probeGzipBytes": 3335,
+      "probeFiles": [
+        "static/chunks/1117.09acacd4234cbb1c.js"
+      ],
+      "viewerGzipBytes": 45587,
+      "viewerFiles": [
+        "static/chunks/2153.35579c1316005b10.js",
+        "static/chunks/8264.0ed1f3d1ac6368bd.js",
+        "static/chunks/8827.95efcee88066d34a.js"
+      ]
+    }
+  }
+}

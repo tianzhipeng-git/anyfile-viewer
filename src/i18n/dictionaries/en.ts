@@ -2,11 +2,10 @@ import type { AppDictionary } from "../types";
 
 const dictionary = {
   metadata: {
-    siteTitle: "Anyfile — Free online file viewer",
+    siteTitle: "Free Online File Viewer — No Upload",
     siteDescription: "Open documents, images, media, code and data with a fast, private online file viewer. Free to use, with no uploads or desktop software.",
-    viewerTitle: "Free online file viewer",
+    viewerTitle: "Free Online File Viewer — No Upload",
     viewerDescription: "Open supported files instantly with a fast, private online viewer. Free to use; files stay on your device and are never uploaded.",
-    noUploadSuffix: " No upload required.",
   },
   common: {
     home: "Home", mainNavigation: "Main navigation", openFile: "Open file", openFolder: "Open folder",
@@ -17,8 +16,7 @@ const dictionary = {
     about: "About", privacy: "Privacy policy", contact: "Contact", resources: "Anyfile", email: "Email", sourceCode: "Source code",
   },
   nav: {
-    imagesVideo: "Images & Media", documents: "Documents", codeData: "Data",
-    developerArtifacts: "Developer", panorama360: "360° Cameras", threeD: "3D", design: "Design",
+    media: "Images & Media", reading: "Documents & Reading", designEngineering: "Design & Engineering", dataDevelopment: "Data & Development",
   },
   home: {
     localFirst: "FREE ONLINE FILE VIEWER", title: "Open files online without uploading.",
@@ -34,8 +32,6 @@ const dictionary = {
     formatsEyebrow: "SUPPORTED FORMATS", formatsTitle: "Find the format you need.",
     formatsDescription: "Browser-native formats and dedicated viewer plugins, organized into clear categories.",
     browseCount: "Browse {count} formats",
-    panoramaEyebrow: "CAMERA ORIGINALS", panoramaTitle: "Open 360° camera files before you edit.",
-    panoramaDescription: "Preview supported Insta360, GoPro MAX and DJI Osmo 360 originals locally—without first exporting a flat video or uploading large footage.",
     openSourceEyebrow: "OPEN SOURCE", openSourceTitle: "Inspect the viewer, not just your files.",
     openSourceDescription: "Anyfile is open source. Review how local files are handled, verify the privacy model and help extend support for uncommon formats.",
     openSourceCta: "View source on GitHub",
@@ -45,11 +41,11 @@ const dictionary = {
       { title: "Apache-2.0", description: "Use, study and build on the project under a permissive open-source license." },
     ],
   },
-  category: { home: "Home", viewerSuffix: " viewers", localSuffix: " Everything is processed on this device.", formats: "FORMATS", choose: "Supported formats" },
+  category: { home: "Home", viewerSuffix: " viewers", formats: "FORMATS", choose: "Supported formats" },
   format: {
     viewerSuffix: " viewer", metadataDescription: "View {name} locally in your browser. {description}",
     browserNativeView: "Browser-native viewing", pluginView: "Dedicated plugin", headline: "Open {name} instantly.",
-    privacySuffix: " No upload required; processing stays in your browser.", choose: "Choose a .{extension} file",
+    choose: "Choose a .{extension} file",
     benefits: [
       { title: "Faster", description: "Skip file uploads and cloud processing queues." },
       { title: "More private", description: "File contents are never sent to Anyfile servers." },
@@ -63,7 +59,7 @@ const dictionary = {
     folderUnsupported: "This browser cannot open folders. Use the latest Chrome or another compatible browser, or open individual files.",
     pickerFailed: "Unable to open the folder picker.", droppedEmpty: "The dropped content contains no readable files.",
     accessErrorTitle: "Unable to access local files", collapseSidebar: "Collapse file sidebar", expandSidebar: "Expand file sidebar",
-    chooseLocalFile: "Choose local files", unopenedTitle: "No workspace open", unopenedDescription: "Choose files or a folder to display them here.",
+    chooseLocalFile: "Choose local files", unopenedTitle: "No workspace open", unopenedDescription: "Choose or drag files/folder to display them here.",
     preview: "Preview", unknownType: "Unknown type", workspaceFiles: "Workspace files",
   },
   viewer: {

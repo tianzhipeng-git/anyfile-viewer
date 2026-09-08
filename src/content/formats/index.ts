@@ -1,9 +1,16 @@
+import { dwgFormat } from "./dwg";
+import { mobiFormats, comicArchiveFormats } from "./ebook-archives";
+import { fb2Format } from "./fb2";
+import { cadExchangeFormats } from "./cad-exchange";
+import { pointFormats } from "./point-cloud";
+import { meshFormats } from "./mesh-3d";
 import type { FormatContent } from "../types";
 
 import { goPro360Format } from "./360";
 import { lotus123Format } from "./123";
 import { threeGpFormat } from "./3gp";
 import { aacFormat } from "./aac";
+import { aiFormat } from "./ai";
 import { aabFormat } from "./aab";
 import { apngFormat } from "./apng";
 import { apkFormat } from "./apk";
@@ -23,11 +30,13 @@ import { dbfFormat } from "./dbf";
 import { deflateFormat } from "./deflate";
 import { difFormat } from "./dif";
 import { dngFormat } from "./dng";
+import { dxfFormat } from "./dxf";
 import { docxFormat } from "./docx";
 import { duckdbFormat } from "./duckdb";
 import { earFormat } from "./ear";
 import { eggFormat } from "./egg";
 import { epubFormat } from "./epub";
+import { epsFormat } from "./eps";
 import { etFormat } from "./et";
 import { flacFormat } from "./flac";
 import { fodsFormat } from "./fods";
@@ -78,10 +87,14 @@ import { parquetFormat } from "./parquet";
 import { pdfFormat } from "./pdf";
 import { pefFormat } from "./pef";
 import { pngFormat } from "./png";
+import { psbFormat } from "./psb";
+import { psdFormat } from "./psd";
+import { psFormat } from "./ps";
 import { pnmFormat } from "./pnm";
 import { prnFormat } from "./prn";
 import { pptxFormat } from "./pptx";
 import { pyzFormat } from "./pyz";
+import { pxdFormat } from "./pxd";
 import { qpwFormat } from "./qpw";
 import { rafFormat } from "./raf";
 import { rarFormat } from "./rar";
@@ -122,10 +135,13 @@ import { zlibFormat } from "./zlib";
 import { zstFormat } from "./zst";
 
 export const formatContents: readonly FormatContent[] = [
+  dwgFormat, ...cadExchangeFormats, ...meshFormats,
+  ...pointFormats,
   goPro360Format,
   lotus123Format,
   threeGpFormat,
   aacFormat,
+  aiFormat,
   aabFormat,
   apngFormat,
   apkFormat,
@@ -145,11 +161,14 @@ export const formatContents: readonly FormatContent[] = [
   deflateFormat,
   difFormat,
   dngFormat,
+  dxfFormat,
   docxFormat,
   duckdbFormat,
   earFormat,
   eggFormat,
-  epubFormat,
+  epubFormat, ...mobiFormats, ...comicArchiveFormats,
+  fb2Format,
+  epsFormat,
   etFormat,
   flacFormat,
   fodsFormat,
@@ -200,10 +219,14 @@ export const formatContents: readonly FormatContent[] = [
   pdfFormat,
   pefFormat,
   pngFormat,
+  psbFormat,
+  psdFormat,
+  psFormat,
   pnmFormat,
   prnFormat,
   pptxFormat,
   pyzFormat,
+  pxdFormat,
   qpwFormat,
   rafFormat,
   rarFormat,

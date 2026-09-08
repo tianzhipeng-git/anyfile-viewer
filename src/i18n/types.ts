@@ -1,25 +1,24 @@
 export type AppDictionary = {
-  metadata: { siteTitle: string; siteDescription: string; viewerTitle: string; viewerDescription: string; noUploadSuffix: string };
+  metadata: { siteTitle: string; siteDescription: string; viewerTitle: string; viewerDescription: string };
   common: {
     home: string; mainNavigation: string; openFile: string; openFolder: string; categories: string;
     getStarted: string; footerPrivacy: string; copyright: string; native: string; plugin: string;
     learnAndOpen: string; browseFormats: string; directOpen: string; language: string;
     about: string; privacy: string; contact: string; resources: string; email: string; sourceCode: string;
   };
-  nav: { imagesVideo: string; documents: string; codeData: string; developerArtifacts: string; panorama360: string; threeD: string; design: string };
+  nav: { media: string; reading: string; designEngineering: string; dataDevelopment: string };
   home: {
     localFirst: string; title: string; description: string; selectFile: string; browse: string; trust: string;
     privacyEyebrow: string; privacyTitle: string; privacyDescription: string;
     principles: readonly { title: string; description: string }[];
     formatsEyebrow: string; formatsTitle: string; formatsDescription: string; browseCount: string;
-    panoramaEyebrow: string; panoramaTitle: string; panoramaDescription: string;
     openSourceEyebrow: string; openSourceTitle: string; openSourceDescription: string; openSourceCta: string;
     openSourcePrinciples: readonly { title: string; description: string }[];
   };
-  category: { home: string; viewerSuffix: string; localSuffix: string; formats: string; choose: string };
+  category: { home: string; viewerSuffix: string; formats: string; choose: string };
   format: {
     viewerSuffix: string; metadataDescription: string; browserNativeView: string; pluginView: string;
-    headline: string; privacySuffix: string; choose: string;
+    headline: string; choose: string;
     benefits: readonly { title: string; description: string }[];
   };
   workspace: {

@@ -1,0 +1,383 @@
+{
+  "date": "2026-09-08T15:01:02.146Z",
+  "sample": "VID_20240415_213145_00_035.insv",
+  "note": "Terminal Node WASM decode; first 30 outputs per track compared. Frame threading changes demux/output interleaving.",
+  "pairs": [
+    {
+      "baseline": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 21.968625000000003,
+        "openMs": 17.756042,
+        "decodeMs": 9798.980414000001,
+        "wallMs": 10063.041625,
+        "cpuMs": 10256.481,
+        "peakRssKiB": 610496,
+        "sharedMemory": false,
+        "decoderWorkers": 0,
+        "counts": [
+          30,
+          30,
+          45
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9386666666666666
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "a2d2cb37663392d166c080d1d9df37ad73e8812edc37e9300abed5d7e9024378"
+        ],
+        "prefixHashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "475c2b05f81fb9a5e468c0493a9e104fe76f5939d490e55cc1e8d01f21d2fc1e"
+        ],
+        "timelineHashes": [
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "e5332bc00b2c3caf78015bb9858595898f6e27359c080fe34147a7ecb7bebf32"
+        ],
+        "heapBytes": 311230464,
+        "readBytes": 35460254,
+        "maxRead": 1228301
+      },
+      "threaded": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 34.616583000000006,
+        "openMs": 15.94787500000001,
+        "decodeMs": 3541.879547000002,
+        "wallMs": 3817.024792,
+        "cpuMs": 10762.122,
+        "peakRssKiB": 604496,
+        "sharedMemory": true,
+        "decoderWorkers": 4,
+        "counts": [
+          30,
+          30,
+          46
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.96
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "29741703cfa79f7182cca4b34454b50099c55b89456578e425b6543e3d6b2f56"
+        ],
+        "prefixHashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "475c2b05f81fb9a5e468c0493a9e104fe76f5939d490e55cc1e8d01f21d2fc1e"
+        ],
+        "timelineHashes": [
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "f0680348003241ac041f11df0f5e63690dd844804eca3ec9e644b605051c563c"
+        ],
+        "heapBytes": 355991552,
+        "readBytes": 36821469,
+        "maxRead": 1228301
+      }
+    },
+    {
+      "baseline": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 18.735542,
+        "openMs": 15.198750000000004,
+        "decodeMs": 9750.054161999997,
+        "wallMs": 10015.57425,
+        "cpuMs": 10200.096,
+        "peakRssKiB": 610256,
+        "sharedMemory": false,
+        "decoderWorkers": 0,
+        "counts": [
+          30,
+          30,
+          45
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9386666666666666
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "a2d2cb37663392d166c080d1d9df37ad73e8812edc37e9300abed5d7e9024378"
+        ],
+        "prefixHashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "475c2b05f81fb9a5e468c0493a9e104fe76f5939d490e55cc1e8d01f21d2fc1e"
+        ],
+        "timelineHashes": [
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "e5332bc00b2c3caf78015bb9858595898f6e27359c080fe34147a7ecb7bebf32"
+        ],
+        "heapBytes": 311230464,
+        "readBytes": 35460254,
+        "maxRead": 1228301
+      },
+      "threaded": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 33.862874999999995,
+        "openMs": 15.64566700000001,
+        "decodeMs": 3604.2025369999974,
+        "wallMs": 3882.638042,
+        "cpuMs": 10930.394,
+        "peakRssKiB": 631360,
+        "sharedMemory": true,
+        "decoderWorkers": 4,
+        "counts": [
+          30,
+          30,
+          46
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.96
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "29741703cfa79f7182cca4b34454b50099c55b89456578e425b6543e3d6b2f56"
+        ],
+        "prefixHashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "475c2b05f81fb9a5e468c0493a9e104fe76f5939d490e55cc1e8d01f21d2fc1e"
+        ],
+        "timelineHashes": [
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "f0680348003241ac041f11df0f5e63690dd844804eca3ec9e644b605051c563c"
+        ],
+        "heapBytes": 351076352,
+        "readBytes": 36821469,
+        "maxRead": 1228301
+      }
+    },
+    {
+      "baseline": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 18.959292000000005,
+        "openMs": 16.590832999999996,
+        "decodeMs": 10569.455044999999,
+        "wallMs": 10856.015,
+        "cpuMs": 11008.554,
+        "peakRssKiB": 520688,
+        "sharedMemory": false,
+        "decoderWorkers": 0,
+        "counts": [
+          30,
+          30,
+          45
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9386666666666666
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "a2d2cb37663392d166c080d1d9df37ad73e8812edc37e9300abed5d7e9024378"
+        ],
+        "prefixHashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "475c2b05f81fb9a5e468c0493a9e104fe76f5939d490e55cc1e8d01f21d2fc1e"
+        ],
+        "timelineHashes": [
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "e5332bc00b2c3caf78015bb9858595898f6e27359c080fe34147a7ecb7bebf32"
+        ],
+        "heapBytes": 311230464,
+        "readBytes": 35460254,
+        "maxRead": 1228301
+      },
+      "threaded": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 35.199124999999995,
+        "openMs": 16.320542000000003,
+        "decodeMs": 3755.157331999999,
+        "wallMs": 4047.2838749999996,
+        "cpuMs": 11404.317,
+        "peakRssKiB": 590032,
+        "sharedMemory": true,
+        "decoderWorkers": 4,
+        "counts": [
+          30,
+          30,
+          46
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.96
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "29741703cfa79f7182cca4b34454b50099c55b89456578e425b6543e3d6b2f56"
+        ],
+        "prefixHashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "475c2b05f81fb9a5e468c0493a9e104fe76f5939d490e55cc1e8d01f21d2fc1e"
+        ],
+        "timelineHashes": [
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "83c9ccd4d34a9e9782776172643b2a64502dde711f11a966cd2dc9270b7e13d0",
+          "f0680348003241ac041f11df0f5e63690dd844804eca3ec9e644b605051c563c"
+        ],
+        "heapBytes": 351076352,
+        "readBytes": 36821469,
+        "maxRead": 1228301
+      }
+    }
+  ],
+  "summary": {
+    "baselineVersion": "9.0.1-anyfile.3",
+    "threadedVersion": "9.0.1-anyfile.4",
+    "baselineMedianDecodeMs": 9798.980414000001,
+    "threadedMedianDecodeMs": 3604.2025369999974,
+    "throughputRatio": 2.718765195186923,
+    "threadedLensPairsPerSecond": 8.323616581484034,
+    "medianCpuCoreEquivalent": 2.8177704732905595,
+    "matchingFirst30OutputsPerTrack": true
+  }
+}

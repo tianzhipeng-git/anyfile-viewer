@@ -1,8 +1,12 @@
 packages:
+  - viewer/ffmpeg-playback
   - viewer/dev-binary-core
   - viewer/i18n
   - viewer/protocol
   - viewer/rendering
+  - viewer/rendering-publication
+  - viewer/rendering-3d
+  - viewer/runtime-assets
   - viewer/raw-decoder
   - viewer/testing
   - viewer/ui

@@ -1,0 +1,26 @@
+{
+  "name": "@anyfile/cad-2d-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts",
+    "./probe": "./src/probe.ts"
+  },
+  "scripts": {
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@anyfile/viewer-protocol": "workspace:*",
+    "dxf-parser": "1.1.2",
+    "@anyfile/rendering-3d": "workspace:*",
+    "three": "0.185.1"
+  },
+  "devDependencies": {
+    "@anyfile/viewer-test": "workspace:*",
+    "happy-dom": "20.11.6",
+    "vitest": "4.1.11",
+    "@types/three": "0.185.4"
+  }
+}

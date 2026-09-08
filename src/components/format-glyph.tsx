@@ -1,10 +1,14 @@
-import { BinaryIcon, DatabaseIcon, FileImageIcon, FileTextIcon } from "lucide-react";
+import { BookOpenIcon, BoxIcon, DraftingCompassIcon, PaletteIcon, BinaryIcon, DatabaseIcon, FileImageIcon, FileTextIcon } from "lucide-react";
 
 const iconByCategory = {
   "images-video": FileImageIcon,
   documents: FileTextIcon,
+  ebooks: BookOpenIcon,
+  "3d-models": BoxIcon,
+  "graphic-design": PaletteIcon,
+  engineering: DraftingCompassIcon,
   "code-data": DatabaseIcon,
-  "developer-artifacts": BinaryIcon,
+  "developer-artifacts": BookOpenIcon, BoxIcon, DraftingCompassIcon, PaletteIcon, BinaryIcon,
 };
 
 export function FormatGlyph({ category, extension }: { category: string; extension: string }) {

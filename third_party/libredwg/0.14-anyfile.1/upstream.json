@@ -1,0 +1,8 @@
+{
+  "artifactVersion": "0.14-anyfile.1",
+  "core": { "version": "0.14", "url": "https://github.com/LibreDWG/libredwg/releases/download/0.14/libredwg-0.14.tar.gz", "sha256": "cb6ee0b078c6d9e0f09d66f1feac33ba6342df88ae544e9f9335fab475218351" },
+  "bindings": { "version": "0.7.10", "commit": "5909bd2bb87fa1168838e1295188f3ee603618eb", "url": "https://codeload.github.com/mlightcad/libredwg-web/tar.gz/5909bd2bb87fa1168838e1295188f3ee603618eb", "sha256": "821f1f42101a4605b320469e407f0b0c1a880235865a2e7a87c368af98f92fa2" },
+  "npm": { "url": "https://registry.npmjs.org/@mlightcad/libredwg-web/-/libredwg-web-0.7.10.tgz", "integrity": "sha512-L9wnwQn8cgHIr6I5El/8TgKSXaRacW9vytSpsU19xufmrnAAqEEGcW0MU92PgEiDKuQtU4GBenERIDfSrbY99g==" },
+  "image": "emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7",
+  "emscripten": "4.0.10"
+}

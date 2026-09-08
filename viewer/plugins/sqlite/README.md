@@ -32,8 +32,8 @@
 
 | 包 | 用途 |
 |---|---|
-| `@anyfile/viewer-protocol` | 插件协议 |
-| `@anyfile/viewer-ui` | 分页表格 UI |
+| `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `@anyfile/viewer-ui` | 共享分页表格界面 |
 | `sql.js@1.14.2` | SQLite WASM 引擎 |
 
 ## 已知限制
@@ -46,3 +46,14 @@
 - 外键约束、触发器不影响只读 SELECT，但不执行
 - WAL 模式下若仅拷贝 `.db` 而未合并 `-wal`，可能看到过期数据
 - 与 DuckDB 插件（`.duckdb`）互不重叠；与 data 插件的 CSV/Parquet 等格式分开
+
+## 开发与验证
+
+- [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
+- 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
+
+在仓库根目录运行插件测试：
+
+```bash
+pnpm --filter @anyfile/sqlite-viewer test
+```

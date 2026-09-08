@@ -1,9 +1,21 @@
+import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
+import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
+import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
+import { mobiManifest } from "@anyfile/mobi-reader/manifest";
+import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
+import { epubManifest } from "@anyfile/epub-reader/manifest";
+import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
+import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
+import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
+import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
+import { mesh3dManifest } from "@anyfile/mesh-3d-viewer/manifest";
 import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
 import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
+import { cad2dManifest } from "@anyfile/cad-2d-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
-import { dataManifest } from "@anyfile/data-viewer/manifest";
+import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
@@ -19,6 +31,9 @@ import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
 import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
+import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
+import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
+import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
@@ -29,6 +44,26 @@ import {
 } from "@anyfile/viewer-protocol";
 
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
+  {
+    manifest: comicBookManifest,
+    async probe(context) { return (await import("@anyfile/comic-book-reader/probe")).probeComicBook(context); },
+    async load() { return (await import("@anyfile/comic-book-reader")).comicBookViewer; },
+  },
+  {
+    manifest: mobiManifest,
+    async probe(context) { return (await import("@anyfile/mobi-reader/probe")).probeMobi(context); },
+    async load() { return (await import("@anyfile/mobi-reader")).mobiViewer; },
+  },
+  {
+    manifest: fictionBookManifest,
+    async probe(context) { return (await import("@anyfile/fictionbook-reader/probe")).probeFictionBook(context); },
+    async load() { return (await import("@anyfile/fictionbook-reader")).fictionBookViewer; },
+  },
+  {
+    manifest: epubManifest,
+    async probe(context) { return (await import("@anyfile/epub-reader/probe")).probeEpub(context); },
+    async load() { return (await import("@anyfile/epub-reader")).epubViewer; },
+  },
   {
     manifest: djiOsmoManifest,
     async probe(context) {
@@ -107,6 +142,28 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     },
   },
   {
+    manifest: ffmpegVideoManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/ffmpeg-video-viewer/probe");
+      return probePackage.probeFfmpegVideo(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/ffmpeg-video-viewer");
+      return viewerPackage.ffmpegVideoViewer;
+    },
+  },
+  {
+    manifest: ffmpegAudioManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/ffmpeg-audio-viewer/probe");
+      return probePackage.probeFfmpegAudio(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/ffmpeg-audio-viewer");
+      return viewerPackage.ffmpegAudioViewer;
+    },
+  },
+  {
     manifest: browserImageManifest,
     async probe(context) {
       const probePackage = await import("@anyfile/browser-image-viewer/probe");
@@ -151,6 +208,17 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     },
   },
   {
+    manifest: pixelmatorPxdManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/pixelmator-pxd-viewer/probe");
+      return probePackage.probePixelmatorPxd(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/pixelmator-pxd-viewer");
+      return viewerPackage.pixelmatorPxdViewer;
+    },
+  },
+  {
     manifest: safeSvgManifest,
     async probe(context) {
       const probePackage = await import("@anyfile/safe-svg-viewer/probe");
@@ -162,6 +230,17 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     },
   },
   {
+    manifest: photoshopManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/photoshop-viewer/probe");
+      return probePackage.probePhotoshop(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/photoshop-viewer");
+      return viewerPackage.photoshopViewer;
+    },
+  },
+  {
     manifest: pdfManifest,
     async probe(context) {
       const probePackage = await import("@anyfile/pdf-viewer/probe");
@@ -170,6 +249,17 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/pdf-viewer");
       return viewerPackage.pdfViewer;
+    },
+  },
+  {
+    manifest: postscriptManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/postscript-viewer/probe");
+      return probePackage.probePostscript(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/postscript-viewer");
+      return viewerPackage.postscriptViewer;
     },
   },
   {
@@ -268,14 +358,14 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     },
   },
   {
-    manifest: dataManifest,
+    manifest: duckdbManifest,
     async probe(context) {
-      const probePackage = await import("@anyfile/data-viewer/probe");
-      return probePackage.probeData(context);
+      const probePackage = await import("@anyfile/duckdb-viewer/probe");
+      return probePackage.probeDuckDB(context);
     },
     async load() {
-      const viewerPackage = await import("@anyfile/data-viewer");
-      return viewerPackage.dataViewer;
+      const viewerPackage = await import("@anyfile/duckdb-viewer");
+      return viewerPackage.duckdbViewer;
     },
   },
   {
@@ -288,6 +378,42 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
       const viewerPackage = await import("@anyfile/archive-metadata-viewer");
       return viewerPackage.archiveMetadataViewer;
     },
+  },
+  {
+    manifest: cad2dManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/cad-2d-viewer/probe");
+      return probePackage.probeCad2d(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/cad-2d-viewer");
+      return viewerPackage.cad2dViewer;
+    },
+  },
+  {
+    manifest: dwgManifest,
+    async probe(context) { return (await import("@anyfile/cad-dwg-viewer/probe")).probeDwg(context); },
+    async load() { return (await import("@anyfile/cad-dwg-viewer")).dwgViewer; },
+  },
+  {
+    manifest: cadExchangeManifest,
+    async probe(context) { return (await import("@anyfile/cad-exchange-viewer/probe")).probeCadExchange(context); },
+    async load() { return (await import("@anyfile/cad-exchange-viewer")).cadExchangeViewer; },
+  },
+  {
+    manifest: pointCloudManifest,
+    async probe(context) { return (await import("@anyfile/point-cloud-viewer/probe")).probePointCloud(context); },
+    async load() { return (await import("@anyfile/point-cloud-viewer")).pointCloudViewer; },
+  },
+  {
+    manifest: print3dManifest,
+    async probe(context) { return (await import("@anyfile/print-3d-viewer/probe")).probePrint3d(context); },
+    async load() { return (await import("@anyfile/print-3d-viewer")).print3dViewer; },
+  },
+  {
+    manifest: mesh3dManifest,
+    async probe(context) { return (await import("@anyfile/mesh-3d-viewer/probe")).probeMesh3d(context); },
+    async load() { return (await import("@anyfile/mesh-3d-viewer")).mesh3dViewer; },
   },
   {
     manifest: hexManifest,

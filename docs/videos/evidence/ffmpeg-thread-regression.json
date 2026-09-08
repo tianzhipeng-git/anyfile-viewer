@@ -1,0 +1,631 @@
+{
+  "date": "2026-09-08T15:02:39.202Z",
+  "results": [
+    {
+      "file": "avi-mpeg4-mp3.avi",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        168
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "avi-mpeg4-mp3.avi",
+      "seek": 1,
+      "counts": [
+        73,
+        0,
+        126
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "ps-mpeg2-ac3.vob",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        125
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "ps-mpeg2-ac3.vob",
+      "seek": 1,
+      "counts": [
+        76,
+        0,
+        94
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "ps-mpeg2-mp2.mpg",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        167
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "ps-mpeg2-mp2.mpg",
+      "seek": 1,
+      "counts": [
+        76,
+        0,
+        126
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "asf-wmv2-wma2.wmv",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        93
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "asf-wmv2-wma2.wmv",
+      "seek": 1,
+      "counts": [
+        77,
+        0,
+        72
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "avi-video-only.avi",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        0
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "avi-video-only.avi",
+      "seek": 1,
+      "counts": [
+        73,
+        0,
+        0
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "avi-1080p.avi",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        168
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "avi-1080p.avi",
+      "seek": 1,
+      "counts": [
+        73,
+        0,
+        126
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "aiff-s16.aiff",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        188
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "aiff-s16.aiff",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        141
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "aiff-s24.aiff",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        141
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "aiff-s24.aiff",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        106
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "aifc-f32.aifc",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        375
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "aifc-f32.aifc",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        282
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "asf-wma1.wma",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        93
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "asf-wma1.wma",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        72
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "asf-wma2.wma",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        93
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "asf-wma2.wma",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        72
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "aiff-silence.aiff",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        188
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "aiff-silence.aiff",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        141
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "mp3-cover.mp3",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        168
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "mp3-cover.mp3",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        126
+      ],
+      "identicalOutput": true,
+      "eof": true,
+      "identicalTimeline": true,
+      "heapBytes": 33554432
+    },
+    {
+      "file": "VID_20240415_213145_00_035.insv",
+      "seek": 1,
+      "identicalOutput": true,
+      "baseline": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 18.786209000000007,
+        "openMs": 16.792417000000007,
+        "decodeMs": 13044.128409000003,
+        "wallMs": 13324.411375,
+        "cpuMs": 13491.335,
+        "peakRssKiB": 516624,
+        "sharedMemory": false,
+        "decoderWorkers": 0,
+        "counts": [
+          30,
+          30,
+          43
+        ],
+        "first": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9813333333333333
+        ],
+        "last": [
+          1.9352666666666667,
+          1.9352666666666667,
+          1.8773333333333333
+        ],
+        "eof": false,
+        "pcmPeak": 0.15844358503818512,
+        "hashes": [
+          "e503080f37f4ddb4d23b76763e5901e647f52026343b7a9d7ba3eaaf17c2139f",
+          "6b12a939ed7fbef3965e8c65fb462401ecbd198fac2c78d8820e2d40de595845",
+          "4a040ff10d12607b5e140bf4d153d1edfba5218bfa2f955dea597174df24351e"
+        ],
+        "prefixHashes": [
+          "e503080f37f4ddb4d23b76763e5901e647f52026343b7a9d7ba3eaaf17c2139f",
+          "6b12a939ed7fbef3965e8c65fb462401ecbd198fac2c78d8820e2d40de595845",
+          "38df8d352542d9d2bbf29aba46c1b275f50f1205fc4ebc29c05b3d8fca2f3038"
+        ],
+        "timelineHashes": [
+          "54a8ad28069c732bb20cff50e3f502f255e82ee329a4f0410b0df1a8f090ff84",
+          "54a8ad28069c732bb20cff50e3f502f255e82ee329a4f0410b0df1a8f090ff84",
+          "bc14ccdde00788b3c3f963a1555e208757417811947243c54687f4c9be0f0c74"
+        ],
+        "heapBytes": 304873472,
+        "readBytes": 40395643,
+        "maxRead": 1038558
+      },
+      "threaded": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 38.245875,
+        "openMs": 18.871250000000003,
+        "decodeMs": 6259.672955999999,
+        "wallMs": 6710.560291999999,
+        "cpuMs": 15582.315,
+        "peakRssKiB": 565344,
+        "sharedMemory": true,
+        "decoderWorkers": 4,
+        "counts": [
+          30,
+          30,
+          46
+        ],
+        "first": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9813333333333333
+        ],
+        "last": [
+          1.9352666666666667,
+          1.9352666666666667,
+          1.9413333333333334
+        ],
+        "eof": false,
+        "pcmPeak": 0.1980474293231964,
+        "hashes": [
+          "e503080f37f4ddb4d23b76763e5901e647f52026343b7a9d7ba3eaaf17c2139f",
+          "6b12a939ed7fbef3965e8c65fb462401ecbd198fac2c78d8820e2d40de595845",
+          "ab4fabee2a26facc87bcfcd0348b2dbf8923871080d2e1f594c9f3e6d4623c12"
+        ],
+        "prefixHashes": [
+          "e503080f37f4ddb4d23b76763e5901e647f52026343b7a9d7ba3eaaf17c2139f",
+          "6b12a939ed7fbef3965e8c65fb462401ecbd198fac2c78d8820e2d40de595845",
+          "38df8d352542d9d2bbf29aba46c1b275f50f1205fc4ebc29c05b3d8fca2f3038"
+        ],
+        "timelineHashes": [
+          "54a8ad28069c732bb20cff50e3f502f255e82ee329a4f0410b0df1a8f090ff84",
+          "54a8ad28069c732bb20cff50e3f502f255e82ee329a4f0410b0df1a8f090ff84",
+          "cf6bcb57878fc6566ab6b7be4b7214984ef9d93e75652a66c929243eda7622c2"
+        ],
+        "heapBytes": 313655296,
+        "readBytes": 41102734,
+        "maxRead": 1038558
+      }
+    },
+    {
+      "file": "VID_20240415_213145_00_035.insv",
+      "seek": 40,
+      "identicalOutput": true,
+      "baseline": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 19.140209,
+        "openMs": 16.116417,
+        "decodeMs": 50328.71892599999,
+        "wallMs": 51622.9995,
+        "cpuMs": 47066.562,
+        "peakRssKiB": 529680,
+        "sharedMemory": false,
+        "decoderWorkers": 0,
+        "counts": [
+          120,
+          119,
+          183
+        ],
+        "first": [
+          39.97326666666667,
+          39.97326666666667,
+          40
+        ],
+        "last": [
+          43.9439,
+          43.91053333333333,
+          43.882666666666665
+        ],
+        "eof": true,
+        "pcmPeak": 0.33755671977996826,
+        "hashes": [
+          "84f28354b44d18f13e37dc37d3b950d32e6d2e143970222e8f60295a6598ccde",
+          "ca5104e30a5aa1b21551d6a6fe81cbfb732877762e9839cdc416e9d03c644641",
+          "83ae5afdf38d4b9f49bf72ee936c018bb5a0b3712aa3d58564036828cba56e74"
+        ],
+        "prefixHashes": [
+          "84f28354b44d18f13e37dc37d3b950d32e6d2e143970222e8f60295a6598ccde",
+          "ca5104e30a5aa1b21551d6a6fe81cbfb732877762e9839cdc416e9d03c644641",
+          "83ae5afdf38d4b9f49bf72ee936c018bb5a0b3712aa3d58564036828cba56e74"
+        ],
+        "timelineHashes": [
+          "c93b1e8a82513cdacc69853147aed697c788941ac4791aa6fa972f0efa8731a7",
+          "c72730f204e87ec0bf8a1ea63fbc4daf41a01209c7ffc6f7f4eb9be447f578f8",
+          "bac14ab69e692dd42e83d2bf4eab82f2692a270c0ba416edb7958c04f86b37f6"
+        ],
+        "heapBytes": 305463296,
+        "readBytes": 121789405,
+        "maxRead": 1038558
+      },
+      "threaded": {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "initMs": 41.084875000000004,
+        "openMs": 18.689042,
+        "decodeMs": 16150.977005000012,
+        "wallMs": 17345.528666,
+        "cpuMs": 46878.151,
+        "peakRssKiB": 667136,
+        "sharedMemory": true,
+        "decoderWorkers": 4,
+        "counts": [
+          120,
+          119,
+          183
+        ],
+        "first": [
+          39.97326666666667,
+          39.97326666666667,
+          40
+        ],
+        "last": [
+          43.9439,
+          43.91053333333333,
+          43.882666666666665
+        ],
+        "eof": true,
+        "pcmPeak": 0.33755671977996826,
+        "hashes": [
+          "84f28354b44d18f13e37dc37d3b950d32e6d2e143970222e8f60295a6598ccde",
+          "ca5104e30a5aa1b21551d6a6fe81cbfb732877762e9839cdc416e9d03c644641",
+          "83ae5afdf38d4b9f49bf72ee936c018bb5a0b3712aa3d58564036828cba56e74"
+        ],
+        "prefixHashes": [
+          "84f28354b44d18f13e37dc37d3b950d32e6d2e143970222e8f60295a6598ccde",
+          "ca5104e30a5aa1b21551d6a6fe81cbfb732877762e9839cdc416e9d03c644641",
+          "83ae5afdf38d4b9f49bf72ee936c018bb5a0b3712aa3d58564036828cba56e74"
+        ],
+        "timelineHashes": [
+          "c93b1e8a82513cdacc69853147aed697c788941ac4791aa6fa972f0efa8731a7",
+          "c72730f204e87ec0bf8a1ea63fbc4daf41a01209c7ffc6f7f4eb9be447f578f8",
+          "bac14ab69e692dd42e83d2bf4eab82f2692a270c0ba416edb7958c04f86b37f6"
+        ],
+        "heapBytes": 315228160,
+        "readBytes": 121789405,
+        "maxRead": 1038558
+      }
+    }
+  ],
+  "rejectedOrTruncatedFixtures": [
+    {
+      "file": "corrupt.avi",
+      "status": 1,
+      "error": "open failed: -1",
+      "matchesBaseline": true
+    },
+    {
+      "file": "truncated.avi",
+      "status": 1,
+      "error": "open failed: -1",
+      "matchesBaseline": true
+    },
+    {
+      "file": "oversized.avi",
+      "status": 1,
+      "error": "open failed: -3",
+      "matchesBaseline": true
+    },
+    {
+      "file": "unknown-codec.avi",
+      "status": 1,
+      "error": "open failed: -2",
+      "matchesBaseline": true
+    },
+    {
+      "file": "asf-multiple-audio.wma",
+      "status": 1,
+      "error": "open failed: -2",
+      "matchesBaseline": true
+    },
+    {
+      "file": "nonfinite-pcm.aifc",
+      "status": 1,
+      "error": "decode failed: -1",
+      "matchesBaseline": true
+    }
+  ]
+}

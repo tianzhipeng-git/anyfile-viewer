@@ -4,8 +4,8 @@ export const categoryContents: readonly CategoryContent[] = [
   {
     slug: "images-video", status: "published",
     copy: {
-      en: { name: "Images & Media", eyebrow: "SEE AND HEAR LOCAL FILES", title: "Image viewers and audio/video players", description: "View images or play supported audio and video online without uploading your media.", introduction: "This category covers still images, camera originals, audio and video. Support depends on both the container and the codec inside it, so each format page states the combinations Anyfile actually handles.", useCases: ["Check an image without sending it to a cloud service", "Play supported audio and video from local storage", "Inspect camera originals and less common raster formats"], commonProblems: ["A recognized video container can contain an unsupported codec", "RAW rendering varies by camera model and embedded preview", "Very large images can exceed browser memory or canvas limits"], faq: [{ question: "Does every browser support the same media formats?", answer: "No. Native codecs and WebCodecs support vary by browser and operating system; each format page calls out important requirements." }] },
-      "zh-CN": { name: "图片与音视频", eyebrow: "在本地看见与听见", title: "图片查看器与音视频播放器", description: "无需上传媒体文件，在线查看图片或播放受支持的音频和视频。", introduction: "这一类别包含静态图片、相机原片、音频和视频。媒体能力同时取决于容器与内部 codec，因此各格式页只说明 Anyfile 实际处理的组合。", useCases: ["不发送到云端即可检查图片", "直接播放本地存储中的受支持音视频", "查看相机原片和较少见的栅格格式"], commonProblems: ["视频容器可识别，但内部 codec 可能不受支持", "RAW 呈现结果会随相机型号和内嵌预览变化", "超大图片可能超过浏览器内存或 Canvas 限制"], faq: [{ question: "不同浏览器支持的媒体格式相同吗？", answer: "不同。原生 codec 和 WebCodecs 能力会随浏览器及操作系统变化，各格式页会注明重要条件。" }] },
+      en: { name: "Images & Media", eyebrow: "SEE AND HEAR LOCAL FILES", title: "Online Image, Audio & Video Viewers", description: "Open photos, play music and watch supported videos directly in your browser.", introduction: "Choose a photo, recording or video to view it on your device. Browse common images, supported RAW camera photos and less familiar media formats from one place.", useCases: ["Check an image without sending it to a cloud service", "Play supported audio and video from local storage", "Inspect camera originals and less common raster formats"], commonProblems: ["A recognized video container can contain an unsupported codec", "RAW rendering varies by camera model and embedded preview", "Very large images can exceed browser memory or canvas limits"], faq: [{ question: "Does every browser support the same media formats?", answer: "No. Native codecs and WebCodecs support vary by browser and operating system; each format page calls out important requirements." }] },
+      "zh-CN": { name: "图片与音视频", eyebrow: "在本地看见与听见", title: "在线图片查看器与音视频播放器", description: "直接在浏览器中打开照片、收听音乐和观看受支持的视频。", introduction: "选择照片、录音或视频，即可在当前设备上查看。这里汇集常见图片、受支持的 RAW 相机原片和较少见的音视频格式。", useCases: ["不发送到云端即可检查图片", "直接播放本地存储中的受支持音视频", "查看相机原片和较少见的栅格格式"], commonProblems: ["视频容器可识别，但内部 codec 可能不受支持", "RAW 呈现结果会随相机型号和内嵌预览变化", "超大图片可能超过浏览器内存或 Canvas 限制"], faq: [{ question: "不同浏览器支持的媒体格式相同吗？", answer: "不同。原生 codec 和 WebCodecs 能力会随浏览器及操作系统变化，各格式页会注明重要条件。" }] },
     },
   },
   {
@@ -13,29 +13,192 @@ export const categoryContents: readonly CategoryContent[] = [
     formatExtensions: ["insv", "insp", "lrv", "360", "osv", "dng", "jpg"],
     panoramaViewerIds: ["insta360", "gopro-max", "dji-osmo-360"],
     copy: {
-      en: { name: "360° Cameras", eyebrow: "OPEN ORIGINAL CAMERA MEDIA", title: "360° camera file viewers", description: "Preview original Insta360, GoPro MAX and DJI Osmo 360 media directly in your browser.", introduction: "Open supported camera-original panoramas without first exporting them to a flat MP4 or JPEG. Anyfile validates known camera layouts, reads large files locally and renders an interactive 360° view without uploading your footage.", useCases: ["Check original camera footage before starting an edit", "Preview large panoramas without waiting for an upload", "Open uncommon INSV, INSP, LRV, .360 and OSV files"], commonProblems: ["Some recordings require HEVC or HEVC Main 10 support from the browser and operating system", "Older Insta360 recordings may need both matching lens files", "Stabilization, reframing and export remain jobs for the camera maker's editing software"], faq: [{ question: "Does Anyfile replace Insta360 Studio, GoPro Player or DJI Studio?", answer: "No. Anyfile is a fast, private viewer for supported originals. Use the camera maker's software when you need stabilization, editing, reframing or export." }] },
-      "zh-CN": { name: "360° 全景", eyebrow: "直接打开相机原片", title: "360° 全景相机文件查看器", description: "直接在浏览器中预览 Insta360、GoPro MAX 与 DJI Osmo 360 原始素材。", introduction: "无需先导出为平面 MP4 或 JPEG，即可打开受支持的全景相机原片。Anyfile 会校验已知相机布局，在本地分段读取大文件，并渲染成交互式 360° 视图，全程不上传素材。", useCases: ["开始剪辑前快速检查相机原始素材", "无需等待上传即可预览大型全景文件", "打开少见的 INSV、INSP、LRV、.360 与 OSV 文件"], commonProblems: ["部分录像要求浏览器和操作系统支持 HEVC 或 HEVC Main 10", "较早的 Insta360 录像可能需要同时提供匹配的两路镜头文件", "防抖、重新取景与导出仍需使用相机厂商的编辑软件"], faq: [{ question: "Anyfile 可以替代 Insta360 Studio、GoPro Player 或 DJI Studio 吗？", answer: "不能。Anyfile 定位是快速、私密地查看受支持的原片；需要防抖、剪辑、重新取景或导出时，请使用相机厂商的软件。" }] },
+      en: { name: "360° Cameras", eyebrow: "OPEN ORIGINAL CAMERA MEDIA", title: "Online 360° Camera Viewers", description: "Explore supported Insta360, GoPro MAX and DJI Osmo 360 photos and videos with drag-to-look viewing.", introduction: "Check your original 360° shots before editing or sharing. Choose your camera below to see supported models, file types and how to open paired recordings.", useCases: ["Check original camera footage before starting an edit", "Preview large panoramas without waiting for an upload", "Open uncommon INSV, INSP, LRV, .360 and OSV files"], commonProblems: ["Some recordings require HEVC or HEVC Main 10 support from the browser and operating system", "Older Insta360 recordings may need both matching lens files", "Stabilization, reframing and export remain jobs for the camera maker's editing software"], faq: [{ question: "Does Anyfile replace Insta360 Studio, GoPro Player or DJI Studio?", answer: "No. Anyfile is a fast, private viewer for supported originals. Use the camera maker's software when you need stabilization, editing, reframing or export." }] },
+      "zh-CN": { name: "360° 全景", eyebrow: "直接打开相机原片", title: "在线 360° 全景相机查看器", description: "查看受支持的 Insta360、GoPro MAX 和 DJI Osmo 360 照片与视频，拖动探索全景。", introduction: "在剪辑或分享前，先查看拍摄的 360° 原片。选择下方相机，了解支持的机型、文件类型以及成对录像的打开方法。", useCases: ["开始剪辑前快速检查相机原始素材", "无需等待上传即可预览大型全景文件", "打开少见的 INSV、INSP、LRV、.360 与 OSV 文件"], commonProblems: ["部分录像要求浏览器和操作系统支持 HEVC 或 HEVC Main 10", "较早的 Insta360 录像可能需要同时提供匹配的两路镜头文件", "防抖、重新取景与导出仍需使用相机厂商的编辑软件"], faq: [{ question: "Anyfile 可以替代 Insta360 Studio、GoPro Player 或 DJI Studio 吗？", answer: "不能。Anyfile 定位是快速、私密地查看受支持的原片；需要防抖、剪辑、重新取景或导出时，请使用相机厂商的软件。" }] },
     },
   },
   {
     slug: "documents", status: "published",
     copy: {
-      en: { name: "Documents", eyebrow: "READ WITHOUT AN UPLOAD QUEUE", title: "Document, spreadsheet and presentation viewers", description: "Read common office files locally while keeping the original file on your device.", introduction: "Document viewers reconstruct readable output in the browser. They are intended for review, not editing, and complex desktop-only layout features may render differently.", useCases: ["Read a PDF or DOCX on an untrusted machine", "Inspect workbook values and worksheets", "Review PPTX slides without installing office software"], commonProblems: ["Password-protected or encrypted files may not open", "Macros, external links and active content are not executed", "Fonts and advanced layout effects can differ from desktop applications"], faq: [{ question: "Can I edit office files in Anyfile?", answer: "No. Anyfile is deliberately read-only; use the authoring application when you need to edit and save a document." }] },
-      "zh-CN": { name: "文档", eyebrow: "阅读，无需上传等待", title: "文档、表格与演示文稿查看器", description: "在本地阅读常见办公文件，原文件始终留在当前设备。", introduction: "文档查看器在浏览器中重建可读内容，定位是检查而非编辑；依赖桌面软件的复杂版式能力可能会有差异。", useCases: ["在不可信设备上阅读 PDF 或 DOCX", "检查工作簿数值与工作表", "无需安装办公软件即可审阅 PPTX 幻灯片"], commonProblems: ["受密码保护或加密的文件可能无法打开", "不会执行宏、外部链接和活动内容", "字体和高级版式效果可能与桌面应用不同"], faq: [{ question: "可以在 Anyfile 中编辑办公文件吗？", answer: "不可以。Anyfile 有意保持只读；需要编辑和保存时请使用对应的创作软件。" }] },
+      en: { name: "Office Documents", eyebrow: "READ WITHOUT AN UPLOAD QUEUE", title: "Online Office Document Viewers", description: "Read PDF and Word files, browse Excel spreadsheets and view PowerPoint presentations.", introduction: "Choose a document, spreadsheet or presentation to see the available viewer. Read supported content on this device; each format page explains any layout or file restrictions.", useCases: ["Read a PDF or DOCX without installing office software", "Inspect workbook values and worksheets", "Review PPTX slides without installing office software"], commonProblems: ["Password-protected or encrypted files may not open", "Macros, external links and active content are not executed", "Fonts and advanced layout effects can differ from desktop applications"], faq: [{ question: "Can I edit office files in Anyfile?", answer: "No. Anyfile is deliberately read-only; use the authoring application when you need to edit and save a document." }] },
+      "zh-CN": { name: "办公文档", eyebrow: "阅读，无需上传等待", title: "在线文档、表格与演示文稿查看器", description: "阅读 PDF 和 Word 文档、浏览 Excel 表格、查看 PowerPoint 幻灯片。", introduction: "选择文档、表格或演示文稿，找到对应的查看器。在当前设备上阅读受支持的内容，各格式页会说明排版和文件限制。", useCases: ["无需安装办公软件即可阅读 PDF 或 DOCX", "检查工作簿数值与工作表", "无需安装办公软件即可审阅 PPTX 幻灯片"], commonProblems: ["受密码保护或加密的文件可能无法打开", "不会执行宏、外部链接和活动内容", "字体和高级版式效果可能与桌面应用不同"], faq: [{ question: "可以在 Anyfile 中编辑办公文件吗？", answer: "不可以。Anyfile 有意保持只读；需要编辑和保存时请使用对应的创作软件。" }] },
+    },
+  },
+  {
+    "slug": "ebooks",
+    "status": "published",
+    "copy": {
+      "en": {
+        "name": "Ebooks & Comics",
+        "eyebrow": "READ BOOKS LOCALLY",
+        "title": "Online Ebook & Comic Readers",
+        "description": "Read EPUB, MOBI and FB2 ebooks, or browse CBZ and CBR comics in your browser.",
+        "introduction": "Open supported unencrypted books and comic archives on your device. Follow chapters, adjust supported reading settings or turn comic pages without installing a reader.",
+        "useCases": [
+          "Read EPUB chapters with adjustable text",
+          "Open supported Kindle and FictionBook files",
+          "Browse comic pages and manga spreads"
+        ],
+        "commonProblems": [
+          "DRM-protected books are not supported",
+          "Fixed-layout and complex ebook styling may not be supported",
+          "Archive and page size limits depend on the format"
+        ],
+        "faq": [
+          {
+            "question": "Can I read ebooks without uploading them?",
+            "answer": "Yes. Supported books are read locally in your browser. Format pages explain reading features and restrictions."
+          }
+        ]
+      },
+      "zh-CN": {
+        "name": "电子书与漫画",
+        "eyebrow": "本地阅读书籍",
+        "title": "在线电子书与漫画阅读器",
+        "description": "阅读 EPUB、MOBI 与 FB2 电子书，或在浏览器中翻阅 CBZ、CBR 漫画。",
+        "introduction": "在当前设备打开受支持的无加密电子书与漫画归档。按章节阅读、调整支持的阅读设置或翻阅漫画，无需安装阅读软件。",
+        "useCases": [
+          "调整字号并阅读 EPUB 章节",
+          "打开受支持的 Kindle 与 FictionBook 文件",
+          "翻阅漫画页面与双页跨页"
+        ],
+        "commonProblems": [
+          "不支持受 DRM 保护的书籍",
+          "固定版式与复杂电子书样式可能不受支持",
+          "归档与页面大小限制因格式而异"
+        ],
+        "faq": [
+          {
+            "question": "可以不上传就阅读电子书吗？",
+            "answer": "可以。受支持的书籍在浏览器本地读取，各格式页会说明阅读功能与限制。"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "slug": "graphic-design",
+    "status": "published",
+    "copy": {
+      "en": {
+        "name": "Graphic Design",
+        "eyebrow": "PREVIEW DESIGN FILES LOCALLY",
+        "title": "Online Photoshop & Illustrator File Viewers",
+        "description": "Preview Photoshop PSD and PSB, Illustrator AI and Pixelmator Pro PXD artwork.",
+        "introduction": "Check supported design files before opening an authoring application. Preview capabilities depend on the saved representation available in each file.",
+        "useCases": [
+          "Check Photoshop document previews",
+          "View supported Illustrator artwork",
+          "Inspect embedded Pixelmator Pro previews"
+        ],
+        "commonProblems": [
+          "Layers and editable objects are not fully reconstructed",
+          "Some files require a compatible saved or embedded preview",
+          "Fonts, effects and colors can differ from the authoring application"
+        ],
+        "faq": [
+          {
+            "question": "Does opening a design file preserve all editing features?",
+            "answer": "No. Anyfile is a read-only preview tool. Use the original design application for full layers, effects and editing."
+          }
+        ]
+      },
+      "zh-CN": {
+        "name": "平面设计",
+        "eyebrow": "本地预览设计文件",
+        "title": "在线 Photoshop 与 Illustrator 文件查看器",
+        "description": "无需安装设计软件，即可预览 Photoshop PSD、PSB、Illustrator AI 与 Pixelmator Pro PXD 图稿。",
+        "introduction": "在打开创作软件前，先检查受支持的设计文件。可预览的内容取决于文件保存的兼容表示或内嵌预览。",
+        "useCases": [
+          "检查 Photoshop 文档预览",
+          "查看受支持的 Illustrator 图稿",
+          "检查 Pixelmator Pro 内嵌预览"
+        ],
+        "commonProblems": [
+          "不会完整重建图层与可编辑对象",
+          "部分文件需要兼容的保存表示或内嵌预览",
+          "字体、效果与颜色可能和创作软件不同"
+        ],
+        "faq": [
+          {
+            "question": "打开设计文件能保留所有编辑功能吗？",
+            "answer": "不能。Anyfile 只提供预览；完整图层、效果与编辑请使用原设计软件。"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "slug": "3d-models",
+    "status": "published",
+    "copy": {
+      "en": {
+        "name": "3D Models",
+        "eyebrow": "EXPLORE SHAPES LOCALLY",
+        "title": "Online 3D Model & Point Cloud Viewers",
+        "description": "Rotate GLB, glTF, OBJ and STL models, inspect 3D print files and explore sampled point clouds.",
+        "introduction": "Inspect model shapes in an interactive browser viewport. Open a containing folder when a model references local materials, textures or buffers.",
+        "useCases": [
+          "Inspect meshes and scene objects",
+          "Preview STL, 3MF and AMF print models",
+          "Explore sampled LAS, LAZ and PCD point clouds"
+        ],
+        "commonProblems": [
+          "WebGL 2 is required",
+          "External textures and buffers must be supplied locally",
+          "Large files, advanced materials and compression have format-specific limits"
+        ],
+        "faq": [
+          {
+            "question": "Can I edit or repair a 3D model here?",
+            "answer": "No. Anyfile provides read-only inspection. Use a modeling or slicing application to edit geometry or prepare a print."
+          }
+        ]
+      },
+      "zh-CN": {
+        "name": "3D 模型",
+        "eyebrow": "本地探索三维形状",
+        "title": "在线 3D 模型与点云查看器",
+        "description": "旋转 GLB、glTF、OBJ 与 STL 模型，检查 3D 打印文件，浏览点云抽样预览。",
+        "introduction": "在浏览器交互视口中检查模型外形。如果模型引用本地材质、纹理或缓冲文件，请打开所在文件夹。",
+        "useCases": [
+          "检查网格与场景对象",
+          "预览 STL、3MF 与 AMF 打印模型",
+          "浏览 LAS、LAZ 与 PCD 点云抽样"
+        ],
+        "commonProblems": [
+          "需要 WebGL 2 支持",
+          "外部纹理与缓冲文件需要在本地一并提供",
+          "大文件、高级材质与压缩支持因格式而异"
+        ],
+        "faq": [
+          {
+            "question": "可以在这里编辑或修复 3D 模型吗？",
+            "answer": "不可以。Anyfile 只提供查看；编辑几何或准备打印请使用建模或切片软件。"
+          }
+        ]
+      }
+    }
+  },
+  {
+    slug: "engineering", status: "published",
+    copy: {
+      en: { name: "CAD Drawings & Models", eyebrow: "READ CAD LOCALLY", title: "Online CAD Drawing & Model Viewers", description: "View DWG and DXF drawings and inspect STEP, IGES and BREP CAD models in your browser.", introduction: "Check engineering drawings and CAD geometry before opening a project. Switch views, rotate supported models and zoom in on details.", useCases: ["Check DXF drawings without uploading them", "Inspect vector geometry before importing into CAD", "Open engineering drawings on a locked-down computer"], commonProblems: ["DWG previews cover model space with replacement fonts", "Complex hatches, dimensions and sheet layouts may be simplified", "Very large drawings remain bounded by browser memory"], faq: [{ question: "Can Anyfile replace AutoCAD?", answer: "No. Anyfile is a read-only local viewer, not a CAD editor. Use a CAD application for editing, dimensioning and exact plotting." }] },
+      "zh-CN": { name: "CAD 图纸与模型", eyebrow: "本地阅读 CAD", title: "在线 CAD 图纸与模型查看器", description: "在浏览器中查看 DWG、DXF 图纸，检查 STEP、IGES 与 BREP CAD 模型。", introduction: "无需先打开 CAD 项目，即可检查工程图纸与 CAD 几何。切换视图、旋转受支持的模型并放大查看细节。", useCases: ["不上传即可检查 DXF 工程图", "在导入 CAD 前检查矢量几何", "在受限电脑上打开工程图"], commonProblems: ["DWG 预览仅包含模型空间，并使用替代字体", "复杂剖面线、标注与图纸布局可能被简化", "超大工程图仍受浏览器内存限制"], faq: [{ question: "Anyfile 能替代 AutoCAD 吗？", answer: "不能。Anyfile 是只读本地查看器，不是 CAD 编辑器。编辑、标注和精确出图仍需使用 CAD 软件。" }] },
     },
   },
   {
     slug: "code-data", status: "published",
     copy: {
-      en: { name: "Data", eyebrow: "MAKE STRUCTURE VISIBLE", title: "Structured data and database viewers", description: "Inspect tables, records and databases locally for review and troubleshooting.", introduction: "Data formats need different views: paged tables for records, schema navigation for databases and specialized summaries for structured archives. Anyfile chooses from the registered viewers without executing file content.", useCases: ["Page through JSON and tabular data", "Inspect SQLite and DuckDB tables", "Review HTTP Archive requests and other structured records"], commonProblems: ["Malformed or mixed-encoding data can prevent parsing", "Nested records do not always map cleanly to a table", "Large queries and files remain bounded by browser memory"], faq: [{ question: "Does opening data execute it?", answer: "No. These viewers parse or display selected files and do not run database triggers or embedded application code." }] },
-      "zh-CN": { name: "数据", eyebrow: "让结构清晰可见", title: "结构化数据与数据库查看器", description: "在本地检查表格、记录和数据库，用于审阅与排错。", introduction: "不同数据格式需要不同视图：记录适合分页表格，数据库需要 schema 导航，结构化归档则需要专用摘要。Anyfile 从已注册查看器中选择，且不会执行文件内容。", useCases: ["分页浏览 JSON 与表格数据", "检查 SQLite 与 DuckDB 数据表", "审阅 HTTP Archive 请求及其他结构化记录"], commonProblems: ["损坏或混合编码的数据可能导致解析失败", "嵌套记录不一定能自然映射为表格", "大查询和大文件仍受浏览器内存限制"], faq: [{ question: "打开数据会执行其中内容吗？", answer: "不会。这些查看器只解析或展示所选文件，不运行数据库触发器或内嵌应用代码。" }] },
+      en: { name: "Data", eyebrow: "MAKE STRUCTURE VISIBLE", title: "Online Data & Database Viewers", description: "Browse CSV, JSON and Parquet data, open SQLite or DuckDB tables, and review HAR network logs.", introduction: "Check a dataset, inspect saved records or investigate a network request. Table and database viewers make rows and columns easy to browse without changing the original file.", useCases: ["Page through JSON and tabular data", "Inspect SQLite and DuckDB tables", "Review HTTP Archive requests and other structured records"], commonProblems: ["Malformed or mixed-encoding data can prevent parsing", "Nested records do not always map cleanly to a table", "Large queries and files remain bounded by browser memory"], faq: [{ question: "Does opening data execute it?", answer: "No. These viewers parse or display selected files and do not run database triggers or embedded application code." }] },
+      "zh-CN": { name: "数据", eyebrow: "让结构清晰可见", title: "在线数据表与数据库查看器", description: "浏览 CSV、JSON 和 Parquet 数据，打开 SQLite 或 DuckDB 数据表，查看 HAR 网络日志。", introduction: "检查数据集、查看已保存的记录，或排查网络请求。通过表格和数据库视图按行列浏览内容，原文件不会被修改。", useCases: ["分页浏览 JSON 与表格数据", "检查 SQLite 与 DuckDB 数据表", "审阅 HTTP Archive 请求及其他结构化记录"], commonProblems: ["损坏或混合编码的数据可能导致解析失败", "嵌套记录不一定能自然映射为表格", "大查询和大文件仍受浏览器内存限制"], faq: [{ question: "打开数据会执行其中内容吗？", answer: "不会。这些查看器只解析或展示所选文件，不运行数据库触发器或内嵌应用代码。" }] },
     },
   },
   {
     slug: "developer-artifacts", status: "published",
     copy: {
-      en: { name: "Developer", eyebrow: "READ CODE AND BUILD OUTPUTS", title: "Code, binary and package inspection tools", description: "Inspect source text, arrays, compiled modules, source maps and archives without executing their payloads.", introduction: "Developer files range from readable source text to opaque build artifacts. These viewers provide syntax-oriented text, safe structural summaries, indexes and paged values while keeping execution outside the viewing path.", useCases: ["Review source or configuration text read-only", "Check NumPy shapes or WebAssembly exports", "Browse package contents or source-map coverage"], commonProblems: ["Malformed text or mixed encodings can prevent parsing", "Corrupt headers make structural inspection impossible", "Compressed or huge entries may hit explicit safety limits"], faq: [{ question: "Are code, package scripts or WebAssembly modules executed?", answer: "No. Anyfile displays source text and reads artifact structure without running code, installing packages or instantiating WebAssembly modules." }] },
-      "zh-CN": { name: "开发者", eyebrow: "阅读代码与构建产物", title: "代码、二进制与软件包检查工具", description: "检查源码文本、数组、编译模块、Source Map 与归档结构，不执行其中载荷。", introduction: "开发者文件既包括可直接阅读的源码文本，也包括不透明的构建产物。这些查看器提供语法导向文本、安全的结构摘要、索引与分页数值，并把执行行为排除在查看路径之外。", useCases: ["只读审阅源码或配置文本", "检查 NumPy 形状或 WebAssembly 导出", "浏览软件包内容或 Source Map 覆盖"], commonProblems: ["损坏文本或混合编码可能导致解析失败", "文件头损坏会导致结构检查失败", "压缩或超大条目可能触发明确的安全限制"], faq: [{ question: "会执行代码、软件包脚本或 WebAssembly 模块吗？", answer: "不会。Anyfile 只展示源码文本并读取产物结构，不运行代码、不安装软件包，也不实例化 WebAssembly 模块。" }] },
+      en: { name: "Developer", eyebrow: "READ CODE AND BUILD OUTPUTS", title: "Online Code & Package Viewers", description: "Read code, inspect NumPy arrays and WASM files, or check the file list inside supported packages.", introduction: "Review source files, check array values or see what a software package contains before installing it. Files are inspected without running code or installing packages.", useCases: ["Review source or configuration text read-only", "Check NumPy shapes or WebAssembly exports", "Browse package contents or source-map coverage"], commonProblems: ["Malformed text or mixed encodings can prevent parsing", "Corrupt headers make structural inspection impossible", "Compressed or huge entries may hit explicit safety limits"], faq: [{ question: "Are code, package scripts or WebAssembly modules executed?", answer: "No. Anyfile displays source text and reads artifact structure without running code, installing packages or instantiating WebAssembly modules." }] },
+      "zh-CN": { name: "开发者", eyebrow: "阅读代码与构建产物", title: "在线代码与软件包查看工具", description: "阅读代码、检查 NumPy 数组和 WASM 文件，或查看受支持软件包中的文件列表。", introduction: "审阅源文件、检查数组数值，或在安装前了解软件包包含哪些文件。查看过程中不会运行代码，也不会安装软件包。", useCases: ["只读审阅源码或配置文本", "检查 NumPy 形状或 WebAssembly 导出", "浏览软件包内容或 Source Map 覆盖"], commonProblems: ["损坏文本或混合编码可能导致解析失败", "文件头损坏会导致结构检查失败", "压缩或超大条目可能触发明确的安全限制"], faq: [{ question: "会执行代码、软件包脚本或 WebAssembly 模块吗？", answer: "不会。Anyfile 只展示源码文本并读取产物结构，不运行代码、不安装软件包，也不实例化 WebAssembly 模块。" }] },
     },
   },
 ];

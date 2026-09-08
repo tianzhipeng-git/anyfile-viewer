@@ -33,7 +33,7 @@
 
 | 包 | 用途 |
 |---|---|
-| `@anyfile/viewer-protocol` | 插件协议 |
+| `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
 
 无第三方渲染库，纯浏览器 API 实现。
 
@@ -45,3 +45,14 @@
 - 每次滚动触发异步读取，快速滚动可能出现短暂空白或闪烁
 - 不提供结构化解码（PE/ELF/Mach-O 等），仅原始字节视图
 - 空文件显示提示，不报错
+
+## 开发与验证
+
+- [格式声明](src/manifest.ts)、[打开入口](src/index.ts)；此插件没有独立内容探测，候选等级默认为 1。
+- 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
+
+在仓库根目录运行插件测试：
+
+```bash
+pnpm --filter @anyfile/hex-viewer test
+```

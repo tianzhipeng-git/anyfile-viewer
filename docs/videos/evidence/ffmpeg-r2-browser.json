@@ -1,0 +1,118 @@
+{
+  "date": "2026-09-05T16:39:48.748Z",
+  "browser": "145.0.7632.6",
+  "os": {
+    "type": "Darwin",
+    "release": "24.6.0",
+    "arch": "arm64"
+  },
+  "results": [
+    {
+      "name": "AVI real first frame; silent open; R2 runtime",
+      "milliseconds": 6405.181458
+    },
+    {
+      "name": "AVI audible playback and pause",
+      "milliseconds": 1199.0567500000006
+    },
+    {
+      "name": "AVI forward/backward and rapid seek, volume, end, replay",
+      "milliseconds": 3861.726667000001
+    },
+    {
+      "name": "Switching to AIFF closes previous audio and Worker",
+      "milliseconds": 6383.477417
+    },
+    {
+      "name": "aiff-s24.aiff playback",
+      "milliseconds": 4395.002458999999
+    },
+    {
+      "name": "aifc-f32.aifc playback",
+      "milliseconds": 4940.631292000002
+    },
+    {
+      "name": "avi-video-only.avi playback",
+      "milliseconds": 3297.272667000001
+    },
+    {
+      "name": "avi-1080p.avi playback",
+      "milliseconds": 3601.826792
+    },
+    {
+      "name": "Narrow/short player keeps controls accessible",
+      "milliseconds": 38.23945800000365
+    },
+    {
+      "name": "Valid silence and corrupt PCM handling",
+      "milliseconds": 4508.225874999996
+    }
+  ],
+  "failures": [],
+  "assetResponses": [
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
+      "status": 200
+    },
+    {
+      "url": "https://assets.anyfile.top/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
+      "status": 200
+    }
+  ]
+}

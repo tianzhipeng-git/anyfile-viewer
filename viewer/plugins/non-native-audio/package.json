@@ -12,6 +12,7 @@
   "dependencies": {
     "@anyfile/non-native-video-viewer": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-rendering": "workspace:*",
     "mediabunny": "1.55.3"
   },
   "devDependencies": {

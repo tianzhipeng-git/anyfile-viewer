@@ -5,6 +5,7 @@ import {
   type OpenViewerContext,
   type ViewerController,
 } from "@anyfile/viewer-protocol";
+import { AudioVisualizer } from "@anyfile/viewer-rendering/audio";
 
 import { abortError } from "./abort-error";
 import { inspectBrowserAudioFile } from "./inspect";
@@ -16,9 +17,11 @@ function copyFor(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, { "zh-CN": {
     reading: "正在检查音频容器与编码…", loading: "正在使用浏览器加载音频…", ready: "音频已打开",
     invalid: "文件不是有效、完整且受支持的音频。", unsupported: "当前浏览器或系统不能播放这个音频组合。", failed: "浏览器无法加载这个音频。",
+    visualizer: "音频可视化效果，激活可在频谱与波形之间切换",
   }, en: {
     reading: "Inspecting the audio container and codec…", loading: "Loading the audio in the browser…", ready: "Audio opened",
     invalid: "The file is not valid, complete supported audio.", unsupported: "This browser or system cannot play this audio combination.", failed: "The browser could not load this audio.",
+    visualizer: "Audio visualisation. Activate to switch between spectrum and waveform.",
   } });
 }
 
@@ -28,11 +31,14 @@ async function openBrowserAudio(context: OpenViewerContext): Promise<ViewerContr
   let objectUrl: string | undefined;
   let root: HTMLElement | undefined;
   let audio: HTMLAudioElement | undefined;
+  let visualizer: AudioVisualizer | undefined;
   let disposed = false;
   const dispose = () => {
     if (disposed) return;
     disposed = true;
     signal.removeEventListener("abort", dispose);
+    visualizer?.dispose();
+    visualizer = undefined;
     if (audio) {
       try { audio.pause(); } catch { /* Detached test media may not implement pause. */ }
       audio.removeAttribute("src");
@@ -50,10 +56,14 @@ async function openBrowserAudio(context: OpenViewerContext): Promise<ViewerContr
     if (!inspection) throw new ViewerError("invalid-file", copy.invalid);
     if (signal.aborted) throw abortError();
     reportProgress({ stage: "loading-media", message: copy.loading });
-    const elements = createAudioViewerElements(file.name, inspection);
+    const elements = createAudioViewerElements(file.name, inspection, copy.visualizer);
     root = elements.root;
     audio = elements.audio;
     container.append(root);
+    // Attaching only registers listeners here; the AudioContext is built on the first
+    // user-initiated play so open() never creates a graph or produces sound.
+    visualizer = new AudioVisualizer(elements.visualizer);
+    visualizer.attach({ kind: "media", element: audio });
     objectUrl = URL.createObjectURL(file);
     signal.addEventListener("abort", dispose, { once: true });
     audio.src = objectUrl;

@@ -1,0 +1,11 @@
+mtllib material.mtl
+o Tetrahedron
+v 0 0 0
+v 1 0 0
+v 0 1 0
+v 0 0 1
+usemtl Blue
+f 1 3 2
+f 1 2 4
+f 1 4 3
+f 2 3 4

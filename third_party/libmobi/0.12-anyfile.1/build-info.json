@@ -1,0 +1,65 @@
+{
+  "artifactVersion": "0.12-anyfile.1",
+  "toolchain": {
+    "emscripten": "3.1.69",
+    "platform": "macOS arm64",
+    "container": "none; native emsdk toolchain"
+  },
+  "recipe": "tools/ebook-decoders-build/build.sh",
+  "adapterRevision": "203430a22a4df5bca920f135690ca4ae71e7aa0b + adapter SHA256 in artifacts",
+  "memory": {
+    "maximumBytes": 268435456,
+    "initialBytes": 16777216,
+    "stackBytes": 1048576
+  },
+  "options": "See build.sh (full compiler/linker and CMake flags)",
+  "sources": {
+    "libmobi": {
+      "revision": "906274205c11944b628da1c553b255acb1af7c55",
+      "sha256": "ec260e472d4db1bcbf8c479ee470bd2a2b2b822f14313604c76e667a684e1dfa",
+      "url": "https://github.com/bfabiszewski/libmobi/archive/906274205c11944b628da1c553b255acb1af7c55.tar.gz"
+    }
+  },
+  "artifacts": {
+    "fetch.py": {
+      "bytes": 1102,
+      "sha256": "22ee67490f08373859db02a95684c89839007542708e1bd513b0eb4ac59cde98"
+    },
+    "SOURCE.md": {
+      "bytes": 1305,
+      "sha256": "54d1feafb28b4c562e6253a82d780be4aeb267efb179f5c676b3d55831f9e277"
+    },
+    "mobi.wasm": {
+      "bytes": 103836,
+      "sha256": "5497cfeacbc655693f18e2fc3fb783d1efa4c122a063f749e00af85c77cbf1d4"
+    },
+    "mobi.c": {
+      "bytes": 2261,
+      "sha256": "71ae265d3759e4f34be306432f704b411f9154d4d05ede8ae42ede5ab73215b1"
+    },
+    "mobi.js": {
+      "bytes": 10881,
+      "sha256": "ddde8705cc82344ef622123ad410501e0a0692b7473592ef82d53e41c8d891e8"
+    },
+    "archive.c": {
+      "bytes": 1382,
+      "sha256": "593574330872fa2cc0921ade415dfcca101692df7a61906d815c4caf514df83a"
+    },
+    "build.sh": {
+      "bytes": 2990,
+      "sha256": "89390e66350deed39c31efc5496918e0b7ea36a5d4bee23281e3378a4603b139"
+    },
+    "COPYING": {
+      "bytes": 7651,
+      "sha256": "da7eabb7bafdf7d3ae5e9f223aa5bdc1eece45ac569dc21b3b037520b4464768"
+    },
+    "COPYING.GPLv3": {
+      "bytes": 35149,
+      "sha256": "3972dc9744f6499f0f9b2dbf76696f2ae7ad8af9b23dde66d6af86c9dfb36986"
+    },
+    "libmobi-source.tar.gz": {
+      "bytes": 5024473,
+      "sha256": "ec260e472d4db1bcbf8c479ee470bd2a2b2b822f14313604c76e667a684e1dfa"
+    }
+  }
+}

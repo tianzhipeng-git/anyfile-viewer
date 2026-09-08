@@ -1,10 +1,22 @@
+import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
+import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
+import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
+import { mobiManifest } from "@anyfile/mobi-reader/manifest";
+import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
+import { epubManifest } from "@anyfile/epub-reader/manifest";
+import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
+import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
+import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
+import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
+import { mesh3dManifest } from "@anyfile/mesh-3d-viewer/manifest";
 import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
 import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
+import { cad2dManifest } from "@anyfile/cad-2d-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
-import { dataManifest } from "@anyfile/data-viewer/manifest";
+import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
@@ -18,6 +30,9 @@ import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
 import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
+import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
+import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
+import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
@@ -117,7 +132,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
       ...djiOsmoManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".osv"),
       ...goProMaxManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".360"),
       ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".lrv" || extension === ".insv"),
-      ...manifestExtensions(browserVideoManifest, nonNativeVideoManifest)
+      ...manifestExtensions(browserVideoManifest, nonNativeVideoManifest, ffmpegVideoManifest)
         .filter((extension) => extension !== ".ts"),
     ],
   },
@@ -129,7 +144,8 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "document",
     icon: FileTextIcon,
-    extensions: manifestExtensions(pdfManifest, wordManifest),
+    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest)
+      .filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },
   {
     kind: "code",
@@ -148,23 +164,27 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "database",
     icon: DatabaseIcon,
-    extensions: manifestExtensions(sqliteManifest, dataManifest),
+    extensions: manifestExtensions(sqliteManifest, duckdbManifest),
   },
   {
     kind: "audio",
     icon: FileAudioIcon,
-    extensions: manifestExtensions(browserAudioManifest, nonNativeAudioManifest)
+    extensions: manifestExtensions(browserAudioManifest, nonNativeAudioManifest, ffmpegAudioManifest)
       .filter((extension) => ![".mp4", ".webm", ".ogg"].includes(extension)),
   },
   {
     kind: "model",
     icon: BoxIcon,
-    extensions: [".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
+    extensions: [...manifestExtensions(cadExchangeManifest, mesh3dManifest, print3dManifest, pointCloudManifest), ".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
   },
   {
     kind: "design",
     icon: PaletteIcon,
-    extensions: [".psd", ".psb", ".ai", ".fig", ".sketch", ".xd", ".indd"],
+    extensions: [
+      ...manifestExtensions(pixelmatorPxdManifest, photoshopManifest, cad2dManifest, dwgManifest),
+      ...pdfManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".ai"),
+      ".psb", ".fig", ".sketch", ".xd", ".indd",
+    ],
   },
   {
     kind: "font",

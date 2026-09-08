@@ -8,4 +8,7 @@ export const MAX_DURATION_SECONDS = 24 * 60 * 60;
 export const MAX_BUFFER_SECONDS = 2;
 export const MAX_BUFFER_BYTES = 8 * 1024 * 1024;
 export const PCM_LOOKAHEAD_SECONDS = 1;
-export const SUPPORTED_CODECS = new Set(["aac", "opus", "vorbis", "flac"]);
+export const MATROSKA_CODECS = new Set(["aac", "opus", "vorbis", "flac"]);
+/** Mediabunny software-decodes these; browser-audio does not claim them. */
+export const WAVE_CODECS = new Set(["alaw", "ulaw"]);
+export const SOFTWARE_PCM_CODECS = WAVE_CODECS;

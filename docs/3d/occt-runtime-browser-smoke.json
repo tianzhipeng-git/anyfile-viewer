@@ -1,0 +1,171 @@
+{
+  "verifiedAt": "2026-09-05T05:05:44.470Z",
+  "browser": "Chrome",
+  "report": [
+    {
+      "mode": "r2",
+      "status": "72 vertices · 12 triangles · Dimensions: 300.00 × 300.00 × 300.00 · mm",
+      "requests": [
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.wasm"
+      ],
+      "workers": [
+        {
+          "terminated": 1,
+          "messages": [
+            {
+              "type": "init",
+              "runtimeUrl": "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+            },
+            {
+              "type": "open"
+            }
+          ]
+        }
+      ],
+      "errors": []
+    },
+    {
+      "mode": "r2-wasm-blocked",
+      "status": "72 vertices · 12 triangles · Dimensions: 300.00 × 300.00 × 300.00 · mm",
+      "requests": [
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.wasm",
+        "http://localhost:3105/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+        "http://localhost:3105/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.wasm"
+      ],
+      "workers": [
+        {
+          "terminated": 1,
+          "messages": [
+            {
+              "type": "init",
+              "runtimeUrl": "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+            }
+          ]
+        },
+        {
+          "terminated": 1,
+          "messages": [
+            {
+              "type": "init",
+              "runtimeUrl": "http://localhost:3105/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+            },
+            {
+              "type": "open"
+            }
+          ]
+        }
+      ],
+      "errors": []
+    },
+    {
+      "mode": "r2-glue-blocked",
+      "status": "72 vertices · 12 triangles · Dimensions: 300.00 × 300.00 × 300.00 · mm",
+      "requests": [
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+        "http://localhost:3105/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+        "http://localhost:3105/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.wasm"
+      ],
+      "workers": [
+        {
+          "terminated": 1,
+          "messages": [
+            {
+              "type": "init",
+              "runtimeUrl": "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+            }
+          ]
+        },
+        {
+          "terminated": 1,
+          "messages": [
+            {
+              "type": "init",
+              "runtimeUrl": "http://localhost:3105/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+            },
+            {
+              "type": "open"
+            }
+          ]
+        }
+      ],
+      "errors": []
+    },
+    {
+      "mode": "both-blocked",
+      "status": "The CAD WebAssembly runtime is unavailable.",
+      "requests": [
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+        "http://localhost:3105/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+      ],
+      "workers": [
+        {
+          "terminated": 1,
+          "messages": [
+            {
+              "type": "init",
+              "runtimeUrl": "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+            }
+          ]
+        },
+        {
+          "terminated": 1,
+          "messages": [
+            {
+              "type": "init",
+              "runtimeUrl": "http://localhost:3105/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+            }
+          ]
+        }
+      ],
+      "errors": []
+    },
+    {
+      "mode": "invalid-file",
+      "status": "The CAD file could not be tessellated.",
+      "requests": [
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.wasm"
+      ],
+      "workers": [
+        {
+          "terminated": 1,
+          "messages": [
+            {
+              "type": "init",
+              "runtimeUrl": "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+            },
+            {
+              "type": "open"
+            }
+          ]
+        }
+      ],
+      "errors": []
+    },
+    {
+      "mode": "zh-CN",
+      "status": "72 顶点 · 12 三角面 · 尺寸: 300.00 × 300.00 × 300.00 · mm",
+      "requests": [
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+        "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.wasm"
+      ],
+      "workers": [
+        {
+          "terminated": 1,
+          "messages": [
+            {
+              "type": "init",
+              "runtimeUrl": "https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js"
+            },
+            {
+              "type": "open"
+            }
+          ]
+        }
+      ],
+      "errors": []
+    }
+  ]
+}

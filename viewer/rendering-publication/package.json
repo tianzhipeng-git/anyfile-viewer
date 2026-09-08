@@ -1,0 +1,16 @@
+{
+  "name": "@anyfile/rendering-publication",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./markup": "./src/markup.ts",
+    "./safe-content": "./src/safe-content.ts"
+  },
+  "dependencies": {
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/browser-image-viewer": "workspace:*",
+    "@anyfile/archive-metadata-viewer": "workspace:*"
+  }
+}

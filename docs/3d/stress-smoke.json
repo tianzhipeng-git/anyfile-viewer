@@ -1,0 +1,40 @@
+{
+  "reports": [
+    {
+      "name": "anyfile-large-mesh.stl",
+      "bytes": 5000084,
+      "firstMs": 228,
+      "doneMs": 239,
+      "firstState": "300,000 vertices · 100,000 triangles · Dimensions: 400.00 × 250.00 × 2.0000 · Units unknown",
+      "final": "300,000 vertices · 100,000 triangles · Dimensions: 400.00 × 250.00 × 2.0000 · Units unknown",
+      "jsHeap": 17063806
+    },
+    {
+      "name": "anyfile-large-cloud.xyz",
+      "bytes": 36890000,
+      "firstMs": 47,
+      "doneMs": 395,
+      "firstState": "4,096 vertices · Dimensions: 2.0000 × 2.0000 × 4.0950 · Units unknown · Representative sample; point attributes are not displayed",
+      "final": "200,000 vertices · Dimensions: 2.0000 × 2.0000 × 999.99 · Units unknown · Representative sample; point attributes are not displayed",
+      "jsHeap": 33313122
+    },
+    {
+      "name": "anyfile-remote-image.gltf",
+      "bytes": 1164,
+      "firstMs": 36,
+      "doneMs": 50,
+      "firstState": "12 vertices · 4 triangles · Dimensions: 1.0000 × 1.0000 × 1.0000 · m · Some textures are missing or unsupported; geometry remains visible.",
+      "final": "12 vertices · 4 triangles · Dimensions: 1.0000 × 1.0000 × 1.0000 · m · Some textures are missing or unsupported; geometry remains visible.",
+      "jsHeap": 35425259
+    },
+    {
+      "openingAbort": "no workers or 3D roots"
+    },
+    {
+      "animationChanged": true,
+      "pausedStable": true
+    }
+  ],
+  "external": [],
+  "errors": []
+}
