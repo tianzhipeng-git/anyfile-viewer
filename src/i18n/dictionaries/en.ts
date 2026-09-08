@@ -2,11 +2,10 @@ import type { AppDictionary } from "../types";
 
 const dictionary = {
   metadata: {
-    siteTitle: "Anyfile — Free online file viewer",
+    siteTitle: "Free Online File Viewer — No Upload",
     siteDescription: "Open documents, images, media, code and data with a fast, private online file viewer. Free to use, with no uploads or desktop software.",
-    viewerTitle: "Free online file viewer",
+    viewerTitle: "Free Online File Viewer — No Upload",
     viewerDescription: "Open supported files instantly with a fast, private online viewer. Free to use; files stay on your device and are never uploaded.",
-    noUploadSuffix: " No upload required.",
   },
   common: {
     home: "Home", mainNavigation: "Main navigation", openFile: "Open file", openFolder: "Open folder",
@@ -45,11 +44,11 @@ const dictionary = {
       { title: "Apache-2.0", description: "Use, study and build on the project under a permissive open-source license." },
     ],
   },
-  category: { home: "Home", viewerSuffix: " viewers", localSuffix: " Everything is processed on this device.", formats: "FORMATS", choose: "Supported formats" },
+  category: { home: "Home", viewerSuffix: " viewers", formats: "FORMATS", choose: "Supported formats" },
   format: {
     viewerSuffix: " viewer", metadataDescription: "View {name} locally in your browser. {description}",
     browserNativeView: "Browser-native viewing", pluginView: "Dedicated plugin", headline: "Open {name} instantly.",
-    privacySuffix: " No upload required; processing stays in your browser.", choose: "Choose a .{extension} file",
+    choose: "Choose a .{extension} file",
     benefits: [
       { title: "Faster", description: "Skip file uploads and cloud processing queues." },
       { title: "More private", description: "File contents are never sent to Anyfile servers." },

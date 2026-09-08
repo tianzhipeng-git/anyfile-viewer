@@ -1,5 +1,5 @@
 export type AppDictionary = {
-  metadata: { siteTitle: string; siteDescription: string; viewerTitle: string; viewerDescription: string; noUploadSuffix: string };
+  metadata: { siteTitle: string; siteDescription: string; viewerTitle: string; viewerDescription: string };
   common: {
     home: string; mainNavigation: string; openFile: string; openFolder: string; categories: string;
     getStarted: string; footerPrivacy: string; copyright: string; native: string; plugin: string;
@@ -16,10 +16,10 @@ export type AppDictionary = {
     openSourceEyebrow: string; openSourceTitle: string; openSourceDescription: string; openSourceCta: string;
     openSourcePrinciples: readonly { title: string; description: string }[];
   };
-  category: { home: string; viewerSuffix: string; localSuffix: string; formats: string; choose: string };
+  category: { home: string; viewerSuffix: string; formats: string; choose: string };
   format: {
     viewerSuffix: string; metadataDescription: string; browserNativeView: string; pluginView: string;
-    headline: string; privacySuffix: string; choose: string;
+    headline: string; choose: string;
     benefits: readonly { title: string; description: string }[];
   };
   workspace: {
