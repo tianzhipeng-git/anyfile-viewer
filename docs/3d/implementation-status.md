@@ -51,7 +51,7 @@
 
 整份路线图**尚未完成**。尤其包括：
 
-- 完整的 CAD 对抗样例覆盖、上游 parser 通告问题的解决，以及自定义 kernel 的公开 Git commit/jsDelivr 分发；
+- 完整的 CAD 对抗样例覆盖、上游 parser 通告问题的解决；
 - E57 parser 集成与完整点云 LOD/导航；
 - 可选的 DWG/USD provider、FBX/DAE/3DS 和 G-code 工作；
 - 更高级的压缩、完整材质/打印语义，以及源文件相机 UI；

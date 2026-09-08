@@ -13,7 +13,7 @@
 
 1. [src/probe.ts](src/probe.ts) 检查 PostScript/EPS 签名及 Illustrator 类型。
 2. 解释器和栅格器位于独立可销毁 Worker，使用锁定版本、仅启用 PS/EPS 的 stet-wasm。
-3. 运行时优先从固定提交的 jsDelivr URL 加载，失败后尝试同版本 R2 镜像和同源资产；每次初始化失败先销毁原 Worker。
+3. 自建运行时优先从版本化 R2 资产加载，失败后尝试同版本同源资产；每次初始化失败先销毁原 Worker。
 
 ## 依赖
 

@@ -420,7 +420,6 @@
             }
           ],
           "sources": [
-            "jsdelivr",
             "r2",
             "same-origin"
           ],
@@ -428,7 +427,6 @@
             "viewer/plugins/postscript/src/runtime.ts"
           ],
           "requiredMarkers": [
-            "cdn.jsdelivr.net/gh/",
             "https://assets.anyfile.top/vendor/stet/",
             "LOCAL_ASSET_ROOT"
           ]

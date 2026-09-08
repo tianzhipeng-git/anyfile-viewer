@@ -32,7 +32,7 @@
 
 采用的 `0.0.23-anyfile.1` 构建将 WASM 内存上限设为 256 MiB（初始 32 MiB），禁止动态执行，并且是纯 Worker ES module。曾尝试过 `worker,node` 构建，但它生成了 Node module import，浏览器测试中被拒绝；该问题已在编译阶段修正。输出上限在 JS array append 之前就于 C++ 层执行：100 万顶点/法线、50 万三角面、10 万面、4096 个 mesh/node、深度 64。Worker 通过 transfer 传递 typed array，并在完成或取消后立即终止。
 
-OCCT WASM 为 3010.9 KiB gzip（level 9），JS/WASM 冷启动合计 3035.8 KiB，超过单资源 2 MiB 门槛，使用 `R2 → 同源`，不再声明 same-origin 例外。两个来源均锁定 `0.0.23-anyfile.1`：`https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/` 与 `/vendor/occt-import-js/0.0.23-anyfile.1/`。审核产物尚未进入公开不可变 Git commit，因此暂不配置 jsDelivr，也不以 npm 原版替代自定义构建。
+OCCT WASM 为 3010.9 KiB gzip（level 9），JS/WASM 冷启动合计 3035.8 KiB，超过单资源 2 MiB 门槛，使用 `R2 → 同源`，不再声明 same-origin 例外。两个来源均锁定 `0.0.23-anyfile.1`：`https://assets.anyfile.top/vendor/occt-import-js/0.0.23-anyfile.1/` 与 `/vendor/occt-import-js/0.0.23-anyfile.1/`。这是本项目自建产物，不通过 jsDelivr 分发，也不以 npm 原版替代自定义构建。
 
 回退复用 `@anyfile/runtime-assets`，每个来源使用新 Worker。资源加载、Worker 启动或内核初始化失败（包括 20 秒初始化超时）后，先终止失败 Worker，再尝试下一来源。内核 ready 后才 transfer 用户文件；解析错误、资源超限和取消不会切换来源。成功、失败和取消均释放 Worker。源码 URL、hash、LGPL 通知、OCCT exception、完整 patch 和构建说明与可替换模块一同分发。应用构建只会校验/复制已审查资产，不会现场编译。
 

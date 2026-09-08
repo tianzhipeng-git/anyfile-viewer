@@ -68,6 +68,12 @@ describe("postscript viewer protocol compliance", () => {
 
     expect(test.container.querySelector(".anyfile-postscript-viewer__canvas")).toBeInstanceOf(HTMLCanvasElement);
     expect(canvasContext.putImageData).toHaveBeenCalledOnce();
+    expect(MockWorker.instances).toHaveLength(1);
+    expect(MockWorker.instances[0].requests[0]).toMatchObject({
+      type: "init",
+      runtimeUrl: "https://assets.anyfile.top/vendor/stet/0.8.1-anyfile.1/stet_wasm.js",
+      wasmUrl: "https://assets.anyfile.top/vendor/stet/0.8.1-anyfile.1/stet_wasm_bg.wasm",
+    });
     expect(test.progress.at(-1)?.stage).toBe("ready");
     expect(test.outside.dataset.viewerTestOutside).toBe("untouched");
 
@@ -92,21 +98,24 @@ describe("postscript viewer protocol compliance", () => {
     test.cleanup();
   });
 
-  it("falls back from jsDelivr to R2 and then local assets with a fresh Worker", async () => {
-    MockWorker.initializationFailures = 2;
+  it("falls back from R2 to local assets with a fresh Worker", async () => {
+    MockWorker.initializationFailures = 1;
     const file = new File(["%!PS-Adobe-3.0\nshowpage\n"], "sample.ps");
     const test = createViewerTestContext(file);
     const controller = await postscriptViewer.open(test.context);
 
-    expect(MockWorker.instances).toHaveLength(3);
-    expect(MockWorker.instances.slice(0, 2).every((worker) => worker.terminated)).toBe(true);
+    expect(MockWorker.instances).toHaveLength(2);
+    expect(MockWorker.instances[0].terminated).toBe(true);
     expect(MockWorker.instances.map((worker) => {
       const request = worker.requests[0];
       return request.type === "init" ? request.runtimeUrl : undefined;
-    })).toEqual(STET_ASSET_SOURCES.map((source) => source.runtimeUrl));
+    })).toEqual([
+      "https://assets.anyfile.top/vendor/stet/0.8.1-anyfile.1/stet_wasm.js",
+      "/vendor/stet/0.8.1-anyfile.1/stet_wasm.js",
+    ]);
 
     await controller.dispose();
-    expect(MockWorker.instances[2].terminated).toBe(true);
+    expect(MockWorker.instances[1].terminated).toBe(true);
     test.cleanup();
   });
 

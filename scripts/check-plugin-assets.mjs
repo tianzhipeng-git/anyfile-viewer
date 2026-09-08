@@ -111,6 +111,9 @@ for (const [id, pluginPolicy] of Object.entries(policy.plugins)) {
       || runtime.sources.at(-1) !== "same-origin") {
       throw new Error(`${id}/${runtime.id} has an invalid runtime source order`);
     }
+    if (runtime.version.includes("-anyfile.") && runtime.sources.includes("jsdelivr")) {
+      throw new Error(`${id}/${runtime.id} is self-built and must not use jsDelivr`);
+    }
     if (runtime.versionPackageJson) {
       const versionPackage = JSON.parse(await readFile(join(projectRoot, runtime.versionPackageJson), "utf8"));
       if (versionPackage.version !== runtime.version) {

@@ -45,9 +45,9 @@
 ### 选择来源
 
 - 小资源默认同源。
-- 有可靠、不可变公共发布的较大资源：公共 CDN → 受控镜像 → 同源。
-- 没有可靠公共发布的自建产物：受控镜像 → 同源。
-- npm CDN URL 锁定精确版本；源码审核产物的 jsDelivr URL 锁定公开仓库完整 Git commit，不能用浮动分支或 tag。
+- 上游公开发布、有明确版本且未经本项目修改的较大资源：jsDelivr → R2 同版本镜像 → 同源。
+- 本项目自行编译、裁剪或打补丁的产物，以及没有可靠公共 CDN 的资源：R2 → 同源；小资源仍默认同源。
+- jsDelivr 仅用于上游公开发布的原始资源，URL 必须锁定精确版本。自建产物即使提交到公开仓库并锁定完整 Git commit，也不得通过 jsDelivr 分发；固定地址不能替代上游来源要求。
 - 模块 Worker、pthread 或相对导入链确实要求同源时，保留同源执行入口；glue/WASM 能否外置由实际初始化链决定。
 
 满足以下任一门槛，默认接入外部分发：单资源传输量 ≥ 2 MiB、典型冷启动运行资产合计 ≥ 4 MiB，或预计月度 Vercel 数据传输达到套餐额度的 10%。前两个门槛由资产策略和构建检查执行；月度流量需单独观察，不是构建检查项。
@@ -114,7 +114,7 @@ WASM 使用 `application/wasm`，JavaScript/Worker 使用正确 JavaScript MIME�
 |---|---|
 | [check-view-bundle.mjs](../scripts/check-view-bundle.mjs) | 从 `/en/view` HTML 检查首包 gzip 预算、重型实现隔离和专属资源 |
 | [check-plugin-bundles.mjs](../scripts/check-plugin-bundles.mjs) | 根据实际动态 chunk 图检查 manifest、probe、插件入口及单 chunk 预算 |
-| [check-plugin-assets.mjs](../scripts/check-plugin-assets.mjs) | 注册与策略覆盖、资产完整性、版本和外部分发门槛 |
+| [check-plugin-assets.mjs](../scripts/check-plugin-assets.mjs) | 注册与策略覆盖、资产完整性、版本、自建产物禁用 jsDelivr 和外部分发门槛 |
 | [check-ffmpeg-bundles.mjs](../scripts/check-ffmpeg-bundles.mjs) | 共享 FFmpeg 的专属体积与依赖边界 |
 
 预算以脚本和策略文件为准，报告位于 `.next/diagnostics/`。这些检查不证明线上 CDN 可用，也不验证部署实际响应头。

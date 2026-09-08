@@ -112,7 +112,7 @@ export async function createPostscriptWorkerClient(signal: AbortSignal) {
     return await initializeRuntimeFromSources({
       signal,
       sources: STET_ASSET_SOURCES.map((source) => ({ name: source.name, value: source })),
-      errorMessage: "Unable to initialize PostScript from jsDelivr, R2, or local assets.",
+      errorMessage: "Unable to initialize PostScript from R2 or local assets.",
       abortMessage: "Viewer operation aborted.",
       async createAttempt(source) {
         const client = new PostscriptWorkerClient(signal);
@@ -129,7 +129,7 @@ export async function createPostscriptWorkerClient(signal: AbortSignal) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
     throw new ViewerError(
       "open-failed",
-      "Unable to initialize PostScript from jsDelivr, R2, or local assets.",
+      "Unable to initialize PostScript from R2 or local assets.",
       { cause: error },
     );
   }
