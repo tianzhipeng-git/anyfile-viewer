@@ -36,7 +36,7 @@ const info = {
   relinkInputs,
   configureFlags: (await readFile(join(output, "configure-flags.txt"), "utf8")).trim().split("\n"),
   // The full link invocation is covered by the hashed build recipe.
-  limits: { wasmBytes: 268435456, pixels: 2073600, tracks: 8, readBytesPerCommand: 33554432, packetStepsPerNext: 8192 },
+  limits: { pthreadPoolSize: 4, panoramaDecodeThreadsPerLens: 2, wasmBytes: 536870912, pixels: 2073600, panoramaPixelsPerLens: 14745600, panoramaOutputPixelsPerLens: 3686400, tracks: 8, readBytesPerCommand: 33554432, packetStepsPerNext: 8192 },
   artifacts,
 };
 await writeFile(join(output, "build-info.json"), `${JSON.stringify(info, null, 2)}\n`);

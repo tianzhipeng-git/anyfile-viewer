@@ -132,10 +132,18 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
           }
           disposeDualTrack = () => playback.dispose();
         } catch (error) {
-          if (!(error instanceof ViewerError) || error.code !== "unsupported-environment" || !inspection.preview) throw error;
-          previewBitmap = await decodeEmbeddedPreview(file, inspection.preview, signal, copy.invalid);
-          renderer.setEquirectangularSource(previewBitmap, inspection.preview.width, inspection.preview.height);
-          showStaticPreview(elements, context.locale);
+          if (!(error instanceof ViewerError) || error.code !== "unsupported-environment") throw error;
+          const { FfmpegPanoramaPlayback } = await import("./ffmpeg-playback");
+          try {
+            const playback = await FfmpegPanoramaPlayback.open(file, renderer, projection, elements, context.locale, signal);
+            if (disposed) { await playback.dispose(); throw abortError(); }
+            disposeDualTrack = () => playback.dispose();
+          } catch (fallbackError) {
+            if (!(fallbackError instanceof ViewerError) || fallbackError.code !== "unsupported-environment" || !inspection.preview) throw fallbackError;
+            previewBitmap = await decodeEmbeddedPreview(file, inspection.preview, signal, copy.invalid);
+            renderer.setEquirectangularSource(previewBitmap, inspection.preview.width, inspection.preview.height);
+            showStaticPreview(elements, context.locale);
+          }
         }
       } else {
         const video = elements.video;

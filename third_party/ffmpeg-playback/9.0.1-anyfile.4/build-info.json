@@ -1,0 +1,136 @@
+{
+  "artifactVersion": "9.0.1-anyfile.4",
+  "status": "playback-runtime",
+  "upstream": {
+    "artifactVersion": "9.0.1-anyfile.4",
+    "version": "9.0.1",
+    "url": "https://ffmpeg.org/releases/ffmpeg-9.0.1.tar.xz",
+    "sha256": "cf38e0e28c7e5605942c4a77755349b0145804a397af37eb1fb4c77cb237f635",
+    "emscripten": "4.0.10",
+    "image": "emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7",
+    "platform": "linux/amd64"
+  },
+  "adapterBaseRevision": "bac58563f6643e57ef332642870deaefb9beb8b8",
+  "adapterSources": {
+    "bridge.c": "cd36a09ee5ee13549a02abc90a0f09b648dc68c63dc8a1f45398cd9b65967f5e",
+    "bridge.h": "9277a06a4eb8412407754fdc694d462eac2efa54209207d8edc93688b8c91436",
+    "output.c": "40e3381eb0a5d960c8ee505cb202ad874432d4aa967d824ca2b9363d468f69fa",
+    "seek.c": "89aab97836a59bff6a5f5d3967358e0baf7a8060527524f0b9b233f1d8e008b9",
+    "worker.js": "3380269abbdc6c3c4aed5edf3b8d91c2394c4a255ae2638ba63019a80393aa7d",
+    "build-in-container.sh": "18dda052c4e02648a8fbfbbfbbfce9b7cd6867508d142f0ba3d28482efb58a0c",
+    "link-in-container.sh": "c46919453f07ecec01e347b357478e549cc83a8848f8b9fa70a20ae3a074ef60",
+    "upstream.json": "7b5d18c3988c1d5209138343e9e6c3928b3247f91619cabaff048d69d6f29d2b"
+  },
+  "adapterWorktreeDirty": true,
+  "linkRecipe": "\"$recipe/bridge.c\" \"$recipe/output.c\" \"$recipe/seek.c\" -I\"$source\" \\\n  \"$libraries/libavformat.a\" \"$libraries/libavcodec.a\" \"$libraries/libswscale.a\" \\\n  \"$libraries/libswresample.a\" \"$libraries/libavutil.a\" \\\n  -O3 -msimd128 -pthread --no-entry -lworkerfs.js \\\n  -sMODULARIZE=1 -sEXPORT_ES6=1 -sEXPORT_NAME=createPlaybackRuntime \\\n  -sENVIRONMENT=worker,node -sPTHREAD_POOL_SIZE=4 -sPTHREAD_POOL_SIZE_STRICT=2 -sDYNAMIC_EXECUTION=0 -sALLOW_MEMORY_GROWTH=1 \\\n  -sINITIAL_MEMORY=33554432 -sMAXIMUM_MEMORY=536870912 -sSTACK_SIZE=1048576 \\\n  -sFILESYSTEM=1 -sEXPORTED_RUNTIME_METHODS=FS,WORKERFS,ccall,UTF8ToString,HEAPU8,wasmMemory,PThread \\\n  -sEXPORTED_FUNCTIONS=_fp_open,_fp_next,_fp_seek,_fp_close,_fp_value,_fp_data,_fp_info,_fp_io_test \\\n  -o \"$output/ffmpeg-playback.js\"\n",
+  "relinkInputs": {
+    "source.tar.xz": "cf38e0e28c7e5605942c4a77755349b0145804a397af37eb1fb4c77cb237f635",
+    "avconfig.h": "6d78a911a2128e926262114c9904209209674e3bc1a18c208c850ecbfc3393ec",
+    "libavformat.a": "fdb768b60fdd0781e5ba3fc8d737a507ccfc4feb172d953f6e81a56e11befb77",
+    "libavcodec.a": "bbd0e772c448f29b7d7c38b55d900354510c7295a4f588063b40c8b14d5d1730",
+    "libavutil.a": "cce21c8c2b8068fbf9b3a31930570d10f5080d3b9b3f32a73303beb3ce96c6f5",
+    "libswscale.a": "8e54d0aa8914ffc872df459b785c8b4cf6af3abbeddded84ab17f1bcebbec2b2",
+    "libswresample.a": "4b94422310255f32df2ba1279ef8475a658382e6b2c3e510b864c50efa443872"
+  },
+  "configureFlags": [
+    "--cc=emcc",
+    "--cxx=em++",
+    "--ar=emar",
+    "--ranlib=emranlib",
+    "--nm=emnm",
+    "--target-os=none",
+    "--arch=wasm32",
+    "--enable-cross-compile",
+    "--disable-autodetect",
+    "--disable-x86asm",
+    "--disable-asm",
+    "--disable-inline-asm",
+    "--disable-runtime-cpudetect",
+    "--disable-programs",
+    "--disable-doc",
+    "--disable-debug",
+    "--disable-network",
+    "--disable-avdevice",
+    "--disable-avfilter",
+    "--disable-encoders",
+    "--disable-muxers",
+    "--disable-filters",
+    "--disable-devices",
+    "--disable-protocols",
+    "--enable-pthreads",
+    "--disable-w32threads",
+    "--disable-os2threads",
+    "--disable-shared",
+    "--enable-static",
+    "--extra-cflags=-O3 -msimd128 -pthread",
+    "--extra-ldflags=-O3 -msimd128 -pthread"
+  ],
+  "limits": {
+    "pthreadPoolSize": 4,
+    "panoramaDecodeThreadsPerLens": 2,
+    "wasmBytes": 536870912,
+    "pixels": 2073600,
+    "panoramaPixelsPerLens": 14745600,
+    "panoramaOutputPixelsPerLens": 3686400,
+    "tracks": 8,
+    "readBytesPerCommand": 33554432,
+    "packetStepsPerNext": 8192
+  },
+  "artifacts": {
+    "ffmpeg-playback.js": {
+      "bytes": 86859,
+      "gzipBytes": 23927,
+      "sha256": "8ff36dccecb0e391d7b31a41e7ec75379a27d1b21a377946732f7ba256d1d803"
+    },
+    "ffmpeg-playback.wasm": {
+      "bytes": 13356973,
+      "gzipBytes": 4987170,
+      "sha256": "ca1f5f8bfe0f7be209087e5ac4b3fad9ec0dac0c3139f155f910c6c531310da6"
+    },
+    "ffmpeg-playback.worker.js": {
+      "bytes": 4078,
+      "gzipBytes": 1722,
+      "sha256": "3380269abbdc6c3c4aed5edf3b8d91c2394c4a255ae2638ba63019a80393aa7d"
+    },
+    "SOURCE.md": {
+      "bytes": 2546,
+      "gzipBytes": 1351,
+      "sha256": "0c2d7c0592a8e42e2d3e411753d303327944bd498c1674d640782d1587e4faf0"
+    },
+    "LICENSE.Adapter": {
+      "bytes": 10174,
+      "gzipBytes": 3579,
+      "sha256": "0d542e0c8804e39aa7f37eb00da5a762149dc682d7829451287e11b938e94594"
+    },
+    "LICENSE.FFmpeg": {
+      "bytes": 26517,
+      "gzipBytes": 9359,
+      "sha256": "246041b6ecf9bc32d718a62c57877c78b5eb397b6467e74ed7ae2626ab189c30"
+    },
+    "LICENSE.Emscripten": {
+      "bytes": 5093,
+      "gzipBytes": 1588,
+      "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+    },
+    "ffmpeg-source.tar.xz": {
+      "bytes": 12036420,
+      "gzipBytes": 12040113,
+      "sha256": "cf38e0e28c7e5605942c4a77755349b0145804a397af37eb1fb4c77cb237f635"
+    },
+    "relink-materials.tar.gz": {
+      "bytes": 6672275,
+      "gzipBytes": 6614086,
+      "sha256": "b9b52f11da45a387766c60b92ed03c9622a1f3f4356ef9b9fce27279bf9d4ba5"
+    },
+    "configure.txt": {
+      "bytes": 18490,
+      "gzipBytes": 4346,
+      "sha256": "92d58c697423de9000328d0cad1e67212cbb03255daaa651873d63e59c8cc43f"
+    },
+    "config.h": {
+      "bytes": 24638,
+      "gzipBytes": 5430,
+      "sha256": "664aec57c50433625ac3c09250561cf6efa62bd22308793bc7faa65ab2d3577d"
+    }
+  }
+}

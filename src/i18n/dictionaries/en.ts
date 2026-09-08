@@ -63,7 +63,7 @@ const dictionary = {
     folderUnsupported: "This browser cannot open folders. Use the latest Chrome or another compatible browser, or open individual files.",
     pickerFailed: "Unable to open the folder picker.", droppedEmpty: "The dropped content contains no readable files.",
     accessErrorTitle: "Unable to access local files", collapseSidebar: "Collapse file sidebar", expandSidebar: "Expand file sidebar",
-    chooseLocalFile: "Choose local files", unopenedTitle: "No workspace open", unopenedDescription: "Choose files or a folder to display them here.",
+    chooseLocalFile: "Choose local files", unopenedTitle: "No workspace open", unopenedDescription: "Choose or drag files/folder to display them here.",
     preview: "Preview", unknownType: "Unknown type", workspaceFiles: "Workspace files",
   },
   viewer: {

@@ -254,6 +254,36 @@
           "sources": [
             "same-origin"
           ]
+        },
+        {
+          "id": "ffmpeg-playback",
+          "version": "9.0.1-anyfile.4",
+          "assetPatterns": [
+            "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "playback",
+              "assetPatterns": [
+                "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.js",
+                "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.wasm",
+                "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.worker.js"
+              ]
+            }
+          ],
+          "sources": [
+            "r2",
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/ffmpeg-playback/src/client.ts"
+          ],
+          "requiredMarkers": [
+            "9.0.1-anyfile.4",
+            "https://assets.anyfile.top/vendor/ffmpeg-playback/",
+            "/vendor/ffmpeg-playback/",
+            "initializeFfmpeg"
+          ]
         }
       ]
     },
@@ -523,17 +553,17 @@
       "runtimeSets": [
         {
           "id": "ffmpeg-playback",
-          "version": "9.0.1-anyfile.1",
+          "version": "9.0.1-anyfile.4",
           "assetPatterns": [
-            "public/vendor/ffmpeg-playback/9.0.1-anyfile.1/**"
+            "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/**"
           ],
           "coldStartGroups": [
             {
               "id": "playback",
               "assetPatterns": [
-                "public/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
-                "public/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
-                "public/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.worker.js"
+                "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.js",
+                "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.wasm",
+                "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.worker.js"
               ]
             }
           ],
@@ -545,7 +575,7 @@
             "viewer/ffmpeg-playback/src/client.ts"
           ],
           "requiredMarkers": [
-            "9.0.1-anyfile.1",
+            "9.0.1-anyfile.4",
             "https://assets.anyfile.top/vendor/ffmpeg-playback/",
             "/vendor/ffmpeg-playback/",
             "initializeFfmpeg"
@@ -559,17 +589,17 @@
       "runtimeSets": [
         {
           "id": "ffmpeg-playback",
-          "version": "9.0.1-anyfile.1",
+          "version": "9.0.1-anyfile.4",
           "assetPatterns": [
-            "public/vendor/ffmpeg-playback/9.0.1-anyfile.1/**"
+            "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/**"
           ],
           "coldStartGroups": [
             {
               "id": "playback",
               "assetPatterns": [
-                "public/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.js",
-                "public/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.wasm",
-                "public/vendor/ffmpeg-playback/9.0.1-anyfile.1/ffmpeg-playback.worker.js"
+                "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.js",
+                "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.wasm",
+                "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.worker.js"
               ]
             }
           ],
@@ -581,7 +611,7 @@
             "viewer/ffmpeg-playback/src/client.ts"
           ],
           "requiredMarkers": [
-            "9.0.1-anyfile.1",
+            "9.0.1-anyfile.4",
             "https://assets.anyfile.top/vendor/ffmpeg-playback/",
             "/vendor/ffmpeg-playback/",
             "initializeFfmpeg"

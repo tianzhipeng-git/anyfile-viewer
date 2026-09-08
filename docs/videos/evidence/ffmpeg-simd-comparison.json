@@ -1,0 +1,290 @@
+{
+  "date": "2026-09-08T14:12:00.736Z",
+  "framesPerLens": 30,
+  "beforeMs": 10759.677334999997,
+  "afterMs": 9737.774878,
+  "speedup": 1.104942090960505,
+  "identicalOutput": true,
+  "runs": [
+    [
+      {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "openMs": 18.603583,
+        "decodeMs": 10759.677334999997,
+        "wallMs": 10907.146792,
+        "cpuMs": 11076.168,
+        "counts": [
+          30,
+          30,
+          45
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9386666666666666
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "a2d2cb37663392d166c080d1d9df37ad73e8812edc37e9300abed5d7e9024378"
+        ],
+        "heapBytes": 311230464,
+        "readBytes": 35460254,
+        "maxRead": 1228301
+      },
+      {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "openMs": 15.395832999999996,
+        "decodeMs": 10659.814199999997,
+        "wallMs": 10804.783542,
+        "cpuMs": 10965.976,
+        "counts": [
+          30,
+          30,
+          45
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9386666666666666
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "a2d2cb37663392d166c080d1d9df37ad73e8812edc37e9300abed5d7e9024378"
+        ],
+        "heapBytes": 311230464,
+        "readBytes": 35460254,
+        "maxRead": 1228301
+      },
+      {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "openMs": 15.874041000000002,
+        "decodeMs": 10762.199673000003,
+        "wallMs": 10908.771833,
+        "cpuMs": 11061.748,
+        "counts": [
+          30,
+          30,
+          45
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9386666666666666
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "a2d2cb37663392d166c080d1d9df37ad73e8812edc37e9300abed5d7e9024378"
+        ],
+        "heapBytes": 311230464,
+        "readBytes": 35460254,
+        "maxRead": 1228301
+      }
+    ],
+    [
+      {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "openMs": 16.392167,
+        "decodeMs": 9764.304292,
+        "wallMs": 9911.651584000001,
+        "cpuMs": 10075.025,
+        "counts": [
+          30,
+          30,
+          45
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9386666666666666
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "a2d2cb37663392d166c080d1d9df37ad73e8812edc37e9300abed5d7e9024378"
+        ],
+        "heapBytes": 311230464,
+        "readBytes": 35460254,
+        "maxRead": 1228301
+      },
+      {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "openMs": 15.573083,
+        "decodeMs": 9737.774878,
+        "wallMs": 9883.418625,
+        "cpuMs": 10058.398,
+        "counts": [
+          30,
+          30,
+          45
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9386666666666666
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "a2d2cb37663392d166c080d1d9df37ad73e8812edc37e9300abed5d7e9024378"
+        ],
+        "heapBytes": 311230464,
+        "readBytes": 35460254,
+        "maxRead": 1228301
+      },
+      {
+        "node": "v24.4.0",
+        "cpu": "Apple M3 Pro",
+        "mode": "panorama",
+        "info": {
+          "duration": 43.977267,
+          "origin": 0,
+          "video": true,
+          "audio": true,
+          "width": 1920,
+          "height": 1920,
+          "sampleRate": 48000,
+          "channels": 2,
+          "videoCodec": "hevc",
+          "audioCodec": "aac"
+        },
+        "openMs": 15.822707999999995,
+        "decodeMs": 9734.789499999997,
+        "wallMs": 9881.438541,
+        "cpuMs": 10057.077,
+        "counts": [
+          30,
+          30,
+          45
+        ],
+        "first": [
+          0,
+          0,
+          0
+        ],
+        "last": [
+          0.9676333333333333,
+          0.9676333333333333,
+          0.9386666666666666
+        ],
+        "eof": false,
+        "pcmPeak": 0.24855075776576996,
+        "hashes": [
+          "8ea947bd4bf872f04b39f0ecd1e43e03b348a18a726a19c9bc0b41c3032e3214",
+          "15b39017e84022b235afb15e09745c8b132ff18963293ae1b84e28a9112b24db",
+          "a2d2cb37663392d166c080d1d9df37ad73e8812edc37e9300abed5d7e9024378"
+        ],
+        "heapBytes": 311230464,
+        "readBytes": 35460254,
+        "maxRead": 1228301
+      }
+    ]
+  ]
+}

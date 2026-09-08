@@ -60,7 +60,7 @@ const dictionary = {
     pickerFailed: "无法打开文件夹选择器。", droppedEmpty: "拖放内容中没有可读取的文件。",
     accessErrorTitle: "无法访问本地文件",
     collapseSidebar: "收起文件栏", expandSidebar: "展开文件栏", chooseLocalFile: "选择本地文件",
-    unopenedTitle: "尚未打开工作区", unopenedDescription: "授权文件或文件夹后，这里会显示句柄树。",
+    unopenedTitle: "尚未打开工作区", unopenedDescription: "选择或拖动文件/文件夹，这里会显示文件树",
     preview: "预览区", unknownType: "未知类型", workspaceFiles: "工作区文件",
   },
   viewer: {

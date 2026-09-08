@@ -16,7 +16,8 @@
     "@anyfile/raw-decoder": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",
-    "mediabunny": "1.55.3"
+    "mediabunny": "1.55.3",
+    "@anyfile/ffmpeg-playback": "workspace:*"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*",

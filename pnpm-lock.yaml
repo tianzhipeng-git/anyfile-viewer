@@ -746,6 +746,9 @@ importers:
       '@anyfile/browser-video-viewer':
         specifier: workspace:*
         version: link:../browser-video
+      '@anyfile/ffmpeg-playback':
+        specifier: workspace:*
+        version: link:../../ffmpeg-playback
       '@anyfile/raw-decoder':
         specifier: workspace:*
         version: link:../../raw-decoder

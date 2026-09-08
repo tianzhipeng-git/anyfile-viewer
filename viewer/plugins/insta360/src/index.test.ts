@@ -9,6 +9,7 @@ const rawMocks = vi.hoisted(() => ({
   dispose: vi.fn(),
 }));
 const x6Mocks = vi.hoisted(() => ({ decode: vi.fn() }));
+const ffmpegMocks = vi.hoisted(() => ({ open: vi.fn() }));
 const dualTrackMocks = vi.hoisted(() => ({ open: vi.fn() }));
 
 vi.mock("@anyfile/raw-decoder", () => ({
@@ -21,6 +22,7 @@ vi.mock("@anyfile/raw-decoder", () => ({
   },
 }));
 vi.mock("./x6-dng-source", () => ({ decodeX6DeflateDng: x6Mocks.decode }));
+vi.mock("./ffmpeg-playback", () => ({ FfmpegPanoramaPlayback: { open: ffmpegMocks.open } }));
 vi.mock("./dual-track-playback", () => ({ DualTrackPlayback: { open: dualTrackMocks.open } }));
 
 import { insta360Viewer } from "./index";
@@ -73,6 +75,7 @@ beforeEach(() => {
   for (const mock of Object.values(rawMocks)) mock.mockReset();
   x6Mocks.decode.mockReset();
   dualTrackMocks.open.mockReset();
+  ffmpegMocks.open.mockReset().mockRejectedValue(new ViewerError("unsupported-environment", "Worker unavailable"));
   vi.spyOn(URL, "createObjectURL").mockReturnValue("blob:insta360");
   vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
   vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => undefined);
@@ -193,6 +196,28 @@ describe("Insta360 viewer protocol lifecycle", () => {
     expect(createImageBitmap).toHaveBeenNthCalledWith(2, developed, 3880, 0, 3880, 3880);
     await vi.waitFor(() => expect(gl.uniform1f).toHaveBeenCalledWith("uProjectionKind", 1));
     await controller.dispose();
+  });
+
+  it("tries FFmpeg after native HEVC fails, and disposes the software session", async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(fakeGl() as unknown as WebGLRenderingContext);
+    dualTrackMocks.open.mockRejectedValue(new ViewerError("unsupported-environment", "HEVC unavailable"));
+    const dispose = vi.fn().mockResolvedValue(undefined);
+    ffmpegMocks.open.mockResolvedValue({ dispose });
+    const context = testContext(new File([modernInsvBytes({ model: "X4" }).bytes], "clip.insv"));
+    const controller = await insta360Viewer.open(context.context);
+    expect(ffmpegMocks.open).toHaveBeenCalledOnce();
+    expect(context.container.textContent).not.toContain("不支持 HEVC");
+    await controller.dispose();
+    expect(dispose).toHaveBeenCalledOnce();
+  });
+
+  it("does not hide a software decoding resource failure behind a still preview", async () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(fakeGl() as unknown as WebGLRenderingContext);
+    dualTrackMocks.open.mockRejectedValue(new ViewerError("unsupported-environment", "HEVC unavailable"));
+    ffmpegMocks.open.mockRejectedValue(new ViewerError("resource-limit", "Memory budget"));
+    const context = testContext(new File([modernInsvBytes({ model: "X4" }).bytes], "clip.insv"));
+    await expect(insta360Viewer.open(context.context)).rejects.toMatchObject({ code: "resource-limit" });
+    expect(context.container.childElementCount).toBe(0);
   });
 
   it("opens the embedded static panorama when dual-track HEVC decoding is unavailable", async () => {

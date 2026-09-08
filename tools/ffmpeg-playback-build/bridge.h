@@ -10,6 +10,8 @@
 #define FP_LIMIT -3
 #define FP_IO -4
 #define FP_PIXELS (1920 * 1080)
+#define FP_PANORAMA_PIXELS (3840 * 3840)
+#define FP_TRACKS 3
 #define FP_BYTES (16 * 1024 * 1024)
 
 typedef struct {
@@ -23,11 +25,12 @@ typedef struct {
     FILE *file;
     AVPacket *packet;
     AVFrame *frame;
-    Track tracks[2]; /* video, audio */
+    Track tracks[FP_TRACKS]; /* front video, audio, back video */
     struct SwsContext *sws;
     SwrContext *swr;
     uint8_t *output;
     unsigned output_capacity;
+    int panorama, pixel_limit;
     int active, eof, flush_track, limit, error, work_left;
     int kind, bytes, width, height, samples, channels, rate;
     int64_t size, read_bytes, total_read;

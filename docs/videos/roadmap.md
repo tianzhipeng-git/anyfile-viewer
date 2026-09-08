@@ -241,3 +241,7 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 - [视频格式支持矩阵](support-matrix.md)
 - [FFmpeg 音视频播放架构](ffmpeg-playback-runtime-plan.md)
 - [音频查看实施路线图](../audio/roadmap.md)
+
+### 2026-09-08：INSV 双轨软件回退
+
+已将 Insta360 现代双轨 HEVC 连接到共享 FFmpeg；用户 X4 样例已完成首帧、连续成对画面、音频、定位、结束重播与清理验证。软件路径输出每镜头 1920²，性能不足时共同缓冲，不承诺实时播放。具体资源上限、样例证据与尚未发布的新资产见 [INSV 软件播放](insv-ffmpeg-playback.md)。

@@ -10,7 +10,11 @@ import assert from "node:assert/strict";
 const directory = process.argv[2];
 const info = JSON.parse(await readFile(`${directory}/build-info.json`, "utf8"));
 const hash = data => createHash("sha256").update(data).digest("hex");
-for (const name of ["upstream.json", "build-in-container.sh"]) {
+const upstream = JSON.parse(await readFile("tools/ffmpeg-playback-build/upstream.json", "utf8"));
+const { artifactVersion: previousVersion, ...previousUpstream } = info.upstream;
+const { artifactVersion: nextVersion, ...nextUpstream } = upstream;
+assert.deepEqual(nextUpstream, previousUpstream, "Upstream/toolchain changed: run a full build");
+for (const name of ["build-in-container.sh"]) {
   assert.equal(hash(await readFile(`tools/ffmpeg-playback-build/${name}`)), info.adapterSources[name], `${name} changed: run a full build`);
 }
 for (const [name, expected] of Object.entries(info.relinkInputs)) {

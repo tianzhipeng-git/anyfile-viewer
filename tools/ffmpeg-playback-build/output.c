@@ -22,20 +22,28 @@ int fp_convert(int slot) {
     // anchor during bounded seek recovery instead of assigning the requested time.
     if (!isfinite(s.timestamp)) return t->recovering ? 3 : FP_INVALID;
     if (f->decode_error_flags || (f->flags & AV_FRAME_FLAG_CORRUPT)) return t->recovering ? 3 : FP_INVALID;
-    if (slot == 0) {
-        if (f->width <= 0 || f->height <= 0 || (int64_t)f->width * f->height > FP_PIXELS) return FP_LIMIT;
-        int size = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, f->width, f->height, 1);
+    if (slot != 1) {
+        if (f->width <= 0 || f->height <= 0 || (int64_t)f->width * f->height > s.pixel_limit) return FP_LIMIT;
+        int width = s.panorama ? 1920 : f->width, height = s.panorama ? 1920 : f->height;
+        int size = av_image_get_buffer_size(AV_PIX_FMT_YUV420P, width, height, 1);
         int ret = reserve(size); if (ret < 0) return ret;
         s.sws = sws_getCachedContext(s.sws, f->width, f->height, f->format,
-            f->width, f->height, AV_PIX_FMT_YUV420P, SWS_BILINEAR, NULL, NULL, NULL);
+            width, height, AV_PIX_FMT_YUV420P, SWS_BILINEAR, NULL, NULL, NULL);
         if (!s.sws) return FP_LIMIT;
+        if (s.panorama) {
+            if (f->width != 3840 || f->height != 3840 || (f->format != AV_PIX_FMT_YUV420P && f->format != AV_PIX_FMT_YUVJ420P)) return FP_UNSUPPORTED;
+            if (f->colorspace != AVCOL_SPC_BT709 || f->color_trc != AVCOL_TRC_BT709 || f->color_primaries != AVCOL_PRI_BT709) return FP_UNSUPPORTED;
+            const int *coefficients = sws_getCoefficients(SWS_CS_ITU709);
+            if (sws_setColorspaceDetails(s.sws, coefficients, f->color_range == AVCOL_RANGE_JPEG,
+                coefficients, 0, 0, 1 << 16, 1 << 16) < 0) return FP_INVALID;
+        }
         uint8_t *planes[4]; int strides[4];
-        av_image_fill_arrays(planes, strides, s.output, AV_PIX_FMT_YUV420P, f->width, f->height, 1);
-        if (sws_scale(s.sws, (const uint8_t *const *)f->data, f->linesize, 0, f->height, planes, strides) != f->height) return FP_INVALID;
-        s.width = f->width; s.height = f->height;
+        av_image_fill_arrays(planes, strides, s.output, AV_PIX_FMT_YUV420P, width, height, 1);
+        if (sws_scale(s.sws, (const uint8_t *const *)f->data, f->linesize, 0, f->height, planes, strides) != height) return FP_INVALID;
+        s.width = width; s.height = height;
         AVRational fps = av_guess_frame_rate(s.format, stream, f);
         s.frame_duration = f->duration > 0 ? f->duration * av_q2d(stream->time_base) : fps.num > 0 && fps.den > 0 ? av_q2d(av_inv_q(fps)) : 0;
-        s.kind = 1;
+        s.kind = slot == 0 ? 1 : 4;
     } else {
         s.rate = f->sample_rate; s.channels = f->ch_layout.nb_channels;
         if (s.rate < 8000 || s.rate > 96000 || s.channels < 1 || s.channels > 2 || f->nb_samples < 1 || f->nb_samples > 65536) return FP_LIMIT;

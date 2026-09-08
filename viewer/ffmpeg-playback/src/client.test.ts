@@ -24,6 +24,14 @@ describe("FFmpeg Worker ownership", () => {
     worker.reply({ kind: "eof" }); await expect(pending).resolves.toEqual({ kind: "eof" });
     client.dispose(); expect(vi.getTimerCount()).toBe(0);
   });
+  it("explicitly selects panorama mode without changing ordinary video mode", async () => {
+    const client = new FfmpegClient(new AbortController().signal), worker = TestWorker.instances[0];
+    const file = new File(["fixture"], "clip.insv");
+    const opened = client.openPanorama(file);
+    expect(worker.postMessage.mock.lastCall![0]).toMatchObject({ type: "open", panorama: true, file });
+    worker.reply({ video: true, audio: true }); await opened;
+    client.dispose();
+  });
   it("hard abort rejects an in-flight decode and is idempotent", async () => {
     const abort = new AbortController(), client = new FfmpegClient(abort.signal), worker = TestWorker.instances[0];
     const pending = expect(client.next()).rejects.toMatchObject({ name: "AbortError" });

@@ -23,7 +23,7 @@ export const panoramaViewerContents: readonly PanoramaViewerContent[] = [
         ],
         highlights: ["Interactive drag, keyboard and wheel navigation", "Local image, video and RAW decoding", "Original audio with playback and seeking where supported"],
         openingSteps: ["Keep matching _00 and _10 INSV files together for X3 and ONE RS recordings.", "Choose both matching files at once, or open their folder. X4, X5 and X6 dual-track INSV recordings open from one file.", "Anyfile checks the model and layout before loading the panorama viewer."],
-        requirements: ["WebGL is required for interactive viewing.", "Video playback depends on browser support for the recording's H.264 or HEVC video and AAC audio.", "Modern INSV can fall back to an embedded static 360° preview when HEVC playback is unavailable."],
+        requirements: ["WebGL is required for interactive viewing.", "Video playback prefers browser H.264/HEVC and AAC decoding; verified dual-track HEVC has a local FFmpeg software fallback.", "Software playback uses 1920×1920 per lens and may buffer frequently. A static preview remains available when the required runtime is unavailable."],
         limitations: ["Only the models and layouts listed on this page are declared as supported.", "HDR merging, gyro leveling and FlowState stabilization are not applied.", "This viewer does not edit, reframe or export footage."],
         faq: [
           { question: "Can I view an INSV file without Insta360 Studio?", answer: "Yes, when its model, layout and browser codecs are supported. The file is read and rendered locally by Anyfile." },
@@ -47,7 +47,7 @@ export const panoramaViewerContents: readonly PanoramaViewerContent[] = [
         ],
         highlights: ["支持拖动、键盘与滚轮环视", "在本地完成图片、视频与 RAW 解码", "受支持时保留原始音频、播放与定位"],
         openingSteps: ["X3 与 ONE RS 录像请保留匹配的 _00、_10 INSV 文件。", "同时选择两个匹配文件，或打开它们所在的文件夹；X4、X5、X6 双轨 INSV 可直接选择单个文件。", "Anyfile 会先校验型号与文件布局，再加载全景查看器。"],
-        requirements: ["交互查看需要 WebGL。", "视频播放取决于浏览器是否支持录像中的 H.264 或 HEVC 视频及 AAC 音频。", "无法播放 HEVC 时，新版 INSV 可以降级显示内嵌的静态 360° 预览。"],
+        requirements: ["交互查看需要 WebGL。", "视频优先使用浏览器解码 H.264/HEVC 与 AAC；已验证的双轨 HEVC 可回退到本地 FFmpeg 软件解码。", "软件解码每路显示 1920×1920，可能频繁缓冲；所需运行环境不可用时仍可显示内嵌的静态 360° 预览。"],
         limitations: ["只声明本页列出的型号与文件布局。", "不应用 HDR 合成、陀螺仪水平校正与 FlowState 防抖。", "不提供剪辑、重新取景或导出。"],
         faq: [
           { question: "不用 Insta360 Studio 可以查看 INSV 吗？", answer: "可以，前提是文件型号、布局和浏览器 codec 均受支持；Anyfile 会在本地读取和渲染文件。" },

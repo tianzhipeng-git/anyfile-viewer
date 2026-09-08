@@ -1,0 +1,292 @@
+{
+  "date": "2026-09-08T14:14:42.424Z",
+  "node": "v24.4.0",
+  "results": [
+    {
+      "file": "avi-mpeg4-mp3.avi",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        168
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "avi-mpeg4-mp3.avi",
+      "seek": 1,
+      "counts": [
+        73,
+        0,
+        126
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "ps-mpeg2-ac3.vob",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        125
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "ps-mpeg2-ac3.vob",
+      "seek": 1,
+      "counts": [
+        76,
+        0,
+        94
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "ps-mpeg2-mp2.mpg",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        167
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "ps-mpeg2-mp2.mpg",
+      "seek": 1,
+      "counts": [
+        76,
+        0,
+        126
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "asf-wmv2-wma2.wmv",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        93
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "asf-wmv2-wma2.wmv",
+      "seek": 1,
+      "counts": [
+        77,
+        0,
+        72
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "avi-video-only.avi",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        0
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "avi-video-only.avi",
+      "seek": 1,
+      "counts": [
+        73,
+        0,
+        0
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "avi-1080p.avi",
+      "seek": 0,
+      "counts": [
+        100,
+        0,
+        168
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "avi-1080p.avi",
+      "seek": 1,
+      "counts": [
+        73,
+        0,
+        126
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "aiff-s16.aiff",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        188
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "aiff-s16.aiff",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        141
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "aiff-s24.aiff",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        141
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "aiff-s24.aiff",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        106
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "aifc-f32.aifc",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        375
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "aifc-f32.aifc",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        282
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "asf-wma1.wma",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        93
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "asf-wma1.wma",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        72
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "asf-wma2.wma",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        93
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "asf-wma2.wma",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        72
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "aiff-silence.aiff",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        188
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "aiff-silence.aiff",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        141
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "mp3-cover.mp3",
+      "seek": 0,
+      "counts": [
+        0,
+        0,
+        168
+      ],
+      "identicalOutput": true,
+      "eof": true
+    },
+    {
+      "file": "mp3-cover.mp3",
+      "seek": 1,
+      "counts": [
+        0,
+        0,
+        126
+      ],
+      "identicalOutput": true,
+      "eof": true
+    }
+  ]
+}

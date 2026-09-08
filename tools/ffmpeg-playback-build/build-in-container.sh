@@ -14,9 +14,9 @@ flags=(--cc=emcc --cxx=em++ --ar=emar --ranlib=emranlib --nm=emnm
   --disable-x86asm --disable-asm --disable-inline-asm --disable-runtime-cpudetect
   --disable-programs --disable-doc --disable-debug --disable-network
   --disable-avdevice --disable-avfilter --disable-encoders --disable-muxers
-  --disable-filters --disable-devices --disable-protocols --disable-pthreads
+  --disable-filters --disable-devices --disable-protocols --enable-pthreads
   --disable-w32threads --disable-os2threads --disable-shared --enable-static
-  --extra-cflags=-O3 --extra-ldflags=-O3)
+  --extra-cflags="-O3 -msimd128 -pthread" --extra-ldflags="-O3 -msimd128 -pthread")
 ./configure "${flags[@]}" > /output/configure.txt
 printf '%s\n' "${flags[@]}" > /output/configure-flags.txt
 make -j4 > /output/compile.log 2>&1

@@ -1,0 +1,30 @@
+{
+  "browser": "145.0.7632.6",
+  "report": [
+    {
+      "name": "silent first dual frame via software fallback",
+      "ms": 2022.2842090000001
+    },
+    {
+      "name": "continuous paired frames, audio and buffering",
+      "ms": 14599.402416
+    },
+    {
+      "name": "pause and latest seek",
+      "ms": 7607.6212080000005
+    },
+    {
+      "name": "narrow viewport retains reachable controls",
+      "ms": 52.067291000003024
+    },
+    {
+      "name": "near-end playback, EOF and replay",
+      "ms": 12609.006541999996
+    },
+    {
+      "name": "file switch stops Worker and audio",
+      "ms": 32.42954199999804
+    }
+  ],
+  "errors": []
+}

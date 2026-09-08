@@ -1,7 +1,9 @@
 import { ViewerError } from "@anyfile/viewer-protocol";
 import type { DecodeEvent, MediaInfo } from "./types";
 
-export const FFMPEG_VERSION = "9.0.1-anyfile.1";
+export type { DecodedFrame, MediaInfo } from "./types";
+
+export const FFMPEG_VERSION = "9.0.1-anyfile.4";
 export const FFMPEG_LOCAL = `/vendor/ffmpeg-playback/${FFMPEG_VERSION}/`;
 const SOURCES = [`https://assets.anyfile.top/vendor/ffmpeg-playback/${FFMPEG_VERSION}/`, FFMPEG_LOCAL];
 type Pending = { id: number; resolve: (value: unknown) => void; reject: (error: unknown) => void; timer: ReturnType<typeof setTimeout> };
@@ -41,6 +43,7 @@ export class FfmpegClient {
     });
   }
   open(file: File, video: boolean) { return this.request<MediaInfo>("open", { file, video }); }
+  openPanorama(file: File) { return this.request<MediaInfo>("open", { file, panorama: true }); }
   next() { return this.request<DecodeEvent>("next"); }
   seek(time: number) { return this.request<void>("seek", { time }); }
   dispose(error: unknown = new DOMException("Disposed", "AbortError")) {

@@ -44,18 +44,18 @@ static int deny_open(AVFormatContext *ctx, AVIOContext **pb, const char *url, in
     return AVERROR(EACCES);
 }
 void fp_close(void) {
-    for (int i = 0; i < 2; i++) avcodec_free_context(&s.tracks[i].codec);
+    for (int i = 0; i < FP_TRACKS; i++) avcodec_free_context(&s.tracks[i].codec);
     av_packet_free(&s.packet); av_frame_free(&s.frame);
     avformat_close_input(&s.format);
     if (s.io) { av_freep(&s.io->buffer); avio_context_free(&s.io); }
     if (s.file) fclose(s.file);
     sws_freeContext(s.sws); swr_free(&s.swr); av_freep(&s.output);
     memset(&s, 0, sizeof(s)); s.active = -1;
-    s.tracks[0].index = s.tracks[1].index = -1;
+    for (int i = 0; i < FP_TRACKS; i++) s.tracks[i].index = -1;
 }
 static int open_track(int slot, int index) {
     AVCodecParameters *p = s.format->streams[index]->codecpar;
-    if (slot == 0 && (p->width <= 0 || p->height <= 0 || (int64_t)p->width * p->height > FP_PIXELS)) return FP_LIMIT;
+    if (slot != 1 && (p->width <= 0 || p->height <= 0 || (int64_t)p->width * p->height > s.pixel_limit)) return FP_LIMIT;
     if (slot == 1 && (p->sample_rate < 8000 || p->sample_rate > 96000 || p->ch_layout.nb_channels < 1 || p->ch_layout.nb_channels > 2)) return FP_LIMIT;
     const AVCodec *codec = avcodec_find_decoder(p->codec_id);
     if (!codec) return FP_UNSUPPORTED;
@@ -64,7 +64,10 @@ static int open_track(int slot, int index) {
     if (!t->codec) return FP_LIMIT;
     int ret = avcodec_parameters_to_context(t->codec, p);
     if (ret < 0) return result(ret);
-    t->codec->thread_count = 1; t->codec->max_pixels = FP_PIXELS;
+    // Frame threading also handles X4 tiled HEVC without WPP. Keep the pool bounded.
+    t->codec->thread_count = s.panorama && slot != 1 ? 2 : 1;
+    t->codec->thread_type = FF_THREAD_FRAME;
+    t->codec->max_pixels = s.pixel_limit;
     t->codec->pkt_timebase = s.format->streams[index]->time_base;
     t->codec->err_recognition = AV_EF_CRCCHECK | AV_EF_EXPLODE;
     ret = avcodec_open2(t->codec, codec, NULL);
@@ -72,6 +75,9 @@ static int open_track(int slot, int index) {
 }
 int fp_open(const char *path, int video) {
     fp_close(); budget();
+    if (video < 0 || video > 2) return FP_UNSUPPORTED;
+    s.panorama = video == 2;
+    s.pixel_limit = s.panorama ? FP_PANORAMA_PIXELS : FP_PIXELS;
     av_log_set_level(AV_LOG_ERROR); av_max_alloc(64 * 1024 * 1024);
     s.file = fopen(path, "rb");
     if (!s.file) return FP_IO;
@@ -94,21 +100,30 @@ int fp_open(const char *path, int video) {
     if (s.limit) return FP_LIMIT;
     if (ret < 0) return result(ret);
     if (s.format->nb_programs > 1) return FP_UNSUPPORTED;
-    int indices[2] = { -1, -1 };
+    int indices[FP_TRACKS] = { -1, -1, -1 };
     for (unsigned i = 0; i < s.format->nb_streams; i++) {
         AVStream *stream = s.format->streams[i];
         enum AVMediaType type = stream->codecpar->codec_type;
         if (stream->disposition & AV_DISPOSITION_ATTACHED_PIC) continue;
         int slot = type == AVMEDIA_TYPE_VIDEO ? 0 : type == AVMEDIA_TYPE_AUDIO ? 1 : -1;
         if (slot < 0) continue;
+        if (s.panorama && slot == 0 && indices[0] >= 0) slot = 2;
         if (indices[slot] >= 0) return FP_UNSUPPORTED;
         indices[slot] = i;
     }
     if ((video && indices[0] < 0) || (!video && (indices[0] >= 0 || indices[1] < 0))) return FP_UNSUPPORTED;
+    if (s.panorama) {
+        if (indices[0] < 0 || indices[1] < 0 || indices[2] < 0) return FP_UNSUPPORTED;
+        for (int slot = 0; slot < FP_TRACKS; slot++) {
+            AVCodecParameters *p = s.format->streams[indices[slot]]->codecpar;
+            if (slot == 1) { if (p->codec_id != AV_CODEC_ID_AAC) return FP_UNSUPPORTED; }
+            else if (p->codec_id != AV_CODEC_ID_HEVC || p->width != 3840 || p->height != 3840 || p->color_space != AVCOL_SPC_BT709 || p->color_trc != AVCOL_TRC_BT709 || p->color_primaries != AVCOL_PRI_BT709 || (p->format != AV_PIX_FMT_YUV420P && p->format != AV_PIX_FMT_YUVJ420P)) return FP_UNSUPPORTED;
+        }
+    }
     if (s.format->duration == AV_NOPTS_VALUE || s.format->duration <= 0) return FP_UNSUPPORTED;
     s.duration = (double)s.format->duration / AV_TIME_BASE;
     s.origin = s.format->start_time == AV_NOPTS_VALUE ? 0 : (double)s.format->start_time / AV_TIME_BASE;
-    for (int i = 0; i < 2; i++) if (indices[i] >= 0) {
+    for (int i = 0; i < FP_TRACKS; i++) if (indices[i] >= 0) {
         ret = open_track(i, indices[i]); if (ret < 0) return ret;
     }
     s.packet = av_packet_alloc(); s.frame = av_frame_alloc();
@@ -116,7 +131,7 @@ int fp_open(const char *path, int video) {
     AVCodecContext *v = s.tracks[0].codec, *a = s.tracks[1].codec;
     snprintf(s.info, sizeof(s.info),
       "{\"duration\":%.9f,\"origin\":%.9f,\"video\":%s,\"audio\":%s,\"width\":%d,\"height\":%d,\"sampleRate\":%d,\"channels\":%d,\"videoCodec\":\"%s\",\"audioCodec\":\"%s\"}",
-      s.duration, s.origin, v ? "true" : "false", a ? "true" : "false", v ? v->width : 0, v ? v->height : 0,
+      s.duration, s.origin, v ? "true" : "false", a ? "true" : "false", v ? (s.panorama ? 1920 : v->width) : 0, v ? (s.panorama ? 1920 : v->height) : 0,
       a ? a->sample_rate : 0, a ? a->ch_layout.nb_channels : 0, v ? avcodec_get_name(v->codec_id) : "", a ? avcodec_get_name(a->codec_id) : "");
     return 0;
 }
@@ -139,8 +154,8 @@ int fp_decode_next(void) {
             s.active = -1;
         }
         if (s.eof) {
-            while (s.flush_track < 2 && (!s.tracks[s.flush_track].codec || s.tracks[s.flush_track].drained)) s.flush_track++;
-            if (s.flush_track == 2) return 0;
+            while (s.flush_track < FP_TRACKS && (!s.tracks[s.flush_track].codec || s.tracks[s.flush_track].drained)) s.flush_track++;
+            if (s.flush_track == FP_TRACKS) return 0;
             int track = s.flush_track++;
             int ret = avcodec_send_packet(s.tracks[track].codec, NULL);
             if (ret < 0 && ret != AVERROR_EOF) return s.error = result(ret);
@@ -151,7 +166,7 @@ int fp_decode_next(void) {
         if (ret == AVERROR_EOF) { s.eof = 1; continue; }
         if (ret < 0) return s.error = result(ret);
         if (s.packet->size > FP_BYTES) { av_packet_unref(s.packet); return s.error = FP_LIMIT; }
-        int track = s.packet->stream_index == s.tracks[0].index ? 0 : s.packet->stream_index == s.tracks[1].index ? 1 : -1;
+        int track = s.packet->stream_index == s.tracks[0].index ? 0 : s.packet->stream_index == s.tracks[1].index ? 1 : s.packet->stream_index == s.tracks[2].index ? 2 : -1;
         if (track >= 0) {
             Track *t = &s.tracks[track];
             if (t->recovering && ++t->recovery_packets > 512) { av_packet_unref(s.packet); return s.error = FP_LIMIT; }
@@ -169,7 +184,7 @@ int fp_decode_next(void) {
 }
 int fp_next(void) { budget(); return fp_decode_next(); }
 void fp_reset_decoders(void) {
-    for (int i = 0; i < 2; i++) if (s.tracks[i].codec) {
+    for (int i = 0; i < FP_TRACKS; i++) if (s.tracks[i].codec) {
         avcodec_flush_buffers(s.tracks[i].codec); s.tracks[i].drained = 0; s.tracks[i].next_timestamp = NAN;
         s.tracks[i].recovering = 1; s.tracks[i].recovery_packets = 0;
     }

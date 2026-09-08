@@ -17,9 +17,10 @@ for (const [name, expected] of Object.entries(info.adapterSources)) {
   assert.equal(createHash("sha256").update(source).digest("hex"), expected, `${name} differs from the built adapter`);
 }
 const config = await readFile(join(directory, "config.h"), "utf8");
-for (const feature of ["GPL", "NONFREE", "NETWORK", "ENCODERS", "MUXERS", "AVFILTER", "AVDEVICE", "PROTOCOLS", "PTHREADS"]) {
+for (const feature of ["GPL", "NONFREE", "NETWORK", "ENCODERS", "MUXERS", "AVFILTER", "AVDEVICE", "PROTOCOLS"]) {
   assert.match(config, new RegExp(`^#define (?:CONFIG|HAVE)_${feature} 0$`, "m"), `${feature} unexpectedly enabled`);
 }
+assert.match(config, /^#define HAVE_PTHREADS 1$/m);
 const configuration = await readFile(join(directory, "configure.txt"), "utf8");
 assert.match(configuration, /License: LGPL version 2\.1 or later/);
 console.log(`Verified ${Object.keys(info.artifacts).length} artifacts and decode-only feature exclusions`);

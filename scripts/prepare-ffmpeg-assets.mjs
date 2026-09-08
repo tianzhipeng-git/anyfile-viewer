@@ -4,7 +4,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gzipSync } from "node:zlib";
 
-const root = dirname(dirname(fileURLToPath(import.meta.url))), version = "9.0.1-anyfile.1";
+const root = dirname(dirname(fileURLToPath(import.meta.url))), version = "9.0.1-anyfile.4";
 const source = join(root, "third_party/ffmpeg-playback", version), target = join(root, "public/vendor/ffmpeg-playback", version);
 const info = JSON.parse(await readFile(join(source, "build-info.json"), "utf8"));
 if (info.artifactVersion !== version) throw new Error("FFmpeg version mismatch");
