@@ -8,7 +8,7 @@ import {
 import { createPagedTableViewer } from "@anyfile/viewer-ui";
 
 import { createDuckDBSession } from "./duckdb-session";
-import { dataManifest } from "./manifest";
+import { duckdbManifest } from "./manifest";
 import type { DataSession } from "./types";
 
 const PAGE_SIZE = 100;
@@ -133,5 +133,5 @@ async function openData(context: OpenViewerContext): Promise<ViewerController> {
   }
 }
 
-export const dataViewer: FileViewerPlugin = { manifest: dataManifest, open: openData };
-export { dataManifest } from "./manifest";
+export const duckdbViewer: FileViewerPlugin = { manifest: duckdbManifest, open: openData };
+export { duckdbManifest } from "./manifest";

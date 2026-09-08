@@ -1,5 +1,5 @@
 {
-  "name": "@anyfile/data-viewer",
+  "name": "@anyfile/duckdb-viewer",
   "version": "1.0.0",
   "private": true,
   "type": "module",

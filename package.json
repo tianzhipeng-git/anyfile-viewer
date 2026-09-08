@@ -45,7 +45,7 @@
     "@anyfile/cad-2d-viewer": "workspace:*",
     "@anyfile/camera-raw-viewer": "workspace:*",
     "@anyfile/code-viewer": "workspace:*",
-    "@anyfile/data-viewer": "workspace:*",
+    "@anyfile/duckdb-viewer": "workspace:*",
     "@anyfile/dev-array-viewer": "workspace:*",
     "@anyfile/dev-source-map-viewer": "workspace:*",
     "@anyfile/dev-wasm-viewer": "workspace:*",

@@ -194,10 +194,10 @@ const photoshopDecoderChunks = archiveChunkContents.filter(({ content }) => cont
 if (photoshopDecoderChunks.length === 0) throw new Error("Deferred Photoshop decoder Worker chunk was not found");
 const duckdbPackage = JSON.parse(await readFile(join(
   projectRoot,
-  "viewer/plugins/data/node_modules/@duckdb/duckdb-wasm/package.json",
+  "viewer/plugins/duckdb/node_modules/@duckdb/duckdb-wasm/package.json",
 ), "utf8"));
 const duckdbRuntimeSource = await readFile(
-  join(projectRoot, "viewer/plugins/data/src/duckdb-runtime.ts"),
+  join(projectRoot, "viewer/plugins/duckdb/src/duckdb-runtime.ts"),
   "utf8",
 );
 const duckdbR2Root = duckdbRuntimeSource.match(/const R2_ASSET_ROOT = "([^"]+)"/)?.[1];

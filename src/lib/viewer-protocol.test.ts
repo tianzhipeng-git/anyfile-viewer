@@ -353,19 +353,32 @@ describe("viewer protocol", () => {
       .toEqual([["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
 
     const officeBytes = readFileSync(join(process.cwd(), "viewer/plugins/archive/examples/archive.zip"));
-    for (const [name, expected] of [
-      ["document.docx", "word-document"],
-      ["workbook.xlsx", "excel-workbook"],
-      ["workbook.ods", "excel-workbook"],
-      ["slides.pptx", "powerpoint-presentation"],
+    for (const [name, expected, level] of [
+      ["document.docx", "word-document", 4],
+      ["workbook.xlsx", "excel-workbook", 3],
+      ["workbook.ods", "excel-workbook", 3],
+      ["slides.pptx", "powerpoint-presentation", 4],
     ] as const) {
       const resolved = await resolveViewerRegistrations(
         new File([officeBytes], name), viewerRegistrations,
         { signal: new AbortController().signal },
       );
       expect(resolved.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
-        .toEqual([[expected, 4], ["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
+        .toEqual([[expected, level], ["archive-metadata-viewer", 2], ["hex-viewer", 1]]);
     }
+  });
+
+  it.each(["records.csv", "records.tsv"])("routes %s to main-content table viewers", async (name) => {
+    const resolved = await resolveViewerRegistrations(
+      new File(["name,value\nAlice,42\n"], name), viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    const tables = resolved.filter(({ registration }) =>
+      ["excel-workbook", "duckdb-data"].includes(registration.manifest.id),
+    );
+    expect(tables.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["excel-workbook", 3], ["duckdb-data", 3]]);
+    expect(resolved[0].registration.manifest.id).toBe("excel-workbook");
   });
 
   it("rejects a loaded plugin whose identity differs from its registration", () => {

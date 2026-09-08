@@ -4,8 +4,8 @@ import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer
 
 import { createDuckDBSession } from "./duckdb-session";
 import { DATA_FILE_FORMATS, findDataFileFormat } from "./formats";
-import { dataViewer } from "./index";
-import { dataManifest } from "./manifest";
+import { duckdbViewer } from "./index";
+import { duckdbManifest } from "./manifest";
 import type { DataPage, DataSession } from "./types";
 
 vi.mock("./duckdb-session", () => ({ createDuckDBSession: vi.fn() }));
@@ -51,8 +51,8 @@ afterEach(() => {
 
 describe("DuckDB data viewer", () => {
   it("publishes all supported data formats in a valid manifest", () => {
-    expect(() => validateManifest(dataManifest)).not.toThrow();
-    expect(dataManifest.formats.flatMap(({ extensions }) => extensions))
+    expect(() => validateManifest(duckdbManifest)).not.toThrow();
+    expect(duckdbManifest.formats.flatMap(({ extensions }) => extensions))
       .toEqual(DATA_FILE_FORMATS.flatMap(({ extensions }) => extensions));
   });
 
@@ -76,7 +76,7 @@ describe("DuckDB data viewer", () => {
     ]);
     mockedCreateSession.mockResolvedValue(session);
     const context = testContext();
-    const controller = await dataViewer.open(context.context);
+    const controller = await duckdbViewer.open(context.context);
 
     expect(context.container.textContent).toContain("Ada");
     expect(context.container.textContent).toContain("VARCHAR");
@@ -101,7 +101,7 @@ describe("DuckDB data viewer", () => {
     ]);
     mockedCreateSession.mockResolvedValue(session);
     const context = testContext("sample.duckdb");
-    const controller = await dataViewer.open(context.context);
+    const controller = await duckdbViewer.open(context.context);
     const select = context.container.querySelector<HTMLSelectElement>("[data-dataset]")!;
 
     select.value = "main.orders";
@@ -113,7 +113,7 @@ describe("DuckDB data viewer", () => {
   it("uses English controls when requested", async () => {
     mockedCreateSession.mockResolvedValue(mockSession());
     const context = testContext("people.parquet", "en");
-    const controller = await dataViewer.open(context.context);
+    const controller = await duckdbViewer.open(context.context);
 
     expect(context.container.querySelector("[data-next]")?.textContent).toBe("Next");
     expect(context.container.querySelector("[data-dataset]")?.getAttribute("aria-label"))
@@ -126,20 +126,20 @@ describe("DuckDB data viewer", () => {
     invalidSession.query = vi.fn(async () => { throw new Error("parser details"); });
     mockedCreateSession.mockResolvedValueOnce(invalidSession);
     const invalid = testContext("broken.json");
-    await expect(dataViewer.open(invalid.context)).rejects.toMatchObject({ code: "invalid-file" });
+    await expect(duckdbViewer.open(invalid.context)).rejects.toMatchObject({ code: "invalid-file" });
     expect(invalidSession.dispose).toHaveBeenCalledOnce();
     expect(invalid.container.childElementCount).toBe(0);
 
     mockedCreateSession.mockRejectedValueOnce(new RangeError("too large"));
     const huge = testContext("huge.parquet");
-    await expect(dataViewer.open(huge.context)).rejects.toMatchObject({ code: "resource-limit" });
+    await expect(duckdbViewer.open(huge.context)).rejects.toMatchObject({ code: "resource-limit" });
   });
 
   it("disposes an active viewer when aborted", async () => {
     const session = mockSession();
     mockedCreateSession.mockResolvedValue(session);
     const context = testContext();
-    const controller = await dataViewer.open(context.context);
+    const controller = await duckdbViewer.open(context.context);
 
     context.abortController.abort();
     await vi.waitFor(() => expect(session.dispose).toHaveBeenCalledOnce());

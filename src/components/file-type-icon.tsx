@@ -15,7 +15,7 @@ import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
 import { cad2dManifest } from "@anyfile/cad-2d-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
-import { dataManifest } from "@anyfile/data-viewer/manifest";
+import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
@@ -163,7 +163,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "database",
     icon: DatabaseIcon,
-    extensions: manifestExtensions(sqliteManifest, dataManifest),
+    extensions: manifestExtensions(sqliteManifest, duckdbManifest),
   },
   {
     kind: "audio",

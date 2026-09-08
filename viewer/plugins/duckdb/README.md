@@ -11,6 +11,7 @@
   - Parquet（`.parquet`、`.parq`、`.pq`）
   - Arrow IPC（`.arrow`、`.feather`、`.ipc`）
   - DuckDB 数据库（`.duckdb`、`.ddb`）
+- **支持等级**：已声明格式均为 3（主要内容）；展示数据行与列，类型推断、嵌套值及数据库结构展示仍有局限。
 - **能力**：自动推断 schema、分页表格浏览（每页 100 行）、多表选择（DuckDB 库文件）
 - **示例文件**：`examples/people.csv`、`people.parquet`、`events.arrow`、`analytics.ddb`
 
@@ -65,5 +66,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/data-viewer test
+pnpm --filter @anyfile/duckdb-viewer test
 ```

@@ -6,6 +6,7 @@
 
 - **插件 ID**：`excel-workbook`
 - **支持格式**：`.xlsx`、`.xlsm`、`.xlsb`、`.xls`、`.ods`、`.csv`、`.tsv` 及多种遗留格式（见 [src/manifest.ts](src/manifest.ts) 完整列表）
+- **支持等级**：已声明格式均为 3（主要内容）；展示单元格值，不覆盖完整样式、图表与公式语义。
 - **能力**：多工作表切换、分页浏览（每页 100 行）、列标 A/B/C… 显示
 - **示例文件**：`examples/demo.xlsx`
 

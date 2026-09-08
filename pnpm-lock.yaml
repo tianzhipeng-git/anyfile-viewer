@@ -35,9 +35,9 @@ importers:
       '@anyfile/comic-book-reader':
         specifier: workspace:*
         version: link:viewer/plugins/comic-book
-      '@anyfile/data-viewer':
+      '@anyfile/duckdb-viewer':
         specifier: workspace:*
-        version: link:viewer/plugins/data
+        version: link:viewer/plugins/duckdb
       '@anyfile/dev-array-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/dev-array
@@ -436,7 +436,7 @@ importers:
         specifier: 4.1.11
         version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(jiti@2.7.0))
 
-  viewer/plugins/data:
+  viewer/plugins/duckdb:
     dependencies:
       '@anyfile/runtime-assets':
         specifier: workspace:*

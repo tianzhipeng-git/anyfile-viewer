@@ -159,13 +159,13 @@
       "runtimeSets": []
     },
     "duckdb-data": {
-      "directory": "data",
-      "package": "@anyfile/data-viewer",
+      "directory": "duckdb",
+      "package": "@anyfile/duckdb-viewer",
       "runtimeSets": [
         {
           "id": "duckdb",
           "version": "1.32.0",
-          "versionPackageJson": "viewer/plugins/data/node_modules/@duckdb/duckdb-wasm/package.json",
+          "versionPackageJson": "viewer/plugins/duckdb/node_modules/@duckdb/duckdb-wasm/package.json",
           "assetPatterns": [
             ".next/static/media/duckdb-*.wasm",
             ".next/static/media/duckdb-*.worker.*.js"
@@ -192,8 +192,8 @@
             "same-origin"
           ],
           "implementationFiles": [
-            "viewer/plugins/data/src/duckdb-runtime.ts",
-            "viewer/plugins/data/src/duckdb-session.ts"
+            "viewer/plugins/duckdb/src/duckdb-runtime.ts",
+            "viewer/plugins/duckdb/src/duckdb-session.ts"
           ],
           "requiredMarkers": [
             "@duckdb/duckdb-wasm/dist/duckdb-browser.mjs",
