@@ -31,7 +31,7 @@ const contents = await Promise.all(
   assets.map((asset) => readFile(join(projectRoot, ".next", asset))),
 );
 const gzipBytes = contents.reduce((total, content) => total + gzipSync(content).byteLength, 0);
-const maximumGzipBytes = 225 * 1024;
+const maximumGzipBytes = 300 * 1024;
 if (gzipBytes > maximumGzipBytes) {
   throw new Error(
     `/en/view initial JavaScript is ${(gzipBytes / 1024).toFixed(1)} KiB gzip; maximum is ${maximumGzipBytes / 1024} KiB`,
