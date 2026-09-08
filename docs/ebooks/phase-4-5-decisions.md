@@ -48,13 +48,13 @@ ZIP/USTAR 保持按 entry 切片读取。RAR/7z 使用一次性顺序解压，�
 
 | 项目 | 上限/策略 |
 |---|---:|
-| MOBI 输入 / text header / record count / 单 record | 64 MiB / 32 MiB / 10,000 / 16 MiB |
-| MOBI 重建输出（Worker 保留编码资源） | 累计 64 MiB；单 part 最多 32 MiB，显示时章节仍限 2 MiB |
+| MOBI 输入 / text header / record count / 单 record | 256 MiB / 32 MiB / 10,000 / 16 MiB |
+| MOBI 重建输出（Worker 保留编码资源） | 累计 256 MiB；单 part 最多 32 MiB，显示时章节仍限 2 MiB |
 | 章节 DOM / 深度 / 当前及邻章 | 20,000 / 64 / 最多 3 章 |
 | RAR/7z 输入 / 总实际展开 | 64 MiB / 128 MiB；最高 1000:1（小于 1 KiB 按 1 KiB 计） |
 | RAR/7z entries / 单 entry / 单图片 | 10,000 / 32 MiB / 16 MiB |
 | TAR 输入 / entries | 2 GiB / 10,000；最多读取 5 MiB 头部块 |
-| 每种 native decoder | 初始 16 MiB、最多 256 MiB WASM memory，1 MiB stack |
+| Native decoder | 初始 16 MiB，1 MiB stack；MOBI 最多 1 GiB、漫画最多 256 MiB WASM memory |
 | 单 Worker 请求耗时 | 60 秒；达到时终止 Worker 并返回 resource-limit |
 | 漫画页 / 单页像素 / 活跃页面 | 5,000 / 800 万（动画按帧计）/ 最多 4 页 |
 

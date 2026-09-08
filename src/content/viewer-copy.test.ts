@@ -50,8 +50,8 @@ describe("user-facing search copy", () => {
         expect(page.description, page.title).not.toMatch(/tessellat|virtualized|deserializ|docx-preview|PDF\.js|WebAssembly|WebCodecs|schema|离散化|虚拟化|反序列化|渲染器/iu);
       }
     }
-    expect(getCategory("engineering", "zh-CN")!.title).toContain("3D");
-    expect(getCategory("documents", "en")!.description).toContain("ebooks and comics");
+    expect(getCategory("3d-models", "zh-CN")!.title).toContain("3D");
+    expect(getCategory("ebooks", "en")!.description).toContain("ebooks");
     expect(getFormat("step", "en")!.description).toContain("rotate");
     expect(getFormat("las", "en")!.description).toContain("sampled preview");
   });

@@ -115,3 +115,13 @@ EBOOK_TEST_URL=http://localhost:3107 pnpm test:ebooks:phase45
 ```
 
 普通测试使用已经入库的自有样例，不需要 Calibre/RAR 或网络。需要重建样例时见 [语料说明](fixtures/phase45/README.md)；需要重建 WASM 时见 [构建配方](../../tools/ebook-decoders-build/README.md)。这些生成流程与应用构建分离。
+
+## 2026-09-09：大型 AZW3 与 SVG 百分比尺寸
+
+- MOBI 输入及 Worker 重建资源总量从 64 MiB 提高到 256 MiB；正文 32 MiB、单章 2 MiB 和记录预算保持原值。
+- `libmobi/0.12-anyfile.2` 保持相同上游源码和 C adapter，WASM 初始内存仍为 16 MiB，可增长上限从 256 MiB 提高到 1 GiB。两个独立源码构建的 JS/WASM 字节一致，见 [重建哈希](evidence/mobi-256-reproducibility.json)。旧版本审核产物未改写。
+- 用户本地合集（不随仓库分发）：输入 130,769,010 bytes，声明正文 28,288,408 bytes，8,286 records、KF8、无加密标记。旧模块返回 resource-limit；新模块成功解码 1,905 个资源、552 个正文分段，重建总量 146,583,204 bytes，最大正文分段 126,665 bytes。
+- Node 中运行真实 WASM，解码约 6 秒，WASM heap 330,694,656 bytes；该次解码后进程 RSS 541,507,584 bytes。这不是浏览器峰值测量，也不代表所有 256 MiB 文件都能在设备可用内存内打开。
+- 本地集成检查执行真实 Worker 消息处理、publication 构建及全部 552 个正文分段的安全内容准备，耗时约 8.5 秒，通过。DOM 部分使用 happy-dom；未做真实浏览器排版、图片显示或交互验收。
+- 章节检查发现 SVG 的 `width="100%" height="100%"` 被当作纯数字而报错；现在使用有效 viewBox 为此类图片设定有界视口，并保留像素总预算与内容清理。百分比没有固有尺寸，参考 [SVG 2 intrinsic sizing](https://www.w3.org/TR/SVG2/coords.html#IntrinsicSizing)。新增正常百分比、过大 viewBox、负值及非法尺寸回归测试。
+- 最终验证：`pnpm test`、`pnpm lint`、`pnpm build`（含 bundle / 资产策略检查）全部通过；Insta360 使用统一 `selectMessages`，并验证中文、英文和法语回退英文。

@@ -18,17 +18,173 @@ export const categoryContents: readonly CategoryContent[] = [
     },
   },
   {
-    slug: "engineering", status: "published",
+    slug: "documents", status: "published",
     copy: {
-      en: { name: "Engineering", eyebrow: "READ CAD LOCALLY", title: "Online CAD & 3D Model Viewers", description: "View DXF drawings, rotate STEP and STL models, and explore sampled point clouds in your browser.", introduction: "Check a drawing or model before opening a CAD project. Rotate supported 3D files, switch views and zoom in on details; point clouds provide a sampled overview.", useCases: ["Check DXF drawings without uploading them", "Inspect vector geometry before importing into CAD", "Open engineering drawings on a locked-down computer"], commonProblems: ["DWG previews cover model space with replacement fonts", "Complex hatches, dimensions and sheet layouts may be simplified", "Very large drawings remain bounded by browser memory"], faq: [{ question: "Can Anyfile replace AutoCAD?", answer: "No. Anyfile is a read-only local viewer, not a CAD editor. Use a CAD application for editing, dimensioning and exact plotting." }] },
-      "zh-CN": { name: "工程图", eyebrow: "本地阅读 CAD", title: "在线 CAD 图纸与 3D 模型查看器", description: "在浏览器中查看 DXF 图纸、旋转 STEP 和 STL 模型、浏览点云抽样预览。", introduction: "无需先打开 CAD 项目，即可检查图纸或模型。受支持的 3D 文件可以旋转、切换视图和放大查看；点云提供抽样后的整体预览。", useCases: ["不上传即可检查 DXF 工程图", "在导入 CAD 前检查矢量几何", "在受限电脑上打开工程图"], commonProblems: ["DWG 预览仅包含模型空间，并使用替代字体", "复杂剖面线、标注与图纸布局可能被简化", "超大工程图仍受浏览器内存限制"], faq: [{ question: "Anyfile 能替代 AutoCAD 吗？", answer: "不能。Anyfile 是只读本地查看器，不是 CAD 编辑器。编辑、标注和精确出图仍需使用 CAD 软件。" }] },
+      en: { name: "Office Documents", eyebrow: "READ WITHOUT AN UPLOAD QUEUE", title: "Online Office Document Viewers", description: "Read PDF and Word files, browse Excel spreadsheets and view PowerPoint presentations.", introduction: "Choose a document, spreadsheet or presentation to see the available viewer. Read supported content on this device; each format page explains any layout or file restrictions.", useCases: ["Read a PDF or DOCX without installing office software", "Inspect workbook values and worksheets", "Review PPTX slides without installing office software"], commonProblems: ["Password-protected or encrypted files may not open", "Macros, external links and active content are not executed", "Fonts and advanced layout effects can differ from desktop applications"], faq: [{ question: "Can I edit office files in Anyfile?", answer: "No. Anyfile is deliberately read-only; use the authoring application when you need to edit and save a document." }] },
+      "zh-CN": { name: "办公文档", eyebrow: "阅读，无需上传等待", title: "在线文档、表格与演示文稿查看器", description: "阅读 PDF 和 Word 文档、浏览 Excel 表格、查看 PowerPoint 幻灯片。", introduction: "选择文档、表格或演示文稿，找到对应的查看器。在当前设备上阅读受支持的内容，各格式页会说明排版和文件限制。", useCases: ["无需安装办公软件即可阅读 PDF 或 DOCX", "检查工作簿数值与工作表", "无需安装办公软件即可审阅 PPTX 幻灯片"], commonProblems: ["受密码保护或加密的文件可能无法打开", "不会执行宏、外部链接和活动内容", "字体和高级版式效果可能与桌面应用不同"], faq: [{ question: "可以在 Anyfile 中编辑办公文件吗？", answer: "不可以。Anyfile 有意保持只读；需要编辑和保存时请使用对应的创作软件。" }] },
     },
   },
   {
-    slug: "documents", status: "published",
+    "slug": "ebooks",
+    "status": "published",
+    "copy": {
+      "en": {
+        "name": "Ebooks & Comics",
+        "eyebrow": "READ BOOKS LOCALLY",
+        "title": "Online Ebook & Comic Readers",
+        "description": "Read EPUB, MOBI and FB2 ebooks, or browse CBZ and CBR comics in your browser.",
+        "introduction": "Open supported unencrypted books and comic archives on your device. Follow chapters, adjust supported reading settings or turn comic pages without installing a reader.",
+        "useCases": [
+          "Read EPUB chapters with adjustable text",
+          "Open supported Kindle and FictionBook files",
+          "Browse comic pages and manga spreads"
+        ],
+        "commonProblems": [
+          "DRM-protected books are not supported",
+          "Fixed-layout and complex ebook styling may not be supported",
+          "Archive and page size limits depend on the format"
+        ],
+        "faq": [
+          {
+            "question": "Can I read ebooks without uploading them?",
+            "answer": "Yes. Supported books are read locally in your browser. Format pages explain reading features and restrictions."
+          }
+        ]
+      },
+      "zh-CN": {
+        "name": "电子书与漫画",
+        "eyebrow": "本地阅读书籍",
+        "title": "在线电子书与漫画阅读器",
+        "description": "阅读 EPUB、MOBI 与 FB2 电子书，或在浏览器中翻阅 CBZ、CBR 漫画。",
+        "introduction": "在当前设备打开受支持的无加密电子书与漫画归档。按章节阅读、调整支持的阅读设置或翻阅漫画，无需安装阅读软件。",
+        "useCases": [
+          "调整字号并阅读 EPUB 章节",
+          "打开受支持的 Kindle 与 FictionBook 文件",
+          "翻阅漫画页面与双页跨页"
+        ],
+        "commonProblems": [
+          "不支持受 DRM 保护的书籍",
+          "固定版式与复杂电子书样式可能不受支持",
+          "归档与页面大小限制因格式而异"
+        ],
+        "faq": [
+          {
+            "question": "可以不上传就阅读电子书吗？",
+            "answer": "可以。受支持的书籍在浏览器本地读取，各格式页会说明阅读功能与限制。"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "slug": "graphic-design",
+    "status": "published",
+    "copy": {
+      "en": {
+        "name": "Graphic Design",
+        "eyebrow": "PREVIEW DESIGN FILES LOCALLY",
+        "title": "Online Photoshop & Illustrator File Viewers",
+        "description": "Preview Photoshop PSD and PSB, Illustrator AI and Pixelmator Pro PXD artwork.",
+        "introduction": "Check supported design files before opening an authoring application. Preview capabilities depend on the saved representation available in each file.",
+        "useCases": [
+          "Check Photoshop document previews",
+          "View supported Illustrator artwork",
+          "Inspect embedded Pixelmator Pro previews"
+        ],
+        "commonProblems": [
+          "Layers and editable objects are not fully reconstructed",
+          "Some files require a compatible saved or embedded preview",
+          "Fonts, effects and colors can differ from the authoring application"
+        ],
+        "faq": [
+          {
+            "question": "Does opening a design file preserve all editing features?",
+            "answer": "No. Anyfile is a read-only preview tool. Use the original design application for full layers, effects and editing."
+          }
+        ]
+      },
+      "zh-CN": {
+        "name": "平面设计",
+        "eyebrow": "本地预览设计文件",
+        "title": "在线 Photoshop 与 Illustrator 文件查看器",
+        "description": "无需安装设计软件，即可预览 Photoshop PSD、PSB、Illustrator AI 与 Pixelmator Pro PXD 图稿。",
+        "introduction": "在打开创作软件前，先检查受支持的设计文件。可预览的内容取决于文件保存的兼容表示或内嵌预览。",
+        "useCases": [
+          "检查 Photoshop 文档预览",
+          "查看受支持的 Illustrator 图稿",
+          "检查 Pixelmator Pro 内嵌预览"
+        ],
+        "commonProblems": [
+          "不会完整重建图层与可编辑对象",
+          "部分文件需要兼容的保存表示或内嵌预览",
+          "字体、效果与颜色可能和创作软件不同"
+        ],
+        "faq": [
+          {
+            "question": "打开设计文件能保留所有编辑功能吗？",
+            "answer": "不能。Anyfile 只提供预览；完整图层、效果与编辑请使用原设计软件。"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "slug": "3d-models",
+    "status": "published",
+    "copy": {
+      "en": {
+        "name": "3D Models",
+        "eyebrow": "EXPLORE SHAPES LOCALLY",
+        "title": "Online 3D Model & Point Cloud Viewers",
+        "description": "Rotate GLB, glTF, OBJ and STL models, inspect 3D print files and explore sampled point clouds.",
+        "introduction": "Inspect model shapes in an interactive browser viewport. Open a containing folder when a model references local materials, textures or buffers.",
+        "useCases": [
+          "Inspect meshes and scene objects",
+          "Preview STL, 3MF and AMF print models",
+          "Explore sampled LAS, LAZ and PCD point clouds"
+        ],
+        "commonProblems": [
+          "WebGL 2 is required",
+          "External textures and buffers must be supplied locally",
+          "Large files, advanced materials and compression have format-specific limits"
+        ],
+        "faq": [
+          {
+            "question": "Can I edit or repair a 3D model here?",
+            "answer": "No. Anyfile provides read-only inspection. Use a modeling or slicing application to edit geometry or prepare a print."
+          }
+        ]
+      },
+      "zh-CN": {
+        "name": "3D 模型",
+        "eyebrow": "本地探索三维形状",
+        "title": "在线 3D 模型与点云查看器",
+        "description": "旋转 GLB、glTF、OBJ 与 STL 模型，检查 3D 打印文件，浏览点云抽样预览。",
+        "introduction": "在浏览器交互视口中检查模型外形。如果模型引用本地材质、纹理或缓冲文件，请打开所在文件夹。",
+        "useCases": [
+          "检查网格与场景对象",
+          "预览 STL、3MF 与 AMF 打印模型",
+          "浏览 LAS、LAZ 与 PCD 点云抽样"
+        ],
+        "commonProblems": [
+          "需要 WebGL 2 支持",
+          "外部纹理与缓冲文件需要在本地一并提供",
+          "大文件、高级材质与压缩支持因格式而异"
+        ],
+        "faq": [
+          {
+            "question": "可以在这里编辑或修复 3D 模型吗？",
+            "answer": "不可以。Anyfile 只提供查看；编辑几何或准备打印请使用建模或切片软件。"
+          }
+        ]
+      }
+    }
+  },
+  {
+    slug: "engineering", status: "published",
     copy: {
-      en: { name: "Documents", eyebrow: "READ WITHOUT AN UPLOAD QUEUE", title: "Online Document & Ebook Viewers", description: "Read PDF and Word files, browse Excel sheets, view PowerPoint slides, and read ebooks and comics.", introduction: "Choose a document, spreadsheet, presentation or book to see the available viewer. Read supported content on this device; each format page explains any layout or file restrictions.", useCases: ["Read a PDF or DOCX without installing office software", "Inspect workbook values and worksheets", "Review PPTX slides without installing office software"], commonProblems: ["Password-protected or encrypted files may not open", "Macros, external links and active content are not executed", "Fonts and advanced layout effects can differ from desktop applications"], faq: [{ question: "Can I edit office files in Anyfile?", answer: "No. Anyfile is deliberately read-only; use the authoring application when you need to edit and save a document." }] },
-      "zh-CN": { name: "文档", eyebrow: "阅读，无需上传等待", title: "在线文档、表格与电子书查看器", description: "阅读 PDF 和 Word 文档、浏览 Excel 表格、查看 PowerPoint 幻灯片，也可阅读电子书和漫画。", introduction: "选择文档、表格、演示文稿或图书，找到对应的查看器。在当前设备上阅读受支持的内容，各格式页会说明排版和文件限制。", useCases: ["无需安装办公软件即可阅读 PDF 或 DOCX", "检查工作簿数值与工作表", "无需安装办公软件即可审阅 PPTX 幻灯片"], commonProblems: ["受密码保护或加密的文件可能无法打开", "不会执行宏、外部链接和活动内容", "字体和高级版式效果可能与桌面应用不同"], faq: [{ question: "可以在 Anyfile 中编辑办公文件吗？", answer: "不可以。Anyfile 有意保持只读；需要编辑和保存时请使用对应的创作软件。" }] },
+      en: { name: "CAD Drawings & Models", eyebrow: "READ CAD LOCALLY", title: "Online CAD Drawing & Model Viewers", description: "View DWG and DXF drawings and inspect STEP, IGES and BREP CAD models in your browser.", introduction: "Check engineering drawings and CAD geometry before opening a project. Switch views, rotate supported models and zoom in on details.", useCases: ["Check DXF drawings without uploading them", "Inspect vector geometry before importing into CAD", "Open engineering drawings on a locked-down computer"], commonProblems: ["DWG previews cover model space with replacement fonts", "Complex hatches, dimensions and sheet layouts may be simplified", "Very large drawings remain bounded by browser memory"], faq: [{ question: "Can Anyfile replace AutoCAD?", answer: "No. Anyfile is a read-only local viewer, not a CAD editor. Use a CAD application for editing, dimensioning and exact plotting." }] },
+      "zh-CN": { name: "CAD 图纸与模型", eyebrow: "本地阅读 CAD", title: "在线 CAD 图纸与模型查看器", description: "在浏览器中查看 DWG、DXF 图纸，检查 STEP、IGES 与 BREP CAD 模型。", introduction: "无需先打开 CAD 项目，即可检查工程图纸与 CAD 几何。切换视图、旋转受支持的模型并放大查看细节。", useCases: ["不上传即可检查 DXF 工程图", "在导入 CAD 前检查矢量几何", "在受限电脑上打开工程图"], commonProblems: ["DWG 预览仅包含模型空间，并使用替代字体", "复杂剖面线、标注与图纸布局可能被简化", "超大工程图仍受浏览器内存限制"], faq: [{ question: "Anyfile 能替代 AutoCAD 吗？", answer: "不能。Anyfile 是只读本地查看器，不是 CAD 编辑器。编辑、标注和精确出图仍需使用 CAD 软件。" }] },
     },
   },
   {

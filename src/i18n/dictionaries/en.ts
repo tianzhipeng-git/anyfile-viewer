@@ -16,8 +16,7 @@ const dictionary = {
     about: "About", privacy: "Privacy policy", contact: "Contact", resources: "Anyfile", email: "Email", sourceCode: "Source code",
   },
   nav: {
-    imagesVideo: "Images & Media", documents: "Documents", codeData: "Data",
-    developerArtifacts: "Developer", panorama360: "360° Cameras", threeD: "3D", design: "Design",
+    media: "Images & Media", reading: "Documents & Reading", designEngineering: "Design & Engineering", dataDevelopment: "Data & Development",
   },
   home: {
     localFirst: "FREE ONLINE FILE VIEWER", title: "Open files online without uploading.",
@@ -33,8 +32,6 @@ const dictionary = {
     formatsEyebrow: "SUPPORTED FORMATS", formatsTitle: "Find the format you need.",
     formatsDescription: "Browser-native formats and dedicated viewer plugins, organized into clear categories.",
     browseCount: "Browse {count} formats",
-    panoramaEyebrow: "CAMERA ORIGINALS", panoramaTitle: "Open 360° camera files before you edit.",
-    panoramaDescription: "Preview supported Insta360, GoPro MAX and DJI Osmo 360 originals locally—without first exporting a flat video or uploading large footage.",
     openSourceEyebrow: "OPEN SOURCE", openSourceTitle: "Inspect the viewer, not just your files.",
     openSourceDescription: "Anyfile is open source. Review how local files are handled, verify the privacy model and help extend support for uncommon formats.",
     openSourceCta: "View source on GitHub",

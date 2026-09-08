@@ -9,7 +9,7 @@ const formats = [
   ["gltf", "glTF 2.0 scenes with local buffers and textures", "glTF 2.0 场景及本地 buffer 与纹理"],
   ["glb", "Binary glTF 2.0 scenes", "二进制 glTF 2.0 场景"],
 ];
-export const meshFormats = formats.map(([extension, en, zh]) => defineFormat(extension, "engineering", 3, {
+export const meshFormats = formats.map(([extension, en, zh]) => defineFormat(extension, "3d-models", 3, {
   name: extension.toUpperCase(), title: `Open ${extension.toUpperCase()} Models Online`,
   description: `View ${extension.toUpperCase()} 3D models, rotate them and zoom in on shapes and surfaces.`,
   introduction: `${extension.toUpperCase()}: ${en}. Models open in a local, interactive WebGL viewport.`,

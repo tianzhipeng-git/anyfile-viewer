@@ -1,4 +1,4 @@
-import { inspectMobi } from "./probe";
+import { inspectMobi, MOBI_LIMITS } from "./probe";
 interface MobiModule {
   HEAPU8: Uint8Array; UTF8ToString(pointer: number): string;
   _malloc(size: number): number; _free(pointer: number): void;
@@ -27,7 +27,7 @@ async function open(file: File, runtime: string) {
     for (let i = 0; i < mod._part_count(); i++) {
       const filename = mod.UTF8ToString(mod._part_name(i)), type = mod.UTF8ToString(mod._part_type(i)), size = mod._part_size(i);
       total += size;
-      if (total > 64 * 1024 ** 2) fail("resource-limit");
+      if (total > MOBI_LIMITS.output) fail("resource-limit");
       stored.set(filename, mod.HEAPU8.slice(mod._part_data(i), mod._part_data(i) + size));
       entries.push({ filename, type, uncompressedSize: size, directory: false });
     }

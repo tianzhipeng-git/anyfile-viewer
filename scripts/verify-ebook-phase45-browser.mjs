@@ -119,7 +119,7 @@ try {
     await open('kf8.azw3','.anyfile-mobi-reader');await textReady('Chapter 1');assert.ok(await page.getByLabel('字号',{exact:true}).count());await clear();
   });
   await check('Runtime response headers and byte sizes',async()=>{
-    for(const path of ['/vendor/libmobi/0.12-anyfile.1/mobi.wasm','/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.wasm']) {
+    for(const path of ['/vendor/libmobi/0.12-anyfile.2/mobi.wasm','/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.wasm']) {
       const response=await page.request.get(base+path);assert.equal(response.status(),200);assert.match(response.headers()['content-type'],/application\/wasm/);assert.match(response.headers()['cache-control'],/immutable/);
     }
   });

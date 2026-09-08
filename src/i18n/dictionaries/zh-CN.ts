@@ -14,8 +14,7 @@ const dictionary = {
     about: "关于", privacy: "隐私政策", contact: "联系", resources: "Anyfile", email: "邮箱", sourceCode: "开源地址",
   },
   nav: {
-    imagesVideo: "图片与音视频", documents: "文档", codeData: "数据",
-    developerArtifacts: "开发者", panorama360: "360° 全景", threeD: "3D", design: "设计",
+    media: "图片与媒体", reading: "文档与阅读", designEngineering: "设计与工程", dataDevelopment: "数据与开发",
   },
   home: {
     localFirst: "免费在线文件查看器", title: "在线打开文件，无需上传。",
@@ -30,8 +29,6 @@ const dictionary = {
     ],
     formatsEyebrow: "支持的格式", formatsTitle: "找到你要打开的格式。",
     formatsDescription: "从浏览器原生支持到专用查看器插件，统一在清晰的类别中。", browseCount: "浏览 {count} 种格式",
-    panoramaEyebrow: "相机原始素材", panoramaTitle: "剪辑之前，直接打开全景相机原片。",
-    panoramaDescription: "在本地预览受支持的 Insta360、GoPro MAX 与 DJI Osmo 360 原片，无需先导出平面视频，也无需上传大型素材。",
     openSourceEyebrow: "开源项目", openSourceTitle: "不仅查看文件，也可以检查查看器本身。",
     openSourceDescription: "Anyfile 完全开源。你可以审查本地文件如何被处理、验证隐私设计，也可以帮助项目支持更多少见格式。",
     openSourceCta: "在 GitHub 查看源码",

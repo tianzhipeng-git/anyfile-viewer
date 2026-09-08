@@ -1,5 +1,5 @@
 import { ViewerError, type ProbeViewerContext } from "@anyfile/viewer-protocol";
-export const MOBI_LIMITS = { file: 64 * 1024 ** 2, text: 32 * 1024 ** 2, records: 10000, record: 16 * 1024 ** 2 };
+export const MOBI_LIMITS = { file: 256 * 1024 ** 2, output: 256 * 1024 ** 2, text: 32 * 1024 ** 2, records: 10000, record: 16 * 1024 ** 2 };
 export async function inspectMobi(file: File, signal: AbortSignal, full = false) {
   signal.throwIfAborted();
   const head = new Uint8Array(await file.slice(0, 86).arrayBuffer());

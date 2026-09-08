@@ -1,6 +1,6 @@
 import { defineFormat } from "./define-format";
 
-export const pxdFormat = defineFormat("pxd", "images-video", 2,
+export const pxdFormat = defineFormat("pxd", "graphic-design", 2,
   {
     name: "Pixelmator Pro document",
     title: "Open Pixelmator Pro PXD Files Online",

@@ -64,8 +64,18 @@ export async function prepareChapter(
     let blob: Blob;
     if (item.type === "image/svg+xml") {
       const svg = parseXml(bytes);
-      const svgWidth = Number(svg.documentElement.getAttribute("width") ?? 300),
-        svgHeight = Number(svg.documentElement.getAttribute("height") ?? 150);
+      const root = svg.documentElement;
+      const viewBox = root.getAttribute("viewBox")?.trim().split(/[\s,]+/).map(Number);
+      if (viewBox && (viewBox.length !== 4 || !viewBox.every(Number.isFinite) || viewBox[2] <= 0 || viewBox[3] <= 0))
+        throw new ViewerError("invalid-file", "Invalid SVG viewBox.");
+      const dimension = (name: string, fallback: number) => {
+        const value = root.getAttribute(name)?.trim();
+        // Percentage lengths have no intrinsic size; use the viewBox for the bounded image viewport.
+        if (value && /^(?:\d+(?:\.\d*)?|\.\d+)%$/.test(value) && parseFloat(value) > 0) return fallback;
+        return Number(value ?? fallback);
+      };
+      const svgWidth = dimension("width", viewBox?.[2] ?? 300),
+        svgHeight = dimension("height", viewBox?.[3] ?? 150);
       if (!Number.isFinite(svgWidth * svgHeight) || svgWidth <= 0 || svgHeight <= 0)
         throw new ViewerError("invalid-file", "Invalid SVG dimensions.");
       pixels += svgWidth * svgHeight;
@@ -96,6 +106,8 @@ export async function prepareChapter(
       }
       if (svg.documentElement.localName !== "svg")
         throw new ViewerError("invalid-file", "Invalid SVG image.");
+      root.setAttribute("width", String(svgWidth));
+      root.setAttribute("height", String(svgHeight));
       blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: item.type });
     } else {
       if (!font) {

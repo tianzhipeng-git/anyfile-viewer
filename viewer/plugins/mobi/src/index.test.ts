@@ -14,6 +14,17 @@ describe("MOBI routing and safe chapters", () => {
     expect(await probeMobi({ file: input, signal: signal() })).toBe(3);
     expect(await inspectMobi(input, signal(), true)).not.toBeNull();
   });
+  it.each([128, 256])("recognizes a %i MiB book without reading the whole file", async size => {
+    const input = file("kf8.azw3");
+    Object.defineProperty(input, "size", { value: size * 1024 ** 2 });
+    vi.spyOn(input, "arrayBuffer").mockRejectedValue(new Error("Whole file read"));
+    expect(await probeMobi({ file: input, signal: signal() })).toBe(3);
+  });
+  it("rejects input above 256 MiB before decoding", async () => {
+    const input = file("kf8.azw3");
+    Object.defineProperty(input, "size", { value: 256 * 1024 ** 2 + 1 });
+    await expect(inspectMobi(input, signal())).rejects.toMatchObject({ code: "resource-limit" });
+  });
   it("rejects an extreme record-count header during routing", async () => {
     expect(await probeMobi({ file: file("records.mobi"), signal: signal() })).toBe(0);
   });
@@ -48,6 +59,29 @@ describe("MOBI routing and safe chapters", () => {
     item.type = "text/plain"; text = '<script>literal PalmDOC</script>';
     const plain = await prepareChapter(source, book, path, signal());
     expect(plain.html).toContain("&lt;script&gt;literal PalmDOC&lt;/script&gt;"); plain.dispose();
+  });
+  it.each([
+    ['width="100%" height="100%" viewBox="0 0 1600 1939"', null],
+    ['width="100%" height="100%" viewBox="0 0 100000 100000"', "resource-limit"],
+    ['width="100%" height="100%" viewBox="0 0 -1 1939"', "invalid-file"],
+    ['width="invalid" height="100%" viewBox="0 0 1600 1939"', "invalid-file"],
+  ])("handles SVG image dimensions: %s", async (dimensions, error) => {
+    const path = "part00000.html", svg = "flow00001.svg";
+    const item = { id: path, path, type: "text/html", properties: [] };
+    const image = { id: svg, path: svg, type: "image/svg+xml", properties: [] };
+    const book: Publication = { title: "", author: "", direction: "ltr", items: new Map([[path, item], [svg, image]]), spine: [item], toc: [] };
+    const source = { entries: new Map(), read: async (name: string) => new TextEncoder().encode(name === path
+      ? '<html><body><img src="flow00001.svg"/></body></html>'
+      : `<svg xmlns="http://www.w3.org/2000/svg" ${dimensions}><rect width="10" height="10"/></svg>`), dispose: async () => {} };
+    source.entries.set(svg, image);
+    const create = vi.spyOn(URL, "createObjectURL");
+    if (error) await expect(prepareChapter(source, book, path, signal())).rejects.toMatchObject({ code: error });
+    else {
+      const chapter = await prepareChapter(source, book, path, signal());
+      expect(await (create.mock.calls[0][0] as Blob).text()).toContain('width="1600" height="1939"');
+      expect(chapter.html).toContain("blob:");
+      chapter.dispose();
+    }
   });
   it("bounds legacy HTML nodes and depth before reconstruction", async () => {
     const path = "part00000.html", item = { id: path, path, type: "text/html", properties: [] };

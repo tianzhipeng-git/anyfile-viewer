@@ -6,13 +6,12 @@ export type AppDictionary = {
     learnAndOpen: string; browseFormats: string; directOpen: string; language: string;
     about: string; privacy: string; contact: string; resources: string; email: string; sourceCode: string;
   };
-  nav: { imagesVideo: string; documents: string; codeData: string; developerArtifacts: string; panorama360: string; threeD: string; design: string };
+  nav: { media: string; reading: string; designEngineering: string; dataDevelopment: string };
   home: {
     localFirst: string; title: string; description: string; selectFile: string; browse: string; trust: string;
     privacyEyebrow: string; privacyTitle: string; privacyDescription: string;
     principles: readonly { title: string; description: string }[];
     formatsEyebrow: string; formatsTitle: string; formatsDescription: string; browseCount: string;
-    panoramaEyebrow: string; panoramaTitle: string; panoramaDescription: string;
     openSourceEyebrow: string; openSourceTitle: string; openSourceDescription: string; openSourceCta: string;
     openSourcePrinciples: readonly { title: string; description: string }[];
   };

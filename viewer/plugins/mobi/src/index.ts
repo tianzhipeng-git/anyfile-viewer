@@ -28,7 +28,7 @@ export const mobiViewer: FileViewerPlugin = {
       if (typeof Worker === "undefined" || typeof WebAssembly === "undefined" || typeof ResizeObserver === "undefined") throw new ViewerError("unsupported-environment", copy.environment);
       context.reportProgress({ stage: "parsing", message: copy.loading });
       worker = createBookWorker(new Worker(new URL("./decoder.worker.ts", import.meta.url), { type: "module" }), lifetime.signal);
-      const result = await worker.request<MobiResult>({ type: "open", file: context.file, runtime: new URL("/vendor/libmobi/0.12-anyfile.1/mobi.js", location.origin).href });
+      const result = await worker.request<MobiResult>({ type: "open", file: context.file, runtime: new URL("/vendor/libmobi/0.12-anyfile.2/mobi.js", location.origin).href });
       const source = {
         entries: new Map(result.entries.map(entry => [entry.filename, entry])),
         read(path: string, limit: number, signal = lifetime.signal) { return worker!.request<Uint8Array>({ type: "read", path, limit }, signal); },

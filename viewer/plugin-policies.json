@@ -520,16 +520,16 @@
       "runtimeSets": [
         {
           "id": "libmobi",
-          "version": "0.12-anyfile.1",
+          "version": "0.12-anyfile.2",
           "assetPatterns": [
-            "public/vendor/libmobi/0.12-anyfile.1/**"
+            "public/vendor/libmobi/0.12-anyfile.2/**"
           ],
           "coldStartGroups": [
             {
               "id": "decode",
               "assetPatterns": [
-                "public/vendor/libmobi/0.12-anyfile.1/mobi.js",
-                "public/vendor/libmobi/0.12-anyfile.1/mobi.wasm"
+                "public/vendor/libmobi/0.12-anyfile.2/mobi.js",
+                "public/vendor/libmobi/0.12-anyfile.2/mobi.wasm"
               ]
             }
           ],
@@ -540,7 +540,7 @@
             "viewer/plugins/mobi/src/index.ts"
           ],
           "requiredMarkers": [
-            "/vendor/libmobi/0.12-anyfile.1/mobi.js"
+            "/vendor/libmobi/0.12-anyfile.2/mobi.js"
           ]
         }
       ]

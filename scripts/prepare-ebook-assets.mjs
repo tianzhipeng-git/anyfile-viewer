@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { cp, mkdir, readFile, rm } from "node:fs/promises";
 import { resolve } from "node:path";
-for (const [dependency, version] of [["libmobi", "0.12-anyfile.1"], ["comic-archive", "3.8.9-anyfile.1"]]) {
+for (const [dependency, version] of [["libmobi", "0.12-anyfile.2"], ["comic-archive", "3.8.9-anyfile.1"]]) {
   const source = resolve("third_party", dependency, version), target = resolve("public/vendor", dependency, version);
   const info = JSON.parse(await readFile(`${source}/build-info.json`, "utf8"));
   if (info.artifactVersion !== version) throw new Error("Ebook artifact version mismatch");

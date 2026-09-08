@@ -1,12 +1,9 @@
-import { ArrowRightIcon, CameraIcon, Code2Icon, FolderOpenIcon, GitForkIcon, LockKeyholeIcon, ScaleIcon, ZapIcon } from "lucide-react";
-import Link from "next/link";
+import { ArrowRightIcon, Code2Icon, FolderOpenIcon, GitForkIcon, LockKeyholeIcon, ScaleIcon, ZapIcon } from "lucide-react";
 
 import { CategoryCard } from "@/components/category-card";
 import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
 import { JsonLd } from "@/components/json-ld";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getPanoramaViewers } from "@/content";
 import { isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
 import { getCategories } from "@/lib/catalog";
@@ -19,7 +16,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   if (!isPublishedLocale(candidate)) return null;
   const dictionary = await getDictionary(candidate);
   const categories = getCategories(candidate);
-  const panoramaViewers = getPanoramaViewers(candidate);
   const pageUrl = new URL(localePath(candidate), siteUrl()).toString();
 
   return (
@@ -77,16 +73,6 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
           </div>
           <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {categories.map((category) => <CategoryCard key={category.slug} category={category} locale={candidate} browseLabel={dictionary.home.browseCount} />)}
-          </div>
-          <div className="mt-4 flex flex-col gap-8 border-t pt-10">
-            <div className="flex max-w-3xl flex-col gap-3">
-              <p className="text-sm font-semibold text-primary">{dictionary.home.panoramaEyebrow}</p>
-              <h2 className="display-title text-4xl sm:text-5xl">{dictionary.home.panoramaTitle}</h2>
-              <p className="text-lg leading-7 text-muted-foreground">{dictionary.home.panoramaDescription}</p>
-            </div>
-            <div className="grid gap-5 lg:grid-cols-3">
-              {panoramaViewers.map((viewer) => <Card key={viewer.viewerId}><CardHeader><CameraIcon className="mb-3 size-7 text-primary" aria-hidden="true" /><CardTitle>{viewer.name}</CardTitle><CardDescription className="leading-6">{viewer.description}</CardDescription><div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">{viewer.formatExtensions.map((extension) => <span key={extension}>.{extension}</span>)}</div></CardHeader><CardFooter><Link className="inline-flex items-center gap-2 font-semibold text-primary" href={localePath(candidate, `/viewers/${viewer.viewerId}`)}>{candidate === "zh-CN" ? "查看相机支持" : "Explore camera support"}<ArrowRightIcon className="size-4" /></Link></CardFooter></Card>)}
-            </div>
           </div>
         </div>
       </section>

@@ -1,5 +1,5 @@
 import { defineFormat } from "./define-format";
-export const pointFormats = ["pcd", "xyz", "las", "laz"].map(extension => defineFormat(extension, "engineering", 2, {
+export const pointFormats = ["pcd", "xyz", "las", "laz"].map(extension => defineFormat(extension, "3d-models", 2, {
   name: extension.toUpperCase(), title: `Preview ${extension.toUpperCase()} Point Clouds Online`, description: `Explore a sampled preview of your ${extension.toUpperCase()} point cloud with rotation and zoom.`,
   introduction: `${extension.toUpperCase()} Point records are streamed into a bounded local preview. Points appear progressively during decoding; LAZ first loads the compressed input.`,
   canShow: ["Progressive point sampling", "Orbit, standard views and zoom"], limitations: [extension === "laz" ? "200,000 sampled points; 64 MiB compressed input" : "200,000 sampled points; 2 GiB input", "Point attributes and binary PCD are not shown"],

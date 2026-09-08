@@ -1,6 +1,6 @@
 import { defineFormat } from "./define-format";
 
-export const psdFormat = defineFormat("psd", "images-video", 3,
+export const psdFormat = defineFormat("psd", "graphic-design", 3,
   { name: "Photoshop document", title: "Open PSD Files Online", description: "Preview the combined image and document details in a PSD file without Photoshop.", introduction: "PSD stores a Photoshop composition together with layers and editing metadata. Anyfile validates the document, decodes its saved composite image in a Worker and presents it in a zoomable canvas.", canShow: ["Saved composite artwork", "Canvas size, color mode and bit depth", "Total and visible layer counts"], limitations: ["Layers cannot be toggled or edited", "Some uncommon color modes and Photoshop features may not decode", "Files over 256 MiB or composites over 64 Mi pixels are rejected"], faq: [{ question: "Can Anyfile edit individual PSD layers?", answer: "No. The viewer displays the saved composite and layer counts but does not edit or recompose layers." }] },
   { name: "Photoshop 文档", title: "在线打开 PSD 文件", description: "无需 Photoshop，即可预览 PSD 中的合成图片并查看文档信息。", introduction: "PSD 保存 Photoshop 合成画面、图层和编辑元数据。Anyfile 会校验文档，在 Worker 中解码已保存的合成图，并通过可缩放画布展示。", canShow: ["已保存的合成图稿", "画布尺寸、颜色模式与位深", "图层总数与可见图层数"], limitations: ["不能切换或编辑图层", "部分少见颜色模式和 Photoshop 功能可能无法解码", "超过 256 MiB 的文件或超过约 6700 万像素的合成图会被拒绝"], faq: [{ question: "Anyfile 可以编辑 PSD 的单独图层吗？", answer: "不可以。查看器展示已保存的合成图和图层数量，但不会编辑或重新合成图层。" }] },
   { verification: "pending" });

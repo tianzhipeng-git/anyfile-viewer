@@ -24,11 +24,12 @@
 | `@anyfile/browser-image-viewer` | 复用浏览器图片识别与解码 |
 | `@anyfile/rendering-publication` | 电子书章节排版、内容清理与导航 |
 
-额外按需加载 `/vendor/libmobi/0.12-anyfile.1/mobi.js` 及其 WASM；部署需包含对应审核资产和许可证。
+额外按需加载 `/vendor/libmobi/0.12-anyfile.2/mobi.js` 及其 WASM；部署需包含对应审核资产和许可证。
 
 ## 已知限制
 
-- 输入最多 64 MiB，声明文本最多 32 MiB，最多 10,000 记录，单记录最多 16 MiB。
+- 输入及重建输出最多 256 MiB，声明文本最多 32 MiB，最多 10,000 记录，单记录最多 16 MiB。
+- WASM 初始内存 16 MiB，可增长到 1 GiB；实际可打开大小仍取决于设备内存及解码展开量。
 - 不支持 DRM、词典或 Print Replica；`.pdb`、`.prc` 仅接受符合书籍结构的内容。
 - 要求 Worker、WebAssembly 和 ResizeObserver；不能将旧版 Kindle 排版等同于现代浏览器的完全还原。
 

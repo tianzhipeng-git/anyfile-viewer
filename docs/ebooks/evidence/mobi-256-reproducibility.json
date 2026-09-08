@@ -1,0 +1,12 @@
+{
+  "mobi.js": {
+    "sha256": "a7846cc4720dcb6c74304f144c1a07f1c628bf2863e6e6980da0490f7a297b88",
+    "bytes": 10882,
+    "reproducible": true
+  },
+  "mobi.wasm": {
+    "sha256": "4ae4e53176f8088419cfb8ef578d352209ce593828ddc0838382cdcd1b27226e",
+    "bytes": 103837,
+    "reproducible": true
+  }
+}

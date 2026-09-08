@@ -1,4 +1,4 @@
-import { ViewerError, type Locale } from "@anyfile/viewer-protocol";
+import { ViewerError, selectMessages, type Locale } from "@anyfile/viewer-protocol";
 import { initializeFfmpeg, type FfmpegClient, type DecodedFrame, type MediaInfo } from "@anyfile/ffmpeg-playback/client";
 import type { PanoramaRenderer } from "./panorama-renderer";
 import type { PanoramaProjectionProfile } from "./projection";
@@ -8,13 +8,13 @@ import { formatTime, type Insta360ViewerElements } from "./ui";
 const BUFFER_SECONDS = 0.5;
 const PREFETCH_SECONDS = 0.7;
 const PREVIEW_SECONDS = 0.1;
-const copyFor = (locale: Locale) => locale === "zh-CN" ? {
+const copyFor = (locale: Locale) => selectMessages(locale, { "zh-CN": {
   play: "播放", pause: "暂停", replay: "重播", buffering: "正在缓冲全景视频…", failed: "全景视频播放失败。", limit: "当前设备无法在资源限制内解码此全景视频。",
   software: "FFmpeg 软件解码 · 每路 1920×1920 预览；播放速度取决于设备性能。",
-} : {
+}, en: {
   play: "Play", pause: "Pause", replay: "Replay", buffering: "Buffering panorama…", failed: "Panorama playback failed.", limit: "This device cannot decode the panorama within the resource limits.",
   software: "FFmpeg software decoding · 1920×1920 per lens; playback speed depends on your device.",
-};
+} });
 
 export class FfmpegPanoramaPlayback {
   #queue: PanoramaFrameQueue;

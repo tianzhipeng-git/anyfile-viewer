@@ -15,7 +15,7 @@
 | CBZ 归档检查 | `archive-metadata-viewer` | 列出图片条目和压缩信息，手动备选 | 2 | implemented | 不提供漫画阅读 |
 | TXT / HTML / Markdown | `ace-code-text` | 代码/文本查看 | 按该插件现状 | implemented | 不提供电子书目录、排版、资源解析或章节导航 |
 | FB2 / FB2 ZIP / 无加密 | `fictionbook-reader` | 正文、嵌套目录、脚注返回、诗歌、表格、封面与图片 | 4 | verified | UTF-8、UTF-16 LE/BE、Windows-1251；32 MiB XML；仅一个主 FB2 |
-| PalmDOC / MOBI7 / KF8 / 联合 MOBI / 无 DRM | `mobi-reader` | 正文、metadata、NCX 目录、常见图片、共享排版与安全视口 | 3 | verified（下述固定组合） | 64 MiB 文件、32 MiB text、单 part 2 MiB；复杂样式/固定布局不完整 |
+| PalmDOC / MOBI7 / KF8 / 联合 MOBI / 无 DRM | `mobi-reader` | 正文、metadata、NCX 目录、常见图片、共享排版与安全视口 | 3 | verified（下述固定组合） | 256 MiB 文件及重建输出、32 MiB text、单 part 2 MiB；复杂样式/固定布局不完整 |
 | CBT / 普通 USTAR | `comic-book-reader` | 与 CBZ 共用页序、ComicInfo 和页面 UI，切片读取 | 4 | verified（下述固定组合） | 不支持 PAX/GNU 扩展、稀疏、链接、加密或分卷 |
 | CBR / RAR4、RAR5；CB7 / 7z Copy、LZMA、LZMA2 | `comic-book-reader` | Worker 顺序解压一次，按需解码/显示图片 | 4 | verified（下述固定组合） | 64 MiB 输入、128 MiB 总展开；无加密/分卷；RAR4 压缩变体尚待专门漫画证据 |
 | DjVu / CHM | 无专用插件 | 可能仅剩通用十六进制或无候选 | 0–1 | not implemented | 不能宣传为电子书阅读支持 |

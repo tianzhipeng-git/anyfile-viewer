@@ -29,16 +29,17 @@ function video(): DecodedFrame {
   return { kind: "video", lens: 0, timestamp: 0, duration: 1 / 30, width: 1920, height: 1920,
     data: new ArrayBuffer(1920 * 1920 * 1.5), sampleRate: 0, channels: 0, samples: 0 };
 }
-it("opens real paired outputs silently and releases temporary VideoFrames", async () => {
+it.each([["en", "Play", "software decoding"], ["zh-CN", "播放", "软件解码"], ["fr", "Play", "software decoding"]] as const)("opens paired outputs with %s controls and releases temporary VideoFrames", async (locale, play, software) => {
   const frames: DecodedFrame[] = [], frame = video();
   for (let i = 0; i < 4; i++) frames.push({ ...frame, timestamp: i / 30 }, { ...frame, lens: 1, timestamp: i / 30 }, {
     ...frame, kind: "audio", timestamp: i / 30, sampleRate: 48000, channels: 2, samples: 1600, data: new ArrayBuffer(12800),
   });
   mocks.next.mockImplementation(async () => frames.shift() ?? { kind: "eof" });
   const renderer = { setDualFrames: vi.fn() }, ui = elements();
-  const session = await FfmpegPanoramaPlayback.open(new File([], "clip.insv"), renderer as unknown as PanoramaRenderer, X4_INSV_PROJECTION, ui, "en", new AbortController().signal);
+  const session = await FfmpegPanoramaPlayback.open(new File([], "clip.insv"), renderer as unknown as PanoramaRenderer, X4_INSV_PROJECTION, ui, locale, new AbortController().signal);
   expect(renderer.setDualFrames).toHaveBeenCalledOnce(); expect(mocks.closeFrame).toHaveBeenCalledTimes(2);
-  expect(mocks.audio).not.toHaveBeenCalled(); expect(ui.status.textContent).toContain("FFmpeg");
+  expect(mocks.audio).not.toHaveBeenCalled(); expect(ui.status.textContent).toContain(software);
+  expect(ui.play?.getAttribute("aria-label")).toBe(play);
   await session.dispose(); await session.dispose(); expect(mocks.dispose).toHaveBeenCalledOnce();
 });
 it("ignores a first-frame result delivered after opening was aborted", async () => {
