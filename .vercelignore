@@ -1,0 +1,13 @@
+# Local tooling and generated assets; pnpm build recreates public assets.
+.agents/
+.env*
+.dev.vars*
+**/.wrangler/
+**/__pycache__/
+**/*.tsbuildinfo
+docs/tasks/
+public/vendor/
+public/source/
+services/feedback/dist/
+services/feedback/worker-configuration.d.ts
+third_party/libredwg/**/*.log

@@ -79,8 +79,15 @@ const pages: Record<SiteInfoSlug, SiteInfoPage> = {
       {
         title: text("Questions and changes", "问题与变更"),
         paragraphs: [text(
-          "Anyfile does not provide user accounts or build profiles from the files you view. For privacy questions, contact support@anyfile.top. Material changes to this policy will be published on this page. Effective September 2, 2026.",
-          "Anyfile 不提供用户账户，也不会根据你查看的文件建立用户画像。如有隐私问题，请联系 support@anyfile.top。本政策如有重要变更，将在此页面发布。生效日期：2026 年 9 月 2 日。",
+          "Anyfile does not provide user accounts or build profiles from the files you view. For privacy questions, contact support@anyfile.top. Material changes to this policy will be published on this page. Effective September 9, 2026.",
+          "Anyfile 不提供用户账户，也不会根据你查看的文件建立用户画像。如有隐私问题，请联系 support@anyfile.top。本政策如有重要变更，将在此页面发布。生效日期：2026 年 9 月 9 日。",
+        )],
+      },
+      {
+        title: text("Feedback", "用户反馈"),
+        paragraphs: [text(
+          "When you submit feedback, your description, selected category, optional email and file format, and interface language are sent to our feedback service on Cloudflare Workers and stored in D1 for handling your request. The form does not read your files or send file names, file contents or the page URL. Your IP address is used for temporary rate limiting and is not stored in the feedback table. Feedback drafts stay in memory in the current page and are cleared when it is reloaded or closed. Contact support@anyfile.top with your feedback reference to request deletion.",
+          "提交反馈时，你填写的描述、所选类型、可选邮箱和文件格式以及界面语言会发送至 Cloudflare Workers 上的反馈服务，并保存在 D1 中用于处理反馈。表单不会读取你的文件，也不发送文件名、文件内容或当前页面网址。IP 地址用于临时限流，不保存在反馈表中。反馈草稿仅保存在当前页面内存中，刷新或关闭页面后清除。如需删除反馈，请携带反馈编号联系 support@anyfile.top。",
         )],
       },
     ],
@@ -93,6 +100,13 @@ const pages: Record<SiteInfoSlug, SiteInfoPage> = {
       "获取帮助、报告问题，或建议支持新的文件格式。",
     ),
     sections: [
+      {
+        title: text("Send feedback", "提交反馈"),
+        paragraphs: [text(
+          "Use the Feedback button in the top navigation on any page to report a problem or suggest a format. You can submit without an account; leave an email only if you would like a reply.",
+          "点击任意页面顶部导航中的“反馈”按钮，即可报告问题或建议支持新的格式，无需登录；希望收到回复时再填写邮箱。",
+        )],
+      },
       {
         title: text("Email support", "邮件支持"),
         paragraphs: [text(

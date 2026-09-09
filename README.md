@@ -18,6 +18,8 @@ pnpm dev
 
 打开 [http://localhost:3000](http://localhost:3000)。
 
+全站反馈弹窗使用独立的 Cloudflare Worker + D1 服务，通过固定项目 key 区分反馈。配置 `NEXT_PUBLIC_FEEDBACK_ENDPOINT` 后启用提交；本地联调、部署与其他项目接入见[反馈服务说明](services/feedback/README.md)。
+
 ## 页面
 
 - `/`：首页与格式类别入口

@@ -2,6 +2,7 @@ import { ArrowUpRightIcon } from "lucide-react";
 
 import { getCategory } from "@/content";
 import { SiteNavigation } from "@/components/site-navigation";
+import { FeedbackTrigger } from "@/components/feedback/feedback-provider";
 
 import { BrandMark } from "@/components/brand-mark";
 import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
@@ -32,6 +33,7 @@ export function SiteHeader({ locale, dictionary }: { locale: PublishedLocale; di
           <SiteNavigation groups={groups} label={dictionary.common.mainNavigation} categoriesLabel={dictionary.common.categories} />
         </div>
         <div className="flex items-center gap-2">
+          <FeedbackTrigger variant="ghost" />
           <LanguageSwitcher locale={locale} label={dictionary.common.language} />
           <Button nativeButton={false} size="sm" render={<IsolationBoundaryLink href={localePath(locale, "/view")} />}>
             {dictionary.common.openFile}

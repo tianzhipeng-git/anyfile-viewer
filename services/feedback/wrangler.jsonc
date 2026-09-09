@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "shared-feedback",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-09",
+  "compatibility_flags": ["nodejs_compat"],
+  "observability": { "enabled": true, "head_sampling_rate": 0.1 },
+  "d1_databases": [
+    { "binding": "DB", "database_name": "feedback", "database_id": "fbf7ce36-90f4-45e4-b704-3b9826565130", "migrations_dir": "migrations" }
+  ],
+  "ratelimits": [
+    { "name": "SOURCE_LIMIT", "namespace_id": "900901", "simple": { "limit": 5, "period": 60 } },
+    { "name": "PROJECT_LIMIT", "namespace_id": "900902", "simple": { "limit": 100, "period": 60 } }
+  ]
+}

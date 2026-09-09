@@ -1,4 +1,5 @@
 packages:
+  - services/feedback
   - viewer/ffmpeg-playback
   - viewer/dev-binary-core
   - viewer/i18n

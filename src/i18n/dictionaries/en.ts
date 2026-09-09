@@ -1,6 +1,17 @@
 import type { AppDictionary } from "../types";
 
 const dictionary = {
+  feedback: {
+    trigger: "Feedback", title: "Send feedback", description: "Report a problem or suggest a file format. No account needed.", close: "Close",
+    category: "Type", bug: "Something is not working", feature: "Format or feature request", other: "Other feedback",
+    message: "Description", messagePlaceholder: "What happened, and what did you expect? Please avoid confidential information.",
+    featurePlaceholder: "Which format or feature would you like us to support?",
+    format: "File format (optional)", email: "Email (optional)", emailHelp: "Leave your email if you would like a reply.",
+    privacy: "We send only what you enter and the interface language. Your open files, file names and browsing URL are not sent.",
+    submit: "Send feedback", sending: "Sending…", success: "Thank you. Your feedback has been received.", receipt: "Reference", another: "Send another",
+    invalid: "Please check your description and email.", rateLimited: "Too many attempts. Please wait a minute and try again.",
+    failed: "Unable to send. Your text is saved in this page; try again or email us.", unavailable: "Feedback is not connected in this environment. Please email us:",
+  },
   metadata: {
     siteTitle: "Free Online File Viewer — No Upload",
     siteDescription: "Open documents, images, media, code and data with a fast, private online file viewer. Free to use, with no uploads or desktop software.",

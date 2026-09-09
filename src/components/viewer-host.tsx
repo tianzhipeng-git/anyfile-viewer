@@ -19,6 +19,7 @@ import {
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/empty";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
+import { FeedbackTrigger } from "@/components/feedback/feedback-provider";
 import { viewerRegistrations } from "@/lib/viewer-registrations";
 import type { AppDictionary } from "@/i18n/types";
 
@@ -298,6 +299,7 @@ export function ViewerHost({
                   {visibleMessage || (file ? interpolate(dictionary.noPlugin, { extension: file.name.split(".").pop()?.toLowerCase() || "unknown" }) : dictionary.selectDescription)}
                 </EmptyDescription>
               </EmptyHeader>
+              {file && visibleStatus === "error" && <FeedbackTrigger />}
             </Empty>
           </div>
         )}
