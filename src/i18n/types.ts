@@ -1,4 +1,12 @@
 export type AppDictionary = {
+  feedback: {
+    trigger: string; title: string; description: string; close: string;
+    category: string; bug: string; feature: string; other: string;
+    message: string; messagePlaceholder: string; featurePlaceholder: string;
+    format: string; email: string; emailHelp: string; privacy: string;
+    submit: string; sending: string; success: string; receipt: string; another: string;
+    invalid: string; rateLimited: string; failed: string; unavailable: string;
+  };
   metadata: { siteTitle: string; siteDescription: string; viewerTitle: string; viewerDescription: string };
   common: {
     home: string; mainNavigation: string; openFile: string; openFolder: string; categories: string;

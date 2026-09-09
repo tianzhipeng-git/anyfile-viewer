@@ -31,6 +31,9 @@ const eslintConfig = defineConfig([
     "third_party/libredwg/**",
     "public/vendor/libredwg/**",
     "next-env.d.ts",
+    "services/feedback/dist/**",
+    "services/feedback/worker-configuration.d.ts",
+    "**/.wrangler/**",
   ]),
 ]);
 

@@ -1,6 +1,17 @@
 import type { AppDictionary } from "../types";
 
 const dictionary = {
+  feedback: {
+    trigger: "反馈", title: "提交反馈", description: "报告问题或建议支持新的文件格式，无需登录。", close: "关闭",
+    category: "反馈类型", bug: "功能或显示异常", feature: "格式或功能建议", other: "其他反馈",
+    message: "具体描述", messagePlaceholder: "发生了什么？你期望看到什么？请勿填写机密信息。",
+    featurePlaceholder: "希望支持哪种文件格式或功能？",
+    format: "文件格式（选填）", email: "邮箱（选填）", emailHelp: "希望收到回复时，请留下邮箱。",
+    privacy: "仅发送你填写的信息和界面语言，不发送已打开的文件、文件名或浏览页面的网址。",
+    submit: "提交反馈", sending: "提交中…", success: "感谢反馈，我们已收到。", receipt: "反馈编号", another: "再提交一条",
+    invalid: "请检查描述和邮箱是否填写正确。", rateLimited: "提交过于频繁，请等待一分钟后重试。",
+    failed: "暂时无法提交，输入已保留在本页面中，请重试或联系我们的邮箱。", unavailable: "当前环境尚未连接反馈服务，请通过邮箱联系：",
+  },
   metadata: {
     siteTitle: "免费在线文件查看器 — 无需上传", siteDescription: "免费的在线文件查看器：快速、私密地打开文档、图片、音视频、代码与数据文件，无需上传、注册账户或安装软件。",
     viewerTitle: "免费在线文件查看器 — 无需上传", viewerDescription: "使用快速、私密的在线查看器打开受支持文件。完全免费，文件留在当前设备，无需上传。",
