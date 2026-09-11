@@ -121,6 +121,23 @@ describe("published SEO content", () => {
     }
   });
 
+  it("consolidates equivalent format guides while retaining old routes and local file support", () => {
+    for (const [alias, canonical] of [["stp", "step"], ["igs", "iges"], ["prc", "mobi"]]) {
+      expect(publishedFormatRoutes).toContain(alias);
+      expect(publishedFormats.some(({ extension }) => extension === alias)).toBe(false);
+      for (const locale of PUBLISHED_LOCALES) {
+        const format = getFormat(alias, locale)!;
+        expect(format.extension).toBe(canonical);
+        expect(format.pluginIds).toEqual(manifestsForExtension(alias).map(({ id }) => id));
+        expect(getCategory(format.categoryId, locale)!.extensions).not.toContain(alias);
+        for (const id of format.pluginIds) {
+          expect(getPlugin(id, locale)!.formats.some((item) => item.extension === alias)).toBe(false);
+          expect(getPlugin(id, locale)!.formats.some((item) => item.extension === canonical)).toBe(true);
+        }
+      }
+    }
+  });
+
   it("keeps the SEO Manifest inventory free of registrations and plugin implementations", () => {
     const source = readFileSync(join(process.cwd(), "src/content/manifests.ts"), "utf8");
     expect(source).not.toContain("viewer-registrations");
