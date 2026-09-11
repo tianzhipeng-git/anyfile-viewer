@@ -96,7 +96,7 @@ export const comicArchiveFormats = [
     description: "Read supported RAR4 or RAR5 CBR comics in single-page, spread or continuous mode.",
     introduction: "CBR stores comic pages inside a RAR archive. Anyfile decodes supported RAR4/RAR5 entries locally, then orders recognized page images for reading. Unlike CBZ's ZIP path, compressed RAR comics are extracted once within a fixed budget before page navigation begins.",
     canShow: ["JPEG, PNG, GIF, WebP and static AVIF pages from supported RAR archives", "Natural filename ordering and available ComicInfo cover or spread hints", "Single pages, two-page spreads, right-to-left reading and zoom"],
-    limitations: ["Encrypted or multipart RAR comics cannot be read; unsupported compression variants may fail", "64 MiB compressed input and 128 MiB cumulative extraction", "Up to 5,000 pages, 16 MiB encoded bytes and 8 million pixels per image"],
+    limitations: ["Encrypted or multipart RAR comics cannot be read; unsupported compression variants may fail", "128 MiB compressed input and 128 MiB cumulative extraction", "Up to 5,000 pages, 16 MiB encoded bytes and 8 million pixels per image"],
     faq: [
       { question: "Why does a CBR pause before showing its first page?", answer: "RAR content must be decoded before the reader can jump between extracted images. This initial step is separate from image decoding, which remains limited to visible pages and their neighbors." },
       { question: "Can I rename CBR to CBZ to make it open?", answer: "No. Changing the suffix does not turn a RAR archive into ZIP. A real conversion requires extracting the page images and creating a new archive in a separate archive tool." },
@@ -106,7 +106,7 @@ export const comicArchiveFormats = [
     description: "打开受支持的 RAR4 或 RAR5 漫画归档，以单页、双页或连续模式阅读图片页。",
     introduction: "CBR 将漫画图片保存在 RAR 归档中。Anyfile 在本地解码受支持的 RAR4/RAR5 条目，再对识别出的图片排序阅读。它与 CBZ 的 ZIP 读取路径不同：压缩 RAR 漫画需先在固定预算内解压一次，之后才能进行页面导航。",
     canShow: ["受支持 RAR 归档内的 JPEG、PNG、GIF、WebP 与静态 AVIF 页", "文件名自然排序，以及可用的 ComicInfo 封面和跨页提示", "单页、双页、从右向左阅读及缩放"],
-    limitations: ["不能阅读加密或分卷 RAR 漫画，不支持的压缩变体可能失败", "压缩输入最大 64 MiB，累计展开最大 128 MiB", "最多 5,000 页，单张图片编码数据最多 16 MiB、像素最多 800 万"],
+    limitations: ["不能阅读加密或分卷 RAR 漫画，不支持的压缩变体可能失败", "压缩输入最大 128 MiB，累计展开最大 128 MiB", "最多 5,000 页，单张图片编码数据最多 16 MiB、像素最多 800 万"],
     faq: [
       { question: "为什么 CBR 显示第一页前需要等待？", answer: "RAR 内容需先解码，阅读器才能在解出的图片间跳转。此准备步骤与图片解码不同，图片本身仍只对可见页及邻页进行解码。" },
       { question: "把 CBR 改名为 CBZ 能解决打不开吗？", answer: "不能。修改后缀不会把 RAR 变成 ZIP。真正的转换需要在其他归档工具中提取图片，并创建新的归档。" },
@@ -117,9 +117,9 @@ export const comicArchiveFormats = [
     description: "Read CB7 comics stored with supported 7z Copy, LZMA or LZMA2 compression within local size limits.",
     introduction: "CB7 uses the 7z container for a sequence of comic images. Solid archives can share compression across several entries, so reading an arbitrary later page may depend on decoding earlier data. Anyfile performs bounded sequential extraction once and then reads pages from the local extracted source.",
     canShow: ["Image entries using supported 7z Copy, LZMA or LZMA2 methods", "Naturally sorted comic pages with keyboard navigation, fit modes and manga direction", "Common JPEG/PNG/GIF/WebP/static AVIF images and ComicInfo reading hints"],
-    limitations: ["No encrypted or split 7z input; other codec/filter combinations are not promised", "A small solid archive can exceed the 128 MiB expansion budget; compressed input is limited to 64 MiB", "At most 5,000 pages, each within 16 MiB and 8 million pixels"],
+    limitations: ["No encrypted or split 7z input; other codec/filter combinations are not promised", "A small solid archive can exceed the 128 MiB expansion budget; compressed input is limited to 128 MiB", "At most 5,000 pages, each within 16 MiB and 8 million pixels"],
     faq: [
-      { question: "Why can a small CB7 archive exceed the size limit?", answer: "Compressed size and expanded image bytes are different. The reader limits cumulative extraction to 128 MiB even when the 7z file itself is below the 64 MiB input limit." },
+      { question: "Why can a small CB7 archive exceed the size limit?", answer: "Compressed size and expanded image bytes are different. The reader limits cumulative extraction to 128 MiB even when the 7z file itself is below the 128 MiB input limit." },
       { question: "Does every CB7 page jump decompress the solid archive again?", answer: "No. After the initial extraction, navigation reads locally stored encoded images. The reader decodes only the active image neighborhood rather than all pages at once." },
     ],
   }, {
@@ -127,9 +127,9 @@ export const comicArchiveFormats = [
     description: "在本地展开预算内阅读受支持 7z 归档中的漫画图片，包括 Copy、LZMA 与 LZMA2 条目。",
     introduction: "CB7 使用 7z 容器保存漫画图片序列。固实归档可能让多个条目共享压缩，因此读取后面的某页可能依赖前面的数据解码。Anyfile 先进行一次有界顺序解压，之后从本地解出的数据源读取页面。",
     canShow: ["使用受支持 7z Copy、LZMA 或 LZMA2 方法保存的图片条目", "自然排序的漫画页，以及键盘导航、适配模式和漫画阅读方向", "常见 JPEG、PNG、GIF、WebP、静态 AVIF 图片及 ComicInfo 阅读提示"],
-    limitations: ["不支持加密或分卷 7z，不保证其他编码与过滤器组合可用", "较小的固实归档也可能超过 128 MiB 展开预算；压缩输入最多 64 MiB", "最多 5,000 页，每页不超过 16 MiB 和 800 万像素"],
+    limitations: ["不支持加密或分卷 7z，不保证其他编码与过滤器组合可用", "较小的固实归档也可能超过 128 MiB 展开预算；压缩输入最多 128 MiB", "最多 5,000 页，每页不超过 16 MiB 和 800 万像素"],
     faq: [
-      { question: "为什么很小的 CB7 也会超过大小限制？", answer: "压缩大小与展开图片字节数不同。即使 7z 文件低于 64 MiB 输入上限，读取器仍会限制累计展开量不超过 128 MiB。" },
+      { question: "为什么很小的 CB7 也会超过大小限制？", answer: "压缩大小与展开图片字节数不同。即使 7z 文件低于 128 MiB 输入上限，读取器仍会限制累计展开量不超过 128 MiB。" },
       { question: "CB7 每次跳页都要重新解压固实归档吗？", answer: "不需要。首次解压完成后，导航读取本地存放的编码图片。阅读器只解码当前图片及邻页，不一次性解码所有页面。" },
     ],
   }, { possibleLevels: [4], verification: "verified" }, archiveToolAlternative),

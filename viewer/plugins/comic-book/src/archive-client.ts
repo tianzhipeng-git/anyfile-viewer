@@ -3,7 +3,7 @@ import type { BookSource, BookEntry } from "@anyfile/archive-metadata-viewer/boo
 import { createBookWorker } from "@anyfile/archive-metadata-viewer/book-worker";
 export async function openCompressedComic(file: File, signal: AbortSignal): Promise<BookSource> {
   signal.throwIfAborted();
-  if (file.size > 64 * 1024 ** 2) throw new ViewerError("resource-limit", "Compressed comic size limit.");
+  if (file.size > 128 * 1024 ** 2) throw new ViewerError("resource-limit", "Compressed comic size limit.");
   if (typeof Worker === "undefined" || typeof WebAssembly === "undefined") throw new ViewerError("unsupported-environment", "Comic decoder unavailable.");
   const client = createBookWorker(new Worker(new URL("./archive.worker.ts", import.meta.url), { type: "module" }), signal);
   try {

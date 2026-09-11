@@ -2,7 +2,7 @@ import { readFileRange } from "@anyfile/dev-binary-core";
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
 
 const PROBE_CHUNK_BYTES = 64 * 1024;
-const MAX_FILE_BYTES = 32 * 1024 * 1024;
+const MAX_FILE_BYTES = 128 * 1024 * 1024;
 const PATTERN_OVERLAP = 256;
 
 export async function probeDevSourceMap({ file, signal }: ProbeViewerContext): Promise<ViewerSupportLevel> {

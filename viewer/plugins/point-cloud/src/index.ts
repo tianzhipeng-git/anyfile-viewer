@@ -5,9 +5,9 @@ import { pointCloudManifest } from "./manifest";
 export const pointCloudViewer: FileViewerPlugin = {
   manifest: pointCloudManifest,
   async open({ container, file, signal, locale }) {
-    const copy = selectMessages(locale, { en: { invalid: "Invalid or unsupported point cloud.", limit: "Point cloud exceeds its resource budget (2 GiB input; LAZ compressed input 64 MiB).", sample: "Representative sample; point attributes are not displayed", progress: "points read" }, "zh-CN": { invalid: "点云无效或使用了不支持的编码。", limit: "点云超过资源上限（输入 2 GiB；LAZ 压缩输入 64 MiB）。", sample: "代表性抽样；不显示点属性", progress: "个点已读取" } });
+    const copy = selectMessages(locale, { en: { invalid: "Invalid or unsupported point cloud.", limit: "Point cloud exceeds its resource budget (2 GiB input; LAZ compressed input 128 MiB).", sample: "Representative sample; point attributes are not displayed", progress: "points read" }, "zh-CN": { invalid: "点云无效或使用了不支持的编码。", limit: "点云超过资源上限（输入 2 GiB；LAZ 压缩输入 128 MiB）。", sample: "代表性抽样；不显示点属性", progress: "个点已读取" } });
     if (signal.aborted) throw new DOMException("Aborted", "AbortError");
-    if (file.size > (file.name.toLowerCase().endsWith(".laz") ? 64 * 1024 ** 2 : 2 * 1024 ** 3)) throw new ViewerError("resource-limit", copy.limit);
+    if (file.size > (file.name.toLowerCase().endsWith(".laz") ? 128 * 1024 ** 2 : 2 * 1024 ** 3)) throw new ViewerError("resource-limit", copy.limit);
     const worker = new Worker(new URL("./points.worker.ts", import.meta.url), { type: "module" });
     let viewer: ReturnType<typeof create3dViewer> | undefined; let disposed = false; let opened = false;
     const geometry = new BufferGeometry(); const material = new PointsMaterial({ color: 0x598eb5, size: 2, sizeAttenuation: false }); const root = new Group(); root.add(new Points(geometry, material));

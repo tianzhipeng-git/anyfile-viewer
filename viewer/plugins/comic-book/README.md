@@ -29,7 +29,7 @@ CBR/CB7 额外使用源码构建的 libarchive Worker/WASM；ZIP 和图片能力
 
 - 最多 5000 页、单页编码数据 16 MiB、单页 800 万像素；归档读取还有独立解压和条目限制。
 - 不支持加密归档；图片解码取决于浏览器，不包含 OCR 或文本提取。
-- CBR/CB7 压缩输入最大 64 MiB，需要部署 `/vendor/comic-archive/3.8.9-anyfile.1/` 下的 libarchive WASM 资产；不提供归档提取或编辑。
+- CBR/CB7 压缩输入最大 128 MiB，需要部署 `/vendor/comic-archive/3.8.9-anyfile.1/` 下的 libarchive WASM 资产；不提供归档提取或编辑。
 
 ## 开发与验证
 

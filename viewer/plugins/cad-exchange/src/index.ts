@@ -7,9 +7,9 @@ import { createCadWorkerClient } from "./worker-client";
 export const cadExchangeViewer: FileViewerPlugin = {
   manifest: cadExchangeManifest,
   async open({file,signal,locale,container,reportProgress}) {
-    const copy = selectMessages(locale, { en:{ loading:"Tessellating CAD geometry locally…", invalid:"The CAD file could not be tessellated.", limit:"CAD input or tessellation exceeds its resource budget (16 MiB input, 256 MiB kernel heap).", unsupported:"The CAD WebAssembly runtime is unavailable." }, "zh-CN":{ loading:"正在本地离散化 CAD 几何…", invalid:"无法将 CAD 文件离散化为可见几何。", limit:"CAD 输入或离散化结果超限（输入 16 MiB，内核堆 256 MiB）。", unsupported:"CAD WebAssembly 运行环境不可用。" } });
+    const copy = selectMessages(locale, { en:{ loading:"Tessellating CAD geometry locally…", invalid:"The CAD file could not be tessellated.", limit:"CAD input or tessellation exceeds its resource budget (128 MiB input, 256 MiB kernel heap).", unsupported:"The CAD WebAssembly runtime is unavailable." }, "zh-CN":{ loading:"正在本地离散化 CAD 几何…", invalid:"无法将 CAD 文件离散化为可见几何。", limit:"CAD 输入或离散化结果超限（输入 128 MiB，内核堆 256 MiB）。", unsupported:"CAD WebAssembly 运行环境不可用。" } });
     if (signal.aborted) throw new DOMException("Aborted","AbortError");
-    if (file.size > 16 * 1024 * 1024) throw new ViewerError("resource-limit",copy.limit);
+    if (file.size > 128 * 1024 * 1024) throw new ViewerError("resource-limit",copy.limit);
     reportProgress({stage:"tessellation",message:copy.loading});
     const bytes = await file.arrayBuffer();
     if (signal.aborted) throw new DOMException("Aborted","AbortError");

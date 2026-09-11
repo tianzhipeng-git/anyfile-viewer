@@ -1,4 +1,4 @@
-export const CAD_INPUT_LIMIT = 64 * 1024 * 1024;
+export const CAD_INPUT_LIMIT = 128 * 1024 * 1024;
 export const CAD_PROBE_BYTES = 64 * 1024;
 
 export function abortError() {

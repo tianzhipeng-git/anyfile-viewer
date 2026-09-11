@@ -61,7 +61,7 @@ describe("dev source map viewer", () => {
       { offset: { line: 1, column: 0 }, map: { version: 3, sources: [], names: [], mappings: "" } },
       { offset: { line: 0, column: 0 }, map: { version: 3, sources: [], names: [], mappings: "" } },
     ] }).context)).rejects.toMatchObject({ code: "invalid-file" });
-    const tooLarge = { name: "huge.map", size: 32 * 1024 * 1024 + 1 } as File;
+    const tooLarge = { name: "huge.map", size: 128 * 1024 * 1024 + 1 } as File;
     const test = createViewerTestContext(tooLarge);
     contexts.push(test);
     await expect(devSourceMapViewer.open(test.context)).rejects.toMatchObject({ code: "resource-limit" });

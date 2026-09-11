@@ -5,7 +5,7 @@ interface LazRuntime {
 import { lasHeader } from "./las";
 import { PointSampler } from "./sampler";
 export async function readLaz(file: File, emit: (sampler: PointSampler, done: boolean) => void) {
-  if (file.size > 64 * 1024 * 1024) throw new RangeError("LAZ whole-buffer limit");
+  if (file.size > 128 * 1024 * 1024) throw new RangeError("LAZ whole-buffer limit");
   const header = lasHeader(await file.slice(0,375).arrayBuffer(), file.size, true);
   const url = `${self.location.origin}/vendor/laz-perf/0.0.7-anyfile.1/laz-perf.js`;
   const runtimeModule = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ url);

@@ -2,7 +2,7 @@ import { ViewerError, type ViewerOpenProgress } from "@anyfile/viewer-protocol";
 
 import type { HarDocument, HarEntry, HarNameValue, HarPostData } from "./types";
 
-export const MAX_HAR_BYTES = 64 * 1024 * 1024;
+export const MAX_HAR_BYTES = 128 * 1024 * 1024;
 
 function abortError() {
   return new DOMException("Viewer operation aborted.", "AbortError");
@@ -110,7 +110,7 @@ export async function readHar(
   reportProgress: (progress: ViewerOpenProgress) => void,
 ): Promise<HarDocument> {
   if (file.size > MAX_HAR_BYTES) {
-    throw new ViewerError("resource-limit", "HAR 文件超过 64 MiB，无法在浏览器中安全解析。", { cause: file.size });
+    throw new ViewerError("resource-limit", "HAR 文件超过 128 MiB，无法在浏览器中安全解析。", { cause: file.size });
   }
   if (signal.aborted) throw abortError();
   const reader = file.slice(0, file.size).stream().getReader();

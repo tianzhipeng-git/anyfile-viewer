@@ -9,7 +9,7 @@ import {
 
 import { wordManifest } from "./manifest";
 
-const MAX_FILE_BYTES = 30 * 1024 * 1024;
+const MAX_FILE_BYTES = 128 * 1024 * 1024;
 
 function abortError() {
   return new DOMException("Viewer operation aborted.", "AbortError");

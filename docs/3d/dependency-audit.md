@@ -59,3 +59,7 @@ npm 0.0.7 registry runtime 曾使用上游 `point10.las.laz` 样例跑通过，�
 [e57-js](https://github.com/semehdi/e57-js) 1.0.8，gitHead `69781f6d01f75c28d2e7144094dd26425212ba07`，已同时检查 registry 包和精确源码归档。它的 `Init` 会检测 `window`，从而让 Worker 执行走到 NODEFS 分支。其分发出来的 glue 使用动态执行，并允许数 GiB 级别的 heap。registry 压缩包缺少完整许可证通知；源码中则包含 libE57Format 的 Boost-1.0、Xerces 的 Apache-2.0/NOTICE，以及 CRCpp 的 BSD 通知。后续若要集成，应采用窄化的源码构建 reader，并显式定义 scan/point/heap 预算，而不是伪造浏览器 `window` 或修补生成后的 glue。当前没有加入任何 E57 注册或支持声明。
 
 DWG/USD 以及更深层的 FBX/DAE/3DS 语义，仍属于第 6 阶段下的可选 provider 工作；当前没有引入服务端转换或上传。
+
+## 2026-09-12 输入预算调整
+
+按产品要求，CAD exchange、DWG 和 LAZ 的文件输入上限统一提高到 128 MiB。上文的 16/64 MiB 输入值是审查时的历史配置；此次未重新评估内存峰值，WASM heap、几何与其他输出限制保持不变。

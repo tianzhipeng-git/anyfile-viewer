@@ -1,4 +1,4 @@
-export const SVG_INPUT_LIMIT = 16 * 1024 * 1024;
+export const SVG_INPUT_LIMIT = 128 * 1024 * 1024;
 export const SVG_PROBE_BYTES = 64 * 1024;
 
 export function abortError() {

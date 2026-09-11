@@ -16,8 +16,8 @@
 | AMF | 未压缩 XML 的 object/volume/triangle、固定 object/volume/material RGB 与单位 | 未实现 curved triangle、ZIP 编码和 constellation |
 | ASCII PCD/XYZ（`point-cloud`） | Worker 流式读取、4,096 点后给出首帧快照、上限 200,000 的确定性 reservoir sample、origin rebasing | 仅为等级 2 的代表性预览；未实现颜色/强度/分类、binary PCD 和完整可导航 LOD |
 
-| STEP/STP、IGES/IGS、BREP（`cad-exchange`） | 有边界的源码构建 OCCT Worker、曲面、面边界、装配名称、面颜色、STEP/IGES 统一归一到 mm | 输入上限 16 MiB；BREP 单位未知；仅支持 tessellation 后的查看；已知畸形输入通告/残余风险见 `dependency-audit.md` |
-| LAS/LAZ（`point-cloud`） | LAS 1.x 记录坐标、scale/offset 和分块读取；单独按需加载的有界 LAZ decoder；共用同一渐进抽样路径 | LAZ 先读取最多 64 MiB 压缩输入；无点属性、扫描语义和完整 LOD |
+| STEP/STP、IGES/IGS、BREP（`cad-exchange`） | 有边界的源码构建 OCCT Worker、曲面、面边界、装配名称、面颜色、STEP/IGES 统一归一到 mm | 输入上限 128 MiB；BREP 单位未知；仅支持 tessellation 后的查看；已知畸形输入通告/残余风险见 `dependency-audit.md` |
+| LAS/LAZ（`point-cloud`） | LAS 1.x 记录坐标、scale/offset 和分块读取；单独按需加载的有界 LAZ decoder；共用同一渐进抽样路径 | LAZ 先读取最多 128 MiB 压缩输入；无点属性、扫描语义和完整 LOD |
 
 共享的 `@anyfile/rendering-3d` 包没有 Manifest 或 probe。它的真实调用方是 DXF、mesh、打印、CAD exchange 和 point-cloud 插件。它负责相机、`OrbitControls`、resize/DPR、按需帧渲染、动画帧、对象可见性、context 恢复和 GPU 释放。为 fit 而进行的显示调整不会改写原始单位。
 
@@ -38,14 +38,14 @@
 
 这些是偏保守的初始实现上限，**并不宣称**已经根据峰值内存测量调优完成。完整压力测量仍未完成。
 
-- mesh/print 输入：64 MiB；DXF 保留现有 64 MiB 上限。
+- OBJ 输入：256 MiB（2026-09-12 从 64 MiB 放宽）；其他 mesh/print 和 DXF 输入：128 MiB。OBJ 仍为整体读取、同步解析，256 MiB 是输入上限而非峰值内存保证，几何及关联资源预算保持不变。
 - OBJ：200 万源顶点、400 万 UV/normal 记录、300 万展开后的 primitive 顶点、4096 个 group，以及 65,536 字符的拼接记录；预算检查发生在 `OBJLoader` 之前。
 - STL：1,000,000 个三角面；DXF：200,000 个展开实体 / 3,000,000 个 primitive 顶点。
 - 共享场景：6,000,000 个唯一几何顶点、256 MiB attribute/index buffer、4,096 个 draw group。该保护发生在解析后、GPU 上传前。
 - 外部资源：128 MiB；PNG/JPEG 单张纹理输入 16 MiB、单轴 8,192、单张 16,777,216 像素；纹理总量按资源组受限。
 - 3MF：2,048 个 ZIP entry、64 MiB 声明展开量、单 entry 32 MiB、压缩比 200；实际流式输出不得超过声明总量和单 entry 上限。
-- XML：源文件 32 MiB、深度 64、1,000,000 个元素；component 深度 32 / 4,096 个实例。
-- PCD/XYZ/LAS：输入 2 GiB；LAZ：压缩输入 64 MiB、WASM heap 256 MiB；单行 65,536 字符，常驻采样点 200,000。
+- XML：源文件 128 MiB、深度 64、1,000,000 个元素；component 深度 32 / 4,096 个实例。
+- PCD/XYZ/LAS：输入 2 GiB；LAZ：压缩输入 128 MiB、WASM heap 256 MiB；单行 65,536 字符，常驻采样点 200,000。
 
 ## 路线图中仍未完成的部分
 
