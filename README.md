@@ -1,62 +1,122 @@
 # Anyfile Viewer
 
-一个 local-first 的浏览器文件查看器。
+**Open more kinds of files, right in your browser.**
 
-核心特点: 
-- 文件在浏览器中直接读取与预览，不上传到服务器, 不用下载桌面软件。 速度更快, 隐私更好。
-- 支持的文件格式 超级超级多, 项目追求的支持的格式多, 而不是支持等级高。
-- 只提供查看功能 不提供编辑, 要轻量、快、能打开大文件。
+English · [简体中文](README.zh-CN.md)
 
-先阅读核心的[格式查看器插件协议](docs/viewer-plugin-protocol.md)和[查看器加载、渲染与部署约定](docs/viewer-loading-and-deployment.md)。
+[Open the viewer](https://www.anyfile.top/en/view) · [Explore formats](https://www.anyfile.top/en) · [Report an issue](https://github.com/tianzhipeng-git/anyfile-viewer/issues)
 
-## 开发
+Anyfile Viewer is a free, open-source file viewer that reads and previews local files on your device. No desktop installation, no account, and no file uploads for previewing.
+
+The goal is broad format coverage with useful, fast, read-only previews. It focuses on viewing rather than editing, with lightweight startup and bounded resource use for large files.
+
+## What you can open
+
+| Category | Examples |
+| --- | --- |
+| Documents & spreadsheets | PDF, DOCX, PPTX, XLSX, XLS, XLSB, ODS, Numbers |
+| Images & design | JPEG, PNG, WebP, SVG, TIFF, HEIC/HEIF, JPEG XL, camera RAW, PSD, PXD, EPS/PostScript |
+| Audio & video | MP3, WAV, FLAC, Ogg, MP4, WebM, MOV, MKV, and selected non-native codecs |
+| 360° camera media | Supported Insta360, GoPro MAX, and DJI Osmo 360 photos and videos |
+| Ebooks & comics | EPUB, unencrypted MOBI/AZW3, FictionBook, CBZ, CBR |
+| Data & databases | CSV, JSON, Parquet, Arrow, DuckDB, SQLite, HAR |
+| CAD, 3D & point clouds | DXF, DWG, STEP, IGES, OBJ, glTF/GLB, STL, 3MF, LAS/LAZ, PCD |
+| Code & developer files | Source code, configuration files, NumPy arrays, source maps, WebAssembly structure |
+| Archives & packages | File listings and metadata for ZIP, RAR, 7z, TAR, and supported package formats |
+| Other binary files | Hexadecimal inspection as a fallback |
+
+These are examples, not a complete compatibility list. Preview depth varies by format: some viewers render full pages or interactive models, while others show embedded previews, structure, or metadata. Media playback depends on the codec inside the container and the browser. Large files remain subject to device memory and browser limits.
+
+See the [format catalog](https://www.anyfile.top/en) for individual capabilities and limitations.
+
+## Use it
+
+1. Open the [viewer workspace](https://www.anyfile.top/en/view).
+2. Select files, drag them into the workspace, or open a folder where the browser supports it.
+3. Choose a file in the sidebar to load its viewer.
+
+The interface is available in English and Simplified Chinese. Folder access and some decoding features depend on browser capabilities.
+
+### Local processing and privacy
+
+Selected files are read, decoded, and rendered in your browser; their contents are not uploaded for conversion or previewing. Viewer code, WebAssembly decoders, and other runtime assets may be downloaded on demand, so local processing does not mean fully offline operation.
+
+The hosted site uses Vercel Analytics and Speed Insights. Feedback is sent only when you submit the form and does not attach your files. See the [privacy policy](https://www.anyfile.top/en/privacy) for details.
+
+## Run locally
+
+Requires **Node.js 24.x** and **pnpm 10.32.1**.
 
 ```bash
+git clone https://github.com/tianzhipeng-git/anyfile-viewer.git
+cd anyfile-viewer
 pnpm install
 pnpm dev
 ```
 
-打开 [http://localhost:3000](http://localhost:3000)。
+Open [http://localhost:3000](http://localhost:3000). The root redirects to `/en`; the Chinese workspace is at `/zh-CN/view`.
 
-全站反馈弹窗使用独立的 Cloudflare Worker + D1 服务，通过固定项目 key 区分反馈。配置 `NEXT_PUBLIC_FEEDBACK_ENDPOINT` 后启用提交；本地联调、部署与其他项目接入见[反馈服务说明](services/feedback/README.md)。
+`pnpm dev` and `pnpm build` prepare the required browser assets automatically. Ordinary application builds use the checked-in or package-provided runtime artifacts and do not compile native dependencies from source.
 
-## 页面
+Optional environment variables in `.env.local`:
 
-- `/`：首页与格式类别入口
-- `/categories/[slug]`：类别页
-- `/formats/[extension]`：文件格式详情页
-- `/view`：本地文件查看器工作区
+| Variable | Purpose |
+| --- | --- |
+| `NEXT_PUBLIC_SITE_URL` | Site URL used for metadata; defaults to localhost in development and `https://www.anyfile.top` in production. |
+| `NEXT_PUBLIC_FEEDBACK_ENDPOINT` | Enables feedback submission to the separate Cloudflare Worker + D1 service. Omit it to leave submission disabled. |
 
-当前查看器通过 `viewer/` 下的统一协议按文件格式动态加载：
+Feedback setup and deployment are covered in the [feedback service README](services/feedback/README.md).
 
-- PDF
-- Word（DOCX）
-- Excel 与电子表格（XLSX、XLSM、XLSB、XLS、ODS、Numbers 等）
-- PowerPoint（PPTX）
-- 代码与文本
-- CSV、JSON、Parquet、Arrow 与 DuckDB
-- 独立的 SQLite（SQLite/SQLite3/DB）插件
-
-`viewer/ui` 是插件共享 UI 层。Excel、DuckDB 数据和 SQLite 查看器复用其中的分页表格渲染器；协议类型仍独立保留在 `viewer/protocol`。
-
-DuckDB 的 WASM 与 Worker 优先从官方 jsDelivr 固定版本资源加载；初始化失败时依次回退到 `assets.anyfile.top` 上的 Cloudflare R2 同版本镜像和构建产物中的同版本本地资源。其他格式可按 `viewer-plugin-protocol.md` 继续接入。
-
-HEVC HEIF/HEIC 会先尝试浏览器原生解码，失败后在独立 Worker 中按需加载同源、可审计的 `libheif + libde265` WASM；用户文件仍不会上传。
-
-## 验证
+### Validate and build
 
 ```bash
 pnpm test
 pnpm lint
 pnpm build
+pnpm start
 ```
 
-`pnpm build` 还会检查 `/view` 的初始 JavaScript 体积，并阻止查看器实现意外进入首包。
+`pnpm test` runs application and workspace package tests. The production build also checks viewer bundle boundaries, initial JavaScript size, and runtime asset policies.
 
-插件也可以独立测试：
+To test one plugin:
 
 ```bash
 pnpm --filter @anyfile/pdf-viewer test
-pnpm --filter @anyfile/word-viewer test
-pnpm --filter @anyfile/excel-viewer test
 ```
+
+Deploy as a Next.js application and preserve the response headers in `next.config.ts`, including the viewer's cross-origin isolation headers. See the [loading and deployment guide](docs/viewer-loading-and-deployment.md).
+
+## Project structure
+
+Built with Next.js, React, TypeScript, and a pnpm workspace. Format implementations load on demand through a shared viewer protocol.
+
+| Path | Responsibility |
+| --- | --- |
+| `src/app/[locale]/` | Localized pages: home, categories, formats, plugin details, and viewer workspace |
+| `src/components/` | Website shell and file workspace |
+| `src/content/` | Format catalog and bilingual page content |
+| `src/lib/viewer-registrations.ts` | Plugin registration and dynamic loading |
+| `viewer/plugins/` | Individual format viewers |
+| `viewer/protocol/` | Host/plugin interfaces and validation |
+| `viewer/ui/`, `viewer/rendering*/` | Shared UI and rendering infrastructure |
+| `viewer/runtime-assets/`, `viewer/plugin-policies.json` | Runtime asset loading and policies |
+| `tools/`, `third_party/` | Source-build recipes and audited third-party artifacts |
+| `services/feedback/` | Optional feedback backend |
+
+## Contributing
+
+Bug reports, new format viewers, and improvements to existing previews are welcome. For a reproducible issue, include the file extension, browser version, expected result, and actual behavior. Use a non-sensitive sample if one is needed.
+
+Before changing a viewer, read the relevant project guides (currently in Chinese):
+
+- [Plugin protocol](docs/viewer-plugin-protocol.md) — manifests, selection, workspace access, and lifecycle.
+- [Rendering guidelines](docs/viewer-rendering-guidelines.md) — layout, asynchronous rendering, accessibility, and content safety.
+- [Loading and deployment](docs/viewer-loading-and-deployment.md) — dynamic imports, Workers/WASM, runtime assets, and response headers.
+- [Shared UI and rendering architecture](docs/viewer-ui-and-rendering-architecture.md) — shared packages and renderer boundaries.
+- [Source-built dependencies](docs/viewer-source-built-dependencies.md) — build recipes, patches, and vendored artifacts.
+
+Keep previews local and read-only, load heavy dependencies on demand, and document the supported subset of a format honestly.
+
+## License
+
+Project-owned code is licensed under [Apache-2.0](LICENSE). Third-party libraries and runtime assets retain their own licenses; see [NOTICE](NOTICE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
