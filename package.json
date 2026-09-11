@@ -13,6 +13,8 @@
     ]
   },
   "scripts": {
+    "audit:content": "node scripts/seo/audit.mjs",
+    "test:seo-audit": "node --test scripts/seo/similarity.test.mjs",
     "prepare:pdfjs": "node scripts/prepare-pdfjs-assets.mjs",
     "prepare:heif": "node scripts/prepare-heif-assets.mjs",
     "prepare:stet": "node scripts/prepare-stet-assets.mjs",
