@@ -1,11 +1,10 @@
-import { ApertureIcon } from "lucide-react";
+import Image from "next/image";
 
 export function BrandMark() {
   return (
     <span className="inline-flex items-center gap-2 font-semibold tracking-tight">
-      <span className="flex size-7 items-center justify-center rounded-full bg-primary text-primary-foreground">
-        <ApertureIcon className="size-4" aria-hidden="true" />
-      </span>
+      <Image src="/brand/anyfile-64.png" alt="" width={28} height={28}
+        className="size-7 rounded-sm" unoptimized />
       Anyfile
     </span>
   );
