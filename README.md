@@ -41,7 +41,7 @@ The interface is available in English and Simplified Chinese. Folder access and 
 
 Selected files are read, decoded, and rendered in your browser; their contents are not uploaded for conversion or previewing. Viewer code, WebAssembly decoders, and other runtime assets may be downloaded on demand, so local processing does not mean fully offline operation.
 
-The hosted site uses Vercel Analytics and Speed Insights. Feedback is sent only when you submit the form and does not attach your files. See the [privacy policy](https://www.anyfile.top/en/privacy) for details.
+The hosted site uses Google Analytics 4 after visitor consent, and Vercel Speed Insights for page performance. Product events exclude file names and contents. See [measurement setup](docs/product-measurement.md) for event definitions and reporting. Feedback is sent only when you submit the form and does not attach your files. See the [privacy policy](https://www.anyfile.top/en/privacy) for details.
 
 ## Run locally
 

@@ -28,7 +28,7 @@ describe("DXF protocol", () => {
   it("rejects invalid and oversized input", async () => {
     const invalid = contextFor(new File(["plain text"], "bad.dxf"));
     await expect(cad2dViewer.open(invalid.context)).rejects.toMatchObject({ code: "invalid-file" });
-    const file = new File(["0\nEOF\n"], "large.dxf"); Object.defineProperty(file, "size", { value: 65 * 1024 * 1024 });
+    const file = new File(["0\nEOF\n"], "large.dxf"); Object.defineProperty(file, "size", { value: 128 * 1024 * 1024 + 1 });
     await expect(cad2dViewer.open(contextFor(file).context)).rejects.toMatchObject({ code: "resource-limit" });
   });
 });

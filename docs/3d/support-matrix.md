@@ -38,10 +38,10 @@
 | STEP | `.step`, `.stp` | 精确 CAD | CAD Worker/WASM → tessellation | 装配、名称、颜色、单位、实体面与边线 | implemented 子集 |
 | IGES | `.iges`, `.igs` | 精确 CAD | CAD Worker/WASM → tessellation | 常见曲面/实体的可见几何与单位 | implemented 子集 |
 | BREP | `.brep` | 精确 CAD | CAD Worker/WASM → tessellation | 拓扑与 tessellated 显示；单位未知 | implemented 子集 |
-| DWG | `.dwg` | CAD | LibreDWG 0.14 本地 Worker；模型空间几何、基础文字、缓存标注与填充 | 16 MiB 文件；替代字体；不含布局、外参、代理与 ACIS 实体 | cad-dwg，等级 3；部分图元近似 |
+| DWG | `.dwg` | CAD | LibreDWG 0.14 本地 Worker；模型空间几何、基础文字、缓存标注与填充 | 128 MiB 文件；替代字体；不含布局、外参、代理与 ACIS 实体 | cad-dwg，等级 3；部分图元近似 |
 | FBX / DAE / 3DS | `.fbx`, `.dae`, `.3ds` | CG | 按格式动态 loader | 常见静态 mesh、层级与材质 | candidate |
 | USD / USDZ | `.usd`, `.usda`, `.usdc`, `.usdz` | CG/AR | USD-aware runtime 独立评估 | composition、引用、mesh、材质和动画的明确子集 | blocked pending provider |
-| LAS / LAZ | `.las`, `.laz` | 点云 | Worker + 有界 LAZ WASM | 坐标抽样预览，不显示属性；LAZ 压缩输入上限 64 MiB | implemented Lv.2 子集 |
+| LAS / LAZ | `.las`, `.laz` | 点云 | Worker + 有界 LAZ WASM | 坐标抽样预览，不显示属性；LAZ 压缩输入上限 128 MiB | implemented Lv.2 子集 |
 | PCD / XYZ | `.pcd`, `.xyz` | 点云 | 流式 Worker / 代表性抽样 | ASCII XYZ 几何；点属性待完成 | implemented 子集 |
 | E57 | `.e57` | 点云 | 专用 Worker/WASM | 扫描分组、坐标和有界点加载 | candidate |
 | G-code toolpath | `.gcode` 等 | 3D 打印 | 流式指令 parser → line segments | 分层刀路/打印路径查看，不模拟实际打印 | candidate |

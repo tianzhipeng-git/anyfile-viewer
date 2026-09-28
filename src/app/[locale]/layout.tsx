@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Analytics } from "@vercel/analytics/next";
+import { GoogleAnalytics } from "@/components/google-analytics";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { SiteFooter } from "@/components/site-footer";
@@ -50,7 +50,7 @@ export default async function LocaleLayout({
           <main className="flex flex-1 flex-col">{children}</main>
           <SiteFooter locale={locale} dictionary={dictionary} />
         </FeedbackProvider>
-        <Analytics />
+        <GoogleAnalytics locale={locale} />
         <SpeedInsights />
       </body>
     </html>

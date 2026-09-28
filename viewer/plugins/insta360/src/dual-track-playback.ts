@@ -85,6 +85,8 @@ async function inspectDualTrackMedia(
 }
 
 export class DualTrackPlayback {
+  onPlayback?: () => void;
+  onFailure?: () => void;
   readonly #media: DualTrackMedia;
   readonly #renderer: PanoramaRenderer;
   readonly #projection: PanoramaProjectionProfile;
@@ -270,6 +272,7 @@ export class DualTrackPlayback {
         await this.waitUntil(Math.max(left.timestamp, right.timestamp), generation);
         if (!this.active(generation)) break;
         this.#renderer.setDualFrames(left.canvas, right.canvas, 3840, 3840, this.#projection);
+        this.onPlayback?.();
       }
     } finally {
       iterators.forEach((iterator) => this.#iterators.delete(iterator));
@@ -370,6 +373,7 @@ export class DualTrackPlayback {
     this.#position = this.currentPosition();
     this.#playing = false;
     this.#failed = true;
+    this.onFailure?.();
     this.cancelPipelines();
     if (this.#elements.play) this.#elements.play.disabled = true;
     if (this.#elements.seek) this.#elements.seek.disabled = true;

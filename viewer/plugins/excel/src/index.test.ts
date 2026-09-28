@@ -148,7 +148,7 @@ describe("Excel viewer protocol compliance", () => {
     const file = {
       name: "huge.xlsx",
       type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      size: 50 * 1024 * 1024 + 1,
+      size: 128 * 1024 * 1024 + 1,
       slice,
     } as unknown as File;
     const context = testContext(file);

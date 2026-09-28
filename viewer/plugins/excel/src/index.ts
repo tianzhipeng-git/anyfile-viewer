@@ -11,7 +11,7 @@ import { createPagedTableViewer, type TableViewerPage } from "@anyfile/viewer-ui
 import { excelManifest } from "./manifest";
 import { abortError, readBlob } from "./read-blob";
 
-const MAX_FILE_BYTES = 50 * 1024 * 1024;
+const MAX_FILE_BYTES = 128 * 1024 * 1024;
 const MAX_PARSED_CELLS = 1_000_000;
 const MAX_WORKSHEETS = 100;
 const MAX_COLUMNS = 200;

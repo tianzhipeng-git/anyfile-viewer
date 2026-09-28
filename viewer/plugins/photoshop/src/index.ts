@@ -63,6 +63,7 @@ async function openPhotoshop(context: OpenViewerContext): Promise<ViewerControll
     viewport.setBitmap(bitmap);
     signal.addEventListener("abort", dispose, { once: true });
     reportProgress({ stage: "ready", message: copy.ready });
+    context.reportPreview?.({ outcome: "success", kind: "static" });
     return { dispose };
   } catch (error) {
     dispose();

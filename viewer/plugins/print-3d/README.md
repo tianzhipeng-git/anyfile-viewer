@@ -11,7 +11,7 @@
 
 ## 实现原理
 
-1. [src/index.ts](src/index.ts) 检查 64 MiB 输入上限，再按需加载 3MF 或 AMF 适配器。
+1. [src/index.ts](src/index.ts) 检查 128 MiB 输入上限，再按需加载 3MF 或 AMF 适配器。
 2. 3MF 按 ZIP 条目读取，限制条目数、实际解压字节、XML 结构和对象递归；AMF 完整读取 XML。
 3. 解析出的几何交给共享三维视口，统一管理相机与销毁。
 

@@ -1,7 +1,7 @@
 import { readFileRange } from "@anyfile/dev-binary-core";
 import { ViewerError } from "@anyfile/viewer-protocol";
 
-const MAX_FILE_BYTES = 32 * 1024 * 1024;
+const MAX_FILE_BYTES = 128 * 1024 * 1024;
 const MAX_MAPPINGS = 1_000_000;
 const MAX_SOURCES = 100_000;
 const MAX_NAMES = 200_000;
@@ -237,7 +237,7 @@ function parseMap(value: unknown, line: number, column: number, depth: number, b
 }
 
 export async function parseSourceMap(file: File, signal: AbortSignal): Promise<SourceMapDocument> {
-  if (file.size > MAX_FILE_BYTES) limit("Source map 文件超过 32 MiB 安全上限。");
+  if (file.size > MAX_FILE_BYTES) limit("Source map 文件超过 128 MiB 安全上限。");
   try {
     const bytes = await readFileRange(file, signal, 0, file.size);
     const text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);

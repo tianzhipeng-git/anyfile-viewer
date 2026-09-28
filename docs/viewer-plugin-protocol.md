@@ -118,6 +118,7 @@ interface OpenViewerContext {
   readonly signal: AbortSignal;
   readonly locale: Locale;
   readonly reportProgress: (progress: ViewerOpenProgress) => void;
+  readonly reportPreview?: (result: ViewerPreviewResult) => void;
 }
 
 interface ViewerOpenProgress {
@@ -133,12 +134,29 @@ interface ViewerController {
 ```
 
 - `file` 是标准浏览器 `File`。优先使用 `slice()`、`stream()` 或 Object URL；整体 `arrayBuffer()` / `text()` 必须有明确输入上限。
+- 文件输入预算约定（2026-09-12）：原有低于 100 MiB 的格式主文件输入上限统一提高到 128 MiB，已有更高上限保持不变。这是产品输入额度，不是实际内存占用保证；关联资源、解压、像素、几何、解析结构及内部缓冲区预算独立管理。
 - `relativePath` 是当前文件在授权工作区中的路径，使用 `/`；普通文件选择时可不存在。
 - `container` 由宿主拥有。插件创建独立根节点，不修改容器本身或容器外 DOM。
 - `signal` 表示整个实例终止，涵盖 opening 和 active 阶段。
 - `locale` 来自 `@anyfile/i18n`。所有用户可见文案及无障碍名称均按此生成，不读取 `navigator.language`；缺失翻译回退英语。
 
 `reportProgress()` 只在 `open()` 未完成且未开始清理时调用。`stage` 是稳定诊断标识，不是宿主状态控制指令；用户文案通过本地化 `message` 提供。已知总量时，`loaded` / `total` 单位相同并满足 `0 <= loaded <= total`；未知时两者都省略。
+
+### 产品结果信号
+
+宿主可提供 `reportPreview`，插件通过它报告内容结果，而非初始化完成：
+
+```ts
+type ViewerPreviewResult =
+  | { outcome: "success"; kind: "static" | "animation" | "video_frame" | "video_playback" | "structure" }
+  | { outcome: "failure"; reason: ViewerErrorCode };
+```
+
+- 静态/动画信号在内容解码并挂载后报告；`video_frame` 表示已显示首帧，不能代表开始播放；`video_playback` 在实际播放启动后报告。
+- active 整体失败可报告稳定错误码，不传消息、文件名、路径、内容或堆栈。初始化 reject 由宿主统一记录失败。
+- 这是可选的测量能力，未提供回调不影响查看；未实现结果信号的插件只计初始化，不推断成功。宿主负责去重，取消后忽略旧实例信号。
+- Hex 初始化完成单列兜底，不计目标预览成功；样例来源由宿主显式指定，不能通过文件名判断。
+- 当前覆盖与统计口径见[产品测量](product-measurement.md)。
 
 ## 7. 关联文件
 

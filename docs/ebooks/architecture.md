@@ -116,7 +116,7 @@ File / FB2 ZIP
   → publication viewport
 ```
 
-FB2 不是任意 HTML。adapter 应显式映射标题、段落、诗歌、引用、脚注链接和图片，不用 XSLT 执行不可信样式表。大 `<binary>` 内容按当前及相邻章节需要才解码，并限制单资源和累计解码字节。当前原始 XML 最多 32 MiB，使用浏览器 DOMParser 进行有界同步解析；不是流式/Worker XML parser，解析调用本身不能中途终止。异步文件读取与逐章 HTML 映射检查 AbortSignal，映射每 256 节点让出事件循环。完整 XML DOM 在实例内保留，图片字节与 URL 不跨章节缓存，dispose 清空索引与 XML 引用。
+FB2 不是任意 HTML。adapter 应显式映射标题、段落、诗歌、引用、脚注链接和图片，不用 XSLT 执行不可信样式表。大 `<binary>` 内容按当前及相邻章节需要才解码，并限制单资源和累计解码字节。当前原始 XML 最多 128 MiB（ZIP 内条目仍限 32 MiB），使用浏览器 DOMParser 进行有界同步解析；不是流式/Worker XML parser，解析调用本身不能中途终止。异步文件读取与逐章 HTML 映射检查 AbortSignal，映射每 256 节点让出事件循环。完整 XML DOM 在实例内保留，图片字节与 URL 不跨章节缓存，dispose 清空索引与 XML 引用。
 
 ### 4.3 MOBI / PalmDOC / AZW3
 
@@ -254,4 +254,4 @@ EPUB.js 经比较未采用；libmobi、DjVu.js 和 libarchive 的固定样例/�
 
 ## 11. 阶段 4–5 实现增量
 
-以 [阶段 4–5 决策](phase-4-5-decisions.md) 为当前 MOBI/漫画容器、整书重建、固实缓存、LGPL 分发和资源上限事实。MOBI/KF8 不追求 Kindle 完整排版，等级 3；CBR/CB7 输入最多 64 MiB，展开最多 128 MiB。`BookSource` 仅描述 entries/read/dispose；它不把 decoder 引入共享视口或 probe。
+以 [阶段 4–5 决策](phase-4-5-decisions.md) 为当前 MOBI/漫画容器、整书重建、固实缓存、LGPL 分发和资源上限事实。MOBI/KF8 不追求 Kindle 完整排版，等级 3；CBR/CB7 输入最多 128 MiB，展开最多 128 MiB。`BookSource` 仅描述 entries/read/dispose；它不把 decoder 引入共享视口或 probe。

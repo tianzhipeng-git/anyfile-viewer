@@ -12,7 +12,7 @@ import { readBlob } from "./read-blob";
 import { PostscriptView } from "./view";
 import { createPostscriptWorkerClient, type PostscriptWorkerClient } from "./worker-client";
 
-const MAX_FILE_BYTES = 64 * 1024 * 1024;
+const MAX_FILE_BYTES = 128 * 1024 * 1024;
 
 const messages = {
   "zh-CN": {

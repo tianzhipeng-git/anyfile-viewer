@@ -72,6 +72,8 @@ async function inspectMedia(file: File, inspection: GoProMaxVideoInspection, sig
 }
 
 export class GoProMaxPlayback {
+  onPlayback?: () => void;
+  onFailure?: () => void;
   readonly #media: GoProMaxMedia;
   readonly #renderer: GoProPanoramaRenderer;
   readonly #elements: GoProMaxViewerElements;
@@ -247,7 +249,10 @@ export class GoProMaxPlayback {
         const firstFrame = first.value as WrappedCanvas;
         const secondFrame = second.value as WrappedCanvas;
         await this.waitUntil(Math.max(firstFrame.timestamp, secondFrame.timestamp), generation);
-        if (this.active(generation)) this.#renderer.setEacFrames(firstFrame.canvas, secondFrame.canvas, this.#width, this.#height);
+        if (this.active(generation)) {
+          this.#renderer.setEacFrames(firstFrame.canvas, secondFrame.canvas, this.#width, this.#height);
+          this.onPlayback?.();
+        }
       }
     } finally {
       iterators.forEach((iterator) => this.#iterators.delete(iterator));
@@ -346,6 +351,7 @@ export class GoProMaxPlayback {
     this.#position = this.currentPosition();
     this.#playing = false;
     this.#failed = true;
+    this.onFailure?.();
     this.cancelPipelines();
     if (this.#elements.play) this.#elements.play.disabled = true;
     if (this.#elements.seek) this.#elements.seek.disabled = true;

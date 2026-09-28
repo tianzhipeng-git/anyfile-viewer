@@ -25,7 +25,7 @@
 扩展名命中 .eps/.epsf/.epsi/.ps，或 .ai 同时成为 PDF/PostScript 候选
   → 4 KiB 有界 probe 检查 DSC 或 DOS EPS 头
   → 动态加载完整插件
-  → 读取不超过 64 MiB 的本地文件
+  → 读取不超过 128 MiB 的本地文件
   → 创建一次性模块 Worker
   → Worker 按需加载版本化 stet glue/WASM
   → 解释首个页面并返回页面尺寸

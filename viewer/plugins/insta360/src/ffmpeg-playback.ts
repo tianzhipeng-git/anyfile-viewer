@@ -17,6 +17,8 @@ const copyFor = (locale: Locale) => selectMessages(locale, { "zh-CN": {
 } });
 
 export class FfmpegPanoramaPlayback {
+  onPlayback?: () => void;
+  onFailure?: () => void;
   #queue: PanoramaFrameQueue;
   #context?: AudioContext;
   #gain?: GainNode;
@@ -185,6 +187,7 @@ export class FfmpegPanoramaPlayback {
     return this.#playing ? Math.min(this.#duration, this.#queue.end, this.#clockMedia + Math.max(0, this.#context!.currentTime - this.#clockWall)) : this.#position;
   }
   private startClock() {
+    this.onPlayback?.();
     this.#playing = true; this.#clockMedia = this.#position; this.#clockWall = this.#context!.currentTime + 0.02;
     this.elements.status.textContent = this.#copy.software; this.scheduleAudio(); this.update();
   }
@@ -256,6 +259,7 @@ export class FfmpegPanoramaPlayback {
     time.textContent = `${formatTime(position)} / ${formatTime(this.#duration)}`;
   }
   private fail(error: unknown) {
+    if (!this.#disposed && !this.#failed) this.onFailure?.();
     if (this.#disposed || this.#failed) return;
     this.stopClock(); this.#failed = true; this.#wanted = false; this.client.dispose();
     this.elements.status.textContent = error instanceof ViewerError && error.code === "resource-limit" ? this.#copy.limit : this.#copy.failed;

@@ -73,6 +73,8 @@ async function inspectMedia(file: File, inspection: DjiOsmoVideoInspection, sign
 }
 
 export class DjiOsmoPlayback {
+  onPlayback?: () => void;
+  onFailure?: () => void;
   readonly #media: DjiOsmoMedia;
   readonly #renderer: DjiOsmoPanoramaRenderer;
   readonly #elements: DjiOsmoViewerElements;
@@ -248,7 +250,10 @@ export class DjiOsmoPlayback {
         const firstFrame = first.value as WrappedCanvas;
         const secondFrame = second.value as WrappedCanvas;
         await this.waitUntil(Math.max(firstFrame.timestamp, secondFrame.timestamp), generation);
-        if (this.active(generation)) this.#renderer.setFisheyeFrames(firstFrame.canvas, secondFrame.canvas, this.#width, this.#height);
+        if (this.active(generation)) {
+          this.#renderer.setFisheyeFrames(firstFrame.canvas, secondFrame.canvas, this.#width, this.#height);
+          this.onPlayback?.();
+        }
       }
     } finally {
       iterators.forEach((iterator) => this.#iterators.delete(iterator));
@@ -350,6 +355,7 @@ export class DjiOsmoPlayback {
     this.#position = this.currentPosition();
     this.#playing = false;
     this.#failed = true;
+    this.onFailure?.();
     this.cancelPipelines();
     if (this.#elements.play) this.#elements.play.disabled = true;
     if (this.#elements.seek) this.#elements.seek.disabled = true;

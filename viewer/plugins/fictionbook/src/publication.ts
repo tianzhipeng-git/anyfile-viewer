@@ -2,7 +2,7 @@ import { ViewerError } from "@anyfile/viewer-protocol";
 import type { PublicationSource } from "@anyfile/rendering-publication";
 import { decodeFb2, FB2_NAMESPACE } from "./encoding";
 import { prepareFb2Section } from "./safe-content";
-export const FB2_LIMITS = { file: 32 * 1024 * 1024, nodes: 100_000, depth: 64, chapters: 2000, chapter: 2 * 1024 * 1024, chapterNodes: 20_000, image: 8 * 1024 * 1024, resources: 32, resourceBytes: 16 * 1024 * 1024, pixels: 16_000_000 };
+export const FB2_LIMITS = { file: 128 * 1024 * 1024, nodes: 100_000, depth: 64, chapters: 2000, chapter: 2 * 1024 * 1024, chapterNodes: 20_000, image: 8 * 1024 * 1024, resources: 32, resourceBytes: 16 * 1024 * 1024, pixels: 16_000_000 };
 export interface Fb2Book extends PublicationSource {
   sections: Map<string, Element[]>;
   anchors: Map<string, string>;

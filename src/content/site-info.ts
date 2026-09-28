@@ -65,8 +65,8 @@ const pages: Record<SiteInfoSlug, SiteInfoPage> = {
       {
         title: text("Website and performance data", "网站与性能数据"),
         paragraphs: [text(
-          "Like most websites, the hosting infrastructure receives ordinary request data such as IP address, browser information and requested pages. Anyfile also uses Vercel Analytics and Speed Insights to understand aggregate usage and page performance. These systems are not given the contents of files you open.",
-          "与大多数网站一样，托管基础设施会接收 IP 地址、浏览器信息和所请求页面等常规访问数据。Anyfile 还使用 Vercel Analytics 与 Speed Insights 了解汇总使用情况和页面性能，这些系统不会收到你打开的文件内容。",
+          "Like most websites, the hosting infrastructure receives ordinary request data such as IP address, browser information and requested pages. Anyfile uses Vercel Speed Insights for page performance. With your permission, Google Analytics 4 uses analytics cookies to measure visits, referral origins, task entries, file formats, size ranges, preview results and timing. We do not send file names, contents, local paths, raw errors or full remote file URLs. You can decline or change your choice using Analytics preferences in the footer.",
+          "与大多数网站一样，托管基础设施会接收 IP 地址、浏览器信息和所请求页面等常规访问数据。Anyfile 使用 Vercel Speed Insights 了解页面性能。经你同意后，Google Analytics 4 使用分析 Cookie 衡量访问、引荐来源、任务入口、文件格式、大小区间、预览结果和耗时；不发送文件名、内容、本地路径、原始错误或完整远端文件 URL。你可拒绝分析，也可随时通过页脚的“分析偏好”修改选择。",
         )],
       },
       {
@@ -79,8 +79,8 @@ const pages: Record<SiteInfoSlug, SiteInfoPage> = {
       {
         title: text("Questions and changes", "问题与变更"),
         paragraphs: [text(
-          "Anyfile does not provide user accounts or build profiles from the files you view. For privacy questions, contact support@anyfile.top. Material changes to this policy will be published on this page. Effective September 9, 2026.",
-          "Anyfile 不提供用户账户，也不会根据你查看的文件建立用户画像。如有隐私问题，请联系 support@anyfile.top。本政策如有重要变更，将在此页面发布。生效日期：2026 年 9 月 9 日。",
+          "Anyfile does not provide user accounts or build profiles from the files you view. For privacy questions, contact support@anyfile.top. Material changes to this policy will be published on this page. Effective September 29, 2026.",
+          "Anyfile 不提供用户账户，也不会根据你查看的文件建立用户画像。如有隐私问题，请联系 support@anyfile.top。本政策如有重要变更，将在此页面发布。生效日期：2026 年 9 月 29 日。",
         )],
       },
       {

@@ -71,9 +71,9 @@ export const pointFormats = [
     description: "Decode supported LAZ files locally and preview their point geometry without exporting LAS first.",
     introduction: "LAZ compresses LAS point records for storage and transfer. Anyfile loads the compressed file into a local WebAssembly decoder, then samples decoded coordinates as they become available. Decompression and preview sampling are separate: a reduced display does not mean the LAZ compression discarded points.",
     canShow: ["Positions from supported compressed LAS layouts after local LAZ decoding", "Up to 200,000 representative points, with progressive updates after decompression begins"],
-    limitations: ["Compressed input is limited to 64 MiB and is loaded in full before decoding", "Point attributes, classification filters and full-resolution cloud navigation are not available", "Requires WebAssembly and WebGL 2; specialized point-cloud containers are not supported merely by renaming them .laz"],
+    limitations: ["Compressed input is limited to 128 MiB and is loaded in full before decoding", "Point attributes, classification filters and full-resolution cloud navigation are not available", "Requires WebAssembly and WebGL 2; specialized point-cloud containers are not supported merely by renaming them .laz"],
     faq: [
-      { question: "Why can a LAZ file hit a limit when a larger LAS file opens?", answer: "The LAZ decoder keeps the compressed input in memory, whereas LAS records can be read directly in chunks. The two readers therefore have different input budgets: 64 MiB for LAZ and 2 GiB for LAS." },
+      { question: "Why can a LAZ file hit a limit when a larger LAS file opens?", answer: "The LAZ decoder keeps the compressed input in memory, whereas LAS records can be read directly in chunks. The two readers therefore have different input budgets: 128 MiB for LAZ and 2 GiB for LAS." },
       { question: "Does the LAZ preview need an extracted LAS file?", answer: "No. The decoder supplies point records directly to the sampler. This viewer neither exports an uncompressed LAS copy nor replaces a full point-cloud analysis tool." },
     ],
   }, {
@@ -81,9 +81,9 @@ export const pointFormats = [
     description: "在本地解码受支持的 LAZ 文件并浏览有限数量的几何抽样，无需预先导出 LAS。",
     introduction: "LAZ 对 LAS 点记录进行压缩，方便存储与传输。Anyfile 将压缩文件加载到本地 WebAssembly 解码器，再随坐标解码进行抽样。解压与预览抽样是两个步骤，显示点变少不代表 LAZ 压缩丢弃了这些点。",
     canShow: ["本地 LAZ 解码后，受支持压缩 LAS 布局中的点位置", "最多 20 万个代表性点，在开始解压后渐进更新预览"],
-    limitations: ["压缩输入上限 64 MiB，解码前需完整加载", "不提供点属性、分类筛选或全分辨率点云导航", "需要 WebAssembly 与 WebGL 2；其他专用点云容器不能仅靠改名为 .laz 获得支持"],
+    limitations: ["压缩输入上限 128 MiB，解码前需完整加载", "不提供点属性、分类筛选或全分辨率点云导航", "需要 WebAssembly 与 WebGL 2；其他专用点云容器不能仅靠改名为 .laz 获得支持"],
     faq: [
-      { question: "为什么较小的 LAZ 达到限制，而更大的 LAS 能打开？", answer: "LAZ 解码器把压缩输入保留在内存中，LAS 则可以直接分块读取记录。因此两个读取器的输入预算不同：LAZ 为 64 MiB，LAS 为 2 GiB。" },
+      { question: "为什么较小的 LAZ 达到限制，而更大的 LAS 能打开？", answer: "LAZ 解码器把压缩输入保留在内存中，LAS 则可以直接分块读取记录。因此两个读取器的输入预算不同：LAZ 为 128 MiB，LAS 为 2 GiB。" },
       { question: "LAZ 预览需要先解出 LAS 文件吗？", answer: "不需要。解码器直接向抽样器提供点记录。此查看器不导出未压缩 LAS 副本，也不能替代完整点云分析工具。" },
     ],
   }, { verification: "pending" }, alternatives),

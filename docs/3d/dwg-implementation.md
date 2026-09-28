@@ -21,7 +21,7 @@
 
 参考：[Emscripten 栈设置](https://emscripten.org/docs/tools_reference/settings_reference.html#stack-size)、[栈溢出调试说明](https://emscripten.org/docs/porting/Debugging.html)。0.14 也包含上游 [CVE-2026-62254 修复](https://github.com/LibreDWG/libredwg/security/advisories/GHSA-gp83-hcvh-g255)。这不等于宣称解析器不存在其他缺陷。
 
-预算：文件 16 MiB；解析/转换 30 秒；最多 20 万展开图元、200 万几何顶点、2000 条文字、10 万文字字符；8 张 2048² 文字图集。超限返回 `resource-limit`。关闭/取消直接终止 Worker；成功和失败均清理 Worker，场景由查看器生命周期回收。
+预算：文件 128 MiB；解析/转换 30 秒；最多 20 万展开图元、200 万几何顶点、2000 条文字、10 万文字字符；8 张 2048² 文字图集。超限返回 `resource-limit`。关闭/取消直接终止 Worker；成功和失败均清理 Worker，场景由查看器生命周期回收。
 
 ## 资产与许可证
 

@@ -42,7 +42,7 @@
 
 ZIP/USTAR 保持按 entry 切片读取。RAR/7z 使用一次性顺序解压，逐 64 KiB 计数并校验实际长度/CRC，保留需要的编码图片与 ComicInfo，释放 decoder 原生结构。之后随机跳页直接读取 Worker 内的编码页，不重复扫描固实归档。页解码和 Object URL 仍按最多四页活跃窗口控制。
 
-这不是无限大固实归档的随机访问。打开前有一次完整展开成本；超过 64 MiB 压缩输入或 128 MiB 总展开量会停止。无论用户跳到第几页，都不能触发反复全书解压。CBR/CBT 与通用 archive 的等级竞争有自动测试；CB7 只有专用阅读器和 hex，通用 archive 未实现 7z，不能虚构其备选能力。
+这不是无限大固实归档的随机访问。打开前有一次完整展开成本；超过 128 MiB 压缩输入或 128 MiB 总展开量会停止。无论用户跳到第几页，都不能触发反复全书解压。CBR/CBT 与通用 archive 的等级竞争有自动测试；CB7 只有专用阅读器和 hex，通用 archive 未实现 7z，不能虚构其备选能力。
 
 ## 资源预算
 
@@ -51,7 +51,7 @@ ZIP/USTAR 保持按 entry 切片读取。RAR/7z 使用一次性顺序解压，�
 | MOBI 输入 / text header / record count / 单 record | 256 MiB / 32 MiB / 10,000 / 16 MiB |
 | MOBI 重建输出（Worker 保留编码资源） | 累计 256 MiB；单 part 最多 32 MiB，显示时章节仍限 2 MiB |
 | 章节 DOM / 深度 / 当前及邻章 | 20,000 / 64 / 最多 3 章 |
-| RAR/7z 输入 / 总实际展开 | 64 MiB / 128 MiB；最高 1000:1（小于 1 KiB 按 1 KiB 计） |
+| RAR/7z 输入 / 总实际展开 | 128 MiB / 128 MiB；最高 1000:1（小于 1 KiB 按 1 KiB 计） |
 | RAR/7z entries / 单 entry / 单图片 | 10,000 / 32 MiB / 16 MiB |
 | TAR 输入 / entries | 2 GiB / 10,000；最多读取 5 MiB 头部块 |
 | Native decoder | 初始 16 MiB，1 MiB stack；MOBI 最多 1 GiB、漫画最多 256 MiB WASM memory |

@@ -27,7 +27,7 @@ LAZ 除包依赖外需要已部署的 laz-perf 审核资产；普通文本和 LA
 
 ## 已知限制
 
-- PCD/XYZ/LAS 输入最多 2 GiB；LAZ 压缩输入最多 64 MiB，WASM 堆上限 256 MiB。
+- PCD/XYZ/LAS 输入最多 2 GiB；LAZ 压缩输入最多 128 MiB，WASM 堆上限 256 MiB。
 - 当前为等级 2 代表性采样，不展示全部点，也没有完整空间 LOD。
 - 不展示颜色、强度或分类属性；不支持 binary PCD 和 E57。
 

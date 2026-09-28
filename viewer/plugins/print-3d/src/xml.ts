@@ -1,5 +1,5 @@
 export function parseXml(source: string) {
-  if (source.length > 32 * 1024 * 1024) throw new RangeError();
+  if (source.length > 128 * 1024 * 1024) throw new RangeError();
   if (/<!DOCTYPE|<!ENTITY/i.test(source)) throw new Error("XML entities forbidden");
   const document = new DOMParser().parseFromString(source, "application/xml");
   if (document.querySelector("parsererror")) throw new Error("Invalid XML");

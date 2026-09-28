@@ -1,0 +1,580 @@
+{
+  "methodology_version": "1.1",
+  "market": {
+    "location_code": 2840,
+    "language_code": "en"
+  },
+  "settings": {
+    "suggestions_limit": 100,
+    "minimum_suggestion_volume": 10,
+    "max_keywords_per_candidate": 40,
+    "serp_depth": 10,
+    "trends_time_range": "past_12_months"
+  },
+  "candidates": [
+    {
+      "id": "kra",
+      "format_name": "Krita Document",
+      "extensions": [
+        "kra"
+      ],
+      "aliases": [
+        "krita document"
+      ],
+      "suggestion_seeds": [
+        "kra file"
+      ],
+      "seed_keywords": [
+        "kra viewer online",
+        "open kra file",
+        "how to open kra file",
+        "kra file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "kra"
+        ],
+        [
+          "krita"
+        ]
+      ]
+    },
+    {
+      "id": "xcf",
+      "format_name": "GIMP Image",
+      "extensions": [
+        "xcf"
+      ],
+      "aliases": [
+        "gimp image"
+      ],
+      "suggestion_seeds": [
+        "xcf file"
+      ],
+      "seed_keywords": [
+        "xcf viewer online",
+        "open xcf file",
+        "how to open xcf file",
+        "xcf file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "xcf"
+        ],
+        [
+          "gimp"
+        ]
+      ]
+    },
+    {
+      "id": "ora",
+      "format_name": "OpenRaster",
+      "extensions": [
+        "ora"
+      ],
+      "aliases": [
+        "openraster"
+      ],
+      "suggestion_seeds": [
+        "ora file"
+      ],
+      "seed_keywords": [
+        "ora viewer online",
+        "open ora file",
+        "how to open ora file",
+        "ora file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "ora",
+          "file"
+        ],
+        [
+          "openraster"
+        ]
+      ]
+    },
+    {
+      "id": "clip",
+      "format_name": "Clip Studio Paint Document",
+      "extensions": [
+        "clip"
+      ],
+      "aliases": [
+        "clip studio paint"
+      ],
+      "suggestion_seeds": [
+        "clip studio paint file"
+      ],
+      "seed_keywords": [
+        "clip studio paint viewer online",
+        "open clip studio paint file",
+        "how to open clip studio paint file",
+        "clip studio paint file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "clip",
+          "studio"
+        ]
+      ]
+    },
+    {
+      "id": "sai",
+      "format_name": "PaintTool SAI Document",
+      "extensions": [
+        "sai"
+      ],
+      "aliases": [
+        "painttool sai",
+        "paint tool sai"
+      ],
+      "suggestion_seeds": [
+        "sai file"
+      ],
+      "seed_keywords": [
+        "sai viewer online",
+        "open sai file",
+        "how to open sai file",
+        "sai file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "sai",
+          "file"
+        ],
+        [
+          "painttool",
+          "sai"
+        ]
+      ]
+    },
+    {
+      "id": "afphoto",
+      "format_name": "Affinity Photo Document",
+      "extensions": [
+        "afphoto"
+      ],
+      "aliases": [
+        "affinity photo"
+      ],
+      "suggestion_seeds": [
+        "afphoto file"
+      ],
+      "seed_keywords": [
+        "afphoto viewer online",
+        "open afphoto file",
+        "how to open afphoto file",
+        "afphoto file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "afphoto"
+        ],
+        [
+          "affinity",
+          "photo"
+        ]
+      ]
+    },
+    {
+      "id": "jp2",
+      "format_name": "JPEG 2000 JP2 Image",
+      "extensions": [
+        "jp2"
+      ],
+      "aliases": [
+        "jpeg 2000"
+      ],
+      "suggestion_seeds": [
+        "jp2 file"
+      ],
+      "seed_keywords": [
+        "jp2 viewer online",
+        "open jp2 file",
+        "how to open jp2 file",
+        "jp2 file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "jp2"
+        ],
+        [
+          "jpeg",
+          "2000"
+        ]
+      ]
+    },
+    {
+      "id": "jxr",
+      "format_name": "JPEG XR Image",
+      "extensions": [
+        "jxr"
+      ],
+      "aliases": [
+        "jpeg xr",
+        "hd photo"
+      ],
+      "suggestion_seeds": [
+        "jxr file"
+      ],
+      "seed_keywords": [
+        "jxr viewer online",
+        "open jxr file",
+        "how to open jxr file",
+        "jxr file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "jxr"
+        ],
+        [
+          "jpeg",
+          "xr"
+        ]
+      ]
+    },
+    {
+      "id": "pcx",
+      "format_name": "PC Paintbrush Image",
+      "extensions": [
+        "pcx"
+      ],
+      "aliases": [
+        "pc paintbrush"
+      ],
+      "suggestion_seeds": [
+        "pcx file"
+      ],
+      "seed_keywords": [
+        "pcx viewer online",
+        "open pcx file",
+        "how to open pcx file",
+        "pcx file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "pcx",
+          "file"
+        ],
+        [
+          "paintbrush"
+        ]
+      ]
+    },
+    {
+      "id": "icns",
+      "format_name": "Apple Icon Image",
+      "extensions": [
+        "icns"
+      ],
+      "aliases": [
+        "apple icon image"
+      ],
+      "suggestion_seeds": [
+        "icns file"
+      ],
+      "seed_keywords": [
+        "icns viewer online",
+        "open icns file",
+        "how to open icns file",
+        "icns file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "icns"
+        ]
+      ]
+    },
+    {
+      "id": "exr",
+      "format_name": "OpenEXR Image",
+      "extensions": [
+        "exr"
+      ],
+      "aliases": [
+        "openexr"
+      ],
+      "suggestion_seeds": [
+        "exr file"
+      ],
+      "seed_keywords": [
+        "exr viewer online",
+        "open exr file",
+        "how to open exr file",
+        "exr file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "exr"
+        ],
+        [
+          "openexr"
+        ]
+      ]
+    },
+    {
+      "id": "hdr",
+      "format_name": "Radiance HDR Image",
+      "extensions": [
+        "hdr"
+      ],
+      "aliases": [
+        "radiance hdr",
+        "rgbe"
+      ],
+      "suggestion_seeds": [
+        "hdr image file"
+      ],
+      "seed_keywords": [
+        "hdr image viewer online",
+        "open hdr image file",
+        "how to open hdr image file",
+        "hdr image file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "hdr",
+          "image"
+        ],
+        [
+          "radiance"
+        ],
+        [
+          "rgbe"
+        ]
+      ]
+    },
+    {
+      "id": "dds",
+      "format_name": "DirectDraw Surface",
+      "extensions": [
+        "dds"
+      ],
+      "aliases": [
+        "directdraw surface"
+      ],
+      "suggestion_seeds": [
+        "dds file"
+      ],
+      "seed_keywords": [
+        "dds viewer online",
+        "open dds file",
+        "how to open dds file",
+        "dds file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "dds",
+          "file"
+        ],
+        [
+          "directdraw"
+        ]
+      ]
+    },
+    {
+      "id": "ktx",
+      "format_name": "Khronos Texture",
+      "extensions": [
+        "ktx"
+      ],
+      "aliases": [
+        "khronos texture"
+      ],
+      "suggestion_seeds": [
+        "ktx file"
+      ],
+      "seed_keywords": [
+        "ktx viewer online",
+        "open ktx file",
+        "how to open ktx file",
+        "ktx file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "ktx",
+          "texture"
+        ],
+        [
+          "ktx",
+          "file"
+        ]
+      ]
+    },
+    {
+      "id": "ktx2",
+      "format_name": "Khronos Texture 2",
+      "extensions": [
+        "ktx2"
+      ],
+      "aliases": [
+        "khronos texture 2"
+      ],
+      "suggestion_seeds": [
+        "ktx2 file"
+      ],
+      "seed_keywords": [
+        "ktx2 viewer online",
+        "open ktx2 file",
+        "how to open ktx2 file",
+        "ktx2 file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "ktx2"
+        ]
+      ]
+    },
+    {
+      "id": "srw",
+      "format_name": "Samsung RAW Image",
+      "extensions": [
+        "srw"
+      ],
+      "aliases": [
+        "samsung raw"
+      ],
+      "suggestion_seeds": [
+        "srw file"
+      ],
+      "seed_keywords": [
+        "srw viewer online",
+        "open srw file",
+        "how to open srw file",
+        "srw file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "srw",
+          "file"
+        ],
+        [
+          "samsung",
+          "raw"
+        ]
+      ]
+    },
+    {
+      "id": "x3f",
+      "format_name": "Sigma X3F Image",
+      "extensions": [
+        "x3f"
+      ],
+      "aliases": [
+        "sigma raw"
+      ],
+      "suggestion_seeds": [
+        "x3f file"
+      ],
+      "seed_keywords": [
+        "x3f viewer online",
+        "open x3f file",
+        "how to open x3f file",
+        "x3f file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "x3f"
+        ],
+        [
+          "sigma",
+          "raw"
+        ]
+      ]
+    },
+    {
+      "id": "dicom",
+      "format_name": "DICOM Image",
+      "extensions": [
+        "dcm"
+      ],
+      "aliases": [
+        "dicom"
+      ],
+      "suggestion_seeds": [
+        "dicom file"
+      ],
+      "seed_keywords": [
+        "dicom viewer online",
+        "open dicom file",
+        "how to open dicom file",
+        "dicom file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "dicom"
+        ],
+        [
+          "dcm",
+          "file"
+        ]
+      ]
+    },
+    {
+      "id": "nifti",
+      "format_name": "NIfTI Image",
+      "extensions": [
+        "nii",
+        "nii.gz"
+      ],
+      "aliases": [
+        "nifti"
+      ],
+      "suggestion_seeds": [
+        "nifti file"
+      ],
+      "seed_keywords": [
+        "nifti viewer online",
+        "open nifti file",
+        "how to open nifti file",
+        "nifti file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "nifti"
+        ],
+        [
+          "nii",
+          "file"
+        ]
+      ]
+    },
+    {
+      "id": "fits",
+      "format_name": "FITS Image",
+      "extensions": [
+        "fits",
+        "fit",
+        "fts"
+      ],
+      "aliases": [
+        "flexible image transport system"
+      ],
+      "suggestion_seeds": [
+        "fits image file"
+      ],
+      "seed_keywords": [
+        "fits image viewer online",
+        "open fits image file",
+        "how to open fits image file",
+        "fits image file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "fits",
+          "file"
+        ],
+        [
+          "fits",
+          "image"
+        ],
+        [
+          "flexible",
+          "image",
+          "transport"
+        ]
+      ]
+    }
+  ]
+}

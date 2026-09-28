@@ -65,7 +65,9 @@ afterEach(() => {
 describe("Photoshop viewer protocol compliance", () => {
   it("renders the composite and disposes owned resources idempotently", async () => {
     const test = createViewerTestContext(psdFile());
-    const controller = await photoshopViewer.open(test.context);
+    const reportPreview = vi.fn();
+    const controller = await photoshopViewer.open({ ...test.context, reportPreview });
+    expect(reportPreview).toHaveBeenCalledExactlyOnceWith({ outcome: "success", kind: "static" });
 
     expect(test.container.querySelector(".anyfile-photoshop-viewer__canvas")).toBeInstanceOf(HTMLCanvasElement);
     expect(test.container.textContent).toContain("2 图层");

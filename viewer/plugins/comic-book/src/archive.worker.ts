@@ -12,7 +12,7 @@ interface ArchiveModule {
 const stored = new Map<string, Uint8Array>();
 const fail = (code: string): never => { throw new Error(code); };
 async function open(file: File, runtime: string) {
-  if (file.size > 64 * 1024 ** 2) fail("resource-limit");
+  if (file.size > 128 * 1024 ** 2) fail("resource-limit");
   const bytes = new Uint8Array(await file.arrayBuffer());
   const kind = comicArchiveKind(bytes);
   if (!kind) fail("invalid-file");

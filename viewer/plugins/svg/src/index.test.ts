@@ -75,7 +75,7 @@ describe("safe SVG viewer protocol compliance", () => {
     await expect(safeSvgViewer.open(invalid.context)).rejects.toMatchObject({ code: "invalid-file" });
 
     const oversizedFile = new File(["<svg/>"], "large.svg");
-    Object.defineProperty(oversizedFile, "size", { value: 17 * 1024 * 1024 });
+    Object.defineProperty(oversizedFile, "size", { value: 128 * 1024 * 1024 + 1 });
     const oversized = contextFor(oversizedFile);
     await expect(safeSvgViewer.open(oversized.context)).rejects.toMatchObject({ code: "resource-limit" });
   });
