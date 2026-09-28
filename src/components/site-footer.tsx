@@ -1,3 +1,4 @@
+import { AnalyticsPreferences } from "@/components/google-analytics";
 import { BrandMark } from "@/components/brand-mark";
 import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
 import { Separator } from "@/components/ui/separator";
@@ -32,6 +33,7 @@ export function SiteFooter({ locale, dictionary }: { locale: PublishedLocale; di
             <IsolationBoundaryLink href={localePath(locale, "/about")} className="text-muted-foreground hover:text-foreground">{dictionary.common.about}</IsolationBoundaryLink>
             <IsolationBoundaryLink href={localePath(locale, "/privacy")} className="text-muted-foreground hover:text-foreground">{dictionary.common.privacy}</IsolationBoundaryLink>
             <IsolationBoundaryLink href={localePath(locale, "/contact")} className="text-muted-foreground hover:text-foreground">{dictionary.common.contact}</IsolationBoundaryLink>
+            <AnalyticsPreferences locale={locale} />
             <a href="mailto:support@anyfile.top" className="text-muted-foreground hover:text-foreground">{dictionary.common.email}: support@anyfile.top</a>
             <a href="https://github.com/tianzhipeng-git/anyfile-viewer" rel="noreferrer" target="_blank" className="text-muted-foreground hover:text-foreground">{dictionary.common.sourceCode}</a>
           </div>

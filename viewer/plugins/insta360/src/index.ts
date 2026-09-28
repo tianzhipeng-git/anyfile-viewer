@@ -44,10 +44,13 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
   let disposeControls: (() => void) | undefined;
   let disposeDualTrack: (() => Promise<void>) | undefined;
   let resetListener: (() => void) | undefined;
+  let playingListener: (() => void) | undefined;
   const mediaErrorListeners: Array<{ video: HTMLVideoElement; listener: () => void }> = [];
   let disposed = false;
 
   const releaseRenderResources = () => {
+    if (playingListener) elements?.video?.removeEventListener("playing", playingListener);
+    playingListener = undefined;
     disposeControls?.();
     disposeControls = undefined;
     void disposeDualTrack?.();
@@ -70,6 +73,7 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
 
   const failActive = (message: string) => {
     if (disposed || !elements) return;
+    context.reportPreview?.({ outcome: "failure", reason: "open-failed" });
     const activeElements = elements;
     releaseRenderResources();
     showFatalError(activeElements, message);
@@ -130,6 +134,8 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
             await playback.dispose();
             throw abortError();
           }
+          playback.onPlayback = () => context.reportPreview?.({ outcome: "success", kind: "video_playback" });
+          playback.onFailure = () => context.reportPreview?.({ outcome: "failure", reason: "open-failed" });
           disposeDualTrack = () => playback.dispose();
         } catch (error) {
           if (!(error instanceof ViewerError) || error.code !== "unsupported-environment") throw error;
@@ -137,6 +143,8 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
           try {
             const playback = await FfmpegPanoramaPlayback.open(file, renderer, projection, elements, context.locale, signal);
             if (disposed) { await playback.dispose(); throw abortError(); }
+            playback.onPlayback = () => context.reportPreview?.({ outcome: "success", kind: "video_playback" });
+            playback.onFailure = () => context.reportPreview?.({ outcome: "failure", reason: "open-failed" });
             disposeDualTrack = () => playback.dispose();
           } catch (fallbackError) {
             if (!(fallbackError instanceof ViewerError) || fallbackError.code !== "unsupported-environment" || !inspection.preview) throw fallbackError;
@@ -179,6 +187,8 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
           if (video.videoWidth !== inspection.width || video.videoHeight !== inspection.height) throw new ViewerError("invalid-file", copy.invalid);
           renderer.setSbsVideo(video, inspection.width, inspection.height, projection);
         }
+        playingListener = () => context.reportPreview?.({ outcome: "success", kind: "video_playback" });
+        video.addEventListener("playing", playingListener);
         disposeControls = bindVideoControls(elements, context.locale);
         for (const media of [video, elements.secondVideo]) {
           if (!media) continue;
@@ -191,6 +201,7 @@ async function openInsta360(context: OpenViewerContext): Promise<ViewerControlle
 
     if (signal.aborted) throw abortError();
     reportProgress({ stage: "ready", message: copy.ready });
+    context.reportPreview?.({ outcome: "success", kind: inspection.kind === "video" && !previewBitmap ? "video_frame" : "static" });
     return { dispose };
   } catch (error) {
     dispose();

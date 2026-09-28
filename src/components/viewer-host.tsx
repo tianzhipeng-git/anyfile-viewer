@@ -20,6 +20,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { FeedbackTrigger } from "@/components/feedback/feedback-provider";
+import { createOpenAttempt, currentEntry, type FileSource, type OpenAttempt } from "@/lib/analytics/events";
 import { viewerRegistrations } from "@/lib/viewer-registrations";
 import type { AppDictionary } from "@/i18n/types";
 
@@ -27,9 +28,11 @@ type ViewerSession = { stop(): Promise<void> };
 type ViewerStatus = "idle" | "loading" | "active" | "error";
 type ViewerRoutingResult = {
   readonly file: File;
+  readonly fileSource: FileSource;
   readonly workspace?: WorkspaceReader;
   readonly candidates: ResolvedViewerRegistration[];
   readonly error?: string;
+  readonly attempt: OpenAttempt;
 };
 
 function SupportLevelBadge({
@@ -88,8 +91,10 @@ export function ViewerHost({
   workspace,
   locale,
   dictionary,
+  fileSource = "user",
 }: {
   file?: File;
+  fileSource?: FileSource;
   header: ReactNode;
   relativePath?: string;
   workspace?: WorkspaceReader;
@@ -97,12 +102,13 @@ export function ViewerHost({
   dictionary: AppDictionary["viewer"];
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const usedAttempts = useRef(new WeakSet<OpenAttempt>());
   const sessionRef = useRef<ViewerSession | undefined>(undefined);
   const [registrationId, setRegistrationId] = useState("");
   const [status, setStatus] = useState<ViewerStatus>("idle");
   const [message, setMessage] = useState("");
   const [routingResult, setRoutingResult] = useState<ViewerRoutingResult>();
-  const currentRoutingResult = routingResult && routingResult.file === file && routingResult.workspace === workspace
+  const currentRoutingResult = routingResult && routingResult.file === file && routingResult.fileSource === fileSource && routingResult.workspace === workspace
     ? routingResult
     : undefined;
   const isRouting = Boolean(file && !currentRoutingResult);
@@ -122,23 +128,26 @@ export function ViewerHost({
     if (!file) return;
 
     const abortController = new AbortController();
+    const attempt = createOpenAttempt(file, fileSource, currentEntry());
 
     void resolveViewerRegistrations(file, viewerRegistrations, {
       signal: abortController.signal,
       workspace,
     }).then((resolvedCandidates) => {
       if (abortController.signal.aborted) return;
-      setRoutingResult({ file, workspace, candidates: resolvedCandidates });
+      setRoutingResult({ file, fileSource, workspace, candidates: resolvedCandidates, attempt });
+      if (!resolvedCandidates.length) attempt.fail("no-viewer");
       setStatus(resolvedCandidates.length > 0 ? "loading" : "idle");
       setMessage(resolvedCandidates.length > 0 ? dictionary.loadingViewer : "");
     }).catch((error: unknown) => {
       if (abortController.signal.aborted || isViewerAbortError(error)) return;
       const viewerError = normalizeViewerError(error, dictionary.detectionFailed);
-      setRoutingResult({ file, workspace, candidates: [], error: viewerError.message });
+      attempt.fail(viewerError.code);
+      setRoutingResult({ file, fileSource, workspace, candidates: [], error: viewerError.message, attempt });
     });
 
-    return () => abortController.abort();
-  }, [dictionary.detectionFailed, dictionary.loadingViewer, file, workspace]);
+    return () => { abortController.abort(); attempt.stop(); };
+  }, [dictionary.detectionFailed, dictionary.loadingViewer, file, fileSource, workspace]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -154,12 +163,14 @@ export function ViewerHost({
     }
 
     const abortController = new AbortController();
+    let attempt: OpenAttempt | undefined;
     let controller: ViewerController | undefined;
     let stopOperation: Promise<void> | undefined;
     const session: ViewerSession = {
       stop() {
         if (!stopOperation) {
           stopOperation = (async () => {
+            attempt?.stop();
             abortController.abort();
             await operation.catch(() => undefined);
             await controller?.dispose();
@@ -176,6 +187,12 @@ export function ViewerHost({
     const operation = (async () => {
       await previousSession?.stop();
       if (abortController.signal.aborted) return;
+      const routedAttempt = currentRoutingResult!.attempt;
+      attempt = usedAttempts.current.has(routedAttempt)
+        ? createOpenAttempt(file, fileSource, currentEntry())
+        : routedAttempt;
+      usedAttempts.current.add(routedAttempt);
+      attempt.selectPlugin(registration.manifest.id);
       container.replaceChildren();
       setStatus("loading");
       setMessage(interpolate(dictionary.loadingNamedViewer, { name: manifestName(registration.manifest, locale) }));
@@ -193,6 +210,9 @@ export function ViewerHost({
         container,
         signal: abortController.signal,
         locale,
+        reportPreview(result) {
+          if (!abortController.signal.aborted && sessionRef.current === session) attempt?.report(result);
+        },
         reportProgress(progress) {
           if (!abortController.signal.aborted && sessionRef.current === session) {
             setStatus("loading");
@@ -201,6 +221,7 @@ export function ViewerHost({
         },
       });
       if (!abortController.signal.aborted && sessionRef.current === session) {
+        attempt?.initialized();
         setStatus("active");
       }
     })().catch((error: unknown) => {
@@ -208,6 +229,7 @@ export function ViewerHost({
       container.replaceChildren();
       if (sessionRef.current === session) {
         const viewerError = normalizeViewerError(error, dictionary.openFailedFallback);
+        attempt?.fail(viewerError.code);
         setStatus("error");
         setMessage(viewerError.message);
       }
@@ -216,7 +238,7 @@ export function ViewerHost({
     return () => {
       void session.stop();
     };
-  }, [dictionary, file, locale, registration, relativePath, workspace]);
+  }, [currentRoutingResult, dictionary, file, fileSource, locale, registration, relativePath, workspace]);
 
   const visibleStatus = !file
     ? "idle"

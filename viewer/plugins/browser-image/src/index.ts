@@ -85,6 +85,7 @@ async function openBrowserImage(context: OpenViewerContext): Promise<ViewerContr
     signal.addEventListener("abort", dispose, { once: true });
     viewport = new ImageViewport(elements, width, height);
     reportProgress({ stage: "ready", message: copy.ready });
+    context.reportPreview?.({ outcome: "success", kind: info.animated ? "animation" : "static" });
     return { dispose };
   } catch (error) {
     dispose();

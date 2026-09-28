@@ -55,6 +55,12 @@ export interface ViewerOpenProgress {
   readonly total?: number;
 }
 
+export type ViewerPreviewKind = "static" | "animation" | "video_frame" | "video_playback" | "structure";
+
+export type ViewerPreviewResult =
+  | { readonly outcome: "success"; readonly kind: ViewerPreviewKind }
+  | { readonly outcome: "failure"; readonly reason: ViewerErrorCode };
+
 export interface OpenViewerContext {
   readonly file: File;
   readonly relativePath?: string;
@@ -63,6 +69,8 @@ export interface OpenViewerContext {
   readonly signal: AbortSignal;
   readonly locale: Locale;
   readonly reportProgress: (progress: ViewerOpenProgress) => void;
+  /** Explicit content readiness, independent of initialization. No file-derived text. */
+  readonly reportPreview?: (result: ViewerPreviewResult) => void;
 }
 
 export interface ViewerController {

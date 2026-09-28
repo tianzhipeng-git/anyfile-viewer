@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { currentEntry, fileProperties, track } from "@/lib/analytics/events";
 import { formatNumber, interpolate } from "@anyfile/i18n";
 import {
   AlertCircleIcon,
@@ -47,6 +48,12 @@ function formatBytes(bytes: number, locale: PublishedLocale) {
 
 export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale; dictionary: AppDictionary }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    const input = fileInputRef.current;
+    const cancel = () => track("file_picker_cancelled", { task_entry: currentEntry() });
+    input?.addEventListener("cancel", cancel);
+    return () => input?.removeEventListener("cancel", cancel);
+  }, []);
   const readRequestId = useRef(0);
   const [entries, setEntries] = useState<WorkspaceTreeEntry[]>([]);
   const [workspaceName, setWorkspaceName] = useState(dictionary.workspace.files);
@@ -77,6 +84,7 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
     try {
       const file = entry.file ?? await entry.handle.getFile();
       if (requestId !== readRequestId.current) return;
+      track("file_selected", { ...fileProperties(file), file_source: "user", task_entry: currentEntry() });
       setSelectedFile(file);
 
     } catch {
@@ -169,6 +177,7 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
       const handle = await window.showDirectoryPicker({ id: "anyfile-workspace", mode: "read" });
       await loadDirectoryHandle(handle);
     } catch (pickerError) {
+      if (isAbortError(pickerError)) track("file_picker_cancelled", { task_entry: currentEntry() });
       if (!isAbortError(pickerError)) setError(dictionary.workspace.pickerFailed);
     }
   }

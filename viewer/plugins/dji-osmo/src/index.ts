@@ -51,6 +51,7 @@ async function openDjiOsmo(context: OpenViewerContext): Promise<ViewerController
   };
   const failActive = (message: string) => {
     if (disposed || !elements) return;
+    context.reportPreview?.({ outcome: "failure", reason: "open-failed" });
     const activeElements = elements;
     releaseResources();
     showFatalError(activeElements, message);
@@ -75,9 +76,12 @@ async function openDjiOsmo(context: OpenViewerContext): Promise<ViewerController
     } else {
       reportProgress({ stage: "loading-media", message: copy.loading });
       playback = await DjiOsmoPlayback.open(file, inspection, renderer, elements, djiOsmoUiCopy(context.locale), signal);
+      playback.onPlayback = () => context.reportPreview?.({ outcome: "success", kind: "video_playback" });
+      playback.onFailure = () => context.reportPreview?.({ outcome: "failure", reason: "open-failed" });
     }
     if (signal.aborted) throw abortError();
     reportProgress({ stage: "ready", message: copy.ready });
+    context.reportPreview?.({ outcome: "success", kind: inspection.kind === "photo" ? "static" : "video_frame" });
     return { dispose };
   } catch (error) {
     dispose();
