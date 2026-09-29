@@ -119,6 +119,7 @@ interface OpenViewerContext {
   readonly locale: Locale;
   readonly reportProgress: (progress: ViewerOpenProgress) => void;
   readonly reportPreview?: (result: ViewerPreviewResult) => void;
+  readonly reportInteraction?: (interaction: ViewerInteraction) => void;
 }
 
 interface ViewerOpenProgress {
@@ -157,6 +158,10 @@ type ViewerPreviewResult =
 - 这是可选的测量能力，未提供回调不影响查看；未实现结果信号的插件只计初始化，不推断成功。宿主负责去重，取消后忽略旧实例信号。
 - Hex 初始化完成单列兜底，不计目标预览成功；样例来源由宿主显式指定，不能通过文件名判断。
 - 当前覆盖与统计口径见[产品测量](product-measurement.md)。
+
+### 用户主动操作信号
+
+`reportInteraction` 可选回调接收 `{ kind: "animation_control", action: "play" | "pause" | "previous_frame" | "next_frame" | "speed_change" }`。仅由用户实际点击控件触发，自动播放、后台暂停、reduced-motion 和计时器不能调用。不得携带文件内容、帧序号或文件名。宿主在成功预览后按每次打开、每种 action 去重，取消和后台整体失败后忽略。
 
 ## 7. 关联文件
 

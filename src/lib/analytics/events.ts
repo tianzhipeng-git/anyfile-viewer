@@ -1,10 +1,10 @@
 import { viewerManifests } from "../../content/manifests";
-import type { ViewerPreviewResult } from "@anyfile/viewer-protocol";
+import type { ViewerInteraction, ViewerPreviewResult } from "@anyfile/viewer-protocol";
 
 export const GA_ID = "G-289W10FK5X";
 export const CONSENT_KEY = "anyfile-analytics-consent";
 type Params = Record<string, string | number>;
-type EventName = "page_view" | "workspace_enter" | "file_selected" | "file_picker_cancelled" | "open_started" | "viewer_initialized" | "open_result" | "video_playback" | "preview_error";
+type EventName = "page_view" | "workspace_enter" | "file_selected" | "file_picker_cancelled" | "open_started" | "viewer_initialized" | "open_result" | "video_playback" | "preview_error" | "animation_control";
 
 declare global {
   interface Window {
@@ -83,7 +83,7 @@ export function track(name: EventName, params: Params = {}) {
   if (!analyticsEnabled() || !consentGranted()) return;
   initializeAnalytics();
   const page = { page_location: window.location.origin + safePath(window.location.pathname), page_title: safePath(window.location.pathname), page_referrer: safeReferrer(document.referrer) };
-  const allowed = ["task_entry", "file_source", "format", "size_bucket", "plugin", "outcome", "duration_ms", "preview_kind", "reason_code"];
+  const allowed = ["task_entry", "file_source", "format", "size_bucket", "plugin", "outcome", "duration_ms", "preview_kind", "reason_code", "action"];
   const safe = Object.fromEntries(Object.entries(params).filter(([key]) => allowed.includes(key)));
   if (name === "page_view") window.gtag?.("set", page);
   window.gtag?.("event", name, { ...safe, ...page });
@@ -102,6 +102,7 @@ export function createOpenAttempt(file: File, source: FileSource, entry: string,
   let stopped = false;
   let played = false;
   let failedAfterPreview = false;
+  const interactions = new Set<string>();
   emit("open_started", base);
   function finish(outcome: string, details: Params = {}) {
     if (ended || stopped) return;
@@ -128,6 +129,12 @@ export function createOpenAttempt(file: File, source: FileSource, entry: string,
       } else if (result.kind === "video_playback") {
         if (previewSucceeded && !played) { played = true; emit("video_playback", { ...base, plugin }); }
       } else finish(plugin === "hex-viewer" ? "fallback" : "success", { preview_kind: result.kind });
+    },
+    interact(interaction: ViewerInteraction) {
+      if (stopped || !previewSucceeded || failedAfterPreview || interaction.kind !== "animation_control") return;
+      if (!["play", "pause", "previous_frame", "next_frame", "speed_change"].includes(interaction.action) || interactions.has(interaction.action)) return;
+      interactions.add(interaction.action);
+      emit("animation_control", { ...base, plugin, action: interaction.action });
     },
     fail(reason: string) { finish("failure", { reason_code: reason }); },
     stop() { finish(initialized ? "unmeasured" : "cancelled", { reason_code: initialized ? "no-preview-signal" : "superseded" }); stopped = true; },

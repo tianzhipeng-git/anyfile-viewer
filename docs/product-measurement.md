@@ -22,11 +22,12 @@
 | `viewer_initialized` | `open()` 返回控制器；不等于预览成功 |
 | `open_result` | 一次尝试的首个结果：success / failure / cancelled / fallback / unmeasured |
 | `video_playback` | 实际播放启动，每次尝试最多一次，独立于首帧 |
+| `animation_control` | 用户主动播放、暂停、逐帧或调速；同次打开每种 action 最多一次，自动播放不触发 |
 | `preview_error` | 首次结果之后发生的整体预览错误；单独计数，不覆盖首个结果 |
 
 通用字段：`task_entry`、`file_source`、`format`、`size_bucket`；路由选定后增加 `plugin`。结果字段为 `outcome`、`preview_kind`、`reason_code`、`duration_ms`。
 
-`task_entry` 从站内链接的 `entry` 参数得到，并再次按白名单验证；保留跨 COOP/COEP 边界的完整导航。直接访问为 direct。`file_source=user|sample` 由调用方明确提供，绝不根据文件名推断。当前工作区只有用户文件入口；后续样例入口须显式传 `fileSource="sample"`，并在选择事件使用相同来源。
+`task_entry` 从站内链接的 `entry` 参数得到，并再次按白名单验证；保留跨 COOP/COEP 边界的完整导航。直接访问为 direct。`file_source=user|sample` 由调用方明确提供，绝不根据文件名推断。工作区的“样例”按钮打开含四种动画格式的样例文件夹，显式传 `fileSource="sample"`，选择事件使用相同来源；用户从本机自行选取文件仍计 user。
 
 `duration_ms` 包含路由与初始化到首个结果的时间；插件手动重选从该次重新打开开始。大小分组按二进制单位：小于 1 MiB、1–10 MiB、10–100 MiB、100 MiB–1 GiB、1 GiB 以上。
 
@@ -46,7 +47,7 @@
 
 事件级自定义维度：task_entry、file_source、format、plugin、size_bucket、outcome、preview_kind、reason_code。
 
-事件级自定义指标：duration_ms，毫秒。发送参数不等于能在报表直接使用，必须先注册。新维度通常需等待处理后才能用于报告。
+事件级自定义指标：duration_ms，毫秒。S3 新增 `action` 事件维度尚需在 GA4 后台注册，用于比较 play / pause / previous_frame / next_frame / speed_change。发送参数不等于能在报表直接使用，必须先注册。新维度通常需等待处理后才能用于报告。
 
 首份自由形式探索建议：行 task_entry / format，列事件名称或 outcome，值事件数；筛选 file_source=user。分别保存打开结果和失败原因视图。目标入口访问使用 page_view 的页面路径；不要把访问次数、用户数、选文件次数、打开尝试混为同一分母。
 

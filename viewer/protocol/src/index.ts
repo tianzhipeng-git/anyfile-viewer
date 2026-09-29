@@ -61,6 +61,11 @@ export type ViewerPreviewResult =
   | { readonly outcome: "success"; readonly kind: ViewerPreviewKind }
   | { readonly outcome: "failure"; readonly reason: ViewerErrorCode };
 
+export type ViewerInteraction = {
+  readonly kind: "animation_control";
+  readonly action: "play" | "pause" | "previous_frame" | "next_frame" | "speed_change";
+};
+
 export interface OpenViewerContext {
   readonly file: File;
   readonly relativePath?: string;
@@ -71,6 +76,8 @@ export interface OpenViewerContext {
   readonly reportProgress: (progress: ViewerOpenProgress) => void;
   /** Explicit content readiness, independent of initialization. No file-derived text. */
   readonly reportPreview?: (result: ViewerPreviewResult) => void;
+  /** Explicit user action only; never autoplay or file-derived values. */
+  readonly reportInteraction?: (interaction: ViewerInteraction) => void;
 }
 
 export interface ViewerController {

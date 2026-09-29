@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { currentEntry, fileProperties, track } from "@/lib/analytics/events";
+import { currentEntry, fileProperties, track, type FileSource } from "@/lib/analytics/events";
 import { formatNumber, interpolate } from "@anyfile/i18n";
 import {
   AlertCircleIcon,
@@ -55,11 +55,15 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
     return () => input?.removeEventListener("cancel", cancel);
   }, []);
   const readRequestId = useRef(0);
+  const sampleFiles = useRef(new WeakSet<File>());
+  const sampleRequest = useRef<AbortController | null>(null);
+  useEffect(() => () => sampleRequest.current?.abort(), []);
   const [entries, setEntries] = useState<WorkspaceTreeEntry[]>([]);
   const [workspaceName, setWorkspaceName] = useState(dictionary.workspace.files);
   const [rootDirectory, setRootDirectory] = useState<FileSystemDirectoryHandle>();
   const [selectedEntry, setSelectedEntry] = useState<WorkspaceTreeEntry>();
   const [selectedFile, setSelectedFile] = useState<File>();
+  const [fileSource, setFileSource] = useState<FileSource>("user");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -75,6 +79,7 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
 
   async function selectEntry(entry: WorkspaceTreeEntry) {
     if (entry.kind !== "file") return;
+    sampleRequest.current?.abort();
     const requestId = ++readRequestId.current;
     setSelectedEntry(entry);
     setSelectedFile(undefined);
@@ -84,7 +89,8 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
     try {
       const file = entry.file ?? await entry.handle.getFile();
       if (requestId !== readRequestId.current) return;
-      track("file_selected", { ...fileProperties(file), file_source: "user", task_entry: currentEntry() });
+      track("file_selected", { ...fileProperties(file), file_source: sampleFiles.current.has(file) ? "sample" : "user", task_entry: currentEntry() });
+      setFileSource(sampleFiles.current.has(file) ? "sample" : "user");
       setSelectedFile(file);
 
     } catch {
@@ -115,6 +121,7 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
   }
 
   async function loadDirectoryHandle(handle: FileSystemDirectoryHandle) {
+    sampleRequest.current?.abort();
     readRequestId.current += 1;
     setSelectedEntry(undefined);
     setSelectedFile(undefined);
@@ -134,7 +141,43 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
     }
   }
 
+  async function openSamples() {
+    sampleRequest.current?.abort();
+    const controller = new AbortController();
+    sampleRequest.current = controller;
+    const requestId = ++readRequestId.current;
+    setBusy(true);
+    setError("");
+    try {
+      const files = await Promise.all(["apng", "gif", "webp", "avif"].map(async (extension) => {
+        const response = await fetch(`/samples/animation/animated.${extension}`, { signal: controller.signal });
+        if (!response.ok) throw new Error("Sample unavailable");
+        const blob = await response.blob();
+        return new File([blob], `animated.${extension}`, { type: blob.type });
+      }));
+      if (controller.signal.aborted || requestId !== readRequestId.current) return;
+      for (const file of files) sampleFiles.current.add(file);
+      const folder = locale === "zh-CN" ? "动画样例" : "Animation samples";
+      const nextEntries: WorkspaceTreeEntry[] = [
+        { id: `animation-samples:${requestId}`, name: folder, displayPath: folder, depth: 0, kind: "directory", childrenLoaded: true },
+        ...browserFileEntries(files).map((entry) => ({ ...entry, depth: 1, relativePath: entry.name, displayPath: `${folder}/${entry.name}` })),
+      ];
+      setRootDirectory(undefined);
+      setEntries(nextEntries);
+      setWorkspaceName(folder);
+      await selectEntry(nextEntries[1]);
+    } catch {
+      if (!controller.signal.aborted && requestId === readRequestId.current) {
+        controller.abort();
+        setError(locale === "zh-CN" ? "样例加载失败，请重试。" : "Could not load the samples. Please try again.");
+      }
+    } finally {
+      if (requestId === readRequestId.current) setBusy(false);
+    }
+  }
+
   async function expandDirectory(entry: Extract<WorkspaceTreeEntry, { kind: "directory" }>) {
+    if (!entry.handle) return;
     try {
       const children = await directoryHandleChildren(entry, locale);
       setEntries((currentEntries) => {
@@ -267,6 +310,9 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
               <FolderOpenIcon data-icon="inline-start" />
               {dictionary.common.openFolder}
             </Button>
+            <Button size="sm" variant="outline" disabled={busy} onClick={() => void openSamples()} aria-label={locale === "zh-CN" ? "打开样例" : "Open samples"}>
+              {locale === "zh-CN" ? "样例" : "Samples"}
+            </Button>
           </div>
           <div className="min-h-0 flex-1 overflow-auto px-2 pb-3">
             {entries.length ? (
@@ -295,6 +341,7 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
               locale={locale}
               dictionary={dictionary.viewer}
               file={selectedFile}
+              fileSource={fileSource}
               relativePath={selectedEntry?.relativePath}
               workspace={workspace}
               header={(

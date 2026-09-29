@@ -10,6 +10,7 @@ export type WorkspaceTreeEntry = WorkspaceTreeEntryBase & (
   | { kind: "file"; handle: FileSystemFileHandle; file?: never }
   | { kind: "file"; file: File; handle?: never }
   | { kind: "directory"; handle: FileSystemDirectoryHandle; childrenLoaded: boolean }
+  | { kind: "directory"; handle?: never; childrenLoaded: true }
 );
 
 export function browserFileEntries(files: File[]): WorkspaceTreeEntry[] {
@@ -61,7 +62,7 @@ export async function directoryHandleEntries(
 }
 
 export async function directoryHandleChildren(
-  directory: Extract<WorkspaceTreeEntry, { kind: "directory" }>,
+  directory: Extract<WorkspaceTreeEntry, { kind: "directory"; handle: FileSystemDirectoryHandle }>,
   locale: Locale = "en",
 ): Promise<WorkspaceTreeEntry[]> {
   const children: Array<[string, FileSystemHandle]> = [];

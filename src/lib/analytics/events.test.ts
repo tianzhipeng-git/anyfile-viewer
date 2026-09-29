@@ -64,3 +64,24 @@ describe("product measurement", () => {
     expect(taskEntry("https://example.com/private")).toBe("direct");
   });
 });
+
+
+describe("animation interaction measurement", () => {
+  it("separates autoplay from explicit actions and deduplicates each action per opening", () => {
+    const emit = vi.fn();
+    const attempt = createOpenAttempt(new File([], "private.gif"), "sample", "formats_gif", emit);
+    attempt.selectPlugin("browser-image");
+    attempt.report({ outcome: "success", kind: "animation" });
+    expect(emit.mock.calls.map(([name]) => name)).toEqual(["open_started", "open_result"]);
+    attempt.interact({ kind: "animation_control", action: "pause" });
+    attempt.interact({ kind: "animation_control", action: "pause" });
+    attempt.interact({ kind: "animation_control", action: "next_frame" });
+    attempt.interact({ kind: "animation_control", action: "speed_change" });
+    attempt.interact({ kind: "animation_control", action: "speed_change" });
+    attempt.stop();
+    attempt.interact({ kind: "animation_control", action: "play" });
+    expect(emit.mock.calls.filter(([name]) => name === "animation_control").map(([, p]) => p.action)).toEqual(["pause", "next_frame", "speed_change"]);
+    expect(emit.mock.lastCall?.[1]).toMatchObject({ file_source: "sample", plugin: "browser-image" });
+    expect(JSON.stringify(emit.mock.calls)).not.toContain("private.gif");
+  });
+});

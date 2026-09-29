@@ -210,6 +210,9 @@ export function ViewerHost({
         container,
         signal: abortController.signal,
         locale,
+        reportInteraction(interaction) {
+          if (!abortController.signal.aborted && sessionRef.current === session) attempt?.interact(interaction);
+        },
         reportPreview(result) {
           if (!abortController.signal.aborted && sessionRef.current === session) attempt?.report(result);
         },
