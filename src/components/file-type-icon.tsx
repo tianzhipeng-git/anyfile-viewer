@@ -1,3 +1,4 @@
+import { mppManifest } from "@anyfile/mpp-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
@@ -144,7 +145,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "document",
     icon: FileTextIcon,
-    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest)
+    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest)
       .filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },
   {

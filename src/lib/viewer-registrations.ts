@@ -1,3 +1,4 @@
+import { mppManifest } from "@anyfile/mpp-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
@@ -44,6 +45,11 @@ import {
 } from "@anyfile/viewer-protocol";
 
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
+  {
+    manifest: mppManifest,
+    async probe(context) { return (await import("@anyfile/mpp-viewer/probe")).probeMpp(context); },
+    async load() { return (await import("@anyfile/mpp-viewer")).mppViewer; },
+  },
   {
     manifest: comicBookManifest,
     async probe(context) { return (await import("@anyfile/comic-book-reader/probe")).probeComicBook(context); },

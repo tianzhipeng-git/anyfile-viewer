@@ -29,6 +29,8 @@ const eslintConfig = defineConfig([
     "public/vendor/libmobi/**",
     "public/vendor/comic-archive/**",
     "third_party/libredwg/**",
+    "third_party/mppgo/**",
+    "public/vendor/mppgo/**",
     "public/vendor/libredwg/**",
     "next-env.d.ts",
     "services/feedback/dist/**",

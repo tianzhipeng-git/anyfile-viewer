@@ -15,6 +15,7 @@ describe("getFileTypeKind", () => {
     ["movie.mkv", "video"],
     ["recording.flac", "audio"],
     ["report.docx", "document"],
+    ["schedule.MPP", "document"],
     ["artwork.eps", "document"],
     ["artwork.epsi", "document"],
     ["print.ps", "document"],

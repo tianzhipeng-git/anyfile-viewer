@@ -653,6 +653,40 @@
           ]
         }
       ]
+    },
+    "microsoft-project": {
+      "directory": "mpp",
+      "package": "@anyfile/mpp-viewer",
+      "runtimeSets": [
+        {
+          "id": "mppgo",
+          "version": "0.0.0-0483da3-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/mppgo/0.0.0-0483da3-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "mpp-reader",
+              "assetPatterns": [
+                "public/vendor/mppgo/0.0.0-0483da3-anyfile.1/mpp.wasm",
+                "public/vendor/mppgo/0.0.0-0483da3-anyfile.1/wasm_exec.js"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/mpp/src/types.ts",
+            "viewer/plugins/mpp/src/kernel.worker.ts"
+          ],
+          "requiredMarkers": [
+            "0.0.0-0483da3-anyfile.1",
+            "mpp.wasm",
+            "wasm_exec.js"
+          ]
+        }
+      ]
     }
   }
 }

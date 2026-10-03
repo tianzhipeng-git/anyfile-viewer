@@ -1,3 +1,4 @@
+import { mppFormat } from "./mpp";
 import { dwgFormat } from "./dwg";
 import { mobiFormats, comicArchiveFormats } from "./ebook-archives";
 import { fb2Format } from "./fb2";
@@ -199,6 +200,7 @@ export const formatContents: readonly FormatContent[] = [
   movFormat,
   mp3Format,
   mp4Format,
+  mppFormat,
   nefFormat,
   npyFormat,
   npzFormat,
