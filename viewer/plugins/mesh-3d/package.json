@@ -14,6 +14,8 @@
   "dependencies": {
     "@anyfile/rendering-3d": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
+    "fflate": "0.8.3",
+    "openskp": "1.3.0",
     "three": "0.185.1"
   },
   "devDependencies": {

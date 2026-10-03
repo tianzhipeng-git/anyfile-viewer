@@ -16,3 +16,7 @@ for (const file of ["MPL-2.0.txt", "SOURCE.md"]) {
 const dicomLicenseTarget = join(root, "public/vendor/licenses/dicom-parser/1.8.21");
 await mkdir(dicomLicenseTarget, { recursive: true });
 await cp(join(root, "licenses/dicom-parser/1.8.21/LICENSE"), join(dicomLicenseTarget, "LICENSE"));
+
+const skpLicenseTarget = join(root, "public/vendor/licenses/openskp/1.3.0");
+await mkdir(skpLicenseTarget, { recursive: true });
+await cp(join(root, "licenses/openskp/1.3.0/LICENSE"), join(skpLicenseTarget, "LICENSE"));

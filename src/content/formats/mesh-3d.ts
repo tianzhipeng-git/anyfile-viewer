@@ -1,6 +1,27 @@
 import { defineFormat } from "./define-format";
 
 export const meshFormats = [
+  defineFormat("skp", "3d-models", 3, {
+    name: "SketchUp Model", title: "View SketchUp SKP Models Online",
+    description: "Open SketchUp models locally to inspect geometry, component placement and supported embedded materials in 3D.",
+    introduction: "SKP stores SketchUp model geometry, reusable components and materials. Anyfile parses supported modern VFF and legacy SKP files in a browser Worker, then displays their placed geometry in an interactive 3D viewport. Model contents stay on your device.",
+    canShow: ["Face geometry and component transforms with orbit, zoom and standard views", "Basic material colors and supported embedded PNG/JPEG textures", "Model dimensions in meters, wireframe and object visibility"],
+    limitations: ["Version compatibility depends on the parser; some legacy files cannot be decoded", "Annotations, standalone edges, styles, saved views and dynamic component behavior are not reproduced", "128 MiB input; ZIP expansion up to 128 MiB total and 64 MiB per entry; 60-second parsing budget; WebGL 2 required"],
+    faq: [
+      { question: "Do I need to upload my SketchUp model?", answer: "No. SKP decoding and rendering happen locally in your browser. You do not need SketchUp installed." },
+      { question: "Will this look exactly like my SketchUp scene?", answer: "The preview focuses on geometry, component placement and supported materials. SketchUp styles, annotations and saved cameras are not reproduced, and some versions or features may fail to open." },
+    ],
+  }, {
+    name: "SketchUp 模型", title: "在线查看 SketchUp SKP 模型",
+    description: "在本地打开 SketchUp 模型，三维检查几何、组件位置和受支持的内嵌材质。",
+    introduction: "SKP 保存 SketchUp 模型几何、可复用组件与材质。Anyfile 在浏览器 Worker 中解析受支持的新式 VFF 和旧版 SKP 文件，再在交互式三维视口显示组件放置后的几何。模型内容始终留在你的设备上。",
+    canShow: ["面几何与组件变换，支持旋转、缩放和标准视图", "基础材质颜色与受支持的内嵌 PNG/JPEG 纹理", "以米显示模型尺寸，支持线框和对象显隐"],
+    limitations: ["版本兼容性取决于解析器；部分旧版文件无法解码", "不复现标注、独立边线、样式、保存视图和动态组件行为", "输入最多 128 MiB；ZIP 总展开量最多 128 MiB、单条目 64 MiB；解析预算 60 秒；需要 WebGL 2"],
+    faq: [
+      { question: "需要上传 SketchUp 模型吗？", answer: "不需要。SKP 解码与渲染都在浏览器本地完成，也无需安装 SketchUp。" },
+      { question: "显示效果与 SketchUp 场景完全一致吗？", answer: "预览侧重几何、组件位置与受支持的材质，不复现 SketchUp 样式、标注和保存的相机视角。部分版本或特性可能无法打开。" },
+    ],
+  }, { verification: "pending" }),
   defineFormat("3mf", "3d-models", 3, {
     name: "3MF print model", title: "Inspect 3MF Print Models Online",
     description: "View 3MF build items, component placement and model units before opening the project in a slicer.",

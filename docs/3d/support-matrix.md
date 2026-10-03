@@ -15,6 +15,7 @@
 | OBJ/MTL | mesh-3d | 网格、对象、本地材质与简单漫反射纹理 | 3 | implemented；几何 smoke 通过，关联材质矩阵待补 |
 | PLY / OFF | mesh-3d | 网格/点（PLY）、基础凸多边形（OFF） | 3 | implemented；固定样例 smoke 通过，binary PLY 证据待补 |
 | glTF / GLB | mesh-3d | glTF 2.0 场景、材质与动画入口 | 3 | implemented；GLB 几何 smoke 通过，动画/关联资源矩阵待补 |
+| SketchUp SKP | mesh-3d | 组件几何与变换、基础材质和内嵌 PNG/JPEG；可取消 Worker | 3 | implemented；v17/v25 固定样例解析测试；真实 Chrome 验收待补 |
 | 3MF / AMF | print-3d | 构建几何、单位；3MF 组件与变换 | 3 | implemented；固定样例 smoke 与结构测试通过 |
 | ASCII PCD / XYZ | point-cloud | 有界渐进代表性抽样 | 2 | implemented；5000 点固定样例 smoke 通过；非完整 LOD |
 | USDZ package | archive | 有界列出包内条目，无 USD 几何 | 2 | implemented |
@@ -96,3 +97,11 @@
 - 理论上被 Three.js loader、OpenCascade 或其他库支持，不等于项目已支持；
 - 只有 metadata 或压缩包条目时保持等级 1–2，不能因文件属于 3D 格式就宣传 3D 预览；
 - 同一扩展名的子格式或资源组织能力不同，应拆成组合记录，不用一个等级覆盖全部变体。
+
+## SketchUp SKP 接入
+
+- 解析：锁定 OpenSKP 1.3.0（MIT），仅在 SKP Worker 中加载；内部 GLB 交给已有本地 glTF adapter，不上传或导出文件。
+- 支持：新式 VFF 与解析器可识别的旧版 MFC 容器；组件实例保留共享几何与变换，坐标为米、Y-up。PNG/JPEG 内嵌纹理复用现有像素预算与缺图降级。
+- 不覆盖：独立边线、标注、样式、保存相机、动态组件行为；不保证所有 SketchUp 版本兼容。
+- 预算：输入 128 MiB；ZIP 单条目 64 MiB、累计展开 128 MiB、4096 条目；几何与纹理编码累计 128 MiB；600 万顶点、4096 节点/绘制、64 层深度；解析 60 秒后终止 Worker。最终渲染仍受共享 GPU/纹理预算限制。
+- 样例及来源：`viewer/plugins/mesh-3d/examples/README.md`；真实 Chrome 视觉与交互验收待用户操作。
