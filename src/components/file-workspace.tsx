@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { currentEntry, fileProperties, track, type FileSource } from "@/lib/analytics/events";
 import { formatNumber, interpolate } from "@anyfile/i18n";
 import {
@@ -27,6 +27,7 @@ import { PublicFileControls } from "@/components/public-file-controls";
 import { downloadPublicFile, PublicFileError } from "@/lib/public-file";
 import { FileTree } from "@/components/file-tree";
 import { ViewerHost } from "@/components/viewer-host";
+import { WorkspaceSidebarResizer } from "@/components/workspace-sidebar-resizer";
 import {
   browserFileEntries,
   directoryHandleChildren,
@@ -70,6 +71,7 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(!embedded);
+  const [sidebarWidth, setSidebarWidth] = useState(300);
   const directoryWorkspace = useMemo(
     () => createWorkspaceReader(rootDirectory, selectedEntry),
     [rootDirectory, selectedEntry],
@@ -307,8 +309,9 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
       )}
       <div
         className={sidebarOpen
-          ? "grid min-h-0 flex-1 overflow-hidden bg-background transition-[grid-template-columns] lg:grid-cols-[300px_minmax(0,1fr)]"
-          : embedded ? "flex min-h-0 flex-1 overflow-hidden bg-background" : "grid min-h-0 flex-1 overflow-hidden bg-background transition-[grid-template-columns] lg:grid-cols-[0px_minmax(0,1fr)]"}
+          ? "relative grid min-h-0 flex-1 overflow-hidden bg-background lg:grid-cols-[var(--workspace-sidebar-width)_minmax(0,1fr)]"
+          : embedded ? "flex min-h-0 flex-1 overflow-hidden bg-background" : "relative grid min-h-0 flex-1 overflow-hidden bg-background lg:grid-cols-[0px_minmax(0,1fr)]"}
+        style={{ "--workspace-sidebar-width": `min(${sidebarWidth}px, max(240px, calc(100% - 360px)))` } as CSSProperties}
         onDragOver={(event) => event.preventDefault()}
         onDrop={(event) => {
           event.preventDefault();
@@ -385,6 +388,9 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
             </div>
           </div>
         </aside>}
+        {!embedded && sidebarOpen && (
+          <WorkspaceSidebarResizer width={sidebarWidth} onWidthChange={setSidebarWidth} locale={locale} />
+        )}
 
         <section className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="relative flex flex-1 items-stretch overflow-hidden bg-muted/30">

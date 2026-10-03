@@ -67,7 +67,7 @@
 
 - 文档挂载点、样式输出节点和工具栏分开。会清空传入节点的库只能获得专用节点，不能传入它们的共同父节点。
 - 库生成的 class 也需限定作用域；若无法满足，应采用适合该格式的隔离渲染方案。
-- 用 `ResizeObserver` 观察实际内容面板，不只读取一次 `window.innerHeight`。
+- 需要显式同步尺寸的渲染器用 `ResizeObserver` 观察实际内容面板，不只读取一次窗口尺寸；可依靠 CSS 自适应的内容无需额外监听。职责见[容器尺寸变化](viewer-ui-and-rendering-architecture.md#容器尺寸变化)。
 - `destroy()`、`close()`、`terminate()` 等纳入插件清理；明确资源所有权，避免重复释放或泄漏。
 - 不在模块顶层创建 renderer、DOM、Worker 或大型运行时。
 

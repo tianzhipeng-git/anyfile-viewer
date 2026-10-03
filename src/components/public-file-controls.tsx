@@ -3,7 +3,7 @@
 import { useEffect, useId, useRef, useState } from "react";
 import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
 import { Button } from "@/components/ui/button";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { publicFileLinks } from "@/lib/public-file";
@@ -61,15 +61,12 @@ export function PublicFileControls({ locale, busy, embedded, onOpen, onCancel }:
     }}>
       <FieldGroup>
         <Field>
-          <FieldLabel htmlFor={`${id}-url`}>{zh ? "公开文件 URL" : "Public file URL"}</FieldLabel>
-          <Input id={`${id}-url`} type="url" required value={value} onChange={(event) => { setValue(event.target.value); setLinks(undefined); }} placeholder="https://example.org/data/file.csv" />
-          <FieldDescription>{zh ? "支持任意公开 HTTPS 文件直链。来源需允许 CORS，最大 128 MiB。仅单文件；不读取关联资源。" : "Any public HTTPS file URL. CORS required; up to 128 MiB. Single files only; related resources are not fetched."}</FieldDescription>
+          <Input id={`${id}-url`} aria-label={zh ? "公开文件 URL" : "Public file URL"} type="url" required value={value} onChange={(event) => { setValue(event.target.value); setLinks(undefined); }} placeholder="https://example.org/data/file.csv" />
         </Field>
         <div className="flex flex-wrap gap-2">
-          <Button type="submit" size="sm" disabled={busy}>{zh ? "打开 URL / 生成代码" : "Open URL / generate code"}</Button>
+          <Button type="submit" size="sm" disabled={busy}>{zh ? "打开 URL" : "Open URL"}</Button>
           {busy && <Button type="button" variant="outline" size="sm" onClick={onCancel}>{zh ? "取消下载" : "Cancel download"}</Button>}
         </div>
-        <FieldDescription>{zh ? "链接只引用已有公开文件，不会上传或分享本地文件。不支持登录、令牌、查询参数或重定向地址。" : "Links reference existing public files; local files are never uploaded or shared. Login, tokens, query strings and redirects are unsupported."}</FieldDescription>
         {links && Object.entries(links).map(([key, text]) => <Field key={key}>
           <FieldLabel htmlFor={`${id}-${key}`}>{key === "link" ? (zh ? "预览链接" : "Preview link") : key === "markdown" ? "README Markdown" : "iframe HTML"}</FieldLabel>
           <Textarea id={`${id}-${key}`} readOnly value={text} onFocus={(event) => event.currentTarget.select()} />
