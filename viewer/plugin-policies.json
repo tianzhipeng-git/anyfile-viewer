@@ -653,6 +653,11 @@
           ]
         }
       ]
+    },
+    "dicom": {
+      "directory": "dicom",
+      "package": "@anyfile/dicom-viewer",
+      "runtimeSets": []
     }
   }
 }

@@ -1,3 +1,4 @@
+import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
@@ -44,6 +45,11 @@ import {
 } from "@anyfile/viewer-protocol";
 
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
+  {
+    manifest: dicomManifest,
+    async probe(context) { return (await import("@anyfile/dicom-viewer/probe")).probeDicom(context); },
+    async load() { return (await import("@anyfile/dicom-viewer")).dicomViewer; },
+  },
   {
     manifest: comicBookManifest,
     async probe(context) { return (await import("@anyfile/comic-book-reader/probe")).probeComicBook(context); },

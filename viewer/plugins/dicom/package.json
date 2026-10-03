@@ -1,0 +1,21 @@
+{
+  "name": "@anyfile/dicom-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts",
+    "./probe": "./src/probe.ts"
+  },
+  "scripts": { "test": "vitest run" },
+  "dependencies": {
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-rendering": "workspace:*",
+    "dicom-parser": "1.8.21"
+  },
+  "devDependencies": {
+    "happy-dom": "20.11.6",
+    "vitest": "4.1.11"
+  }
+}

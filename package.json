@@ -95,7 +95,8 @@
     "@anyfile/mobi-reader": "workspace:*",
     "@anyfile/ffmpeg-video-viewer": "workspace:*",
     "@anyfile/ffmpeg-audio-viewer": "workspace:*",
-    "@anyfile/cad-dwg-viewer": "workspace:*"
+    "@anyfile/cad-dwg-viewer": "workspace:*",
+    "@anyfile/dicom-viewer": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

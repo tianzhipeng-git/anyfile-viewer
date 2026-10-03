@@ -1,3 +1,4 @@
+import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
@@ -39,6 +40,7 @@ import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
 
 // Manifest-only inventory. This module must never import registrations, probes or plugin roots.
 export const viewerManifests: readonly ViewerPluginManifest[] = [
+  dicomManifest,
   djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
   dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, harManifest,

@@ -1,3 +1,4 @@
+import { dicomFormat } from "./dicom";
 import { dwgFormat } from "./dwg";
 import { mobiFormats, comicArchiveFormats } from "./ebook-archives";
 import { fb2Format } from "./fb2";
@@ -135,6 +136,7 @@ import { zlibFormat } from "./zlib";
 import { zstFormat } from "./zst";
 
 export const formatContents: readonly FormatContent[] = [
+  dicomFormat,
   dwgFormat, ...cadExchangeFormats, ...meshFormats,
   ...pointFormats,
   goPro360Format,
