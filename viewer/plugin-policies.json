@@ -687,6 +687,40 @@
           ]
         }
       ]
+    },
+    "visio": {
+      "directory": "visio",
+      "package": "@anyfile/visio-viewer",
+      "runtimeSets": [
+        {
+          "id": "libvisio",
+          "version": "0.1.11-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/libvisio/0.1.11-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "parser",
+              "assetPatterns": [
+                "public/vendor/libvisio/0.1.11-anyfile.1/visio.mjs",
+                "public/vendor/libvisio/0.1.11-anyfile.1/visio.wasm",
+                "public/vendor/libvisio/0.1.11-anyfile.1/converters.dat"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/visio/src/types.ts",
+            "viewer/plugins/visio/src/kernel.worker.ts"
+          ],
+          "requiredMarkers": [
+            "0.1.11-anyfile.1",
+            "visio.mjs"
+          ]
+        }
+      ]
     }
   }
 }

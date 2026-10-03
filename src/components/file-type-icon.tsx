@@ -1,3 +1,4 @@
+import { visioManifest } from "@anyfile/visio-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
@@ -182,7 +183,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     kind: "design",
     icon: PaletteIcon,
     extensions: [
-      ...manifestExtensions(pixelmatorPxdManifest, photoshopManifest, cad2dManifest, dwgManifest),
+      ...manifestExtensions(visioManifest, pixelmatorPxdManifest, photoshopManifest, cad2dManifest, dwgManifest),
       ...pdfManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".ai"),
       ".psb", ".fig", ".sketch", ".xd", ".indd",
     ],

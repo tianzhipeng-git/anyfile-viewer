@@ -1,3 +1,4 @@
+import { visioManifest } from "@anyfile/visio-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
@@ -420,6 +421,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: mesh3dManifest,
     async probe(context) { return (await import("@anyfile/mesh-3d-viewer/probe")).probeMesh3d(context); },
     async load() { return (await import("@anyfile/mesh-3d-viewer")).mesh3dViewer; },
+  },
+  {
+    manifest: visioManifest,
+    async probe(context) { return (await import("@anyfile/visio-viewer/probe")).probeVisio(context); },
+    async load() { return (await import("@anyfile/visio-viewer")).visioViewer; },
   },
   {
     manifest: hexManifest,

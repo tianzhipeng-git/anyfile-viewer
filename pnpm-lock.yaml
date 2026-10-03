@@ -137,6 +137,9 @@ importers:
       '@anyfile/viewer-rendering':
         specifier: workspace:*
         version: link:viewer/rendering
+      '@anyfile/visio-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/visio
       '@anyfile/word-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/word
@@ -1144,6 +1147,22 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
+      vitest:
+        specifier: 4.1.11
+        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
+
+  viewer/plugins/visio:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+    devDependencies:
       happy-dom:
         specifier: 20.11.6
         version: 20.11.6

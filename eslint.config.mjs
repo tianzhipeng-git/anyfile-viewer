@@ -30,6 +30,8 @@ const eslintConfig = defineConfig([
     "public/vendor/comic-archive/**",
     "third_party/libredwg/**",
     "third_party/mppgo/**",
+    "third_party/libvisio/**",
+    "public/vendor/libvisio/**",
     "public/vendor/mppgo/**",
     "public/vendor/libredwg/**",
     "next-env.d.ts",

@@ -27,6 +27,8 @@ describe("getFileTypeKind", () => {
     ["records.parquet", "database"],
     ["scene.gltf", "model"],
     ["layout.fig", "design"],
+    ["drawing.VSD", "design"],
+    ["diagram.vsdx", "design"],
     ["artwork.ai", "design"],
     ["composition.psd", "design"],
     ["typeface.woff2", "font"],

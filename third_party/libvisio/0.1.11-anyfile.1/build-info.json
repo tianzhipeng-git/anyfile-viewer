@@ -1,0 +1,109 @@
+{
+  "artifactVersion": "0.1.11-anyfile.1",
+  "image": "emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7",
+  "emscripten": "4.0.10",
+  "icupkg": "70.1-2",
+  "sources": {
+    "libvisio": {
+      "version": "0.1.11",
+      "url": "https://dev-www.libreoffice.org/src/libvisio/libvisio-0.1.11.tar.xz",
+      "sha256": "2a6efd40b6d9dbcb70fba3be53112366882ba97b57151df3698dfa478c8d8dd3"
+    },
+    "librevenge": {
+      "version": "0.0.5",
+      "url": "https://downloads.sourceforge.net/project/libwpd/librevenge/librevenge-0.0.5/librevenge-0.0.5.tar.xz",
+      "sha256": "106d0c44bb6408b1348b9e0465666fa83b816177665a22cd017e886c1aaeeb34"
+    },
+    "libxml2": {
+      "version": "2.15.4",
+      "url": "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.4.tar.xz",
+      "sha256": "98087fd181d9070724f3fbc65c7377db03038eb92bd882374daff44940138821"
+    },
+    "icu": {
+      "version": "68.2",
+      "url": "https://github.com/unicode-org/icu/releases/download/release-68-2/icu4c-68_2-src.zip",
+      "sha256": "047e621bf3ddde8682a569ff26cbfdd27225f892adab76d32c56094823323865"
+    },
+    "boost": {
+      "version": "1.83.0",
+      "url": "https://github.com/emscripten-ports/boost/releases/download/boost-1.83.0/boost-headers-1.83.0.zip",
+      "sha256": "66cc701002c558afb5baf7e1a163ca7f8c3d4c80e7ec4ffb7c66dfcb32ac9358"
+    },
+    "zlib": {
+      "version": "1.3.1",
+      "url": "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz",
+      "sha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c"
+    }
+  },
+  "adapterRevision": 1,
+  "recipeHashes": {
+    "CMakeLists.txt": "c2617f9f5fc03af0c81cfa852d431e745783c5d4b87bf58772cd3fc43a18e603",
+    "adapter.cpp": "51a3ebf2db76450bd281926d743bf768810a21785becdbab0bc174f6a7debe32",
+    "build-in-container.sh": "0ce8cb54d101036e114d9f299b0ed63bc5e16c7b3fe473cdf5b09dd588af8831",
+    "converters.txt": "84be6f576dd18d239afe90461f89b250d8b003cf5c3afc66f30d734a9a0db865"
+  },
+  "options": {
+    "optimization": "O3",
+    "exceptions": true,
+    "memoryMaximum": 536870912,
+    "filesystem": false,
+    "networking": false,
+    "pages": 512,
+    "outputBytes": 67108864,
+    "pageBytes": 16777216
+  },
+  "artifacts": {
+    "SOURCE.md": {
+      "bytes": 1103,
+      "sha256": "a8bd344281d495535888ec289f5249f6ff10d7f325a493bef346bb2e1d121685"
+    },
+    "converters.dat": {
+      "bytes": 642848,
+      "sha256": "9c5f8a36537c69ff9ad861a745be341c857ded15a5674fcd0761244dcc717ef0"
+    },
+    "visio.mjs": {
+      "bytes": 43745,
+      "sha256": "44c432b3819c953ec93de511d7138df1ceb4fa16cc26f8b9617283a0f6f18c46"
+    },
+    "visio.wasm": {
+      "bytes": 1396323,
+      "sha256": "af5a435f2ae25717d5e176f73e7e3715fd736d393841141600d65a456a981171"
+    },
+    "sources/librevenge.tar.xz": {
+      "bytes": 437400,
+      "sha256": "106d0c44bb6408b1348b9e0465666fa83b816177665a22cd017e886c1aaeeb34"
+    },
+    "sources/libvisio.tar.xz": {
+      "bytes": 2051520,
+      "sha256": "2a6efd40b6d9dbcb70fba3be53112366882ba97b57151df3698dfa478c8d8dd3"
+    },
+    "licenses/boost.txt": {
+      "bytes": 1338,
+      "sha256": "c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566"
+    },
+    "licenses/emscripten.txt": {
+      "bytes": 5093,
+      "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+    },
+    "licenses/icu.txt": {
+      "bytes": 21439,
+      "sha256": "f155f8f66833bdc8e0479656256bfac1d66a9ec9df4aa56292308f522b4e3fa7"
+    },
+    "licenses/librevenge-MPL-2.0.txt": {
+      "bytes": 16726,
+      "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+    },
+    "licenses/libvisio-MPL-2.0.txt": {
+      "bytes": 16726,
+      "sha256": "fab3dd6bdab226f1c08630b1dd917e11fcb4ec5e1e020e2c16f83a0a13863e85"
+    },
+    "licenses/libxml2.txt": {
+      "bytes": 1314,
+      "sha256": "5d4873884a890122a4b9b20ad56ac6f7da1d796a5bfcf04a427970ac96217626"
+    },
+    "licenses/zlib.txt": {
+      "bytes": 1002,
+      "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+    }
+  }
+}

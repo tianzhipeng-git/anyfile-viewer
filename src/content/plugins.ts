@@ -21,6 +21,12 @@ const plugin = (
 });
 
 export const pluginContents: readonly PluginContent[] = [
+  plugin("visio", { en: "How the Visio Viewer Works", "zh-CN": "Visio 查看器如何工作" },
+    { en: "Preview VSDX and VSD diagrams locally.", "zh-CN": "在本地预览 VSDX 和 VSD 图表。" },
+    { en: "libvisio reads drawing pages inside a cancellable WebAssembly Worker.", "zh-CN": "libvisio 在可取消的 WebAssembly Worker 中读取绘图页面。" },
+    { en: ["Pages are displayed as isolated SVG images with zoom and pan.", "Files are processed locally and are never uploaded."], "zh-CN": ["页面以隔离的 SVG 图片展示，支持缩放和拖动。", "文件始终在本地处理，不会上传。"] },
+    { en: ["Fonts, embedded objects and proprietary effects may differ from Visio.", "Read-only graphical preview; no macros, editing or shape-data inspection."], "zh-CN": ["字体、嵌入对象与专有效果可能与 Visio 不同。", "仅提供图形预览；不执行宏，不提供编辑或形状数据检查。"] },
+    [upstream("libvisio / librevenge", "0.1.11 / 0.0.5", "https://github.com/LibreOffice/libvisio", "MPL-2.0", "Local Visio parsing and SVG generation.", "本地 Visio 解析与 SVG 生成。", "/vendor/libvisio/0.1.11-anyfile.1/SOURCE.md")]),
   plugin("microsoft-project", { en: "How the MPP Viewer Works", "zh-CN": "MPP 查看器如何工作" },
     { en: "Read Microsoft Project plans locally.", "zh-CN": "在本地读取 Microsoft Project 计划。" },
     { en: "A cancellable WASM Worker reads MPP14 schedules into paginated task and resource tables with a Gantt overview.", "zh-CN": "可取消的 WASM Worker 读取 MPP14 计划，以分页任务表、资源表和甘特概览展示。" },
