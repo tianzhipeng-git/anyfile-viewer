@@ -1,0 +1,66 @@
+import type { PublishedLocale } from "@/i18n/config";
+
+const english = {
+  title: "Integrations & embeds",
+  description: "Add an Open in Anyfile button to your README, link to a public file preview, or embed a viewer in your website. Files are read directly in the browser.",
+  start: "Open the code generator",
+  intro: "Open a public file URL in the workspace sidebar under “Public URL, button & embed”. Copy the preview link, README Markdown or iframe HTML and paste it into your content.",
+  sourceTitle: "Choose a public file",
+  source: "Use a direct HTTPS URL on your own website, object storage, a public dataset, GitHub Raw or any other host. The file must be accessible without login, and the host must allow browser CORS requests. A GitHub blob page is a web page, not a file URL. Keep the filename extension in the URL so Anyfile can select a viewer.",
+  cors: "For public files, your host can send Access-Control-Allow-Origin: *. If it restricts access to specific origins, allow the Anyfile origin used by your integration (normally https://www.anyfile.top). A file that downloads in the address bar can still fail to preview if CORS is missing. Anyfile does not proxy requests to bypass source restrictions.",
+  exampleTitle: "Try a working example",
+  example: "This public Iris CSV from seaborn-data opens in the table viewer. Try the button or the embedded viewer below; no local file is uploaded.",
+  preview: "Open the example",
+  frameTitle: "Embedded Iris CSV preview",
+  codeTitle: "Copy an integration",
+  link: "Preview link",
+  markdown: "README Markdown button",
+  iframe: "Website iframe",
+  codeDescription: "README platforms generally support Markdown image links rather than iframes. Use the iframe on a website or tutorial that permits embedded content; set width and height to fit your page and keep a descriptive title.",
+  parametersTitle: "URL and language",
+  parameters: "Use /en/view for English or /zh-CN/view for Simplified Chinese; replace view with embed for the compact iframe page. Put the complete file URL in the #file= fragment, encoded with URLSearchParams. The code generator handles this encoding. Keep the fragment rather than moving the file URL into the page query string.",
+  versions: "For stable examples, use a versioned object URL or a GitHub commit URL. Links reference existing public files; selecting a local file does not create a shareable URL or upload it.",
+  limitsTitle: "Limits and compatibility",
+  limits: "Public downloads are limited to 128 MiB, including responses without an accurate Content-Length. Viewer-specific decoding and memory limits still apply. The current URL entry opens one file; it does not fetch related textures, fonts, paired camera files or other dependencies. Open a local folder or multiple local files when those are needed.",
+  credentials: "Requests omit cookies, authentication and referrers. URLs containing a username, password, query string or fragment, and URLs requiring redirects are currently unsupported. Use a direct anonymous file URL.",
+  isolation: "An ordinary website can embed viewers that work without cross-origin isolation. Formats requiring SharedArrayBuffer or threaded WASM need the parent page and all ancestors to satisfy cross-origin isolation, plus permission for the frame. Adding allow=\"cross-origin-isolated\" alone is insufficient. Use the embedded viewer’s “Open in new window” link when necessary. Browser and format support still apply.",
+  troubleshootingTitle: "If a file does not open",
+  troubleshooting: "Check that the URL returns the file itself, works without authentication, has no redirect and permits CORS. Confirm the download is under 128 MiB and the filename has the correct extension. A successful download does not guarantee the format or encoding is supported. For missing related files, open a local folder; for isolation requirements, open a separate window.",
+  privacyTitle: "Privacy",
+  privacy: "Files are downloaded directly from the source into the visitor’s browser and parsed there. Anyfile does not upload, store or host those files. The source host receives the visitor’s download request. File URLs use a fragment that is not included in the Anyfile page request; analytics and performance events omit the complete file URL, filename and contents.",
+};
+
+type IntegrationContent = { [Key in keyof typeof english]: string };
+const chinese: IntegrationContent = {
+  title: "集成与嵌入",
+  description: "为 README 添加 Open in Anyfile 按钮，链接到公开文件预览，或在网站中嵌入查看器。文件直接在访问者的浏览器中读取。",
+  start: "打开代码生成器",
+  intro: "在工作区侧栏展开“公开 URL、按钮与嵌入”，输入公开文件直链。复制预览链接、README Markdown 或 iframe HTML，放入你的内容中。",
+  sourceTitle: "准备公开文件",
+  source: "支持你自己的网站、对象存储、公开数据集、GitHub Raw 或其他任意主机上的 HTTPS 文件直链。文件需要无需登录即可读取，来源服务器需要允许浏览器 CORS 请求。GitHub blob 页面是网页，不是文件直链。请在 URL 中保留文件扩展名，以便 Anyfile 选择查看器。",
+  cors: "公开文件的服务器可返回 Access-Control-Allow-Origin: *。如果限定了允许来源，需要允许集成所用的 Anyfile origin（通常为 https://www.anyfile.top）。地址栏可以下载的文件，仍可能因缺少 CORS 而无法预览。Anyfile 不通过代理绕过来源限制。",
+  exampleTitle: "体验可用示例",
+  example: "这个来自 seaborn-data 的公开 Iris CSV 可以直接打开为表格。点击按钮或体验下方的嵌入查看器，不需要上传本地文件。",
+  preview: "打开示例",
+  frameTitle: "嵌入的 Iris CSV 预览",
+  codeTitle: "复制接入代码",
+  link: "预览链接",
+  markdown: "README Markdown 按钮",
+  iframe: "网站 iframe",
+  codeDescription: "README 平台通常支持 Markdown 图片链接，不支持 iframe。在允许嵌入内容的网站或教程中使用 iframe；根据版面调整 width 和 height，并保留描述性的 title。",
+  parametersTitle: "URL 与语言",
+  parameters: "英语使用 /en/view，简体中文使用 /zh-CN/view；将 view 换成 embed 即为精简的 iframe 页面。完整文件 URL 经过 URLSearchParams 编码后放入 #file= 片段，代码生成器会完成编码。请保留片段形式，不要把文件地址改放到页面查询参数中。",
+  versions: "为了保持示例稳定，建议使用带版本的对象地址或固定 GitHub commit 的地址。链接只引用已有公开文件；选择本地文件不会生成可分享的地址，也不会上传文件。",
+  limitsTitle: "限制与兼容性",
+  limits: "公开文件下载上限为 128 MiB；即使响应没有准确的 Content-Length，也会检查实际下载字节数。查看器自身的解码与内存限制仍然生效。URL 入口目前只打开单文件，不读取材质、字体、相机配对文件或其他关联资源。需要关联文件时，请使用本地文件夹或多文件打开。",
+  credentials: "请求不携带 Cookie、认证信息或来源页地址。目前不支持包含用户名、密码、查询参数或片段的文件 URL，也不支持需要重定向的地址。请使用无需认证的文件直链。",
+  isolation: "普通网页可以嵌入不依赖跨源隔离的查看器。需要 SharedArrayBuffer 或多线程 WASM 的格式，要求父页及全部祖先满足跨源隔离，并允许 iframe 使用相应能力；仅添加 allow=\"cross-origin-isolated\" 不足以获得隔离。必要时使用嵌入查看器的“在新窗口打开”入口。实际能力还取决于浏览器和文件格式。",
+  troubleshootingTitle: "打不开时检查什么",
+  troubleshooting: "确认地址返回文件本身、无需认证、没有重定向且允许 CORS；文件小于 128 MiB，文件名具有正确扩展名。下载成功不代表格式或编码一定受支持。缺少关联文件时通过本地文件夹打开；需要隔离能力时在新窗口打开。",
+  privacyTitle: "隐私边界",
+  privacy: "文件由来源直接下载到访问者的浏览器，并在浏览器解析。Anyfile 不上传、存储或托管这些文件；来源主机会收到访问者的下载请求。文件地址放在不会进入 Anyfile 页面请求的片段中，分析与性能事件不发送完整文件地址、文件名或内容。",
+};
+
+export function integrationContent(locale: PublishedLocale): IntegrationContent {
+  return locale === "zh-CN" ? chinese : english;
+}

@@ -33,6 +33,7 @@ export function SiteFooter({ locale, dictionary }: { locale: PublishedLocale; di
             <IsolationBoundaryLink href={localePath(locale, "/about")} className="text-muted-foreground hover:text-foreground">{dictionary.common.about}</IsolationBoundaryLink>
             <IsolationBoundaryLink href={localePath(locale, "/privacy")} className="text-muted-foreground hover:text-foreground">{dictionary.common.privacy}</IsolationBoundaryLink>
             <IsolationBoundaryLink href={localePath(locale, "/contact")} className="text-muted-foreground hover:text-foreground">{dictionary.common.contact}</IsolationBoundaryLink>
+            <IsolationBoundaryLink href={localePath(locale, "/integrations")} className="text-muted-foreground hover:text-foreground">{locale === "zh-CN" ? "集成与嵌入" : "Integrations & embeds"}</IsolationBoundaryLink>
             <AnalyticsPreferences locale={locale} />
             <a href="mailto:support@anyfile.top" className="text-muted-foreground hover:text-foreground">{dictionary.common.email}: support@anyfile.top</a>
             <a href="https://github.com/tianzhipeng-git/anyfile-viewer" rel="noreferrer" target="_blank" className="text-muted-foreground hover:text-foreground">{dictionary.common.sourceCode}</a>

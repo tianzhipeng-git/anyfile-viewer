@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/", destination: "/en", permanent: true },
+      { source: "/integrations", destination: "/en/integrations", permanent: true },
+      { source: "/embed", destination: "/en/embed", permanent: true },
       { source: "/view", destination: "/en/view", permanent: true },
       { source: "/categories/:slug", destination: "/en/categories/:slug", permanent: true },
       { source: "/formats/:extension", destination: "/en/formats/:extension", permanent: true },
@@ -22,11 +24,15 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        source: "/:locale(en|zh-CN|es|de|fr|ja|pt|ru|ko|it)/view",
+        source: "/:locale(en|zh-CN|es|de|fr|ja|pt|ru|ko|it)/:mode(view|embed)",
         headers: [
           { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
           { key: "Cross-Origin-Embedder-Policy", value: "require-corp" },
         ],
+      },
+      {
+        source: "/:locale(en|zh-CN)/embed",
+        headers: [{ key: "Cross-Origin-Resource-Policy", value: "cross-origin" }],
       },
       {
         source: "/vendor/libraw/:path*",

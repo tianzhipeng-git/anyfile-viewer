@@ -23,6 +23,8 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Separator } from "@/components/ui/separator";
+import { PublicFileControls } from "@/components/public-file-controls";
+import { downloadPublicFile, PublicFileError } from "@/lib/public-file";
 import { FileTree } from "@/components/file-tree";
 import { ViewerHost } from "@/components/viewer-host";
 import {
@@ -46,7 +48,7 @@ function formatBytes(bytes: number, locale: PublishedLocale) {
   return `${formatNumber(bytes / 1024 ** 2, locale, { maximumFractionDigits: 1 })} MB`;
 }
 
-export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale; dictionary: AppDictionary }) {
+export function FileWorkspace({ locale, dictionary, embedded = false }: { locale: PublishedLocale; dictionary: AppDictionary; embedded?: boolean }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     const input = fileInputRef.current;
@@ -56,8 +58,9 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
   }, []);
   const readRequestId = useRef(0);
   const sampleFiles = useRef(new WeakSet<File>());
-  const sampleRequest = useRef<AbortController | null>(null);
-  useEffect(() => () => sampleRequest.current?.abort(), []);
+  const remoteFiles = useRef(new WeakSet<File>());
+  const downloadRequest = useRef<AbortController | null>(null);
+  useEffect(() => () => downloadRequest.current?.abort(), []);
   const [entries, setEntries] = useState<WorkspaceTreeEntry[]>([]);
   const [workspaceName, setWorkspaceName] = useState(dictionary.workspace.files);
   const [rootDirectory, setRootDirectory] = useState<FileSystemDirectoryHandle>();
@@ -66,7 +69,7 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
   const [fileSource, setFileSource] = useState<FileSource>("user");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(!embedded);
   const directoryWorkspace = useMemo(
     () => createWorkspaceReader(rootDirectory, selectedEntry),
     [rootDirectory, selectedEntry],
@@ -79,7 +82,7 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
 
   async function selectEntry(entry: WorkspaceTreeEntry) {
     if (entry.kind !== "file") return;
-    sampleRequest.current?.abort();
+    downloadRequest.current?.abort();
     const requestId = ++readRequestId.current;
     setSelectedEntry(entry);
     setSelectedFile(undefined);
@@ -89,8 +92,8 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
     try {
       const file = entry.file ?? await entry.handle.getFile();
       if (requestId !== readRequestId.current) return;
-      track("file_selected", { ...fileProperties(file), file_source: sampleFiles.current.has(file) ? "sample" : "user", task_entry: currentEntry() });
-      setFileSource(sampleFiles.current.has(file) ? "sample" : "user");
+      track("file_selected", { ...fileProperties(file), file_source: sampleFiles.current.has(file) ? "sample" : remoteFiles.current.has(file) ? "remote" : "user", task_entry: currentEntry() });
+      setFileSource(sampleFiles.current.has(file) ? "sample" : remoteFiles.current.has(file) ? "remote" : "user");
       setSelectedFile(file);
 
     } catch {
@@ -121,7 +124,7 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
   }
 
   async function loadDirectoryHandle(handle: FileSystemDirectoryHandle) {
-    sampleRequest.current?.abort();
+    downloadRequest.current?.abort();
     readRequestId.current += 1;
     setSelectedEntry(undefined);
     setSelectedFile(undefined);
@@ -141,10 +144,53 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
     }
   }
 
-  async function openSamples() {
-    sampleRequest.current?.abort();
+  function cancelDownload() {
+    downloadRequest.current?.abort();
+    readRequestId.current += 1;
+    setBusy(false);
+  }
+
+  async function openPublicFile(value: string) {
+    downloadRequest.current?.abort();
     const controller = new AbortController();
-    sampleRequest.current = controller;
+    downloadRequest.current = controller;
+    const requestId = ++readRequestId.current;
+    setSelectedFile(undefined);
+    setSelectedEntry(undefined);
+    setRootDirectory(undefined);
+    setEntries([]);
+    setBusy(true);
+    setError("");
+    try {
+      const file = await downloadPublicFile(value, window.location.origin, controller.signal);
+      if (controller.signal.aborted || requestId !== readRequestId.current) return;
+      const source = new URL(value);
+      if (source.origin === window.location.origin && source.pathname.startsWith("/samples/")) sampleFiles.current.add(file);
+      else remoteFiles.current.add(file);
+      await loadBrowserFiles([file]);
+    } catch (failure) {
+      if (controller.signal.aborted || requestId !== readRequestId.current) return;
+      const code = failure instanceof PublicFileError ? failure.code : "fetch-failed";
+      const messages = locale === "zh-CN" ? {
+        "invalid-url": "请输入不含认证信息、查询参数或片段的公开文件直链。",
+        "resource-limit": "公开文件超过 128 MiB 下载上限。",
+        "fetch-failed": "无法读取公开文件。请确认文件存在、来源允许 CORS 且地址没有重定向；也可下载后在本地打开。",
+      } : {
+        "invalid-url": "Use a direct public file URL without credentials, query strings or fragments.",
+        "resource-limit": "The public file exceeds the 128 MiB download limit.",
+        "fetch-failed": "Could not read the public file. Check availability, CORS and redirects, or download it and open locally.",
+      };
+      setError(messages[code]);
+    } finally {
+      // selectEntry advances the request id and owns its loading state.
+      if (requestId === readRequestId.current) setBusy(false);
+    }
+  }
+
+  async function openSamples() {
+    downloadRequest.current?.abort();
+    const controller = new AbortController();
+    downloadRequest.current = controller;
     const requestId = ++readRequestId.current;
     setBusy(true);
     setError("");
@@ -250,6 +296,8 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
 
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
+      {embedded && <PublicFileControls locale={locale} busy={busy} embedded onOpen={openPublicFile} onCancel={cancelDownload} />}
+      {busy && <p role="status" className="px-3 text-sm text-muted-foreground">{locale === "zh-CN" ? "正在读取文件…" : "Reading file…"}</p>}
       {error && (
         <Alert variant="destructive">
           <AlertCircleIcon />
@@ -260,14 +308,14 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
       <div
         className={sidebarOpen
           ? "grid min-h-0 flex-1 overflow-hidden bg-background transition-[grid-template-columns] lg:grid-cols-[300px_minmax(0,1fr)]"
-          : "grid min-h-0 flex-1 overflow-hidden bg-background transition-[grid-template-columns] lg:grid-cols-[0px_minmax(0,1fr)]"}
+          : embedded ? "flex min-h-0 flex-1 overflow-hidden bg-background" : "grid min-h-0 flex-1 overflow-hidden bg-background transition-[grid-template-columns] lg:grid-cols-[0px_minmax(0,1fr)]"}
         onDragOver={(event) => event.preventDefault()}
         onDrop={(event) => {
           event.preventDefault();
           void acceptDroppedHandles(event.dataTransfer.items);
         }}
       >
-        <aside className={sidebarOpen
+        {!embedded && <aside className={sidebarOpen
           ? "flex min-h-0 flex-col overflow-hidden bg-muted/70 lg:border-r"
           : "hidden min-h-0 flex-col overflow-hidden bg-muted/70 lg:flex"}>
           <div className="flex items-center justify-between gap-3 p-4">
@@ -314,28 +362,31 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
               {locale === "zh-CN" ? "样例" : "Samples"}
             </Button>
           </div>
-          <div className="min-h-0 flex-1 overflow-auto px-2 pb-3">
-            {entries.length ? (
-              <FileTree
-                entries={entries}
-                selectedId={selectedEntry?.id}
-                onSelect={(entry) => void selectEntry(entry)}
-                onExpand={expandDirectory}
-                ariaLabel={dictionary.workspace.workspaceFiles}
-              />
-            ) : (
-              <Empty>
-                <EmptyHeader>
-                  <EmptyMedia variant="icon"><FolderOpenIcon /></EmptyMedia>
-                  <EmptyTitle>{dictionary.workspace.unopenedTitle}</EmptyTitle>
-                  <EmptyDescription>{dictionary.workspace.unopenedDescription}</EmptyDescription>
-                </EmptyHeader>
-              </Empty>
-            )}
+          <div className="min-h-0 flex-1 overflow-auto">
+            <PublicFileControls locale={locale} busy={busy} embedded={false} onOpen={openPublicFile} onCancel={cancelDownload} />
+            <div className="px-2 pb-3">
+              {entries.length ? (
+                <FileTree
+                  entries={entries}
+                  selectedId={selectedEntry?.id}
+                  onSelect={(entry) => void selectEntry(entry)}
+                  onExpand={expandDirectory}
+                  ariaLabel={dictionary.workspace.workspaceFiles}
+                />
+              ) : (
+                <Empty>
+                  <EmptyHeader>
+                    <EmptyMedia variant="icon"><FolderOpenIcon /></EmptyMedia>
+                    <EmptyTitle>{dictionary.workspace.unopenedTitle}</EmptyTitle>
+                    <EmptyDescription>{dictionary.workspace.unopenedDescription}</EmptyDescription>
+                  </EmptyHeader>
+                </Empty>
+              )}
+            </div>
           </div>
-        </aside>
+        </aside>}
 
-        <section className="flex min-h-0 min-w-0 flex-col">
+        <section className="flex min-h-0 min-w-0 flex-1 flex-col">
           <div className="relative flex flex-1 items-stretch overflow-hidden bg-muted/30">
             <ViewerHost
               locale={locale}
@@ -346,7 +397,7 @@ export function FileWorkspace({ locale, dictionary }: { locale: PublishedLocale;
               workspace={workspace}
               header={(
                 <div className="flex min-w-0 items-center gap-2">
-                  {!sidebarOpen && (
+                  {!embedded && !sidebarOpen && (
                     <Button
                       size="icon-sm"
                       variant="ghost"

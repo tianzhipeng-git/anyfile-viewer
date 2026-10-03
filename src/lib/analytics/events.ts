@@ -29,7 +29,7 @@ export function safePath(path: string): string {
   const match = /^\/(en|zh-CN)(?:\/(.*))?\/?$/.exec(path.split(/[?#]/)[0]);
   if (!match) return "/unknown";
   const route = (match[2] ?? "").replace(/\/$/, "");
-  if (["", "view", "about", "privacy", "contact", "formats", "categories", "plugins", "viewers"].includes(route)) return `/${match[1]}${route ? `/${route}` : ""}`;
+  if (["", "view", "embed", "integrations", "about", "privacy", "contact", "formats", "categories", "plugins", "viewers"].includes(route)) return `/${match[1]}${route ? `/${route}` : ""}`;
   const [section, value, extra] = route.split("/");
   if (!extra && ((section === "formats" && extensions.includes(`.${value}`)) || (section === "plugins" && pluginIds.has(value)) || (section === "categories" && ["images-video", "360-cameras", "documents", "engineering", "code-data", "developer-artifacts", "ebooks", "graphic-design", "3d-models"].includes(value)) || (section === "viewers" && ["insta360", "gopro-max", "dji-osmo-360"].includes(value)))) return `/${match[1]}/${section}/${value}`;
   return `/${match[1]}/other`;
@@ -42,7 +42,9 @@ export function taskEntry(path: string): string {
 
 export function currentEntry(): string {
   const entry = new URLSearchParams(window.location.search).get("entry");
-  return entry ? taskEntry(entry) : "direct";
+  if (entry) return taskEntry(entry);
+  if (window.location.pathname.endsWith("/embed")) return "embed";
+  return new URLSearchParams(window.location.hash.slice(1)).has("file") ? "public_url" : "direct";
 }
 
 export function consentGranted(): boolean {
@@ -89,7 +91,7 @@ export function track(name: EventName, params: Params = {}) {
   window.gtag?.("event", name, { ...safe, ...page });
 }
 
-export type FileSource = "user" | "sample";
+export type FileSource = "user" | "sample" | "remote";
 export function createOpenAttempt(file: File, source: FileSource, entry: string, emit: typeof track = track) {
   // Do not send a result without its start if consent is granted halfway through an attempt.
   if (emit === track && (!analyticsEnabled() || !consentGranted())) emit = () => {};

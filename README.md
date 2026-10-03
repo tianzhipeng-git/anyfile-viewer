@@ -120,3 +120,13 @@ Keep previews local and read-only, load heavy dependencies on demand, and docume
 ## License
 
 Project-owned code is licensed under [Apache-2.0](LICENSE). Third-party libraries and runtime assets retain their own licenses; see [NOTICE](NOTICE) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+### Public files, README buttons and embeds
+
+In the workspace sidebar, expand **Public URL, button & embed** to open a public file and copy a preview link, README badge or iframe HTML. Any public HTTPS file URL is supported (CORS required, up to 128 MiB). Downloads happen directly in your browser; local files are never uploaded or shared.
+
+```markdown
+[![Open in Anyfile](https://www.anyfile.top/brand/open-in-anyfile.svg)](https://www.anyfile.top/en/view#file=https%3A%2F%2Fraw.githubusercontent.com%2Fmwaskom%2Fseaborn-data%2Fmaster%2Firis.csv)
+```
+
+Websites can embed `/en/embed#file=…` (or `/zh-CN/embed#file=…`). Some formats require an isolated parent page or the **Open in new window** link. Authentication, redirects and related remote files are unsupported. See the [public integration guide](https://www.anyfile.top/en/integrations) or [repository documentation](docs/public-file-embedding.md).

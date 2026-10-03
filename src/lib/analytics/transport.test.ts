@@ -54,3 +54,18 @@ it("uses the Google opt-out flag to stop automatic collection without reloading 
   updateAnalyticsConsent(true);
   expect(window["ga-disable-G-289W10FK5X"]).toBe(false);
 });
+
+it("attributes public and embedded previews without sending the source URL", async () => {
+  const { track, currentEntry, CONSENT_KEY } = await import("./events");
+  localStorage.setItem(CONSENT_KEY, "granted");
+  window.location.href = "https://www.anyfile.top/en/view#file=https%3A%2F%2Fraw.githubusercontent.com%2Fowner%2Frepo%2Ffile.csv";
+  expect(currentEntry()).toBe("public_url");
+  track("file_selected", { task_entry: currentEntry(), file_source: "remote", format: "csv" });
+  window.location.href = "https://www.anyfile.top/en/embed#file=https%3A%2F%2Fraw.githubusercontent.com%2Fowner%2Frepo%2Ffile.csv";
+  expect(currentEntry()).toBe("embed");
+  track("page_view", { task_entry: currentEntry() });
+  const payload = JSON.stringify(window.dataLayer);
+  expect(payload).toContain('"file_source":"remote"');
+  expect(payload).toContain("https://www.anyfile.top/en/embed");
+  expect(payload).not.toMatch(/raw.githubusercontent.com|file.csv|#file/);
+});

@@ -135,6 +135,10 @@
     @apply bg-background text-foreground;
     letter-spacing: -0.01em;
   }
+  body:has(.embed-page) > header,
+  body:has(.embed-page) > footer {
+    display: none;
+  }
   body:has(.viewer-page) > footer {
     display: none;
   }
