@@ -99,7 +99,8 @@
     "@anyfile/ffmpeg-audio-viewer": "workspace:*",
     "@anyfile/cad-dwg-viewer": "workspace:*",
     "@anyfile/mpp-viewer": "workspace:*",
-    "@anyfile/visio-viewer": "workspace:*"
+    "@anyfile/visio-viewer": "workspace:*",
+    "@anyfile/dicom-viewer": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

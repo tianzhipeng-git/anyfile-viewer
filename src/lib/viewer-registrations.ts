@@ -1,5 +1,6 @@
 import { visioManifest } from "@anyfile/visio-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
+import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
@@ -50,6 +51,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: mppManifest,
     async probe(context) { return (await import("@anyfile/mpp-viewer/probe")).probeMpp(context); },
     async load() { return (await import("@anyfile/mpp-viewer")).mppViewer; },
+  },
+  {
+    manifest: dicomManifest,
+    async probe(context) { return (await import("@anyfile/dicom-viewer/probe")).probeDicom(context); },
+    async load() { return (await import("@anyfile/dicom-viewer")).dicomViewer; },
   },
   {
     manifest: comicBookManifest,

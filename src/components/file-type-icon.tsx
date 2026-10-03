@@ -1,5 +1,6 @@
 import { visioManifest } from "@anyfile/visio-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
+import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
@@ -121,6 +122,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
       modernRasterManifest,
       cameraRawManifest,
       generalRasterManifest,
+      dicomManifest,
       safeSvgManifest,
       ),
     ],

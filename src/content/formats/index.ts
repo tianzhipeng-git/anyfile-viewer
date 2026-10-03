@@ -1,5 +1,6 @@
 import { visioFormats } from "./visio";
 import { mppFormat } from "./mpp";
+import { dicomFormat } from "./dicom";
 import { dwgFormat } from "./dwg";
 import { mobiFormats, comicArchiveFormats } from "./ebook-archives";
 import { fb2Format } from "./fb2";
@@ -138,6 +139,7 @@ import { zstFormat } from "./zst";
 
 export const formatContents: readonly FormatContent[] = [
   ...visioFormats,
+  dicomFormat,
   dwgFormat, ...cadExchangeFormats, ...meshFormats,
   ...pointFormats,
   goPro360Format,
