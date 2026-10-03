@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 import { currentEntry, fileProperties, track, type FileSource } from "@/lib/analytics/events";
-import { formatNumber, interpolate } from "@anyfile/i18n";
+import { formatNumber } from "@anyfile/i18n";
 import {
   AlertCircleIcon,
   FileIcon,
-  FolderIcon,
+  LinkIcon,
   FolderOpenIcon,
   PanelLeftCloseIcon,
   PanelLeftOpenIcon,
 } from "lucide-react";
 
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Empty,
@@ -22,7 +21,6 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Separator } from "@/components/ui/separator";
 import { PublicFileControls } from "@/components/public-file-controls";
 import { downloadPublicFile, PublicFileError } from "@/lib/public-file";
 import { FileTree } from "@/components/file-tree";
@@ -63,7 +61,6 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
   const downloadRequest = useRef<AbortController | null>(null);
   useEffect(() => () => downloadRequest.current?.abort(), []);
   const [entries, setEntries] = useState<WorkspaceTreeEntry[]>([]);
-  const [workspaceName, setWorkspaceName] = useState(dictionary.workspace.files);
   const [rootDirectory, setRootDirectory] = useState<FileSystemDirectoryHandle>();
   const [selectedEntry, setSelectedEntry] = useState<WorkspaceTreeEntry>();
   const [selectedFile, setSelectedFile] = useState<File>();
@@ -72,6 +69,8 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(!embedded);
   const [sidebarWidth, setSidebarWidth] = useState(300);
+  const [linkControlsOpen, setLinkControlsOpen] = useState(false);
+  const linkControlsId = useId();
   const directoryWorkspace = useMemo(
     () => createWorkspaceReader(rootDirectory, selectedEntry),
     [rootDirectory, selectedEntry],
@@ -112,7 +111,6 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
     const nextEntries = fileHandleEntries(handles);
     setRootDirectory(undefined);
     setEntries(nextEntries);
-    setWorkspaceName(handles.length === 1 ? handles[0].name : interpolate(dictionary.workspace.fileCount, { count: formatNumber(handles.length, locale) }));
     if (nextEntries[0]) await selectEntry(nextEntries[0]);
   }
 
@@ -121,7 +119,6 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
     const nextEntries = browserFileEntries(files);
     setRootDirectory(undefined);
     setEntries(nextEntries);
-    setWorkspaceName(files.length === 1 ? files[0].name : interpolate(dictionary.workspace.fileCount, { count: formatNumber(files.length, locale) }));
     if (nextEntries[0]) await selectEntry(nextEntries[0]);
   }
 
@@ -136,7 +133,6 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
       const nextEntries = await directoryHandleEntries(handle, locale);
       setRootDirectory(handle);
       setEntries(nextEntries);
-      setWorkspaceName(handle.name);
       const firstFile = nextEntries.find((entry) => entry.kind === "file");
       if (firstFile) await selectEntry(firstFile);
     } catch {
@@ -212,7 +208,6 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
       ];
       setRootDirectory(undefined);
       setEntries(nextEntries);
-      setWorkspaceName(folder);
       await selectEntry(nextEntries[1]);
     } catch {
       if (!controller.signal.aborted && requestId === readRequestId.current) {
@@ -319,17 +314,19 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
         }}
       >
         {!embedded && <aside className={sidebarOpen
-          ? "flex min-h-0 flex-col overflow-hidden bg-muted/70 lg:border-r"
-          : "hidden min-h-0 flex-col overflow-hidden bg-muted/70 lg:flex"}>
-          <div className="flex items-center justify-between gap-3 p-4">
-            <div className="flex min-w-0 items-center gap-2 text-sm font-semibold">
-              <FolderIcon className="size-4 shrink-0" aria-hidden="true" />
-              <span className="truncate">{workspaceName}</span>
+          ? "@container flex min-h-0 flex-col overflow-hidden bg-muted/30 lg:border-r"
+          : "@container hidden min-h-0 flex-col overflow-hidden bg-muted/30 lg:flex"}>
+          <div className="flex shrink-0 items-center justify-between gap-2 px-3 pt-3 pb-1">
+            <div className="flex min-w-0 items-center gap-2 text-xs leading-none font-medium text-muted-foreground">
+              <span>{dictionary.workspace.files}</span>
+              <span className="tabular-nums">{formatNumber(entries.filter((entry) => entry.kind === "file").length, locale)}</span>
             </div>
             <div className="flex shrink-0 items-center gap-1">
-              <Badge variant="secondary">{entries.filter((entry) => entry.kind === "file").length}</Badge>
+              <Button size="xs" variant="ghost" disabled={busy} onClick={() => void openSamples()} aria-label={locale === "zh-CN" ? "打开样例" : "Open samples"}>
+                {locale === "zh-CN" ? "样例" : "Samples"}
+              </Button>
               <Button
-                size="icon-sm"
+                size="icon-xs"
                 variant="ghost"
                 aria-label={dictionary.workspace.collapseSidebar}
                 title={dictionary.workspace.collapseSidebar}
@@ -339,8 +336,7 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
               </Button>
             </div>
           </div>
-          <Separator />
-          <div className="flex flex-wrap gap-2 p-3">
+          <div className="flex shrink-0 items-center gap-1 px-2 pt-1 pb-3">
             <input
               ref={fileInputRef}
               type="file"
@@ -353,20 +349,23 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
                 if (files.length) void loadBrowserFiles(files);
               }}
             />
-            <Button size="sm" disabled={busy} onClick={() => void openFiles()}>
-              <FileIcon data-icon="inline-start" />
+            <Button size="xs" variant="outline" disabled={busy} onClick={() => void openFiles()}>
+              <FileIcon data-icon="inline-start" className="hidden @min-[280px]:block" />
               {dictionary.common.openFile}
             </Button>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => void openDirectory()}>
-              <FolderOpenIcon data-icon="inline-start" />
+            <Button size="xs" variant="outline" disabled={busy} onClick={() => void openDirectory()}>
+              <FolderOpenIcon data-icon="inline-start" className="hidden @min-[280px]:block" />
               {dictionary.common.openFolder}
             </Button>
-            <Button size="sm" variant="outline" disabled={busy} onClick={() => void openSamples()} aria-label={locale === "zh-CN" ? "打开样例" : "Open samples"}>
-              {locale === "zh-CN" ? "样例" : "Samples"}
+            <Button size="xs" variant="outline" aria-expanded={linkControlsOpen} aria-controls={linkControlsId} onClick={() => setLinkControlsOpen(!linkControlsOpen)}>
+              <LinkIcon data-icon="inline-start" className="hidden @min-[280px]:block" />
+              {locale === "zh-CN" ? "打开链接" : "Open link"}
             </Button>
           </div>
-          <div className="min-h-0 flex-1 overflow-auto">
+          <div id={linkControlsId} hidden={!linkControlsOpen} className="max-h-[45%] shrink-0 overflow-auto">
             <PublicFileControls locale={locale} busy={busy} embedded={false} onOpen={openPublicFile} onCancel={cancelDownload} />
+          </div>
+          <div className="min-h-0 flex-1 overflow-auto">
             <div className="px-2 pb-3">
               {entries.length ? (
                 <FileTree

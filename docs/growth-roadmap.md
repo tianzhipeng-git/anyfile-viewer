@@ -185,7 +185,7 @@ Google 全景分组包含 360-cameras 分类页、Insta360 页、INSV 和 LRV �
 
 ### C2. 公开 URL、README 按钮与嵌入
 
-2026-10-03 已实现公开 URL、README 按钮及 iframe 首版。入口在工作区侧栏“公开 URL、按钮与嵌入”，复用现有插件，不新增 SDK、上传、托管或服务端代理。使用说明与验收记录见 [公开文件与嵌入](public-file-embedding.md)。
+2026-10-03 已实现公开 URL、README 按钮及 iframe 首版。当前入口在工作区侧栏顶部“打开链接 / Open link”，复用现有插件，不新增 SDK、上传、托管或服务端代理。使用说明与验收记录见 [公开文件与嵌入](public-file-embedding.md)。
 
 - [x] 浏览器直接读取任意公开 HTTPS 文件（包括作者网站、对象存储、GitHub Raw、jsDelivr）及本站 `/samples/` 文件，最大 128 MiB；流式核对大小，可取消，并显示 URL、读取与超限错误。
 - [x] 生成“Open in Anyfile”链接、带本站 SVG 按钮的 README Markdown、iframe HTML；地址使用 `#file=`，不进入本站请求查询。

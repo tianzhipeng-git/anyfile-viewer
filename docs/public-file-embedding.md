@@ -1,6 +1,6 @@
 # 公开文件、README 按钮与 iframe
 
-首版实现于 2026-10-03。2026-10-04 已移除来源域名白名单。网站公开说明页为 `/en/integrations` 和 `/zh-CN/integrations`，页脚和工作区均提供入口，包含可体验按钮、iframe 示例、接入代码及排错说明。在 `/en/view` 或 `/zh-CN/view` 工作区侧栏展开“公开 URL、按钮与嵌入”，输入文件直链并打开，可复制预览链接、Markdown 按钮和 iframe HTML。
+首版实现于 2026-10-03。2026-10-04 已移除来源域名白名单。网站公开说明页为 `/en/integrations` 和 `/zh-CN/integrations`，页脚和工作区均提供入口，包含可体验按钮、iframe 示例、接入代码及排错说明。在 `/en/view` 或 `/zh-CN/view` 工作区侧栏顶部点击“打开链接 / Open link”，输入文件直链并打开，可复制预览链接、Markdown 按钮和 iframe HTML。
 
 ## 公开来源与边界
 

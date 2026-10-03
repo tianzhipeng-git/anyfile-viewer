@@ -47,12 +47,12 @@ function TreeNode({ node, selectedId, onSelect, onExpand }: TreeNodeProps) {
   const [open, setOpen] = useState(entry.depth === 0);
   const [loading, setLoading] = useState(false);
   const rowClassName = cn(
-    "flex w-full items-center gap-2 rounded-lg py-2 pr-3 text-left text-sm transition-colors",
+    "flex w-full items-center gap-2 rounded-md py-1.5 pr-2 text-left text-sm transition-colors",
     selectedId === entry.id
-      ? "bg-background text-foreground"
-      : "text-muted-foreground hover:bg-background/60 hover:text-foreground",
+      ? "bg-primary/10 text-primary"
+      : "text-foreground/80 hover:bg-muted hover:text-foreground",
   );
-  const rowStyle = { paddingLeft: `${12 + entry.depth * 16}px` };
+  const rowStyle = { paddingLeft: `${8 + entry.depth * 16}px` };
 
   if (entry.kind === "file") {
     return (

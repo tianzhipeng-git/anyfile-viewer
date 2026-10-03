@@ -123,7 +123,7 @@ pnpm --filter @anyfile/pdf-viewer test
 
 ### 公开文件、README 按钮与嵌入
 
-在工作区侧栏展开 **公开 URL、按钮与嵌入**，输入公开文件直链，可复制预览链接、README Markdown 按钮与 iframe HTML。支持任意公开 HTTPS 文件直链，需要来源允许 CORS，最大 128 MiB。文件直接读取到浏览器，本地文件不会上传或因生成链接而变成可分享内容。
+点击工作区侧栏顶部的 **打开链接**，输入公开文件直链，可复制预览链接、README Markdown 按钮与 iframe HTML。支持任意公开 HTTPS 文件直链，需要来源允许 CORS，最大 128 MiB。文件直接读取到浏览器，本地文件不会上传或因生成链接而变成可分享内容。
 
 ```markdown
 [![Open in Anyfile](https://www.anyfile.top/brand/open-in-anyfile.svg)](https://www.anyfile.top/zh-CN/view#file=https%3A%2F%2Fraw.githubusercontent.com%2Fmwaskom%2Fseaborn-data%2Fmaster%2Firis.csv)

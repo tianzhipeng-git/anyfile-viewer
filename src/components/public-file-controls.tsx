@@ -50,9 +50,8 @@ export function PublicFileControls({ locale, busy, embedded, onOpen, onCancel }:
     {busy && <Button size="sm" variant="outline" onClick={onCancel}>{zh ? "取消下载" : "Cancel download"}</Button>}
   </div>;
 
-  return <details className="border-t p-3 text-sm">
-    <summary className="cursor-pointer font-medium">{zh ? "公开 URL、按钮与嵌入" : "Public URL, button & embed"}</summary>
-    <p className="mt-3"><IsolationBoundaryLink href={`/${locale}/integrations`} className="underline">{zh ? "集成与嵌入说明" : "Integration & embedding guide"}</IsolationBoundaryLink></p>
+  return <div className="border-b px-3 pb-3 text-sm">
+    <p><IsolationBoundaryLink href={`/${locale}/integrations`} className="underline">{zh ? "集成与嵌入说明" : "Integration & embedding guide"}</IsolationBoundaryLink></p>
     <form className="mt-3" onSubmit={(event) => {
       event.preventDefault();
       setCopyStatus("");
@@ -75,5 +74,5 @@ export function PublicFileControls({ locale, busy, embedded, onOpen, onCancel }:
         <p role="status">{copyStatus}</p>
       </FieldGroup>
     </form>
-  </details>;
+  </div>;
 }

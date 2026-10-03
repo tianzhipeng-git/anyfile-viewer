@@ -3,8 +3,8 @@ import type { PublishedLocale } from "@/i18n/config";
 const english = {
   title: "Integrations & embeds",
   description: "Add an Open in Anyfile button to your README, link to a public file preview, or embed a viewer in your website. Files are read directly in the browser.",
-  start: "Open the code generator",
-  intro: "Open a public file URL in the workspace sidebar under “Public URL, button & embed”. Copy the preview link, README Markdown or iframe HTML and paste it into your content.",
+  start: "Open the workspace",
+  intro: "Click “Open link” at the top of the workspace sidebar, enter a public file URL, then click “Open URL”. Copy the preview link, README Markdown or iframe HTML and paste it into your content.",
   sourceTitle: "Choose a public file",
   source: "Use a direct HTTPS URL on your own website, object storage, a public dataset, GitHub Raw or any other host. The file must be accessible without login, and the host must allow browser CORS requests. A GitHub blob page is a web page, not a file URL. Keep the filename extension in the URL so Anyfile can select a viewer.",
   cors: "For public files, your host can send Access-Control-Allow-Origin: *. If it restricts access to specific origins, allow the Anyfile origin used by your integration (normally https://www.anyfile.top). A file that downloads in the address bar can still fail to preview if CORS is missing. Anyfile does not proxy requests to bypass source restrictions.",
@@ -34,8 +34,8 @@ type IntegrationContent = { [Key in keyof typeof english]: string };
 const chinese: IntegrationContent = {
   title: "集成与嵌入",
   description: "为 README 添加 Open in Anyfile 按钮，链接到公开文件预览，或在网站中嵌入查看器。文件直接在访问者的浏览器中读取。",
-  start: "打开代码生成器",
-  intro: "在工作区侧栏展开“公开 URL、按钮与嵌入”，输入公开文件直链。复制预览链接、README Markdown 或 iframe HTML，放入你的内容中。",
+  start: "打开工作区",
+  intro: "点击工作区侧栏顶部的“打开链接”，输入公开文件直链，再点击“打开 URL”。复制预览链接、README Markdown 或 iframe HTML，放入你的内容中。",
   sourceTitle: "准备公开文件",
   source: "支持你自己的网站、对象存储、公开数据集、GitHub Raw 或其他任意主机上的 HTTPS 文件直链。文件需要无需登录即可读取，来源服务器需要允许浏览器 CORS 请求。GitHub blob 页面是网页，不是文件直链。请在 URL 中保留文件扩展名，以便 Anyfile 选择查看器。",
   cors: "公开文件的服务器可返回 Access-Control-Allow-Origin: *。如果限定了允许来源，需要允许集成所用的 Anyfile origin（通常为 https://www.anyfile.top）。地址栏可以下载的文件，仍可能因缺少 CORS 而无法预览。Anyfile 不通过代理绕过来源限制。",
