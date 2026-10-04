@@ -1,3 +1,5 @@
+import { sceneExchangeFormats } from "./scene-exchange";
+import { ifcFormat } from "./ifc";
 import { visioFormats } from "./visio";
 import { mppFormat } from "./mpp";
 import { dicomFormat } from "./dicom";
@@ -140,7 +142,7 @@ import { zstFormat } from "./zst";
 export const formatContents: readonly FormatContent[] = [
   ...visioFormats,
   dicomFormat,
-  dwgFormat, ...cadExchangeFormats, ...meshFormats,
+  ...sceneExchangeFormats, ifcFormat, dwgFormat, ...cadExchangeFormats, ...meshFormats,
   ...pointFormats,
   goPro360Format,
   lotus123Format,

@@ -1,3 +1,4 @@
+import { fbxVersion, isDae } from "./scene-header";
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
 import { isSkp } from "./skp-header";
 export async function probeMesh3d({ file, signal }: ProbeViewerContext): Promise<ViewerSupportLevel> {
@@ -5,6 +6,8 @@ export async function probeMesh3d({ file, signal }: ProbeViewerContext): Promise
   const bytes = new Uint8Array(await file.slice(0, 4096).arrayBuffer());
   if (signal.aborted) throw new DOMException("Aborted", "AbortError");
   const text = new TextDecoder().decode(bytes); const ext = file.name.split(".").pop()?.toLowerCase();
+  if (ext === "fbx") return fbxVersion(bytes) >= (text.startsWith("Kaydara FBX Binary") ? 6400 : 7000) ? 3 : 0;
+  if (ext === "dae") return isDae(text) ? 3 : 0;
   if (ext === "skp") return isSkp(bytes) ? 3 : 0;
   if (ext === "stl") return (bytes.length >= 84 && new DataView(bytes.buffer).getUint32(80, true) * 50 + 84 === file.size) || /^\s*solid\b/.test(text) ? 3 : 0;
   if (ext === "ply") return /^ply\r?\n/.test(text) ? 3 : 0;

@@ -1,3 +1,4 @@
+import { ifcManifest } from "@anyfile/ifc-viewer/manifest";
 import { visioManifest } from "@anyfile/visio-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
 import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
@@ -407,6 +408,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: dwgManifest,
     async probe(context) { return (await import("@anyfile/cad-dwg-viewer/probe")).probeDwg(context); },
     async load() { return (await import("@anyfile/cad-dwg-viewer")).dwgViewer; },
+  },
+  {
+    manifest: ifcManifest,
+    async probe(context) { return (await import("@anyfile/ifc-viewer/probe")).probeIfc(context); },
+    async load() { return (await import("@anyfile/ifc-viewer")).ifcViewer; },
   },
   {
     manifest: cadExchangeManifest,

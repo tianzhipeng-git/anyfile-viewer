@@ -1,0 +1,139 @@
+; FBX 7.4.0 project file
+FBXHeaderExtension:  {
+	FBXHeaderVersion: 1003
+	FBXVersion: 7400
+}
+GlobalSettings:  {
+	Version: 1000
+	Properties70:  {
+		P: "UpAxis","int","","A",2
+		P: "UpAxisSign","int","","A",1
+		P: "UnitScaleFactor","double","","A",1.0
+	}
+}
+Objects:  {
+	Model: 1000,"Model::Room","Null" {
+		Version: 232
+		Properties70:  {
+			P: "Lcl Translation","Lcl Translation","","A",0.0,0.0,0.0
+			P: "Lcl Rotation","Lcl Rotation","","A",0.0,0.0,0.0
+			P: "Lcl Scaling","Lcl Scaling","","A",1.0,1.0,1.0
+		}
+	}
+	Material: 2000,"Material::Blue","" {
+		Version: 102
+		ShadingModel: "phong"
+		Properties70:  {
+			P: "DiffuseColor","Color","","A",0.4,0.65,0.85
+		}
+	}
+	Video: 3000,"Video::surface","Clip" {
+		RelativeFilename: "surface.png"
+		Filename: "surface.png"
+		Content: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4nGNo2PDgPwAG1AMQ/5r/oAAAAABJRU5ErkJggg=="
+	}
+	Texture: 3001,"Texture::surface","TextureVideoClip" {
+		FileName: "surface.png"
+		RelativeFilename: "surface.png"
+	}
+	Geometry: 100,"Geometry::Floor","Mesh" {
+		Vertices: *24 {
+			a: -300.0,-200.0,0,300.0,-200.0,0,300.0,200.0,0,-300.0,200.0,0,-300.0,-200.0,20,300.0,-200.0,20,300.0,200.0,20,-300.0,200.0,20
+		}
+		PolygonVertexIndex: *36 {
+			a: 0,2,-2,0,3,-3,4,5,-7,4,6,-8,0,1,-6,0,5,-5,1,2,-7,1,6,-6,2,3,-8,2,7,-7,3,0,-5,3,4,-8
+		}
+	}
+	Model: 200,"Model::Floor","Mesh" {
+		Version: 232
+		Properties70:  {
+			P: "Lcl Translation","Lcl Translation","","A",0.0,0.0,0.0
+			P: "Lcl Rotation","Lcl Rotation","","A",0.0,0.0,0.0
+			P: "Lcl Scaling","Lcl Scaling","","A",1.0,1.0,1.0
+		}
+	}
+	Geometry: 101,"Geometry::North","Mesh" {
+		Vertices: *24 {
+			a: -300.0,-10.0,0,300.0,-10.0,0,300.0,10.0,0,-300.0,10.0,0,-300.0,-10.0,300,300.0,-10.0,300,300.0,10.0,300,-300.0,10.0,300
+		}
+		PolygonVertexIndex: *36 {
+			a: 0,2,-2,0,3,-3,4,5,-7,4,6,-8,0,1,-6,0,5,-5,1,2,-7,1,6,-6,2,3,-8,2,7,-7,3,0,-5,3,4,-8
+		}
+	}
+	Model: 201,"Model::North","Mesh" {
+		Version: 232
+		Properties70:  {
+			P: "Lcl Translation","Lcl Translation","","A",0.0,190.0,20.0
+			P: "Lcl Rotation","Lcl Rotation","","A",0.0,0.0,0.0
+			P: "Lcl Scaling","Lcl Scaling","","A",1.0,1.0,1.0
+		}
+	}
+	Geometry: 102,"Geometry::South","Mesh" {
+		Vertices: *24 {
+			a: -300.0,-10.0,0,300.0,-10.0,0,300.0,10.0,0,-300.0,10.0,0,-300.0,-10.0,300,300.0,-10.0,300,300.0,10.0,300,-300.0,10.0,300
+		}
+		PolygonVertexIndex: *36 {
+			a: 0,2,-2,0,3,-3,4,5,-7,4,6,-8,0,1,-6,0,5,-5,1,2,-7,1,6,-6,2,3,-8,2,7,-7,3,0,-5,3,4,-8
+		}
+	}
+	Model: 202,"Model::South","Mesh" {
+		Version: 232
+		Properties70:  {
+			P: "Lcl Translation","Lcl Translation","","A",0.0,-190.0,20.0
+			P: "Lcl Rotation","Lcl Rotation","","A",0.0,0.0,0.0
+			P: "Lcl Scaling","Lcl Scaling","","A",1.0,1.0,1.0
+		}
+	}
+	Geometry: 103,"Geometry::East","Mesh" {
+		Vertices: *24 {
+			a: -10.0,-180.0,0,10.0,-180.0,0,10.0,180.0,0,-10.0,180.0,0,-10.0,-180.0,300,10.0,-180.0,300,10.0,180.0,300,-10.0,180.0,300
+		}
+		PolygonVertexIndex: *36 {
+			a: 0,2,-2,0,3,-3,4,5,-7,4,6,-8,0,1,-6,0,5,-5,1,2,-7,1,6,-6,2,3,-8,2,7,-7,3,0,-5,3,4,-8
+		}
+	}
+	Model: 203,"Model::East","Mesh" {
+		Version: 232
+		Properties70:  {
+			P: "Lcl Translation","Lcl Translation","","A",290.0,0.0,20.0
+			P: "Lcl Rotation","Lcl Rotation","","A",0.0,0.0,0.0
+			P: "Lcl Scaling","Lcl Scaling","","A",1.0,1.0,1.0
+		}
+	}
+	Geometry: 104,"Geometry::West","Mesh" {
+		Vertices: *24 {
+			a: -10.0,-180.0,0,10.0,-180.0,0,10.0,180.0,0,-10.0,180.0,0,-10.0,-180.0,300,10.0,-180.0,300,10.0,180.0,300,-10.0,180.0,300
+		}
+		PolygonVertexIndex: *36 {
+			a: 0,2,-2,0,3,-3,4,5,-7,4,6,-8,0,1,-6,0,5,-5,1,2,-7,1,6,-6,2,3,-8,2,7,-7,3,0,-5,3,4,-8
+		}
+	}
+	Model: 204,"Model::West","Mesh" {
+		Version: 232
+		Properties70:  {
+			P: "Lcl Translation","Lcl Translation","","A",-290.0,0.0,20.0
+			P: "Lcl Rotation","Lcl Rotation","","A",0.0,0.0,0.0
+			P: "Lcl Scaling","Lcl Scaling","","A",1.0,1.0,1.0
+		}
+	}
+}
+Connections:  {
+	C: "OO",1000,0
+	C: "OO",3000,3001
+	C: "OP",3001,2000,"DiffuseColor"
+	C: "OO",100,200
+	C: "OO",200,1000
+	C: "OO",2000,200
+	C: "OO",101,201
+	C: "OO",201,1000
+	C: "OO",2000,201
+	C: "OO",102,202
+	C: "OO",202,1000
+	C: "OO",2000,202
+	C: "OO",103,203
+	C: "OO",203,1000
+	C: "OO",2000,203
+	C: "OO",104,204
+	C: "OO",204,1000
+	C: "OO",2000,204
+}

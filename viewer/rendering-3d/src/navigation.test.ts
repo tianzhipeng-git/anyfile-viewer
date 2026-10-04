@@ -42,6 +42,32 @@ describe("walkthrough", () => {
     const s = setup(); s.click("Walkthrough"); s.ui.root.querySelector("input")!.dispatchEvent(new KeyboardEvent("keydown", { key: "w", bubbles: true })); expect(s.nav.update(0)).toBe(false);
     s.nav.dispose(); s.key("w"); expect(s.nav.update(0)).toBe(false);
   });
+  it("resumes keyboard movement after pointer toolbar actions and speed changes", () => {
+    const s = setup(); s.click("Walkthrough");
+    const button = s.ui.button("Wireframe", () => {});
+    button.focus(); button.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+    expect(document.activeElement).toBe(s.canvas);
+    const speed = s.ui.root.querySelector("select")!;
+    speed.dispatchEvent(new PointerEvent("pointerdown", { bubbles: true })); speed.focus();
+    speed.value = "3"; speed.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(document.activeElement).toBe(s.canvas);
+    const before = s.perspective.position.clone(); s.key("w"); s.nav.update(0); s.nav.update(50);
+    expect(s.perspective.position.distanceTo(before)).toBeCloseTo(0.21);
+    const forward = [...s.ui.root.querySelectorAll("button")].find(item => item.textContent === "Forward")!;
+    forward.focus(); forward.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+    expect(document.activeElement).toBe(s.canvas);
+    s.nav.dispose(); button.focus(); button.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+    expect(document.activeElement).toBe(button);
+  });
+  it("preserves keyboard control focus and does not navigate while editing speed", () => {
+    const s = setup(); s.click("Walkthrough");
+    const button = s.ui.button("Wireframe", () => {}); button.focus(); button.click();
+    expect(document.activeElement).toBe(button);
+    const speed = s.ui.root.querySelector("select")!; speed.focus();
+    speed.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }));
+    speed.value = "3"; speed.dispatchEvent(new Event("change", { bubbles: true }));
+    expect(document.activeElement).toBe(speed); expect(s.nav.update(0)).toBe(false);
+  });
   it("places the eye above a picked world-space surface and allows cancel", () => {
     const s = setup(); s.root.position.set(0, 0, 0); s.ortho.position.set(0, 10, 0); s.ortho.lookAt(0, 0, 0); s.ortho.updateProjectionMatrix();
     s.click("Place viewpoint"); s.click("Pick view center"); s.click("Enter here");

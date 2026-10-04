@@ -140,6 +140,18 @@ export function createNavigation(options: {
   };
   const visibility = () => { if (document.hidden) stop(); };
   const abort = new AbortController(); const signal = abort.signal;
+  // Pointer-operated controls return to navigation; keyboard users keep their tab position.
+  const resume = () => { if (mode === "roam") canvas.focus({ preventScroll: true }); };
+  const resumeAfterButton = (event: MouseEvent) => {
+    if (event.detail > 0 && event.target instanceof Element && event.target.closest("button")) resume();
+  };
+  ui.toolbar.addEventListener("click", resumeAfterButton, { signal });
+  panel.addEventListener("click", resumeAfterButton, { signal });
+  let pointerSpeed = false;
+  speed.addEventListener("pointerdown", () => { pointerSpeed = true; }, { signal });
+  speed.addEventListener("keydown", () => { pointerSpeed = false; }, { signal });
+  speed.addEventListener("change", () => { if (pointerSpeed) resume(); }, { signal });
+  speed.addEventListener("blur", () => { pointerSpeed = false; }, { signal });
   canvas.addEventListener("wheel", wheel, { signal, passive: false });
   canvas.addEventListener("keydown", keydown, { signal }); window.addEventListener("keyup", keyup, { signal });
   canvas.addEventListener("blur", stop, { signal }); window.addEventListener("blur", stop, { signal }); document.addEventListener("visibilitychange", visibility, { signal });

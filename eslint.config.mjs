@@ -17,6 +17,7 @@ const eslintConfig = defineConfig([
     "public/vendor/ogv/**",
     "public/vendor/stet/**",
     "public/vendor/occt-import-js/**",
+    "public/vendor/web-ifc/**",
     "public/vendor/laz-perf/**",
     "third_party/heif-wasm/**",
     "third_party/ffmpeg-playback/**",

@@ -22,6 +22,7 @@ export const mesh3dViewer: FileViewerPlugin = {
         case "ply": document = (await import("./ply")).loadPly(bytes); break;
         case "obj": document = await (await import("./obj")).loadObj(new TextDecoder().decode(bytes), context); break;
         case "glb": case "gltf": document = await (await import("./gltf")).loadGltf(bytes, context); break;
+        case "fbx": case "dae": document = await (await import("./scene-adapter")).loadScene(bytes, ext, context); break;
         case "skp": document = await (await import("./skp-adapter")).loadSkp(bytes, context); break;
         default: throw new Error("Unsupported extension");
       }

@@ -15,6 +15,8 @@
 | OBJ/MTL | mesh-3d | 网格、对象、本地材质与简单漫反射纹理 | 3 | implemented；几何 smoke 通过，关联材质矩阵待补 |
 | PLY / OFF | mesh-3d | 网格/点（PLY）、基础凸多边形（OFF） | 3 | implemented；固定样例 smoke 通过，binary PLY 证据待补 |
 | glTF / GLB | mesh-3d | glTF 2.0 场景、材质与动画入口 | 3 | implemented；GLB 几何 smoke 通过，动画/关联资源矩阵待补 |
+| IFC | ifc | 建筑几何、构件名称、颜色、单位与漫游 | 3 | implemented；原创房间样例真实解析与 Chrome 漫游通过，详见 IFC 节 |
+| FBX / COLLADA DAE | mesh-3d | 网格、层级、材质、本地/内嵌纹理、动画入口与漫游 | 3 | implemented；ASCII/binary FBX、DAE 原创房间样例解析；真实 Chrome 验证见下节 |
 | SketchUp SKP | mesh-3d | 组件几何与变换、基础材质和内嵌 PNG/JPEG；可取消 Worker | 3 | implemented；v17/v25 固定样例解析测试；79 MiB 用户模型真实 Chrome 加载、视角与缩放通过 |
 | 3MF / AMF | print-3d | 构建几何、单位；3MF 组件与变换 | 3 | implemented；固定样例 smoke 与结构测试通过 |
 | ASCII PCD / XYZ | point-cloud | 有界渐进代表性抽样 | 2 | implemented；5000 点固定样例 smoke 通过；非完整 LOD |
@@ -40,7 +42,7 @@
 | IGES | `.iges`, `.igs` | 精确 CAD | CAD Worker/WASM → tessellation | 常见曲面/实体的可见几何与单位 | implemented 子集 |
 | BREP | `.brep` | 精确 CAD | CAD Worker/WASM → tessellation | 拓扑与 tessellated 显示；单位未知 | implemented 子集 |
 | DWG | `.dwg` | CAD | LibreDWG 0.14 本地 Worker；模型空间几何、基础文字、缓存标注与填充 | 128 MiB 文件；替代字体；不含布局、外参、代理与 ACIS 实体 | cad-dwg，等级 3；部分图元近似 |
-| FBX / DAE / 3DS | `.fbx`, `.dae`, `.3ds` | CG | 按格式动态 loader | 常见静态 mesh、层级与材质 | candidate |
+| 3DS | `.3ds` | CG | 按格式动态 loader | 常见静态 mesh、层级与材质 | candidate |
 | USD / USDZ | `.usd`, `.usda`, `.usdc`, `.usdz` | CG/AR | USD-aware runtime 独立评估 | composition、引用、mesh、材质和动画的明确子集 | blocked pending provider |
 | LAS / LAZ | `.las`, `.laz` | 点云 | Worker + 有界 LAZ WASM | 坐标抽样预览，不显示属性；LAZ 压缩输入上限 128 MiB | implemented Lv.2 子集 |
 | PCD / XYZ | `.pcd`, `.xyz` | 点云 | 流式 Worker / 代表性抽样 | ASCII XYZ 几何；点属性待完成 | implemented 子集 |
@@ -125,3 +127,28 @@
 放置观察点仅在点击或选择画面中心时拾取可见网格，在表面上方显示眼高标记，确认后进入；不会自动识别地板，也不会穿透屋顶寻找房间。取消放置或返回总览恢复之前的相机、缩放和 orbit 目标。失焦/隐藏/图形上下文丢失时停止移动；无输入时不持续渲染。平面文档保留原有查看方式。
 
 漫游验收（2026-10-04）：真实 Chrome 打开用户 Living Room.skp，完成中心表面拾取、确认进入、下降穿过屋顶、水平步进、拖动室内环顾和返回原总览。共享渲染器 12 项测试通过（含 10 项导航测试），应用 123 项回归通过，ESLint、TypeScript、生产构建与 bundle/asset 检查通过。
+
+## IFC 建筑模型（2026-10-04）
+
+- 插件 `ifc`，等级 3；IFC2X3、IFC4、IFC4X3_ADD2 的 STEP 文本 `.ifc`。不声明 IFCZIP、IFCXML 或不兼容 schema alias。
+- web-ifc 0.0.78 官方 npm 原始 JS/WASM，MPL-2.0；独立模块 Worker，强制单线程，不需要 pthread。jsDelivr → R2 同版本镜像 → 同源，回退仅覆盖初始化；模型错误不重复解析。
+- `StreamAllMeshes` 将几何转换为米、Y-up，保留变换、构件名、颜色和透明度，共享几何按 ID 复用。超过 256 个构件时按 IFC 类型分组显隐。
+- 接入共享总览、观察点放置和漫游；不提供属性表、完整空间层级、纹理、碰撞、重力、BIM 校验或精确测量。web-ifc 未支持的几何可能省略。
+- 主文件 128 MiB；IFC 数据内存配置 512 MiB（不是整个 WASM 堆的硬上限）；输出 600 万顶点、256 MiB、4,096 次绘制；解析 120 秒超时或取消后终止 Worker。
+- 固定原创 `viewer/plugins/ifc/fixtures/room.ifc` 验证毫米转米、6 × 4 × 3.2 米房间、Y-up、变换、名称与颜色；真实 Chrome 打开、地面观察点放置、室内环顾及返回总览通过。完整工业模型兼容性矩阵仍待补。
+- `BasicHouse.ifc` 本地实测（50.3 MiB，IFC2X3）：Chrome 显示 884,073 顶点、617,376 三角面。空的轴线/曲线三角网格不视为文件损坏，不计绘制预算；仍校验非空几何的结构。样例不随仓库分发，可用 `IFC_TEST_FILE=/absolute/path/to/model.ifc pnpm --filter @anyfile/ifc-viewer test` 复测。
+- Worker 测试覆盖各来源失败清理、同源回退、取消、超时、文件错误不回退；插件测试覆盖损坏/超限输入、销毁和取消后不渲染。
+
+
+## FBX / COLLADA DAE（2026-10-04）
+
+- `mesh-3d` 新增 `.fbx`、`.dae`，等级 3。ASCII FBX >= 7000、binary >= 6400；COLLADA 2005/11 与 2008/03 namespace 的受支持子集。
+- Three.js 0.185.1 解析器按需在模块 Worker 中运行；COLLADA 使用 LinkeDOM 0.18.13 的 worker XML DOM。FBX 的两个窄补丁及删除条件见 `patches/three-worker.md`。
+- Worker 内不加载图片，仅记录纹理引用。二进制内嵌图片以 Blob 返回；主线程从授权工作区/内嵌数据读取 PNG/JPEG，先检查像素预算再解码。文件里的远程或越界引用不会发起网络请求；缺图时保留几何并提示。
+- 场景保留网格、节点变换、基础材质、骨骼与解析器输出的动画片段。导入光源不启用，使用统一查看照明。高级着色器、约束、物理和 COLLADA 运动学不属于支持范围；完整动画/导出器兼容性矩阵待补。
+- FBX 声明的厘米/单位比例转换为米（没有声明时单位未知）；COLLADA 使用 `<unit meter>`，缺省为标准的米。坐标统一 Y-up，复用观察点、漫游、眼高、移动速度与 FOV 控件。
+- 输入 128 MiB；解析前限制 1,200 万数字/数组元素与 10 万结构节点；binary FBX 校验记录边界、64 层深度、128 MiB 数组展开量，分块验证压缩数组的真实长度。输出沿用 600 万顶点、256 MiB 和 4,096 次绘制限制；最多 256 个纹理引用。120 秒超时、取消和失败均终止 Worker。
+- 外部图片沿用关联资源 128 MiB/3,200 万像素预算；单图 16 MiB、8192 边长、16,777,216 像素；总解码图片 64 Mi 像素。缺失/不支持图片降级，超限拒绝。
+- 原创可重建样例 `viewer/plugins/mesh-3d/fixtures/scenes` 覆盖同一 6 × 4 × 3.2 米房间的 ASCII FBX、压缩 binary FBX（内嵌 PNG）、DAE（外部 PNG）。测试验证单位、Y-up、名称、纹理记录、网络阻断、取消与清理。
+
+- 真实 Chrome：binary FBX 内嵌 PNG 与 DAE 本地 PNG 均显示成功、尺寸正确且无缺图提示；DAE 放置观察点、室内环顾和返回总览通过。未声明全面验证不同软件的大型项目或复杂动画。

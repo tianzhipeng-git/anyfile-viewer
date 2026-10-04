@@ -726,6 +726,44 @@
       "directory": "dicom",
       "package": "@anyfile/dicom-viewer",
       "runtimeSets": []
+    },
+    "ifc": {
+      "directory": "ifc",
+      "package": "@anyfile/ifc-viewer",
+      "runtimeSets": [
+        {
+          "id": "web-ifc",
+          "version": "0.0.78",
+          "assetPatterns": [
+            "public/vendor/web-ifc/0.0.78/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "ifc",
+              "assetPatterns": [
+                "public/vendor/web-ifc/0.0.78/web-ifc-api.js",
+                "public/vendor/web-ifc/0.0.78/web-ifc.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "jsdelivr",
+            "r2",
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/ifc/src/runtime.ts",
+            "viewer/plugins/ifc/src/worker-client.ts"
+          ],
+          "requiredMarkers": [
+            "0.0.78",
+            "https://cdn.jsdelivr.net/npm/web-ifc@",
+            "https://assets.anyfile.top/vendor/web-ifc/",
+            "`/vendor/web-ifc/",
+            "initializeRuntimeFromSources"
+          ]
+        }
+      ]
     }
   }
 }

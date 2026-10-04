@@ -1,0 +1,21 @@
+diff --git a/examples/jsm/loaders/FBXLoader.js b/examples/jsm/loaders/FBXLoader.js
+index 7a78f38c2d99d6ee67c707f3c9fb717abb1940bf..b20010bdc9fd5829f27101dc18653b64cc2330c1 100644
+--- a/examples/jsm/loaders/FBXLoader.js
++++ b/examples/jsm/loaders/FBXLoader.js
+@@ -367,7 +367,7 @@ class FBXTreeParser {
+ 		} else { // Binary Format
+ 
+ 			const array = new Uint8Array( content );
+-			return window.URL.createObjectURL( new Blob( [ array ], { type: type } ) );
++			return URL.createObjectURL( new Blob( [ array ], { type: type } ) );
+ 
+ 		}
+ 
+@@ -1005,6 +1005,7 @@ class FBXTreeParser {
+ 		// if all the models where already combined in a single group, just return that
+ 		if ( sceneGraph.children.length === 1 && sceneGraph.children[ 0 ].isGroup ) {
+ 
++			sceneGraph.children[ 0 ].userData.unitScaleFactor = sceneGraph.userData.unitScaleFactor;
+ 			sceneGraph.children[ 0 ].animations = animations;
+ 			sceneGraph = sceneGraph.children[ 0 ];
+ 

@@ -1,3 +1,4 @@
+import { ifcManifest } from "@anyfile/ifc-viewer/manifest";
 import { visioManifest } from "@anyfile/visio-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
 import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
@@ -179,7 +180,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "model",
     icon: BoxIcon,
-    extensions: [...manifestExtensions(cadExchangeManifest, mesh3dManifest, print3dManifest, pointCloudManifest), ".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
+    extensions: [...manifestExtensions(ifcManifest, cadExchangeManifest, mesh3dManifest, print3dManifest, pointCloudManifest), ".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
   },
   {
     kind: "design",
