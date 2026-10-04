@@ -1,3 +1,7 @@
+import { ifcManifest } from "@anyfile/ifc-viewer/manifest";
+import { visioManifest } from "@anyfile/visio-viewer/manifest";
+import { mppManifest } from "@anyfile/mpp-viewer/manifest";
+import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
@@ -119,6 +123,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
       modernRasterManifest,
       cameraRawManifest,
       generalRasterManifest,
+      dicomManifest,
       safeSvgManifest,
       ),
     ],
@@ -144,7 +149,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "document",
     icon: FileTextIcon,
-    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest)
+    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest)
       .filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },
   {
@@ -175,13 +180,13 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "model",
     icon: BoxIcon,
-    extensions: [...manifestExtensions(cadExchangeManifest, mesh3dManifest, print3dManifest, pointCloudManifest), ".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
+    extensions: [...manifestExtensions(ifcManifest, cadExchangeManifest, mesh3dManifest, print3dManifest, pointCloudManifest), ".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
   },
   {
     kind: "design",
     icon: PaletteIcon,
     extensions: [
-      ...manifestExtensions(pixelmatorPxdManifest, photoshopManifest, cad2dManifest, dwgManifest),
+      ...manifestExtensions(visioManifest, pixelmatorPxdManifest, photoshopManifest, cad2dManifest, dwgManifest),
       ...pdfManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".ai"),
       ".psb", ".fig", ".sketch", ".xd", ".indd",
     ],

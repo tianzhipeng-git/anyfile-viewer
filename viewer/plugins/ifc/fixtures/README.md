@@ -1,0 +1,1 @@
+Original synthetic fixture authored for Anyfile Viewer, under the repository Apache-2.0 license. IFC4 millimeter units; floor and four walls, 6 × 4 × 3.2 meters overall, with surface color. No external assets.

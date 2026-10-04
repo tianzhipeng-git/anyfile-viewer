@@ -120,3 +120,13 @@ pnpm --filter @anyfile/pdf-viewer test
 ## 许可证
 
 项目自有代码使用 [Apache-2.0](LICENSE) 许可证。第三方库与运行时资源遵循各自的许可证，详见 [NOTICE](NOTICE) 和 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+
+### 公开文件、README 按钮与嵌入
+
+点击工作区侧栏顶部的 **打开链接**，输入公开文件直链，可复制预览链接、README Markdown 按钮与 iframe HTML。支持任意公开 HTTPS 文件直链，需要来源允许 CORS，最大 128 MiB。文件直接读取到浏览器，本地文件不会上传或因生成链接而变成可分享内容。
+
+```markdown
+[![Open in Anyfile](https://www.anyfile.top/brand/open-in-anyfile.svg)](https://www.anyfile.top/zh-CN/view#file=https%3A%2F%2Fraw.githubusercontent.com%2Fmwaskom%2Fseaborn-data%2Fmaster%2Firis.csv)
+```
+
+网站可嵌入 `/zh-CN/embed#file=…` 或 `/en/embed#file=…`。部分格式需要隔离的父页或通过 **在新窗口打开** 查看；首版不支持认证、重定向及远程关联文件。详见[网站集成说明](https://www.anyfile.top/zh-CN/integrations)与[仓库文档](docs/public-file-embedding.md)。

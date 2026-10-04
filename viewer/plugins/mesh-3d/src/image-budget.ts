@@ -1,3 +1,17 @@
+import { ViewerError, selectMessages, type Locale } from "@anyfile/viewer-protocol";
+
+// 256 MiB of decoded RGBA pixels, excluding mipmaps and renderer overhead.
+export function checkTexturePixelBudget(pixels: number, locale: Locale) {
+  const limit = 64 * 1024 * 1024;
+  if (pixels <= limit) return;
+  const count = pixels.toLocaleString(locale);
+  const maximum = limit.toLocaleString(locale);
+  throw new ViewerError("resource-limit", selectMessages(locale, {
+    en: `Model textures contain ${count} pixels; the viewer limit is ${maximum} pixels (256 MiB decoded RGBA).`,
+    "zh-CN": `模型纹理共有 ${count} 像素，查看器上限为 ${maximum} 像素（解码为 RGBA 后 256 MiB）。`,
+  }));
+}
+
 export async function imagePixels(blob: Blob) {
   if (blob.size > 16 * 1024 * 1024) throw new RangeError("Encoded texture budget");
   const bytes = new Uint8Array(await blob.slice(0, 256 * 1024).arrayBuffer());

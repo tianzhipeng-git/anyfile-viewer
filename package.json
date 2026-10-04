@@ -10,7 +10,11 @@
   "pnpm": {
     "ignoredBuiltDependencies": [
       "unrs-resolver"
-    ]
+    ],
+    "patchedDependencies": {
+      "openskp@1.3.0": "patches/openskp@1.3.0.patch",
+      "three@0.185.1": "patches/three@0.185.1.patch"
+    }
   },
   "scripts": {
     "audit:content": "node scripts/seo/audit.mjs",
@@ -20,7 +24,7 @@
     "prepare:stet": "node scripts/prepare-stet-assets.mjs",
     "prepare:ogv": "node scripts/prepare-ogv-assets.mjs",
     "prepare:licenses": "node scripts/prepare-license-assets.mjs",
-    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif && pnpm prepare:stet && pnpm prepare:ogv && pnpm prepare:laz && pnpm prepare:occt && pnpm prepare:dwg && pnpm prepare:ebooks && pnpm prepare:licenses && pnpm prepare:ffmpeg",
+    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif && pnpm prepare:stet && pnpm prepare:ogv && pnpm prepare:laz && pnpm prepare:occt && pnpm prepare:dwg && pnpm prepare:ebooks && pnpm prepare:licenses && pnpm prepare:ffmpeg && pnpm prepare:mpp && pnpm prepare:visio && pnpm prepare:ifc",
     "dev": "pnpm prepare:assets && next dev",
     "build": "pnpm prepare:assets && next build --webpack && pnpm check:bundle",
     "check:bundle": "node scripts/check-view-bundle.mjs && node scripts/check-plugin-bundles.mjs && node scripts/check-plugin-assets.mjs && node scripts/check-ffmpeg-bundles.mjs",
@@ -37,7 +41,10 @@
     "prepare:ebooks": "node scripts/prepare-ebook-assets.mjs",
     "test:ebooks:phase45": "node scripts/verify-ebook-phase45-browser.mjs",
     "prepare:ffmpeg": "node scripts/prepare-ffmpeg-assets.mjs",
-    "prepare:dwg": "node scripts/prepare-dwg-assets.mjs"
+    "prepare:dwg": "node scripts/prepare-dwg-assets.mjs",
+    "prepare:mpp": "node scripts/prepare-mpp-assets.mjs",
+    "prepare:visio": "node scripts/prepare-visio-assets.mjs",
+    "prepare:ifc": "node scripts/prepare-ifc-assets.mjs"
   },
   "dependencies": {
     "@anyfile/i18n": "workspace:*",
@@ -95,7 +102,11 @@
     "@anyfile/mobi-reader": "workspace:*",
     "@anyfile/ffmpeg-video-viewer": "workspace:*",
     "@anyfile/ffmpeg-audio-viewer": "workspace:*",
-    "@anyfile/cad-dwg-viewer": "workspace:*"
+    "@anyfile/cad-dwg-viewer": "workspace:*",
+    "@anyfile/mpp-viewer": "workspace:*",
+    "@anyfile/visio-viewer": "workspace:*",
+    "@anyfile/dicom-viewer": "workspace:*",
+    "@anyfile/ifc-viewer": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

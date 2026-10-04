@@ -5,7 +5,7 @@ import type { ImageFileInfo } from "./format";
 export interface ImageViewerElements {
   readonly root: HTMLDivElement;
   readonly viewport: HTMLDivElement;
-  readonly image: HTMLImageElement;
+  readonly image: HTMLImageElement | HTMLCanvasElement;
   readonly zoomValue: HTMLOutputElement;
   readonly rotateLeft: HTMLButtonElement;
   readonly rotateRight: HTMLButtonElement;
@@ -29,6 +29,13 @@ const styles = `
   .anyfile-browser-image-viewer__viewport { position:relative; min-height:0; flex:1; overflow:hidden; overscroll-behavior:contain; background:repeating-conic-gradient(#e7e9ec 0 25%,#f7f8f9 0 50%) 50%/20px 20px; touch-action:none; cursor:grab; user-select:none; }
   .anyfile-browser-image-viewer__viewport[data-dragging=true] { cursor:grabbing; }
   .anyfile-browser-image-viewer__image { position:absolute; left:50%; top:50%; display:block; max-width:none; max-height:none; transform-origin:center; image-orientation:from-image; box-shadow:0 8px 30px rgb(0 0 0 / .18); pointer-events:none; }
+  .anyfile-browser-image-viewer__animation { display:flex; flex-wrap:wrap; flex:none; align-items:center; gap:8px; padding:8px 12px; border-bottom:1px solid var(--viewer-border,#ddd); font-size:13px; }
+  .anyfile-browser-image-viewer__animation button { min-height:44px; }
+  .anyfile-browser-image-viewer__animation label { display:flex; align-items:center; gap:6px; }
+  .anyfile-browser-image-viewer__animation select { min-height:44px; border:1px solid var(--viewer-border,#ddd); border-radius:7px; padding:0 8px; background:var(--viewer-background,#fff); color:inherit; font:inherit; }
+  .anyfile-browser-image-viewer__animation select:focus-visible { outline:2px solid var(--viewer-accent,#2563eb); outline-offset:1px; }
+  .anyfile-browser-image-viewer__animation span { font-variant-numeric:tabular-nums; }
+  .anyfile-browser-image-viewer button:disabled { opacity:.5; cursor:default; }
   @media (max-width:640px) {
     .anyfile-browser-image-viewer__toolbar { align-items:flex-start; flex-wrap:wrap; }
     .anyfile-browser-image-viewer__identity { width:100%; }
@@ -52,7 +59,7 @@ export function createImageViewerElements(
   width: number,
   height: number,
   locale: Locale,
-  imageElement?: HTMLImageElement,
+  imageElement?: HTMLImageElement | HTMLCanvasElement,
 ): ImageViewerElements {
   const copy = selectMessages(locale, {
     en: { tools: "Image viewing tools", frames: "frames", animated: "animated", alpha: "alpha", orientation: "orientation", zoomOut: "Zoom out", zoomIn: "Zoom in", fit: "Fit", actual: "Actual size", rotateLeft: "Rotate left", rotateRight: "Rotate right", canvas: "Image canvas, draggable and zoomable" },
@@ -101,7 +108,8 @@ export function createImageViewerElements(
   viewport.setAttribute("aria-label", copy.canvas);
   const image = imageElement ?? document.createElement("img");
   image.className = "anyfile-browser-image-viewer__image";
-  image.alt = fileName;
+  image.setAttribute("aria-label", fileName);
+  if (image instanceof HTMLImageElement) image.alt = fileName;
   image.draggable = false;
   viewport.append(image);
   toolbar.append(identity, controls);

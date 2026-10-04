@@ -1,5 +1,5 @@
 import { validateNodeGraph } from "./gltf-structure";
-import { imagePixels } from "./image-budget";
+import { checkTexturePixelBudget, imagePixels } from "./image-budget";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { ViewerError, selectMessages, type OpenViewerContext } from "@anyfile/viewer-protocol";
 import { disposeObject } from "@anyfile/rendering-3d";
@@ -35,9 +35,8 @@ export async function loadGltf(bytes: ArrayBuffer, context: OpenViewerContext) {
         const offset = bufferView.byteOffset ?? 0, length = bufferView.byteLength;
         if (!Number.isSafeInteger(offset) || !Number.isSafeInteger(length) || offset < 0 || length < 0 || offset + length > view.getUint32(start, true)) throw new Error("Invalid image range");
         pixels += await imagePixels(new Blob([bytes.slice(start + 8 + offset, start + 8 + offset + length)]));
-        if (pixels > 32_000_000) throw new RangeError("Texture budget");
       }
-      if (pixels + resources.imagePixels > 32_000_000) throw new RangeError("Total texture budget");
+      checkTexturePixelBudget(pixels + resources.imagePixels, context.locale);
       } catch (error) {
         if (context.signal.aborted || error instanceof RangeError || (error instanceof ViewerError && error.code === "resource-limit")) throw error;
         // Optional textures must not prevent inspection of otherwise valid geometry.

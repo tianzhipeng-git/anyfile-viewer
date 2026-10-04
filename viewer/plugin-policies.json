@@ -653,6 +653,117 @@
           ]
         }
       ]
+    },
+    "microsoft-project": {
+      "directory": "mpp",
+      "package": "@anyfile/mpp-viewer",
+      "runtimeSets": [
+        {
+          "id": "mppgo",
+          "version": "0.0.0-0483da3-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/mppgo/0.0.0-0483da3-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "mpp-reader",
+              "assetPatterns": [
+                "public/vendor/mppgo/0.0.0-0483da3-anyfile.1/mpp.wasm",
+                "public/vendor/mppgo/0.0.0-0483da3-anyfile.1/wasm_exec.js"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/mpp/src/types.ts",
+            "viewer/plugins/mpp/src/kernel.worker.ts"
+          ],
+          "requiredMarkers": [
+            "0.0.0-0483da3-anyfile.1",
+            "mpp.wasm",
+            "wasm_exec.js"
+          ]
+        }
+      ]
+    },
+    "visio": {
+      "directory": "visio",
+      "package": "@anyfile/visio-viewer",
+      "runtimeSets": [
+        {
+          "id": "libvisio",
+          "version": "0.1.11-anyfile.1",
+          "assetPatterns": [
+            "public/vendor/libvisio/0.1.11-anyfile.1/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "parser",
+              "assetPatterns": [
+                "public/vendor/libvisio/0.1.11-anyfile.1/visio.mjs",
+                "public/vendor/libvisio/0.1.11-anyfile.1/visio.wasm",
+                "public/vendor/libvisio/0.1.11-anyfile.1/converters.dat"
+              ]
+            }
+          ],
+          "sources": [
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/visio/src/types.ts",
+            "viewer/plugins/visio/src/kernel.worker.ts"
+          ],
+          "requiredMarkers": [
+            "0.1.11-anyfile.1",
+            "visio.mjs"
+          ]
+        }
+      ]
+    },
+    "dicom": {
+      "directory": "dicom",
+      "package": "@anyfile/dicom-viewer",
+      "runtimeSets": []
+    },
+    "ifc": {
+      "directory": "ifc",
+      "package": "@anyfile/ifc-viewer",
+      "runtimeSets": [
+        {
+          "id": "web-ifc",
+          "version": "0.0.78",
+          "assetPatterns": [
+            "public/vendor/web-ifc/0.0.78/**"
+          ],
+          "coldStartGroups": [
+            {
+              "id": "ifc",
+              "assetPatterns": [
+                "public/vendor/web-ifc/0.0.78/web-ifc-api.js",
+                "public/vendor/web-ifc/0.0.78/web-ifc.wasm"
+              ]
+            }
+          ],
+          "sources": [
+            "jsdelivr",
+            "r2",
+            "same-origin"
+          ],
+          "implementationFiles": [
+            "viewer/plugins/ifc/src/runtime.ts",
+            "viewer/plugins/ifc/src/worker-client.ts"
+          ],
+          "requiredMarkers": [
+            "0.0.78",
+            "https://cdn.jsdelivr.net/npm/web-ifc@",
+            "https://assets.anyfile.top/vendor/web-ifc/",
+            "`/vendor/web-ifc/",
+            "initializeRuntimeFromSources"
+          ]
+        }
+      ]
     }
   }
 }

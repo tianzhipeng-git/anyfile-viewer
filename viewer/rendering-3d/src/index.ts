@@ -1,6 +1,7 @@
 import { AmbientLight, AnimationMixer, type AnimationClip, DirectionalLight, Group, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { ViewerError, selectMessages, type Locale } from "@anyfile/viewer-protocol";
+import { createNavigation } from "./navigation";
 import { create3dUi } from "./ui";
 import { disposeObject, inspectObject } from "./resources";
 export { disposeObject, inspectObject } from "./resources";
@@ -51,6 +52,7 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
   const onInteraction = () => { interacted = true; };
   controls.addEventListener("start", onInteraction);
   controls.listenToKeyEvents(renderer.domElement);
+  let navigation: ReturnType<typeof createNavigation> | undefined;
   let disposed = false; let frame = 0; let lost = false;
   const schedule = () => {
     if (disposed || lost || frame) return;
@@ -58,8 +60,9 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
       frame = 0;
       if (disposed || lost) return;
       if (playing && mixer) { mixer.update(Math.min(0.1, (time - lastTime) / 1000)); lastTime = time; }
+      const moving = navigation?.update(time);
       renderer.render(scene, camera);
-      if (playing) schedule();
+      if (playing || moving) schedule();
     });
   };
   const resize = () => {
@@ -78,7 +81,7 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
     controls.target.set(0, 0, 0); camera.position.copy(offset.normalize().multiplyScalar(distance)); camera.zoom = 1;
     camera.updateProjectionMatrix(); controls.update(); schedule();
   };
-  ui.button(ui.copy.fit, () => fit());
+  const orbitButtons = [ui.button(ui.copy.fit, () => fit())];
   if (mixer && doc.animations) {
     const select = document.createElement("select"); select.setAttribute("aria-label", ui.copy.animation);
     doc.animations.forEach((clip, index) => { const option = document.createElement("option"); option.value = String(index); option.textContent = clip.name || String(index + 1); select.append(option); });
@@ -93,8 +96,8 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
     ui.button(ui.copy.play, (button) => { playing = !playing; button.setAttribute("aria-pressed", String(playing)); if (playing) start(); });
   }
   const directions = doc.up === "z" ? [[0, 0, 1], [0, -1, 0], [1, 0, 0], [1, -1, 1]] : [[0, 1, 0], [0, 0, 1], [1, 0, 0], [1, 1, 1]];
-  [ui.copy.top, ui.copy.front, ui.copy.right, ui.copy.iso].forEach((name, index) => ui.button(name, () => fit(new Vector3(...directions[index]))));
-  ui.button(ui.copy.projection, (button) => {
+  [ui.copy.top, ui.copy.front, ui.copy.right, ui.copy.iso].forEach((name, index) => orbitButtons.push(ui.button(name, () => fit(new Vector3(...directions[index])))));
+  const projectionButton = ui.button(ui.copy.projection, (button) => {
     const previous = camera; camera = camera === ortho ? perspective : ortho;
     camera.position.copy(previous.position); camera.quaternion.copy(previous.quaternion);
     controls.object = camera; camera.updateProjectionMatrix(); controls.update(); button.setAttribute("aria-pressed", String(camera === perspective)); schedule();
@@ -104,7 +107,16 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
     else camera.position.sub(controls.target).multiplyScalar(1 / factor).add(controls.target);
     controls.update(); schedule();
   };
-  ui.button(ui.copy.zoomIn, () => zoom(1.25)); ui.button(ui.copy.zoomOut, () => zoom(0.8));
+  orbitButtons.push(projectionButton, ui.button(ui.copy.zoomIn, () => zoom(1.25)), ui.button(ui.copy.zoomOut, () => zoom(0.8)));
+  if (!doc.planar) navigation = createNavigation({
+    ui, locale, canvas: renderer.domElement, root: doc.root, scene, perspective, controls, radius, units: doc.units,
+    getCamera: () => camera, setCamera: next => { camera = next; }, schedule,
+    changed: active => {
+      if (active) interacted = true;
+      orbitButtons.forEach(button => { button.disabled = active; });
+      projectionButton.setAttribute("aria-pressed", String(camera === perspective));
+    },
+  });
   let wireframe = false;
   ui.button(ui.copy.wire, (button) => {
     wireframe = !wireframe;
@@ -128,7 +140,7 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
   }
   const status = () => `${stats.vertices.toLocaleString(locale)} ${copy.vertices}${stats.triangles ? ` · ${stats.triangles.toLocaleString(locale)} ${copy.triangles}` : ""} · ${copy.size}: ${stats.size.toArray().map(n => n.toPrecision(5)).join(" × ")} · ${doc.units || copy.units}${doc.description ? ` · ${doc.description}` : ""}`;
   ui.status.textContent = status();
-  const contextLost = (event: Event) => { event.preventDefault(); lost = true; cancelAnimationFrame(frame); frame = 0; ui.status.textContent = ui.copy.lost; };
+  const contextLost = (event: Event) => { event.preventDefault(); navigation?.stop(); lost = true; cancelAnimationFrame(frame); frame = 0; ui.status.textContent = ui.copy.lost; };
   const contextRestored = () => { lost = false; ui.status.textContent = status(); schedule(); };
   renderer.domElement.addEventListener("webglcontextlost", contextLost);
   renderer.domElement.addEventListener("webglcontextrestored", contextRestored);
@@ -145,12 +157,12 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
       pivot.position.copy(stats.bounds.getCenter(new Vector3()).negate());
       for (const camera of [ortho, perspective]) { camera.near = radius / 10000; camera.far = radius * 10000; }
       if (interacted) {
-        const delta = pivot.position.clone().sub(previous); camera.position.add(delta); controls.target.add(delta); camera.updateProjectionMatrix(); controls.update(); schedule();
+        const delta = pivot.position.clone().sub(previous); camera.position.add(delta); controls.target.add(delta); navigation?.rebase(delta); camera.updateProjectionMatrix(); if (controls.enabled) controls.update(); schedule();
       } else { resize(); fit(); }
     },
     dispose() {
       if (disposed) return; disposed = true;
-      cancelAnimationFrame(frame); observer.disconnect(); controls.removeEventListener("change", schedule); controls.removeEventListener("start", onInteraction); controls.dispose();
+      cancelAnimationFrame(frame); navigation?.dispose(); observer.disconnect(); controls.removeEventListener("change", schedule); controls.removeEventListener("start", onInteraction); controls.dispose();
       renderer.domElement.removeEventListener("webglcontextlost", contextLost); renderer.domElement.removeEventListener("webglcontextrestored", contextRestored);
       mixer?.stopAllAction(); mixer?.uncacheRoot(doc.root);
       disposeObject(doc.root); renderer.dispose(); renderer.forceContextLoss(); renderer.domElement.width = 0; renderer.domElement.height = 0; ui.root.remove();

@@ -36,8 +36,8 @@ export function GoogleAnalytics({ locale }: { locale: string }) {
     if (!enabled || lastPath.current === pathname) return;
     initializeAnalytics();
     lastPath.current = pathname;
-    track("page_view", { task_entry: safePath(pathname).endsWith("/view") ? currentEntry() : taskEntry(pathname) });
-    if (safePath(pathname).endsWith("/view")) track("workspace_enter", { task_entry: currentEntry() });
+    track("page_view", { task_entry: /\/(view|embed)$/.test(safePath(pathname)) ? currentEntry() : taskEntry(pathname) });
+    if (/\/(view|embed)$/.test(safePath(pathname))) track("workspace_enter", { task_entry: currentEntry() });
   }, [enabled, pathname]);
   function choose(granted: boolean) {
     try { localStorage.setItem(CONSENT_KEY, granted ? "granted" : "denied"); } catch { return; }

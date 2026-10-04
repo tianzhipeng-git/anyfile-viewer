@@ -1,10 +1,10 @@
 import { viewerManifests } from "../../content/manifests";
-import type { ViewerPreviewResult } from "@anyfile/viewer-protocol";
+import type { ViewerInteraction, ViewerPreviewResult } from "@anyfile/viewer-protocol";
 
 export const GA_ID = "G-289W10FK5X";
 export const CONSENT_KEY = "anyfile-analytics-consent";
 type Params = Record<string, string | number>;
-type EventName = "page_view" | "workspace_enter" | "file_selected" | "file_picker_cancelled" | "open_started" | "viewer_initialized" | "open_result" | "video_playback" | "preview_error";
+type EventName = "page_view" | "workspace_enter" | "file_selected" | "file_picker_cancelled" | "open_started" | "viewer_initialized" | "open_result" | "video_playback" | "preview_error" | "animation_control";
 
 declare global {
   interface Window {
@@ -29,7 +29,7 @@ export function safePath(path: string): string {
   const match = /^\/(en|zh-CN)(?:\/(.*))?\/?$/.exec(path.split(/[?#]/)[0]);
   if (!match) return "/unknown";
   const route = (match[2] ?? "").replace(/\/$/, "");
-  if (["", "view", "about", "privacy", "contact", "formats", "categories", "plugins", "viewers"].includes(route)) return `/${match[1]}${route ? `/${route}` : ""}`;
+  if (["", "view", "embed", "integrations", "about", "privacy", "contact", "formats", "categories", "plugins", "viewers"].includes(route)) return `/${match[1]}${route ? `/${route}` : ""}`;
   const [section, value, extra] = route.split("/");
   if (!extra && ((section === "formats" && extensions.includes(`.${value}`)) || (section === "plugins" && pluginIds.has(value)) || (section === "categories" && ["images-video", "360-cameras", "documents", "engineering", "code-data", "developer-artifacts", "ebooks", "graphic-design", "3d-models"].includes(value)) || (section === "viewers" && ["insta360", "gopro-max", "dji-osmo-360"].includes(value)))) return `/${match[1]}/${section}/${value}`;
   return `/${match[1]}/other`;
@@ -42,7 +42,9 @@ export function taskEntry(path: string): string {
 
 export function currentEntry(): string {
   const entry = new URLSearchParams(window.location.search).get("entry");
-  return entry ? taskEntry(entry) : "direct";
+  if (entry) return taskEntry(entry);
+  if (window.location.pathname.endsWith("/embed")) return "embed";
+  return new URLSearchParams(window.location.hash.slice(1)).has("file") ? "public_url" : "direct";
 }
 
 export function consentGranted(): boolean {
@@ -83,13 +85,13 @@ export function track(name: EventName, params: Params = {}) {
   if (!analyticsEnabled() || !consentGranted()) return;
   initializeAnalytics();
   const page = { page_location: window.location.origin + safePath(window.location.pathname), page_title: safePath(window.location.pathname), page_referrer: safeReferrer(document.referrer) };
-  const allowed = ["task_entry", "file_source", "format", "size_bucket", "plugin", "outcome", "duration_ms", "preview_kind", "reason_code"];
+  const allowed = ["task_entry", "file_source", "format", "size_bucket", "plugin", "outcome", "duration_ms", "preview_kind", "reason_code", "action"];
   const safe = Object.fromEntries(Object.entries(params).filter(([key]) => allowed.includes(key)));
   if (name === "page_view") window.gtag?.("set", page);
   window.gtag?.("event", name, { ...safe, ...page });
 }
 
-export type FileSource = "user" | "sample";
+export type FileSource = "user" | "sample" | "remote";
 export function createOpenAttempt(file: File, source: FileSource, entry: string, emit: typeof track = track) {
   // Do not send a result without its start if consent is granted halfway through an attempt.
   if (emit === track && (!analyticsEnabled() || !consentGranted())) emit = () => {};
@@ -102,6 +104,7 @@ export function createOpenAttempt(file: File, source: FileSource, entry: string,
   let stopped = false;
   let played = false;
   let failedAfterPreview = false;
+  const interactions = new Set<string>();
   emit("open_started", base);
   function finish(outcome: string, details: Params = {}) {
     if (ended || stopped) return;
@@ -128,6 +131,12 @@ export function createOpenAttempt(file: File, source: FileSource, entry: string,
       } else if (result.kind === "video_playback") {
         if (previewSucceeded && !played) { played = true; emit("video_playback", { ...base, plugin }); }
       } else finish(plugin === "hex-viewer" ? "fallback" : "success", { preview_kind: result.kind });
+    },
+    interact(interaction: ViewerInteraction) {
+      if (stopped || !previewSucceeded || failedAfterPreview || interaction.kind !== "animation_control") return;
+      if (!["play", "pause", "previous_frame", "next_frame", "speed_change"].includes(interaction.action) || interactions.has(interaction.action)) return;
+      interactions.add(interaction.action);
+      emit("animation_control", { ...base, plugin, action: interaction.action });
     },
     fail(reason: string) { finish("failure", { reason_code: reason }); },
     stop() { finish(initialized ? "unmeasured" : "cancelled", { reason_code: initialized ? "no-preview-signal" : "superseded" }); stopped = true; },

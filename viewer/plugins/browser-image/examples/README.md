@@ -14,3 +14,14 @@
 | ICO/CUR | `sample.ico`、`sample.cur` | `truncated.ico`、`corrupt.ico` |
 
 真实渲染 smoke test 使用这些正常文件验证浏览器解码、尺寸与动画挂载；损坏和截断文件必须被 probe 拒绝，直接调用插件时必须返回 `invalid-file`。
+
+## 定向动画样例
+
+`node viewer/plugins/browser-image/scripts/generate-animation-fixture.mjs` 生成原创 `disposal-finite.apng`（4 × 4、4 帧、每帧 500 ms、共播放 2 次）。
+
+1. 全红 SOURCE / NONE。
+2. 左上半透明绿色 OVER / PREVIOUS，显示为红绿混合。
+3. 恢复前态后，左下蓝色 SOURCE / BACKGROUND；左上恢复红色。
+4. 左下被清空，右下透明 SOURCE；最终整个下半部透明，上半部红色。
+
+该样例用于真实浏览器检查混合、恢复前态、清空背景、透明替换及有限循环；mock 测试不能证明这些像素语义。

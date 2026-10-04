@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { GoogleAnalytics } from "@/components/google-analytics";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SafeSpeedInsights } from "@/components/safe-speed-insights";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -51,7 +51,7 @@ export default async function LocaleLayout({
           <SiteFooter locale={locale} dictionary={dictionary} />
         </FeedbackProvider>
         <GoogleAnalytics locale={locale} />
-        <SpeedInsights />
+        <SafeSpeedInsights />
       </body>
     </html>
   );

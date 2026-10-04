@@ -8,7 +8,7 @@
 
 文件只在浏览器本地读取和查看，不上传、不编辑、不转换或导出。优先扩大有实际查看价值的格式覆盖，同时保持轻量和有界资源使用。
 
-- **宿主**：取得文件与目录权限，维护文件选择与工作区，筛选和排序插件，加载选中的实现，提供容器、打开遮罩和生命周期管理。
+- **宿主**：取得本地文件与目录权限，或通过[公开 URL 入口](public-file-embedding.md)无凭据读取用户指定的公开 HTTPS 单文件，维护文件选择与工作区，筛选和排序插件，加载选中的实现，提供容器、打开遮罩和生命周期管理。
 - **插件**：校验和解析文件，在容器内建立 UI，管理格式交互、后台任务和资源释放。
 - **共享包**：复用已稳定的 UI、解析或运行时能力，不改变宿主协议，也不作为候选插件注册。
 
@@ -119,6 +119,7 @@ interface OpenViewerContext {
   readonly locale: Locale;
   readonly reportProgress: (progress: ViewerOpenProgress) => void;
   readonly reportPreview?: (result: ViewerPreviewResult) => void;
+  readonly reportInteraction?: (interaction: ViewerInteraction) => void;
 }
 
 interface ViewerOpenProgress {
@@ -133,7 +134,7 @@ interface ViewerController {
 }
 ```
 
-- `file` 是标准浏览器 `File`。优先使用 `slice()`、`stream()` 或 Object URL；整体 `arrayBuffer()` / `text()` 必须有明确输入上限。
+- `file` 是标准浏览器 `File`；本地与公开 URL 输入复用同一接口，公开单文件不提供远程工作区。优先使用 `slice()`、`stream()` 或 Object URL；整体 `arrayBuffer()` / `text()` 必须有明确输入上限。
 - 文件输入预算约定（2026-09-12）：原有低于 100 MiB 的格式主文件输入上限统一提高到 128 MiB，已有更高上限保持不变。这是产品输入额度，不是实际内存占用保证；关联资源、解压、像素、几何、解析结构及内部缓冲区预算独立管理。
 - `relativePath` 是当前文件在授权工作区中的路径，使用 `/`；普通文件选择时可不存在。
 - `container` 由宿主拥有。插件创建独立根节点，不修改容器本身或容器外 DOM。
@@ -157,6 +158,10 @@ type ViewerPreviewResult =
 - 这是可选的测量能力，未提供回调不影响查看；未实现结果信号的插件只计初始化，不推断成功。宿主负责去重，取消后忽略旧实例信号。
 - Hex 初始化完成单列兜底，不计目标预览成功；样例来源由宿主显式指定，不能通过文件名判断。
 - 当前覆盖与统计口径见[产品测量](product-measurement.md)。
+
+### 用户主动操作信号
+
+`reportInteraction` 可选回调接收 `{ kind: "animation_control", action: "play" | "pause" | "previous_frame" | "next_frame" | "speed_change" }`。仅由用户实际点击控件触发，自动播放、后台暂停、reduced-motion 和计时器不能调用。不得携带文件内容、帧序号或文件名。宿主在成功预览后按每次打开、每种 action 去重，取消和后台整体失败后忽略。
 
 ## 7. 关联文件
 

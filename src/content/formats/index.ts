@@ -1,3 +1,8 @@
+import { sceneExchangeFormats } from "./scene-exchange";
+import { ifcFormat } from "./ifc";
+import { visioFormats } from "./visio";
+import { mppFormat } from "./mpp";
+import { dicomFormat } from "./dicom";
 import { dwgFormat } from "./dwg";
 import { mobiFormats, comicArchiveFormats } from "./ebook-archives";
 import { fb2Format } from "./fb2";
@@ -135,7 +140,9 @@ import { zlibFormat } from "./zlib";
 import { zstFormat } from "./zst";
 
 export const formatContents: readonly FormatContent[] = [
-  dwgFormat, ...cadExchangeFormats, ...meshFormats,
+  ...visioFormats,
+  dicomFormat,
+  ...sceneExchangeFormats, ifcFormat, dwgFormat, ...cadExchangeFormats, ...meshFormats,
   ...pointFormats,
   goPro360Format,
   lotus123Format,
@@ -199,6 +206,7 @@ export const formatContents: readonly FormatContent[] = [
   movFormat,
   mp3Format,
   mp4Format,
+  mppFormat,
   nefFormat,
   npyFormat,
   npzFormat,

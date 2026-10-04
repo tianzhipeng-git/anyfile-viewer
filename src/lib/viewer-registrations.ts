@@ -1,3 +1,7 @@
+import { ifcManifest } from "@anyfile/ifc-viewer/manifest";
+import { visioManifest } from "@anyfile/visio-viewer/manifest";
+import { mppManifest } from "@anyfile/mpp-viewer/manifest";
+import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
@@ -44,6 +48,16 @@ import {
 } from "@anyfile/viewer-protocol";
 
 export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
+  {
+    manifest: mppManifest,
+    async probe(context) { return (await import("@anyfile/mpp-viewer/probe")).probeMpp(context); },
+    async load() { return (await import("@anyfile/mpp-viewer")).mppViewer; },
+  },
+  {
+    manifest: dicomManifest,
+    async probe(context) { return (await import("@anyfile/dicom-viewer/probe")).probeDicom(context); },
+    async load() { return (await import("@anyfile/dicom-viewer")).dicomViewer; },
+  },
   {
     manifest: comicBookManifest,
     async probe(context) { return (await import("@anyfile/comic-book-reader/probe")).probeComicBook(context); },
@@ -396,6 +410,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() { return (await import("@anyfile/cad-dwg-viewer")).dwgViewer; },
   },
   {
+    manifest: ifcManifest,
+    async probe(context) { return (await import("@anyfile/ifc-viewer/probe")).probeIfc(context); },
+    async load() { return (await import("@anyfile/ifc-viewer")).ifcViewer; },
+  },
+  {
     manifest: cadExchangeManifest,
     async probe(context) { return (await import("@anyfile/cad-exchange-viewer/probe")).probeCadExchange(context); },
     async load() { return (await import("@anyfile/cad-exchange-viewer")).cadExchangeViewer; },
@@ -414,6 +433,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: mesh3dManifest,
     async probe(context) { return (await import("@anyfile/mesh-3d-viewer/probe")).probeMesh3d(context); },
     async load() { return (await import("@anyfile/mesh-3d-viewer")).mesh3dViewer; },
+  },
+  {
+    manifest: visioManifest,
+    async probe(context) { return (await import("@anyfile/visio-viewer/probe")).probeVisio(context); },
+    async load() { return (await import("@anyfile/visio-viewer")).visioViewer; },
   },
   {
     manifest: hexManifest,

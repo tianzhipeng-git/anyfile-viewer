@@ -1,0 +1,34 @@
+{
+  "network_calls_made": 0,
+  "methodology_version": "1.1",
+  "market": {
+    "location_code": 2840,
+    "language_code": "en"
+  },
+  "candidates": [
+    "skp",
+    "ifc",
+    "vsdx",
+    "vsd",
+    "mpp",
+    "dds",
+    "exr",
+    "jp2",
+    "dicom",
+    "cdr"
+  ],
+  "planned_calls": {
+    "keyword_suggestions": 10,
+    "keyword_overview_min": 1,
+    "keyword_overview_max": 1,
+    "serp_advanced": 10,
+    "trends_explore": 10
+  },
+  "settings": {
+    "suggestions_limit": 100,
+    "minimum_suggestion_volume": 10,
+    "max_keywords_per_candidate": 40,
+    "serp_depth": 10,
+    "trends_time_range": "past_12_months"
+  }
+}

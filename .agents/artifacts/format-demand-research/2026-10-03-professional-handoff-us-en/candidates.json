@@ -1,0 +1,316 @@
+{
+  "methodology_version": "1.1",
+  "market": {
+    "location_code": 2840,
+    "language_code": "en"
+  },
+  "settings": {
+    "suggestions_limit": 100,
+    "minimum_suggestion_volume": 10,
+    "max_keywords_per_candidate": 40,
+    "serp_depth": 10,
+    "trends_time_range": "past_12_months"
+  },
+  "candidates": [
+    {
+      "id": "skp",
+      "format_name": "SketchUp Model",
+      "extensions": [
+        "skp"
+      ],
+      "aliases": [
+        "sketchup model",
+        "sketchup file"
+      ],
+      "suggestion_seeds": [
+        "sketchup skp file"
+      ],
+      "seed_keywords": [
+        "skp viewer online",
+        "open skp file",
+        "how to open skp file",
+        "sketchup file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "skp"
+        ],
+        [
+          "sketchup"
+        ]
+      ]
+    },
+    {
+      "id": "ifc",
+      "format_name": "Industry Foundation Classes",
+      "extensions": [
+        "ifc"
+      ],
+      "aliases": [
+        "industry foundation classes",
+        "ifc bim model"
+      ],
+      "suggestion_seeds": [
+        "ifc bim file"
+      ],
+      "seed_keywords": [
+        "ifc viewer online",
+        "open ifc file",
+        "how to open ifc file",
+        "ifc file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "ifc",
+          "file"
+        ],
+        [
+          "ifc",
+          "viewer"
+        ],
+        [
+          "industry foundation classes"
+        ]
+      ]
+    },
+    {
+      "id": "vsdx",
+      "format_name": "Microsoft Visio XML Drawing",
+      "extensions": [
+        "vsdx"
+      ],
+      "aliases": [
+        "visio vsdx drawing"
+      ],
+      "suggestion_seeds": [
+        "vsdx file"
+      ],
+      "seed_keywords": [
+        "vsdx viewer online",
+        "open vsdx file",
+        "how to open vsdx file",
+        "vsdx file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "vsdx",
+          "file"
+        ],
+        [
+          "vsdx",
+          "viewer"
+        ],
+        [
+          "visio",
+          "vsdx"
+        ]
+      ]
+    },
+    {
+      "id": "vsd",
+      "format_name": "Microsoft Visio Binary Drawing",
+      "extensions": [
+        "vsd"
+      ],
+      "aliases": [
+        "visio vsd drawing"
+      ],
+      "suggestion_seeds": [
+        "vsd file"
+      ],
+      "seed_keywords": [
+        "vsd viewer online",
+        "open vsd file",
+        "how to open vsd file",
+        "vsd file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "vsd",
+          "file"
+        ],
+        [
+          "vsd",
+          "viewer"
+        ],
+        [
+          "visio",
+          "vsd"
+        ]
+      ]
+    },
+    {
+      "id": "mpp",
+      "format_name": "Microsoft Project Plan",
+      "extensions": [
+        "mpp"
+      ],
+      "aliases": [
+        "microsoft project file"
+      ],
+      "suggestion_seeds": [
+        "mpp file"
+      ],
+      "seed_keywords": [
+        "mpp viewer online",
+        "open mpp file",
+        "how to open mpp file",
+        "mpp file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "mpp",
+          "file"
+        ],
+        [
+          "mpp",
+          "viewer"
+        ],
+        [
+          "microsoft",
+          "project"
+        ]
+      ]
+    },
+    {
+      "id": "dds",
+      "format_name": "DirectDraw Surface",
+      "extensions": [
+        "dds"
+      ],
+      "aliases": [
+        "directdraw surface"
+      ],
+      "suggestion_seeds": [
+        "dds file"
+      ],
+      "seed_keywords": [
+        "dds viewer online",
+        "open dds file",
+        "how to open dds file",
+        "dds file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "dds",
+          "file"
+        ],
+        [
+          "directdraw"
+        ]
+      ]
+    },
+    {
+      "id": "exr",
+      "format_name": "OpenEXR Image",
+      "extensions": [
+        "exr"
+      ],
+      "aliases": [
+        "openexr"
+      ],
+      "suggestion_seeds": [
+        "exr file"
+      ],
+      "seed_keywords": [
+        "exr viewer online",
+        "open exr file",
+        "how to open exr file",
+        "exr file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "exr"
+        ],
+        [
+          "openexr"
+        ]
+      ]
+    },
+    {
+      "id": "jp2",
+      "format_name": "JPEG 2000 JP2 Image",
+      "extensions": [
+        "jp2"
+      ],
+      "aliases": [
+        "jpeg 2000"
+      ],
+      "suggestion_seeds": [
+        "jp2 file"
+      ],
+      "seed_keywords": [
+        "jp2 viewer online",
+        "open jp2 file",
+        "how to open jp2 file",
+        "jp2 file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "jp2"
+        ],
+        [
+          "jpeg",
+          "2000"
+        ]
+      ]
+    },
+    {
+      "id": "dicom",
+      "format_name": "DICOM Image",
+      "extensions": [
+        "dcm"
+      ],
+      "aliases": [
+        "dicom"
+      ],
+      "suggestion_seeds": [
+        "dicom file"
+      ],
+      "seed_keywords": [
+        "dicom viewer online",
+        "open dicom file",
+        "how to open dicom file",
+        "dicom file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "dicom"
+        ],
+        [
+          "dcm",
+          "file"
+        ]
+      ]
+    },
+    {
+      "id": "cdr",
+      "format_name": "CorelDRAW Drawing",
+      "extensions": [
+        "cdr"
+      ],
+      "aliases": [
+        "coreldraw drawing",
+        "coreldraw file"
+      ],
+      "suggestion_seeds": [
+        "coreldraw file"
+      ],
+      "seed_keywords": [
+        "cdr viewer online",
+        "open cdr file",
+        "how to open cdr file",
+        "coreldraw file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "cdr",
+          "file"
+        ],
+        [
+          "coreldraw"
+        ]
+      ]
+    }
+  ]
+}

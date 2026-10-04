@@ -1,0 +1,11 @@
+import { cp, mkdir, readFile } from "node:fs/promises";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+const root = dirname(dirname(fileURLToPath(import.meta.url)));
+const version = "0.0.78";
+const source = join(root, "viewer/plugins/ifc/node_modules/web-ifc");
+const target = join(root, "public/vendor/web-ifc", version);
+const info = JSON.parse(await readFile(join(source, "package.json"), "utf8"));
+if (info.version !== version) throw new Error("Unexpected web-ifc version");
+await mkdir(target, { recursive: true });
+for (const name of ["web-ifc-api.js", "web-ifc.wasm", "LICENSE.md"]) await cp(join(source, name), join(target, name));

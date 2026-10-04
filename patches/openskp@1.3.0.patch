@@ -1,0 +1,44 @@
+diff --git a/dist/index.js b/dist/index.js
+index 0cfe5b588feaede837aa36e21dd8f3481a70e7a5..060958ed141535625526e5d94d32dcad170db92a 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -372,6 +372,17 @@ function* iterTopLevelLazy(data, start, end, containerTags = CONTAINER_TAGS) {
+     const [, f401Offset, f401Size] = headers[0];
+     headers = flatHeaders(data, f401Offset + 6, f401Offset + 6 + f401Size);
+   }
++  // Definition tables can contain nearly the entire model. Expand their
++  // structural wrappers before parsing so only one definition's TLV tree
++  // is retained at a time, alongside the already extracted geometry.
++  const definitionTables = new Set(["F901", "7017", "7117"]);
++  const expand = (header) => {
++    const [tag, offset, size] = header;
++    return definitionTables.has(tag)
++      ? flatHeaders(data, offset + 6, offset + 6 + size).flatMap(expand)
++      : [header];
++  };
++  headers = headers.flatMap(expand);
+   const total = headers.length;
+   let index = 0;
+   for (const [, offset, size] of headers) {
+diff --git a/dist/index.mjs b/dist/index.mjs
+index 072a58c74a7a14721b99537f7eaf09902d898ca5..b290bca42411c5fb88f88d8ff300ae077fd07ead 100644
+--- a/dist/index.mjs
++++ b/dist/index.mjs
+@@ -302,6 +302,17 @@ function* iterTopLevelLazy(data, start, end, containerTags = CONTAINER_TAGS) {
+     const [, f401Offset, f401Size] = headers[0];
+     headers = flatHeaders(data, f401Offset + 6, f401Offset + 6 + f401Size);
+   }
++  // Definition tables can contain nearly the entire model. Expand their
++  // structural wrappers before parsing so only one definition's TLV tree
++  // is retained at a time, alongside the already extracted geometry.
++  const definitionTables = new Set(["F901", "7017", "7117"]);
++  const expand = (header) => {
++    const [tag, offset, size] = header;
++    return definitionTables.has(tag)
++      ? flatHeaders(data, offset + 6, offset + 6 + size).flatMap(expand)
++      : [header];
++  };
++  headers = headers.flatMap(expand);
+   const total = headers.length;
+   let index = 0;
+   for (const [, offset, size] of headers) {

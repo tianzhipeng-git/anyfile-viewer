@@ -62,7 +62,7 @@
 | DDS | `.dds` | GPU texture | 0 | deferred | 5 | mip、array、cubemap 和 BC family |
 | KTX/KTX2 | `.ktx` `.ktx2` | GPU texture | 0 | deferred | 5 | 评估 Khronos 官方 WASM |
 | GeoTIFF/COG | `.tif` `.tiff` `.gtif` `.gtiff` `.geotif` `.geotiff` | general raster；未来 geospatial raster | 3 | implemented | 5 | 当前查看普通像素/页面，检测到空间标签时降级；不解释 CRS、坐标或 band 语义 |
-| DICOM | `.dcm` 等 | medical image | 0 | deferred | 5 | 多 transfer syntax、序列和医学元数据 |
+| DICOM | `.dcm`、`.dicom` | medical image | 1 / 3 | implemented; native smoke verified | 5 | Part 10 原生 8/16-bit 灰度、8-bit RGB、多帧和窗宽/窗位；压缩/LUT/增强变换仅元数据，详见 [DICOM](dicom.md) |
 | NIfTI/NRRD | `.nii` `.nii.gz` `.nrrd` | volume/scientific | 0 | deferred | 5 | 需要体数据和方向语义 |
 | FITS | `.fits` `.fit` `.fts` | volume/scientific | 0 | deferred | 5 | 需要数值窗口和 colormap |
 

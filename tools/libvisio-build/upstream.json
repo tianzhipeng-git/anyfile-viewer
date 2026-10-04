@@ -1,0 +1,38 @@
+{
+  "artifactVersion": "0.1.11-anyfile.1",
+  "image": "emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7",
+  "emscripten": "4.0.10",
+  "icupkg": "70.1-2",
+  "sources": {
+    "libvisio": {
+      "version": "0.1.11",
+      "url": "https://dev-www.libreoffice.org/src/libvisio/libvisio-0.1.11.tar.xz",
+      "sha256": "2a6efd40b6d9dbcb70fba3be53112366882ba97b57151df3698dfa478c8d8dd3"
+    },
+    "librevenge": {
+      "version": "0.0.5",
+      "url": "https://downloads.sourceforge.net/project/libwpd/librevenge/librevenge-0.0.5/librevenge-0.0.5.tar.xz",
+      "sha256": "106d0c44bb6408b1348b9e0465666fa83b816177665a22cd017e886c1aaeeb34"
+    },
+    "libxml2": {
+      "version": "2.15.4",
+      "url": "https://download.gnome.org/sources/libxml2/2.15/libxml2-2.15.4.tar.xz",
+      "sha256": "98087fd181d9070724f3fbc65c7377db03038eb92bd882374daff44940138821"
+    },
+    "icu": {
+      "version": "68.2",
+      "url": "https://github.com/unicode-org/icu/releases/download/release-68-2/icu4c-68_2-src.zip",
+      "sha256": "047e621bf3ddde8682a569ff26cbfdd27225f892adab76d32c56094823323865"
+    },
+    "boost": {
+      "version": "1.83.0",
+      "url": "https://github.com/emscripten-ports/boost/releases/download/boost-1.83.0/boost-headers-1.83.0.zip",
+      "sha256": "66cc701002c558afb5baf7e1a163ca7f8c3d4c80e7ec4ffb7c66dfcb32ac9358"
+    },
+    "zlib": {
+      "version": "1.3.1",
+      "url": "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz",
+      "sha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c"
+    }
+  }
+}

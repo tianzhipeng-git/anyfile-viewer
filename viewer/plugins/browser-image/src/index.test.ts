@@ -55,6 +55,7 @@ describe("browser image viewer protocol compliance", () => {
 
     const image = context.container.querySelector<HTMLImageElement>(".anyfile-browser-image-viewer__image");
     expect(image?.src).toBe("blob:browser-image-viewer");
+    expect(context.container.textContent).toContain("当前浏览器无法控制此格式的动画帧");
     expect(context.container.textContent).toContain("GIF · 96 × 64 · 2 帧");
     expect(context.progress.at(-1)?.stage).toBe("ready");
     expect(context.outside.dataset.viewerTestOutside).toBe("untouched");

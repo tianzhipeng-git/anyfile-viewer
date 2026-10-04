@@ -1,0 +1,6 @@
+import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+export const messages = (locale: Locale) => selectMessages(locale, {
+  en: { reading: "Reading Visio drawing…", engine: "Loading Visio engine…", rendering: "Rendering diagram…", invalid: "This is not a valid or supported Visio drawing.", limit: "The drawing exceeds the browser's size, page or processing limits.", unsupported: "Unable to initialize the Visio WebAssembly Worker.", previous: "Previous page", next: "Next page", page: "Page", fit: "Fit", actual: "Actual size", zoomIn: "Zoom in", zoomOut: "Zoom out", rotateLeft: "Rotate left", rotateRight: "Rotate right", canvas: "Visio diagram, draggable and zoomable", tools: "Visio viewing tools", failed: "Unable to display this page.", note: "Diagram preview; some fonts, embedded objects and Visio-specific effects may differ." },
+  "zh-CN": { reading: "正在读取 Visio 绘图…", engine: "正在加载 Visio 引擎…", rendering: "正在渲染图表…", invalid: "文件不是有效或受支持的 Visio 绘图。", limit: "绘图超过浏览器的大小、页数或处理时间限制。", unsupported: "无法初始化 Visio WebAssembly Worker。", previous: "上一页", next: "下一页", page: "页码", fit: "适合窗口", actual: "实际大小", zoomIn: "放大", zoomOut: "缩小", rotateLeft: "向左旋转", rotateRight: "向右旋转", canvas: "Visio 图表，可拖动和缩放", tools: "Visio 查看工具", failed: "无法显示此页面。", note: "图表预览；部分字体、嵌入对象和 Visio 专有效果可能与原文件不同。" },
+});
+export type Copy = ReturnType<typeof messages>;

@@ -9,6 +9,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const paths = [
     "/",
     "/view",
+    "/integrations",
     ...SITE_INFO_SLUGS.map((slug) => `/${slug}`),
     ...publishedCategories.map(({ slug }) => `/categories/${slug}`),
     ...publishedFormats.map(({ extension }) => `/formats/${extension}`),

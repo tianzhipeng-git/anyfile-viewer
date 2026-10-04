@@ -6,6 +6,8 @@ import {
   type ViewerController,
 } from "@anyfile/viewer-protocol";
 
+import { animationMime, imageDecoder } from "./animation-decoder";
+import { animationCopy } from "./animation-ui";
 import { inspectImageFile } from "./format";
 import { decodeImage } from "./image-load";
 import { browserImageManifest } from "./manifest";
@@ -66,6 +68,19 @@ async function openBrowserImage(context: OpenViewerContext): Promise<ViewerContr
       loaded: Math.min(file.size, IMAGE_HEADER_BYTES),
       total: file.size,
     });
+    const mime = animationMime(info);
+    const animationCandidate = info.animated || info.format === "APNG" || (info.format === "GIF" && file.size > IMAGE_HEADER_BYTES);
+    let nativePreviewNotice = false;
+    if (animationCandidate && mime) {
+      const Decoder = imageDecoder();
+      if (Decoder && await Decoder.isTypeSupported(mime)) {
+        if (signal.aborted) throw abortError();
+        const { openAnimation } = await import("./animation");
+        const controller = await openAnimation(context, mime);
+        if (controller) return controller;
+      } else nativePreviewNotice = true;
+    }
+    if (signal.aborted) throw abortError();
     objectUrl = URL.createObjectURL(file);
     image = document.createElement("img");
     try {
@@ -81,6 +96,12 @@ async function openBrowserImage(context: OpenViewerContext): Promise<ViewerContr
 
     const elements = createImageViewerElements(file.name, info, width, height, context.locale, image);
     root = elements.root;
+    if (nativePreviewNotice) {
+      const notice = document.createElement("div");
+      notice.className = "anyfile-browser-image-viewer__animation";
+      notice.textContent = animationCopy(context.locale).unavailable;
+      root.insertBefore(notice, elements.viewport);
+    }
     container.append(root);
     signal.addEventListener("abort", dispose, { once: true });
     viewport = new ImageViewport(elements, width, height);

@@ -4,7 +4,7 @@
 
 ## 1. 页面与代码加载
 
-`/{locale}/view` 由 Server Component 输出页面外壳，`FileWorkspace` / `ViewerHost` 在浏览器取得文件并打开插件。[locale layout](../src/app/[locale]/layout.tsx) 只为已发布语言生成静态参数；当前发布英语和简体中文。
+`/{locale}/view` 与 `/{locale}/embed` 由 Server Component 输出页面外壳，`FileWorkspace` / `ViewerHost` 在浏览器取得文件并打开插件。[locale layout](../src/app/[locale]/layout.tsx) 只为已发布语言生成静态参数；当前发布英语和简体中文。
 
 当前使用普通 Next.js 部署，生产执行 `next build --webpack`，开发执行 `next dev`。静态预渲染不等于 `output: "export"`：现有响应头依赖 [next.config.ts](../next.config.ts)。若改用静态导出，托管服务器必须另行配置等价响应头。
 
@@ -76,6 +76,8 @@ Cross-Origin-Embedder-Policy: require-corp
 ```
 
 这支持 LibRaw pthread 等需要隔离的运行时，不要求所有插件使用多线程。首页和格式介绍页不属于此计算环境。不要为了加载某个远程资源而关闭整个查看页隔离。
+
+公开文件入口通过浏览器无凭据 CORS fetch 读取任意公开 HTTPS 来源，使用片段 `#file=`，不经过服务端代理；大小、来源和嵌入限制见[公开文件与嵌入](public-file-embedding.md)。`/{locale}/embed` 保持同样的 COOP/COEP；跨源 iframe 另提供 `Cross-Origin-Resource-Policy: cross-origin`。父页及全部祖先未隔离时，iframe 内不能承诺 SharedArrayBuffer/pthread 可用，需使用新窗口入口。
 
 COOP/COEP 在顶层文档响应时生效。进入或离开查看页必须通过 [IsolationBoundaryLink](../src/components/isolation-boundary-link.tsx) 完整导航；文件、目录和插件切换仍使用客户端状态。切换语言完整导航并清空本地文件选择。
 

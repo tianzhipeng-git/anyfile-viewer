@@ -1,0 +1,46 @@
+{
+  "artifactVersion": "0.0.0-0483da3-anyfile.1",
+  "upstream": {
+    "commit": "0483da362cb316188eee9124d47d216c80078bb2",
+    "sourceUrl": "https://codeload.github.com/TinToSer/mppgo/tar.gz/0483da362cb316188eee9124d47d216c80078bb2",
+    "sha256": "b047180848b9f0e5f439f10e902496f3045428c78be4b4c493ddd8ea80270e24"
+  },
+  "toolchain": {
+    "version": "go1.27.1",
+    "container": null
+  },
+  "adapterRevision": 1,
+  "flags": [
+    "GOOS=js",
+    "GOARCH=wasm",
+    "-trimpath",
+    "-buildvcs=false",
+    "-ldflags=-s -w -buildid="
+  ],
+  "artifacts": {
+    "GO-LICENSE": {
+      "bytes": 1453,
+      "sha256": "911f8f5782931320f5b8d1160a76365b83aea6447ee6c04fa6d5591467db9dad"
+    },
+    "LICENSE": {
+      "bytes": 1087,
+      "sha256": "9ad508debdf9df2305afa19fbe6e54b9a3074c3818a125a7386d411af941323b"
+    },
+    "NOTICE": {
+      "bytes": 1228,
+      "sha256": "aee98da5154d62b0e89f7b1753c5f31fe8dda58eb7b36c0c153a1926458cd13d"
+    },
+    "SOURCE.md": {
+      "bytes": 609,
+      "sha256": "d8bbd9c16e2f5489e033a58ddbea33bb293b4b60896eb939c3c722e9b127a1cd"
+    },
+    "mpp.wasm": {
+      "bytes": 5354715,
+      "sha256": "86bbd8ff5ac77641265d685e11b1db0c3369cedd7c09cb97d52530f453c2e433"
+    },
+    "wasm_exec.js": {
+      "bytes": 16992,
+      "sha256": "0c949f4996f9a89698e4b5c586de32249c3b69b7baadb64d220073cc04acba14"
+    }
+  }
+}

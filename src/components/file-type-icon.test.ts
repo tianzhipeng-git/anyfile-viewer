@@ -7,6 +7,8 @@ import { getFileTypeKind } from "./file-type-icon";
 describe("getFileTypeKind", () => {
   it.each([
     ["photo.HEIC", "image"],
+    ["scan.DCM", "image"],
+    ["scan.dicom", "image"],
     ["panorama.insp", "image"],
     ["panorama.360", "video"],
     ["panorama.osv", "video"],
@@ -15,6 +17,7 @@ describe("getFileTypeKind", () => {
     ["movie.mkv", "video"],
     ["recording.flac", "audio"],
     ["report.docx", "document"],
+    ["schedule.MPP", "document"],
     ["artwork.eps", "document"],
     ["artwork.epsi", "document"],
     ["print.ps", "document"],
@@ -26,6 +29,8 @@ describe("getFileTypeKind", () => {
     ["records.parquet", "database"],
     ["scene.gltf", "model"],
     ["layout.fig", "design"],
+    ["drawing.VSD", "design"],
+    ["diagram.vsdx", "design"],
     ["artwork.ai", "design"],
     ["composition.psd", "design"],
     ["typeface.woff2", "font"],
