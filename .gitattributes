@@ -1,0 +1,2 @@
+# Audited artifacts must retain the exact bytes recorded in build-info.json.
+third_party/** -text
