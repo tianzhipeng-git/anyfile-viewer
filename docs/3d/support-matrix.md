@@ -15,7 +15,7 @@
 | OBJ/MTL | mesh-3d | 网格、对象、本地材质与简单漫反射纹理 | 3 | implemented；几何 smoke 通过，关联材质矩阵待补 |
 | PLY / OFF | mesh-3d | 网格/点（PLY）、基础凸多边形（OFF） | 3 | implemented；固定样例 smoke 通过，binary PLY 证据待补 |
 | glTF / GLB | mesh-3d | glTF 2.0 场景、材质与动画入口 | 3 | implemented；GLB 几何 smoke 通过，动画/关联资源矩阵待补 |
-| SketchUp SKP | mesh-3d | 组件几何与变换、基础材质和内嵌 PNG/JPEG；可取消 Worker | 3 | implemented；v17/v25 固定样例解析测试；真实 Chrome 验收待补 |
+| SketchUp SKP | mesh-3d | 组件几何与变换、基础材质和内嵌 PNG/JPEG；可取消 Worker | 3 | implemented；v17/v25 固定样例解析测试；79 MiB 用户模型真实 Chrome 加载、视角与缩放通过 |
 | 3MF / AMF | print-3d | 构建几何、单位；3MF 组件与变换 | 3 | implemented；固定样例 smoke 与结构测试通过 |
 | ASCII PCD / XYZ | point-cloud | 有界渐进代表性抽样 | 2 | implemented；5000 点固定样例 smoke 通过；非完整 LOD |
 | USDZ package | archive | 有界列出包内条目，无 USD 几何 | 2 | implemented |
@@ -103,5 +103,25 @@
 - 解析：锁定 OpenSKP 1.3.0（MIT），仅在 SKP Worker 中加载；内部 GLB 交给已有本地 glTF adapter，不上传或导出文件。
 - 支持：新式 VFF 与解析器可识别的旧版 MFC 容器；组件实例保留共享几何与变换，坐标为米、Y-up。PNG/JPEG 内嵌纹理复用现有像素预算与缺图降级。
 - 不覆盖：独立边线、标注、样式、保存相机、动态组件行为；不保证所有 SketchUp 版本兼容。
-- 预算：输入 128 MiB；ZIP 单条目 64 MiB、累计展开 128 MiB、4096 条目；几何与纹理编码累计 128 MiB；600 万顶点、4096 节点/绘制、64 层深度；解析 60 秒后终止 Worker。最终渲染仍受共享 GPU/纹理预算限制。
+- 预算：输入 128 MiB；ZIP 单条目 512 MiB、累计展开 768 MiB、4096 条目；几何与纹理编码累计 128 MiB；600 万顶点、4096 节点/绘制、64 层深度；解析 60 秒后终止 Worker。最终渲染仍受共享 GPU/纹理预算限制。
 - 样例及来源：`viewer/plugins/mesh-3d/examples/README.md`；真实 Chrome 视觉与交互验收待用户操作。
+
+### 2026-10-04 大型 SKP 修复
+
+79 MiB 的用户模型内含 262.6 MiB `model.dat`、282.0 MiB 总展开数据，旧的 64/128 MiB ZIP 预算在解析前拒绝它。直接放开预算时，OpenSKP 1.3.0 会把 F901/7017/7117 整个定义表递归物化，耗尽 Node 默认约 4 GiB 堆。
+
+通过 pnpm 锁定的 `patches/openskp@1.3.0.patch` 改为按定义解析 TLV，保持组件与几何语义；本地同文件解析约 12 秒，输出 1,827,257 顶点、549 节点、517 绘制批次，几何 63.0 MiB、内嵌纹理 13.1 MiB。结束时进程 RSS 约 2.7 GiB（不是峰值或浏览器内存保证）。此证据支持提高展开预算，几何/GPU 等其他预算不变。
+
+60 张纹理合计 64,807,075 像素，共享 glTF adapter 总纹理额度改为 64 × 1024² 像素（RGBA 256 MiB；不含 mipmap 与渲染器开销），覆盖该工作负载。SKP Worker 传递结构化超限原因和数值；解析器内部 RangeError 与主动预算、超时分开显示。
+
+私有模型不纳入仓库。可用 `SKP_TEST_FILE=/absolute/path/to/model.skp pnpm --filter @anyfile/mesh-3d-viewer test` 运行实际解析与纹理预检回归。
+
+真实 Chrome 验收：使用原始 SKP 单文件，经完整 Worker → GLB adapter → WebGL 流程显示 1,827,257 顶点、1,015,976 三角面与材质纹理；Top/Isometric 视图及缩放操作通过。更改 npm patch 后需刷新旧开发页面，避免热更新残留的模块/Worker。
+
+### 共享 3D 漫游
+
+非平面文档提供自由漫游与观察点放置。漫游使用透视相机，拖动/方向键环顾，WASD 水平移动，Q/E 沿文档 up 轴升降，触屏可用步进按钮。漫游时滚轮、触摸板双指上下滑动或捏合调节垂直视野角（20°–100°），不改变观察位置；捏合张开放大、合拢缩小，仅在漫游画布上接管手势，浏览器键盘缩放快捷键保留。速度支持慢/正常/快；已知单位按米换算眼高和移动速度，未知单位明确显示模型单位。无重力和碰撞，可穿墙。
+
+放置观察点仅在点击或选择画面中心时拾取可见网格，在表面上方显示眼高标记，确认后进入；不会自动识别地板，也不会穿透屋顶寻找房间。取消放置或返回总览恢复之前的相机、缩放和 orbit 目标。失焦/隐藏/图形上下文丢失时停止移动；无输入时不持续渲染。平面文档保留原有查看方式。
+
+漫游验收（2026-10-04）：真实 Chrome 打开用户 Living Room.skp，完成中心表面拾取、确认进入、下降穿过屋顶、水平步进、拖动室内环顾和返回原总览。共享渲染器 12 项测试通过（含 10 项导航测试），应用 123 项回归通过，ESLint、TypeScript、生产构建与 bundle/asset 检查通过。

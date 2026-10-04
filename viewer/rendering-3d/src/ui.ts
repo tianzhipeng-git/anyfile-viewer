@@ -14,6 +14,12 @@ export function create3dUi(container: HTMLElement, locale: Locale, title: string
 .anyfile-rendering-3d button{white-space:nowrap;font:inherit;color:inherit;background:var(--viewer-background,#fff);border:1px solid var(--viewer-border,#ddd);border-radius:5px;padding:6px;cursor:pointer}
 .anyfile-rendering-3d button:focus-visible,.anyfile-rendering-3d canvas:focus-visible{outline:2px solid var(--viewer-accent,#2563eb)}
 .anyfile-rendering-3d button[aria-pressed=true]{background:var(--viewer-accent,#2563eb);color:white}
+.anyfile-rendering-3d button:disabled{opacity:.45;cursor:default}
+.anyfile-rendering-3d .r3-navigation{display:flex;flex:none;flex-wrap:wrap;align-items:center;gap:6px;padding:8px;border-bottom:1px solid var(--viewer-border,#ddd);max-height:40%;overflow:auto}
+.anyfile-rendering-3d [hidden]{display:none!important}
+.anyfile-rendering-3d .r3-navigation-help{flex-basis:100%;font-size:12px}
+.anyfile-rendering-3d .r3-navigation input{width:70px}
+.anyfile-rendering-3d .r3-navigation input,.anyfile-rendering-3d .r3-navigation select{font:inherit;color:inherit;background:var(--viewer-background,#fff);border:1px solid var(--viewer-border,#ddd);padding:5px;border-radius:4px}
 .anyfile-rendering-3d .r3-body{display:flex;flex:1;min-height:0}
 .anyfile-rendering-3d .r3-view{flex:1;min-width:0;position:relative;overflow:hidden}
 .anyfile-rendering-3d canvas{display:block;width:100%;height:100%;touch-action:none}

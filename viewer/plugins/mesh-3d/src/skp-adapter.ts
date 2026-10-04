@@ -1,5 +1,6 @@
-import { selectMessages, type OpenViewerContext } from "@anyfile/viewer-protocol";
+import { ViewerError, selectMessages, type OpenViewerContext } from "@anyfile/viewer-protocol";
 import { loadGltf } from "./gltf";
+import { skpLimitMessage } from "./skp-limits";
 
 export async function loadSkp(bytes: ArrayBuffer, context: OpenViewerContext) {
   const { signal } = context;
@@ -8,11 +9,12 @@ export async function loadSkp(bytes: ArrayBuffer, context: OpenViewerContext) {
     const worker = new Worker(new URL("./skp.worker.ts", import.meta.url), { type: "module" });
     const cleanup = () => { clearTimeout(timeout); signal.removeEventListener("abort", abort); worker.terminate(); };
     const abort = () => { cleanup(); reject(new DOMException("Aborted", "AbortError")); };
-    const timeout = setTimeout(() => { cleanup(); reject(new RangeError("SKP parsing time budget")); }, 60_000);
+    const timeout = setTimeout(() => { cleanup(); reject(new ViewerError("resource-limit", skpLimitMessage(context.locale, { metric: "time", actual: 60, limit: 60, unit: "s" }))); }, 60_000);
     signal.addEventListener("abort", abort, { once: true });
     worker.onmessage = ({ data }) => {
       cleanup();
-      if (data.error) reject(data.error === "resource-limit" ? new RangeError() : new Error("Invalid SKP"));
+      if (data.error === "resource-limit") reject(new ViewerError("resource-limit", data.detail ? skpLimitMessage(context.locale, data.detail) : selectMessages(context.locale, { en: "The SketchUp parser exhausted its memory or recursion capacity.", "zh-CN": "SketchUp 解析器耗尽了内存或递归容量。" })));
+      else if (data.error) reject(new Error("Invalid SKP"));
       else resolve(data.result);
     };
     worker.onerror = () => { cleanup(); reject(new Error("SKP worker failed")); };

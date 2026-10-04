@@ -31,7 +31,7 @@ it("does not create a worker for an already cancelled open", async () => {
 it("bounds decoding time and terminates a stuck parser", async () => {
   vi.useFakeTimers();
   const result = loadSkp(new ArrayBuffer(32), context());
-  const assertion = expect(result).rejects.toBeInstanceOf(RangeError);
+  const assertion = expect(result).rejects.toMatchObject({ code: "resource-limit", message: expect.stringContaining("parsing time") });
   await vi.advanceTimersByTimeAsync(60_000);
   await assertion;
   expect(instances[0].terminate).toHaveBeenCalledOnce();
@@ -39,8 +39,13 @@ it("bounds decoding time and terminates a stuck parser", async () => {
 it.each(["resource-limit", "invalid-file"])("cleans up on %s", async error => {
   const result = loadSkp(new ArrayBuffer(32), context());
   instances[0].onmessage!({ data: { error } });
-  await expect(result).rejects.toBeInstanceOf(error === "resource-limit" ? RangeError : Error);
+  await expect(result).rejects.toBeInstanceOf(Error);
   expect(instances[0].terminate).toHaveBeenCalledOnce();
+});
+it("preserves the specific exceeded budget and values across the worker boundary", async () => {
+  const result = loadSkp(new ArrayBuffer(32), context());
+  instances[0].onmessage!({ data: { error: "resource-limit", detail: { metric: "entry", actual: 600, limit: 512, unit: "MiB" } } });
+  await expect(result).rejects.toMatchObject({ code: "resource-limit", message: "SketchUp expanded entry size: 600 MiB; viewer limit: 512 MiB." });
 });
 it("releases the worker after success and explains preview limitations", async () => {
   const result = loadSkp(new ArrayBuffer(32), context());
