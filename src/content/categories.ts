@@ -136,9 +136,10 @@ export const categoryContents: readonly CategoryContent[] = [
         "name": "3D Models",
         "eyebrow": "EXPLORE SHAPES LOCALLY",
         "title": "Online 3D Model & Point Cloud Viewers",
-        "description": "Rotate GLB, glTF, OBJ and STL models, inspect 3D print files and explore sampled point clouds.",
-        "introduction": "Inspect model shapes in an interactive browser viewport. Open a containing folder when a model references local materials, textures or buffers.",
+        "description": "View SketchUp SKP, GLB, glTF, OBJ and STL; walk through interiors or inspect print models and point clouds.",
+        "introduction": "Explore SketchUp houses and interior designs without uploading files or installing a desktop viewer. Use first-person walkthroughs to move inside supported 3D scenes, place a viewpoint, adjust eye height and look around a room. You can also inspect meshes, print models and sampled point clouds. Open the containing folder when a model references local materials, textures or buffers.",
         "useCases": [
+          "Review SketchUp SKP architecture and interior designs with room walkthroughs",
           "Inspect meshes and scene objects",
           "Preview STL, 3MF and AMF print models",
           "Explore sampled LAS, LAZ and PCD point clouds"
@@ -150,6 +151,10 @@ export const categoryContents: readonly CategoryContent[] = [
         ],
         "faq": [
           {
+            "question": "Can I view a room from inside instead of orbiting the building?",
+            "answer": "Yes. Walkthrough mode lets you move inside supported SKP, GLB and glTF scenes and look around from a chosen viewpoint. Adjust eye height, movement speed and field of view, then return to the previous overview. Movement can pass through walls; it does not simulate gravity or collisions."
+          },
+          {
             "question": "Can I edit or repair a 3D model here?",
             "answer": "No. Anyfile provides read-only inspection. Use a modeling or slicing application to edit geometry or prepare a print."
           }
@@ -159,9 +164,10 @@ export const categoryContents: readonly CategoryContent[] = [
         "name": "3D 模型",
         "eyebrow": "本地探索三维形状",
         "title": "在线 3D 模型与点云查看器",
-        "description": "旋转 GLB、glTF、OBJ 与 STL 模型，检查 3D 打印文件，浏览点云抽样预览。",
-        "introduction": "在浏览器交互视口中检查模型外形。如果模型引用本地材质、纹理或缓冲文件，请打开所在文件夹。",
+        "description": "本地打开 SketchUp SKP、GLB、glTF、OBJ 与 STL 文件，漫游建筑和房间内部，检查 3D 打印模型与点云抽样预览。",
+        "introduction": "无需上传文件或安装桌面查看器，即可查看 SketchUp 房屋与室内设计。通过第一人称漫游进入受支持的三维场景，放置观察点、调节眼高并在房间内环顾。也可检查网格、打印模型与点云抽样。如果模型引用本地材质、纹理或缓冲文件，请打开所在文件夹。",
         "useCases": [
+          "通过室内漫游查看 SketchUp SKP 建筑与室内设计方案",
           "检查网格与场景对象",
           "预览 STL、3MF 与 AMF 打印模型",
           "浏览 LAS、LAZ 与 PCD 点云抽样"
@@ -172,6 +178,10 @@ export const categoryContents: readonly CategoryContent[] = [
           "大文件、高级材质与压缩支持因格式而异"
         ],
         "faq": [
+          {
+            "question": "可以站在房间内部观察，而不只是围着建筑旋转吗？",
+            "answer": "可以。漫游模式支持进入受支持的 SKP、GLB 和 glTF 场景，从选定观察点移动环顾，调节眼高、移动速度和视野角度，再返回之前的总览。移动允许穿墙，不模拟重力或碰撞。"
+          },
           {
             "question": "可以在这里编辑或修复 3D 模型吗？",
             "answer": "不可以。Anyfile 只提供查看；编辑几何或准备打印请使用建模或切片软件。"

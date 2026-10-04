@@ -2,23 +2,27 @@ import { defineFormat } from "./define-format";
 
 export const meshFormats = [
   defineFormat("skp", "3d-models", 3, {
-    name: "SketchUp Model", title: "View SketchUp SKP Models Online",
-    description: "Open SketchUp models locally to inspect geometry, component placement and supported embedded materials in 3D.",
-    introduction: "SKP stores SketchUp model geometry, reusable components and materials. Anyfile parses supported modern VFF and legacy SKP files in a browser Worker, then displays their placed geometry in an interactive 3D viewport. Model contents stay on your device.",
-    canShow: ["Face geometry and component transforms with orbit, zoom and standard views", "Basic material colors and supported embedded PNG/JPEG textures", "Model dimensions in meters, wireframe and object visibility"],
-    limitations: ["Version compatibility depends on the parser; some legacy files cannot be decoded", "Annotations, standalone edges, styles, saved views and dynamic component behavior are not reproduced", "128 MiB input; ZIP expansion up to 768 MiB total and 512 MiB per entry; 60-second parsing budget; WebGL 2 required"],
+    name: "SketchUp Model", title: "SketchUp SKP Viewer & Interior Walkthroughs",
+    description: "Open SketchUp SKP buildings and interior models with first-person room walkthroughs.",
+    introduction: "Open a supported SketchUp .skp file to explore a house, apartment or interior design in your browser. Inspect the whole building from outside, then place a viewpoint on a visible surface and enter a room at an adjustable eye height. First-person walkthrough controls let you move around and look at the layout, furniture and supported materials from inside. Anyfile reads the model locally, so you can review a design without uploading it or installing SketchUp.",
+    canShow: ["Face geometry and component transforms with orbit, zoom and standard views", "Basic material colors and supported embedded PNG/JPEG textures", "Model dimensions in meters, wireframe and object visibility", "First-person walkthroughs with viewpoint placement, adjustable eye height and speed, and return to the previous overview", "Drag to look around; WASD to move, Q/E to rise or descend, and scroll or trackpad pinch to adjust the field of view"],
+    limitations: ["Walkthroughs allow movement through walls without collision detection or gravity; viewpoint placement selects visible surfaces, including roofs and furniture", "Version compatibility depends on the parser; some legacy files cannot be decoded", "Annotations, standalone edges, styles, saved views and dynamic component behavior are not reproduced", "128 MiB input; ZIP expansion up to 768 MiB total and 512 MiB per entry; 60-second parsing budget; WebGL 2 required"],
     faq: [
       { question: "Do I need to upload my SketchUp model?", answer: "No. SKP decoding and rendering happen locally in your browser. You do not need SketchUp installed." },
+      { question: "How can I walk inside a SketchUp house or room?", answer: "Open the SKP file, choose Place viewpoint, select a visible surface and confirm Enter here. Set the eye height, drag to look around, use WASD to move and Q/E to rise or descend. You can also enter Walkthrough directly from the current view. Return to overview restores the previous camera view." },
+      { question: "What if the roof blocks the room, and can I zoom during a walkthrough?", answer: "Placement picks the visible roof rather than a hidden floor. After entering, use Q to descend through it, or place the viewpoint on a floor that is already visible. Scroll or use a trackpad pinch to change the field of view while staying in place. This is free navigation without collision detection or gravity." },
       { question: "Will this look exactly like my SketchUp scene?", answer: "The preview focuses on geometry, component placement and supported materials. SketchUp styles, annotations and saved cameras are not reproduced, and some versions or features may fail to open." },
     ],
   }, {
-    name: "SketchUp 模型", title: "在线查看 SketchUp SKP 模型",
-    description: "在本地打开 SketchUp 模型，三维检查几何、组件位置和受支持的内嵌材质。",
-    introduction: "SKP 保存 SketchUp 模型几何、可复用组件与材质。Anyfile 在浏览器 Worker 中解析受支持的新式 VFF 和旧版 SKP 文件，再在交互式三维视口显示组件放置后的几何。模型内容始终留在你的设备上。",
-    canShow: ["面几何与组件变换，支持旋转、缩放和标准视图", "基础材质颜色与受支持的内嵌 PNG/JPEG 纹理", "以米显示模型尺寸，支持线框和对象显隐"],
-    limitations: ["版本兼容性取决于解析器；部分旧版文件无法解码", "不复现标注、独立边线、样式、保存视图和动态组件行为", "输入最多 128 MiB；ZIP 总展开量最多 768 MiB、单条目 512 MiB；解析预算 60 秒；需要 WebGL 2"],
+    name: "SketchUp 模型", title: "SKP 在线查看器：SketchUp 模型与室内漫游",
+    description: "在线打开 SketchUp SKP 文件，无需上传或安装 SketchUp。支持建筑、房屋与室内设计模型的第一人称漫游、观察点放置和视野调节。",
+    introduction: "在浏览器中打开受支持的 SketchUp .skp 文件，查看房屋、住宅与室内设计方案。你可以先从外部观察建筑，再在可见表面放置观察点，设置眼高并进入房间，以第一人称移动和环顾，查看室内布局、家具位置及受支持的材质。Anyfile 在本地读取模型，无需上传设计文件，也无需安装 SketchUp。",
+    canShow: ["面几何与组件变换，支持旋转、缩放和标准视图", "基础材质颜色与受支持的内嵌 PNG/JPEG 纹理", "以米显示模型尺寸，支持线框和对象显隐", "第一人称室内漫游：放置观察点、调节眼高和移动速度，并一键返回原总览", "拖动环顾，WASD 移动，Q/E 升降，滚轮或触摸板捏合调节视野角度"],
+    limitations: ["漫游允许穿墙，不模拟碰撞或重力；观察点放置会选中可见表面，包括屋顶和家具", "版本兼容性取决于解析器；部分旧版文件无法解码", "不复现标注、独立边线、样式、保存视图和动态组件行为", "输入最多 128 MiB；ZIP 总展开量最多 768 MiB、单条目 512 MiB；解析预算 60 秒；需要 WebGL 2"],
     faq: [
       { question: "需要上传 SketchUp 模型吗？", answer: "不需要。SKP 解码与渲染都在浏览器本地完成，也无需安装 SketchUp。" },
+      { question: "如何进入 SketchUp 房屋或房间内部漫游？", answer: "打开 SKP 文件后，选择“放置观察点”，点击可见表面，再确认“从这里进入”。设置眼高，拖动环顾，使用 WASD 移动、Q/E 升降。也可以点击“漫游”直接从当前视角开始。“返回总览”会恢复之前的相机视角。" },
+      { question: "屋顶挡住房间怎么办？漫游中能缩放吗？", answer: "放置观察点会选中可见屋顶，不会自动找到下面的地板。进入后可按 Q 下降穿过屋顶，或直接在已经可见的地面放置观察点。滚轮或触摸板捏合可以在原地调整视野角度。当前是自由漫游，不模拟碰撞或重力。" },
       { question: "显示效果与 SketchUp 场景完全一致吗？", answer: "预览侧重几何、组件位置与受支持的材质，不复现 SketchUp 样式、标注和保存的相机视角。部分版本或特性可能无法打开。" },
     ],
   }, { verification: "pending" }),
@@ -152,7 +156,7 @@ export const meshFormats = [
     name: "glTF 2.0 scene", title: "Open glTF Scenes with Local Resources",
     description: "View a glTF 2.0 scene with its local binary buffers and images by selecting the containing folder.",
     introduction: "A .gltf file is the JSON description of a scene: nodes, meshes and materials can reference separate buffers and textures. Keep the export folder intact when opening it in Anyfile. The viewer resolves supported local dependencies and displays the scene without using remote resource URLs.",
-    canShow: ["Supported glTF 2.0 scene nodes, meshes and materials", "Local buffer data and supported image textures from the selected workspace", "Scene navigation and object visibility with glTF's meter-based scale"],
+    canShow: ["Supported glTF 2.0 scene nodes, meshes and materials", "Local buffer data and supported image textures from the selected workspace", "First-person walkthroughs of architectural scenes, with viewpoint placement and eye height in meters", "Orbit, object visibility and return to the previous overview"],
     limitations: ["Missing binary buffers can prevent opening; missing images can leave geometry visible without some textures", "Required Draco, meshopt and BasisU compression extensions cannot be decoded", "128 MiB model input and 128 MiB related-resource budget; WebGL 2 required"],
     faq: [
       { question: "Why does selecting only the glTF JSON fail?", answer: "The scene may reference a .bin buffer that contains the actual vertex data. Select its folder with the companion files and preserve relative paths so the reader can find them." },
@@ -162,7 +166,7 @@ export const meshFormats = [
     name: "glTF 2.0 场景", title: "打开 glTF 场景及本地关联资源",
     description: "选择所在文件夹，一起查看 glTF 2.0 场景及其本地二进制缓冲区和图片。",
     introduction: ".gltf 文件是场景的 JSON 描述，节点、网格和材质可以引用独立的缓冲区与纹理。使用 Anyfile 打开时请保留完整导出文件夹，查看器会解析受支持的本地依赖，不使用远程资源 URL。",
-    canShow: ["受支持的 glTF 2.0 场景节点、网格与材质", "所选工作区中的本地缓冲数据与受支持图片纹理", "场景导航与对象显隐，采用 glTF 以米为基础的尺度"],
+    canShow: ["受支持的 glTF 2.0 场景节点、网格与材质", "所选工作区中的本地缓冲数据与受支持图片纹理", "建筑场景第一人称漫游，支持放置观察点和以米设置眼高", "旋转观察、对象显隐与返回原总览"],
     limitations: ["缺少二进制缓冲区可能无法打开；缺图时几何仍可能可见，但部分纹理缺失", "无法解码必需的 Draco、meshopt 或 BasisU 压缩扩展", "模型输入最多 128 MiB，关联资源预算 128 MiB；需要 WebGL 2"],
     faq: [
       { question: "为什么只选择 glTF JSON 会失败？", answer: "场景可能引用包含实际顶点数据的 .bin 缓冲区。请选择包含关联文件的文件夹并保留相对路径，使读取器能找到它们。" },
@@ -173,7 +177,7 @@ export const meshFormats = [
     name: "Binary glTF 2.0", title: "View GLB Binary glTF Models Online",
     description: "Inspect GLB scenes with packaged geometry and supported textures before using them in a 3D application.",
     introduction: "GLB wraps a glTF scene in a binary container with a JSON chunk and, commonly, an embedded binary buffer. This can make a model easier to share as one file than a multi-file .gltf export. Anyfile reads supported glTF 2.0 content from that container and opens its scene in the local viewport.",
-    canShow: ["Scene hierarchy and meshes stored in a supported GLB container", "Embedded geometry and supported materials or images", "Interactive inspection of the asset's shape and object arrangement"],
+    canShow: ["Scene hierarchy and meshes stored in a supported GLB container", "Embedded geometry and supported materials or images", "Interactive inspection of the asset's shape and object arrangement", "Room walkthroughs for interior scenes: move inside, look around and adjust the field of view without moving the eye"],
     limitations: ["A GLB can still reference external resources; those require the containing folder", "Bundling in GLB does not remove required Draco, meshopt or BasisU decoder dependencies, which are unsupported", "Input limited to 128 MiB; related files have a separate 128 MiB budget; requires WebGL 2"],
     faq: [
       { question: "Is every GLB completely self-contained?", answer: "No. GLB allows binary data to be embedded, but scene descriptions may still refer to external resources. If a companion file is required, open the folder containing both." },
@@ -183,7 +187,7 @@ export const meshFormats = [
     name: "二进制 glTF 2.0", title: "在线查看 GLB 二进制 glTF 模型",
     description: "检查打包几何与受支持纹理的二进制 glTF 场景，在用于三维应用前核对资源。",
     introduction: "GLB 使用二进制容器包裹 glTF 场景，包含 JSON 块，并通常内嵌二进制缓冲区。相比多文件 .gltf 导出，它便于将模型作为单个文件分享。Anyfile 从容器中读取受支持的 glTF 2.0 内容，再在本地视口打开场景。",
-    canShow: ["受支持 GLB 容器中的场景层级与网格", "内嵌几何及受支持的材质和图片", "交互检查资源的外形与对象排列"],
+    canShow: ["受支持 GLB 容器中的场景层级与网格", "内嵌几何及受支持的材质和图片", "交互检查资源的外形与对象排列", "室内场景漫游：进入房间、移动环顾，并在原地调节视野角度"],
     limitations: ["GLB 仍可能引用外部资源，此时需打开所在文件夹", "打包为 GLB 不会消除必需的 Draco、meshopt 或 BasisU 解码依赖，当前不支持这些解码器", "输入上限 128 MiB，关联文件另有 128 MiB 预算；需要 WebGL 2"],
     faq: [
       { question: "每个 GLB 都完全自包含吗？", answer: "不是。GLB 允许内嵌二进制数据，但场景描述仍可能引用外部资源。需要关联文件时，请打开同时包含这些文件的文件夹。" },
