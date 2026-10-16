@@ -14,7 +14,7 @@
   "dependencies": {
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-ui": "workspace:*",
-    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+    "xlsx": "npm:@e965/xlsx@0.20.3"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*",

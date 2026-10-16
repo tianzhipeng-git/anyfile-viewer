@@ -33,7 +33,7 @@ instructions, and license texts are published with
 | OGV.js | 1.9.0 | MIT; bundled Ogg codecs use their accompanying BSD-style terms | <https://github.com/brion/ogv.js> |
 | PDF.js | 6.2.108 | Apache-2.0 | <https://github.com/mozilla/pdf.js> |
 | React and React DOM | 19.2.8 | MIT | <https://github.com/facebook/react> |
-| SheetJS | 0.20.3 | Apache-2.0 | <https://git.sheetjs.com/sheetjs/sheetjs> |
+| SheetJS | 0.20.3 | Apache-2.0 | <https://git.sheetjs.com/sheetjs/sheetjs>; installed through the third-party npm republisher [@e965/xlsx](https://github.com/e965/sheetjs-npm-publisher), pinned to 0.20.3 |
 | sql.js | 1.14.2 | MIT; SQLite is public domain | <https://github.com/sql-js/sql.js> |
 | tailwind-merge | 3.6.0 | MIT | <https://github.com/dcastil/tailwind-merge> |
 | tw-animate-css | 1.4.0 | MIT | <https://github.com/Wombosvideo/tw-animate-css> |
