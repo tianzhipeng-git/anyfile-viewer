@@ -1,3 +1,4 @@
+import { mindMapManifest } from "@anyfile/mind-map-viewer/manifest";
 import { ifcManifest } from "@anyfile/ifc-viewer/manifest";
 import { visioManifest } from "@anyfile/visio-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
@@ -315,6 +316,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
       const viewerPackage = await import("@anyfile/har-viewer");
       return viewerPackage.harViewer;
     },
+  },
+  {
+    manifest: mindMapManifest,
+    async probe(context) { return (await import("@anyfile/mind-map-viewer/probe")).probeMindMap(context); },
+    async load() { return (await import("@anyfile/mind-map-viewer")).mindMapViewer; },
   },
   {
     manifest: codeManifest,

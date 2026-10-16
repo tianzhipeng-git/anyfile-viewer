@@ -106,7 +106,8 @@
     "@anyfile/mpp-viewer": "workspace:*",
     "@anyfile/visio-viewer": "workspace:*",
     "@anyfile/dicom-viewer": "workspace:*",
-    "@anyfile/ifc-viewer": "workspace:*"
+    "@anyfile/ifc-viewer": "workspace:*",
+    "@anyfile/mind-map-viewer": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

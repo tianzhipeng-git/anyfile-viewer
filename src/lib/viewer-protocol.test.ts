@@ -200,9 +200,18 @@ describe("viewer protocol", () => {
     expect(result.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel])).toEqual([["mesh-3d", 3], ["hex-viewer", 1]]);
   });
 
+  it("routes FreeMind ahead of text while retaining Objective-C++ support", async () => {
+    const signal = new AbortController().signal;
+    const mindMap = await resolveViewerRegistrations(new File(['<?xml version="1.0"?><map><node TEXT="Plan"/></map>'], "ideas.mm"), viewerRegistrations, { signal });
+    expect(mindMap[0].registration.manifest.id).toBe("mind-map");
+    const source = await resolveViewerRegistrations(new File(['#import <Foundation/Foundation.h>'], "source.mm"), viewerRegistrations, { signal });
+    expect(source[0].registration.manifest.id).toBe("ace-code-text");
+    expect(source.some(({ registration }) => registration.manifest.id === "mind-map")).toBe(false);
+  });
+
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
+      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),

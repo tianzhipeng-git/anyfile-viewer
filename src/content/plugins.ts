@@ -21,6 +21,11 @@ const plugin = (
 });
 
 export const pluginContents: readonly PluginContent[] = [
+  plugin("mind-map", { en: "How the Mind Map Viewer Works", "zh-CN": "思维导图查看器如何工作" },
+    { en: "Read XMind, MindManager and FreeMind / Freeplane maps locally.", "zh-CN": "本地读取 XMind、MindManager 与 FreeMind / Freeplane 脑图。" },
+    { en: "Bounded ZIP and XML/JSON readers recover topic trees for a focused branch view.", "zh-CN": "有界 ZIP 与 XML/JSON 解析器提取主题树，以聚焦分支的方式展示。" },
+    { en: ["Reuses the shared ZIP reader; no extra runtime assets.", "Only 100 child topics are mounted per page; files and links stay local."], "zh-CN": ["复用共享 ZIP 读取器，无额外运行时资产。", "每页最多挂载 100 个子主题；文件与链接内容均在本地处理。"] },
+    { en: ["Structure preview, not original layout; no images, attachments, relationships or task metadata.", "No encrypted files; 128 MiB input, 16 MiB content and 20,000 topics."], "zh-CN": ["仅预览结构，不还原原始布局、图片、附件、关联线与任务元数据。", "不支持加密；输入 128 MiB、内容 16 MiB、20,000 个主题。"] }),
   plugin("ifc", { en: "How the IFC Building Viewer Works", "zh-CN": "IFC 建筑模型查看器如何工作" },
     { en: "Local IFC building previews with interior walkthroughs.", "zh-CN": "本地预览 IFC 建筑模型，支持室内漫游。" },
     { en: "A cancellable web-ifc Worker reads building geometry for the shared 3D viewport and first-person walkthrough controls.", "zh-CN": "可取消的 web-ifc Worker 读取建筑几何，交给共享三维视口和第一人称漫游控件。" },
