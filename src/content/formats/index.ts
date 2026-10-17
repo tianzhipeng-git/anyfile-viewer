@@ -1,3 +1,4 @@
+import { mindMapFormats } from "./mind-map";
 import { sceneExchangeFormats } from "./scene-exchange";
 import { ifcFormat } from "./ifc";
 import { visioFormats } from "./visio";
@@ -140,6 +141,7 @@ import { zlibFormat } from "./zlib";
 import { zstFormat } from "./zst";
 
 export const formatContents: readonly FormatContent[] = [
+  ...mindMapFormats,
   ...visioFormats,
   dicomFormat,
   ...sceneExchangeFormats, ifcFormat, dwgFormat, ...cadExchangeFormats, ...meshFormats,

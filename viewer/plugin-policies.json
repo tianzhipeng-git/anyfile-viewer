@@ -764,6 +764,11 @@
           ]
         }
       ]
+    },
+    "mind-map": {
+      "directory": "mind-map",
+      "package": "@anyfile/mind-map-viewer",
+      "runtimeSets": []
     }
   }
 }

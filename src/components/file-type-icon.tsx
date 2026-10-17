@@ -1,3 +1,4 @@
+import { mindMapManifest } from "@anyfile/mind-map-viewer/manifest";
 import { ifcManifest } from "@anyfile/ifc-viewer/manifest";
 import { visioManifest } from "@anyfile/visio-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
@@ -151,6 +152,11 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     icon: FileTextIcon,
     extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest)
       .filter((extension) => extension !== ".ai" && extension !== ".zip"),
+  },
+  {
+    kind: "design",
+    icon: PaletteIcon,
+    extensions: manifestExtensions(mindMapManifest),
   },
   {
     kind: "code",
