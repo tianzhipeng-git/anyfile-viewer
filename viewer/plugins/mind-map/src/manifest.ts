@@ -9,5 +9,5 @@ export const mindMapManifest = {
     { name: { en: "MindManager", "zh-CN": "MindManager 思维导图" }, extensions: [".mmap"] },
     { name: { en: "FreeMind / Freeplane", "zh-CN": "FreeMind / Freeplane 思维导图" }, extensions: [".mm"] },
   ],
-  workspaceAccess: "none",
+  workspaceAccess: "optional",
 } as const satisfies ViewerPluginManifest;

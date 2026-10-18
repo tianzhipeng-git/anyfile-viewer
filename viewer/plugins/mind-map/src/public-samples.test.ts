@@ -42,10 +42,10 @@ describe.skipIf(!directory)("downloaded public mind maps", () => {
         expect(sheets.length, sample.path).toBe(sample.expectedSheets);
         const controller = await mindMapViewer.open(test.context);
         expect(test.container.querySelector("h2")?.textContent).toBe(sheets[0].root.title || "未命名主题");
-        const first = test.container.querySelector<HTMLButtonElement>(".mm-branches button");
+        const first = test.container.querySelectorAll(".mm-node")[1];
         if (first) {
-          first.click();
-          expect(test.container.querySelector("h2")?.textContent).toBe(sheets[0].root.children[0].title || "未命名主题");
+          first.dispatchEvent(new MouseEvent("click"));
+          expect(test.container.querySelector("h2")?.textContent).toBe(first.getAttribute("aria-label"));
         }
         test.abortController.abort(); await controller.dispose(); await controller.dispose();
         expect(test.container.childElementCount).toBe(0);

@@ -927,6 +927,9 @@ importers:
       '@anyfile/archive-metadata-viewer':
         specifier: workspace:*
         version: link:../archive
+      '@anyfile/safe-svg-viewer':
+        specifier: workspace:*
+        version: link:../svg
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol

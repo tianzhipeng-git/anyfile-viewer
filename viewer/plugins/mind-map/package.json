@@ -5,6 +5,6 @@
   "type": "module",
   "exports": { ".": "./src/index.ts", "./manifest": "./src/manifest.ts", "./probe": "./src/probe.ts" },
   "scripts": { "test": "vitest run" },
-  "dependencies": { "@anyfile/viewer-protocol": "workspace:*", "@anyfile/archive-metadata-viewer": "workspace:*" },
+  "dependencies": { "@anyfile/viewer-protocol": "workspace:*", "@anyfile/archive-metadata-viewer": "workspace:*", "@anyfile/safe-svg-viewer": "workspace:*" },
   "devDependencies": { "@anyfile/viewer-test": "workspace:*", "fflate": "0.8.3", "happy-dom": "20.11.6", "vitest": "4.1.11" }
 }

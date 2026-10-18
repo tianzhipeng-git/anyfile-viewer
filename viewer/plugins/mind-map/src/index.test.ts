@@ -20,10 +20,6 @@ function archive(name: string, path: string, content: string, level: 0 | 6 = 0) 
 function context(file = new File([mm], "ideas.mm")) {
   const test = createViewerTestContext(file); contexts.push(test); return test;
 }
-const click = (test: ViewerTestContext, label: string) => {
-  const button = Array.from(test.container.querySelectorAll("button")).find((item) => item.textContent === label);
-  expect(button, label).toBeDefined(); button!.click();
-};
 afterEach(() => { for (const test of contexts.splice(0)) test.cleanup(); });
 
 describe("mind map format support", () => {
@@ -48,13 +44,13 @@ describe("mind map format support", () => {
     const wholeRead = vi.spyOn(test.context.file, "arrayBuffer");
     const controller = await mindMapViewer.open({ ...test.context, reportPreview: preview });
     expect(test.container.querySelector("h2")?.textContent).toBe("计划");
-    const branch = test.container.querySelector<HTMLButtonElement>(".mm-branches button")!;
-    branch.click();
+    const branch = test.container.querySelector('.mm-node[aria-label="设计"]')!;
+    branch.dispatchEvent(new MouseEvent("click"));
     expect(test.container.querySelector("h2")?.textContent).toBe("设计");
     expect(test.container.textContent).toContain("中文备注");
     expect(preview).toHaveBeenCalledExactlyOnceWith({ outcome: "success", kind: "structure" });
     expect(wholeRead).not.toHaveBeenCalled();
-    click(test, "上级主题");
+    test.container.querySelector('.mm-node[aria-label="计划"]')!.dispatchEvent(new MouseEvent("click"));
     expect(test.container.querySelector("h2")?.textContent).toBe("计划");
     await controller.dispose(); await controller.dispose();
     expect(test.container.children).toHaveLength(0);
@@ -68,7 +64,7 @@ describe("mind map format support", () => {
     expect(maps[0].root.children.map(node => node.title)).toEqual(["Child", "Summary", "Callout"]);
     const test = context(archive("modern.xmind", "content.json", source));
     const controller = await mindMapViewer.open(test.context);
-    click(test, "Callout (0)");
+    test.container.querySelector('.mm-node[aria-label="Callout"]')!.dispatchEvent(new MouseEvent("click"));
     expect(test.container.querySelector("h2")?.textContent).toBe("Callout");
     await controller.dispose();
   });
@@ -92,16 +88,15 @@ describe("mind map format support", () => {
     expect(fetch).not.toHaveBeenCalled();
     await controller.dispose();
   });
-  it("paginates wide maps and can reach the final branch", async () => {
+  it("renders all branches together and can select the final branch", async () => {
     const content = `<map><node TEXT="Root">${Array.from({ length: 205 }, (_, i) => `<node TEXT="Child ${i}"/>`).join("")}</node></map>`;
     const test = context(new File([content], "wide.mm"));
     const controller = await mindMapViewer.open(test.context);
-    expect(test.container.querySelectorAll(".mm-branches button")).toHaveLength(100);
-    click(test, "下一组分支"); click(test, "下一组分支");
-    expect(test.container.querySelectorAll(".mm-branches button")).toHaveLength(5);
-    click(test, "Child 204 (0)");
+    expect(test.container.querySelectorAll(".mm-node")).toHaveLength(206);
+    expect(test.container.querySelectorAll(".mm-branch")).toHaveLength(205);
+    test.container.querySelector('.mm-node[aria-label="Child 204"]')!.dispatchEvent(new MouseEvent("click"));
     expect(test.container.querySelector("h2")?.textContent).toBe("Child 204");
-    click(test, "中心主题");
+    test.container.querySelector('.mm-node[aria-label="Root"]')!.dispatchEvent(new MouseEvent("click"));
     expect(test.container.querySelector("h2")?.textContent).toBe("Root");
     await controller.dispose();
   });
@@ -147,7 +142,7 @@ describe("mind map format support", () => {
     const active = context();
     const preview = vi.fn();
     const controller = await mindMapViewer.open({ ...active.context, reportPreview: preview });
-    const staleButton = active.container.querySelector<HTMLButtonElement>(".mm-branches button")!;
+    const staleButton = active.container.querySelector<HTMLButtonElement>(".mm-toolbar button")!;
     const progressCount = active.progress.length;
     active.abortController.abort(); staleButton.click();
     await controller.dispose(); await controller.dispose();
@@ -157,7 +152,7 @@ describe("mind map format support", () => {
   });
   it("falls back to English for untranslated locales", async () => {
     const test = context(); const controller = await mindMapViewer.open({ ...test.context, locale: "de" });
-    expect(test.container.textContent).toContain("Parent topic"); await controller.dispose();
+    expect(test.container.textContent).toContain("Fit map"); await controller.dispose();
   });
   it.each(["planning.mm", "planning.xmind", "planning-legacy.xmind", "planning.mmap"])("opens checked-in example %s", async (name) => {
     const file = new File([readFileSync(`${process.cwd()}/examples/${name}`)], name);
