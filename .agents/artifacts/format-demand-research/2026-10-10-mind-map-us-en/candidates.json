@@ -1,0 +1,177 @@
+{
+  "methodology_version": "1.1",
+  "market": {
+    "location_code": 2840,
+    "language_code": "en"
+  },
+  "settings": {
+    "suggestions_limit": 100,
+    "minimum_suggestion_volume": 10,
+    "max_keywords_per_candidate": 40,
+    "serp_depth": 10,
+    "trends_time_range": "past_12_months"
+  },
+  "candidates": [
+    {
+      "id": "xmind",
+      "format_name": "XMind",
+      "extensions": [
+        "xmind"
+      ],
+      "aliases": [
+        "xmind"
+      ],
+      "suggestion_seeds": [
+        "xmind file"
+      ],
+      "seed_keywords": [
+        "xmind viewer online",
+        "open xmind file",
+        "how to open xmind file",
+        "xmind file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "xmind"
+        ]
+      ]
+    },
+    {
+      "id": "freemind-mm",
+      "format_name": "FreeMind / Freeplane",
+      "extensions": [
+        "mm"
+      ],
+      "aliases": [
+        "freemind",
+        "freeplane"
+      ],
+      "suggestion_seeds": [
+        "freemind file",
+        "freeplane file"
+      ],
+      "seed_keywords": [
+        "freemind viewer online",
+        "open mm file",
+        "how to open freemind file",
+        "freeplane file viewer",
+        "mm file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "freemind"
+        ],
+        [
+          "freeplane"
+        ],
+        [
+          "mm file"
+        ]
+      ]
+    },
+    {
+      "id": "mindmanager-mmap",
+      "format_name": "MindManager",
+      "extensions": [
+        "mmap"
+      ],
+      "aliases": [
+        "mindmanager"
+      ],
+      "suggestion_seeds": [
+        "mmap file",
+        "mindmanager file"
+      ],
+      "seed_keywords": [
+        "mmap viewer online",
+        "open mmap file",
+        "how to open mindmanager file",
+        "mindmanager file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "mmap file"
+        ],
+        [
+          "mindmanager"
+        ]
+      ]
+    },
+    {
+      "id": "mindnode",
+      "format_name": "MindNode",
+      "extensions": [
+        "mindnode"
+      ],
+      "aliases": [
+        "mindnode"
+      ],
+      "suggestion_seeds": [
+        "mindnode file"
+      ],
+      "seed_keywords": [
+        "mindnode viewer online",
+        "open mindnode file",
+        "how to open mindnode file",
+        "mindnode file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "mindnode"
+        ]
+      ]
+    },
+    {
+      "id": "ithoughts-itmz",
+      "format_name": "iThoughts",
+      "extensions": [
+        "itmz"
+      ],
+      "aliases": [
+        "ithoughts"
+      ],
+      "suggestion_seeds": [
+        "itmz file",
+        "ithoughts file"
+      ],
+      "seed_keywords": [
+        "itmz viewer online",
+        "open itmz file",
+        "how to open ithoughts file",
+        "ithoughts file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "itmz"
+        ],
+        [
+          "ithoughts"
+        ]
+      ]
+    },
+    {
+      "id": "opml",
+      "format_name": "OPML (adjacent outline format)",
+      "extensions": [
+        "opml"
+      ],
+      "aliases": [
+        "outline processor markup language"
+      ],
+      "suggestion_seeds": [
+        "opml file"
+      ],
+      "seed_keywords": [
+        "opml viewer online",
+        "open opml file",
+        "how to open opml file",
+        "opml file viewer"
+      ],
+      "serp_context_groups": [
+        [
+          "opml"
+        ]
+      ]
+    }
+  ]
+}

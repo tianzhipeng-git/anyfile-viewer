@@ -2,8 +2,11 @@ import { ViewerError } from "@anyfile/viewer-protocol";
 import { openBookZip } from "@anyfile/archive-metadata-viewer/zip-source";
 
 export const LIMITS = { file: 128 * 1024 ** 2, content: 16 * 1024 ** 2, nodes: 20_000, depth: 128, sheets: 128, text: 4 * 1024 ** 2 };
-export interface Topic { title: string; notes: string; link: string; children: Topic[] }
-export interface Sheet { title: string; root: Topic }
+export type { Topic, Sheet } from "./model";
+import type { Topic, Sheet } from "./model";
+import { loadAssets } from "./assets";
+import type { WorkspaceReader } from "@anyfile/viewer-protocol";
+import { jsonVisual, xmlVisual, jsonRelationships, xmlRelationships, kind, applyLegacyStyles, managerDefaults, managerRelationships } from "./visual-data";
 export function checkAbort(signal: AbortSignal) {
   if (signal.aborted) throw new DOMException("Aborted", "AbortError");
 }
@@ -53,28 +56,35 @@ export function parseContent(source: string, format: "xmind-json" | "xmind-xml" 
     checkAbort(signal);
     textSize += title.length + notes.length + link.length;
     if (++count > LIMITS.nodes || depth > LIMITS.depth || textSize > LIMITS.text) throw limit();
-    return { title, notes, link, children: [] };
+    return { id: `topic-${count}`, title, notes, link, children: [], kind: "attached", style: {}, structure: "", folded: false, markers: [], labels: [], metadata: {}, boundaries: [], relationships: [], attachments: [] };
   }
-  function jsonTopic(value: unknown, depth: number): Topic {
+  function jsonTopic(value: unknown, depth: number, theme: Record<string, unknown> = {}, topicKind = "attached"): Topic {
     const data = record(value);
     const notes = data.notes == null ? {} : record(data.notes);
     const plain = notes.plain == null ? {} : record(notes.plain);
     const result = topic(string(data.title), string(plain.content), string(data.href), depth);
+    const styleName = depth === 0 ? "centralTopic" : topicKind === "detached" ? "floatingTopic" : topicKind === "summary" ? "summaryTopic" : topicKind === "callout" ? "calloutTopic" : depth === 1 ? "mainTopic" : "subTopic";
+    const base = theme[styleName] ? record(theme[styleName]) : {};
+    const own = data.style ? record(data.style) : {};
+    jsonVisual(result, { ...data, style: { properties: { ...(base.properties ? record(base.properties) : {}), ...(own.properties ? record(own.properties) : {}) } } });
     if (data.children != null) {
       const groups = record(data.children);
       for (const key of ["attached", "detached", "summary", "callout"]) {
         if (groups[key] == null) continue;
         if (!Array.isArray(groups[key])) throw invalid();
-        for (const item of groups[key]) result.children.push(jsonTopic(item, depth + 1));
+        for (const item of groups[key]) {
+          const node = jsonTopic(item, depth + 1, theme, key); node.kind = kind(key); result.children.push(node);
+        }
       }
     }
     return result;
   }
+  let managerRoot: Element | undefined;
   function xmlTopic(element: Element, depth: number): Topic {
     let title: string, notes: string, link: string, nested: Element[];
     if (format === "mm") {
       const rich = children(element, "richcontent");
-      title = element.getAttribute("TEXT") ?? richText(rich.find((item) => item.getAttribute("TYPE") === "NODE"));
+      title = element.getAttribute("TEXT") ?? richText(rich.find((item) => item.getAttribute("TYPE") === "NODE")).split("\n").map(line => line.trim()).filter(Boolean).join("\n");
       notes = rich.filter((item) => ["NOTE", "DETAILS"].includes(item.getAttribute("TYPE") ?? "")).map(richText).join("\n");
       link = element.getAttribute("LINK") ?? "";
       nested = children(element, "node");
@@ -84,8 +94,8 @@ export function parseContent(source: string, format: "xmind-json" | "xmind-xml" 
       notes = richText(note);
       // Some versions store XHTML notes as escaped XML instead of elements.
       if (note && !note.children.length && /^\s*</.test(notes)) notes = richText(xml(notes));
-      link = child(child(element, "HyperlinkGroup"), "Hyperlink")?.getAttribute("Url") ?? "";
-      nested = children(child(element, "SubTopics"), "Topic");
+      link = (child(element, "Hyperlink") ?? child(child(element, "HyperlinkGroup"), "Hyperlink") ?? child(child(element, "HyperlinkGroup"), "IndexedHyperlink"))?.getAttribute("Url") ?? "";
+      nested = [...children(child(element, "SubTopics"), "Topic"), ...children(child(element, "FloatingTopics"), "Topic")];
     } else {
       title = text(child(element, "title"));
       const note = child(element, "notes");
@@ -94,7 +104,15 @@ export function parseContent(source: string, format: "xmind-json" | "xmind-xml" 
       nested = children(child(element, "children"), "topics").flatMap((group) => children(group, "topic"));
     }
     const result = topic(title, notes, link, depth);
-    for (const item of nested) result.children.push(xmlTopic(item, depth + 1));
+    if (format === "mmap" && managerRoot) managerDefaults(element, managerRoot, depth);
+    xmlVisual(result, element, format);
+    if (format === "xmind-xml") result.metadata.styleId = element.getAttribute("style-id") ?? "";
+    for (const item of nested) {
+      const node = xmlTopic(item, depth + 1);
+      if (format === "xmind-xml") node.kind = kind(item.parentElement?.getAttribute("type") ?? "");
+      if (format === "mmap" && item.parentElement?.localName === "FloatingTopics") node.kind = "detached";
+      result.children.push(node);
+    }
     return result;
   }
   let sheets: Sheet[];
@@ -104,7 +122,7 @@ export function parseContent(source: string, format: "xmind-json" | "xmind-xml" 
     if (data.length > LIMITS.sheets) throw limit();
     sheets = data.map((value) => {
       const sheet = record(value);
-      return { title: string(sheet.title), root: jsonTopic(sheet.rootTopic, 0) };
+      return { title: string(sheet.title), root: jsonTopic(sheet.rootTopic, 0, sheet.theme ? record(sheet.theme) : {}), relationships: jsonRelationships(sheet.relationships) };
     });
   } else {
     const root = xml(source);
@@ -115,8 +133,9 @@ export function parseContent(source: string, format: "xmind-json" | "xmind-xml" 
     } else if (format === "mmap") {
       const topics = children(child(root, "OneTopic"), "Topic");
       if (root.localName !== "Map" || topics.length !== 1) throw invalid();
+      managerRoot = root;
       const node = xmlTopic(topics[0], 0);
-      sheets = [{ title: node.title, root: node }];
+      sheets = [{ title: node.title, root: node, relationships: managerRelationships(root) }];
     } else {
       if (root.localName !== "xmap-content") throw invalid();
       const items = children(root, "sheet");
@@ -124,7 +143,7 @@ export function parseContent(source: string, format: "xmind-json" | "xmind-xml" 
       if (items.length > LIMITS.sheets) throw limit();
       sheets = items.map((item) => {
         if (children(item, "topic").length !== 1) throw invalid();
-        return { title: text(child(item, "title")), root: xmlTopic(child(item, "topic")!, 0) };
+        return { title: text(child(item, "title")), root: xmlTopic(child(item, "topic")!, 0), relationships: xmlRelationships(item) };
       });
     }
   }
@@ -158,10 +177,14 @@ async function readText(file: File, signal: AbortSignal): Promise<string> {
   }
 }
 
-export async function readMindMap(file: File, signal: AbortSignal): Promise<Sheet[]> {
+export async function readMindMap(file: File, signal: AbortSignal, workspace?: WorkspaceReader): Promise<Sheet[]> {
   checkAbort(signal);
   if (file.size > LIMITS.file) throw limit();
-  if (/\.mm$/i.test(file.name)) return parseContent(await readText(file, signal), "mm", signal);
+  if (/\.mm$/i.test(file.name)) {
+    const sheets = parseContent(await readText(file, signal), "mm", signal);
+    await loadAssets(sheets, signal, undefined, workspace);
+    return sheets;
+  }
   if (!/\.(xmind|mmap)$/i.test(file.name)) throw invalid();
   const zip = await openBookZip(file, signal);
   try {
@@ -170,7 +193,14 @@ export async function readMindMap(file: File, signal: AbortSignal): Promise<Shee
     if (!zip.entries.has(path)) throw invalid();
     const bytes = await zip.read(path, LIMITS.content, signal);
     const source = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
-    return parseContent(source, isXmind ? (path.endsWith("json") ? "xmind-json" : "xmind-xml") : "mmap", signal);
+    const sheets = parseContent(source, isXmind ? (path.endsWith("json") ? "xmind-json" : "xmind-xml") : "mmap", signal);
+    if (zip.entries.has("styles.xml")) {
+      const styles = new TextDecoder().decode(await zip.read("styles.xml", LIMITS.content, signal));
+      xml(styles);
+      applyLegacyStyles(sheets, styles);
+    }
+    await loadAssets(sheets, signal, zip);
+    return sheets;
   } finally {
     await zip.dispose();
   }

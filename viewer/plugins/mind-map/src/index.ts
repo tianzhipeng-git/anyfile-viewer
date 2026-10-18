@@ -19,7 +19,7 @@ export const mindMapViewer: FileViewerPlugin = {
       checkAbort(context.signal);
       context.signal.addEventListener("abort", dispose, { once: true });
       context.reportProgress({ stage: "reading", message: copy.reading });
-      const sheets = await readMindMap(context.file, context.signal);
+      const sheets = await readMindMap(context.file, context.signal, context.workspace);
       checkAbort(context.signal);
       view = createMindMapView(sheets, copy);
       context.container.append(view.root);
