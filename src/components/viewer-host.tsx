@@ -87,6 +87,7 @@ function SupportLevelBadge({
 export function ViewerHost({
   file,
   header,
+  emptyState,
   relativePath,
   workspace,
   locale,
@@ -96,6 +97,7 @@ export function ViewerHost({
   file?: File;
   fileSource?: FileSource;
   header: ReactNode;
+  emptyState?: ReactNode;
   relativePath?: string;
   workspace?: WorkspaceReader;
   locale: Locale;
@@ -309,8 +311,8 @@ export function ViewerHost({
           } as React.CSSProperties}
         />
         {visibleStatus !== "active" && (
-          <div className="absolute inset-0 grid place-items-center p-6">
-            <Empty>
+          <div className="absolute inset-0 grid place-items-center overflow-auto p-6">
+            {!file && emptyState ? emptyState : <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
                   {visibleStatus === "loading" ? <LoaderCircleIcon className="animate-spin" /> : visibleStatus === "error" ? <AlertCircleIcon /> : <FileSearchIcon />}
@@ -325,7 +327,7 @@ export function ViewerHost({
                 </EmptyDescription>
               </EmptyHeader>
               {file && visibleStatus === "error" && <FeedbackTrigger />}
-            </Empty>
+            </Empty>}
           </div>
         )}
       </div>

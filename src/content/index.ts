@@ -1,6 +1,7 @@
 import type { PublishedLocale } from "../i18n/config";
 
 import { withViewerBenefits } from "./viewer-copy";
+import { ANIMATION_SAMPLE_EXTENSIONS } from "./format-samples";
 
 import { categoryContents } from "./categories";
 import { formatContents } from "./formats";
@@ -19,6 +20,29 @@ export function getFormat(extension: string, locale: PublishedLocale) {
   const content = publishedFormats.find((item) => item.extension === normalized || item.aliases?.includes(normalized));
   if (!content) return undefined;
   return { ...content, ...withViewerBenefits(content.copy[locale], locale), pluginIds: manifestsForExtension(content.extension).map(({ id }) => id) };
+}
+
+export function getRelatedFormats(extension: string, locale: PublishedLocale) {
+  const format = getFormat(extension, locale);
+  if (!format) return [];
+  const index = publishedFormats.findIndex((item) => item.extension === format.extension);
+  const pluginIds = new Set([format.extension, ...(format.aliases ?? [])]
+    .flatMap((value) => manifestsForExtension(value).map(({ id }) => id)));
+  const animation = ANIMATION_SAMPLE_EXTENSIONS.includes(format.extension);
+  return publishedFormats
+    .map((item, position) => ({ item, distance: Math.abs(position - index) }))
+    .filter(({ item }) => item.categoryId === format.categoryId && item.extension !== format.extension)
+    .map(({ item, distance }) => ({
+      item,
+      distance,
+      animation: animation && ANIMATION_SAMPLE_EXTENSIONS.includes(item.extension),
+      sharedPlugin: manifestsForExtension(item.extension).some(({ id }) => format.pluginIds.includes(id)) ? 2
+        : Number([item.extension, ...(item.aliases ?? [])]
+          .some((value) => manifestsForExtension(value).some(({ id }) => pluginIds.has(id)))),
+    }))
+    .sort((a, b) => Number(b.animation) - Number(a.animation) || Number(b.sharedPlugin) - Number(a.sharedPlugin) || a.distance - b.distance)
+    .slice(0, 4)
+    .map(({ item }) => getFormat(item.extension, locale)!);
 }
 
 export function getCategory(slug: string, locale: PublishedLocale) {

@@ -35,6 +35,7 @@
 
 - browser-image：图片完成解码并挂载，区分 static / animation。
 - photoshop-document：PSD/PSB 合成图已交给视口，static。
+- mesh-3d（包括 SKP）：首次 WebGL 绘制完成且上下文有效，static；取消、销毁或丢失上下文不记成功。
 - Insta360 / GoPro MAX / DJI Osmo：照片或静态回退为 static；视频首帧为 video_frame；实际播放另发 video_playback。
 - Hex 初始化完成记 fallback，任何入口都不把它算目标任务成功。
 - 其余插件仅记录初始化和显式失败；初始化后离开且没有结果信号时记 unmeasured，不能计入成功或失败。初始化前切换记 cancelled。
@@ -43,7 +44,7 @@
 
 ## GA4 报表配置
 
-已在资源 `556331864` / 数据流 `15861388657` 后台关闭增强型衡量，保存以下定义（2026-09-29）；尚未发布代码，未验证线上收数。
+已在资源 `556331864` / 数据流 `15861388657` 后台关闭增强型衡量，保存以下定义（2026-09-29）。2026-10-24 已在 GA4 报告确认线上收到打开及结果事件；事件到达不代表结果均为成功，也不替代下述逐路径验收。
 
 事件级自定义维度：task_entry、file_source、format、plugin、size_bucket、outcome、preview_kind、reason_code。
 

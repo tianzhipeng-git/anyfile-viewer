@@ -72,6 +72,7 @@ const dictionary = {
     accessErrorTitle: "Unable to access local files", collapseSidebar: "Collapse file sidebar", expandSidebar: "Expand file sidebar",
     chooseLocalFile: "Choose local files", unopenedTitle: "No workspace open", unopenedDescription: "Choose or drag files/folder to display them here.",
     preview: "Preview", unknownType: "Unknown type", workspaceFiles: "Workspace files",
+    insvPairHint: "For X3 or One RS INSV recordings, select the matching _00 and _10 files together, or open their folder.",
   },
   viewer: {
     detecting: "Detecting the file format and choosing a viewer…", detectionFailed: "Unable to detect this file format.",
@@ -89,7 +90,7 @@ const dictionary = {
     fallbackTitle: "No dedicated preview for this file type", fallbackDescription: "The raw file contents are shown in hexadecimal.",
     openingTitle: "Opening file", failedTitle: "Viewer failed to open", noViewerTitle: "No matching viewer",
     selectTitle: "Choose a local file", noPlugin: "No plugin currently supports the {extension} format.",
-    selectDescription: "Choose a PDF, spreadsheet, code, text or structured data file. Its contents stay in your browser.",
+    selectDescription: "Choose files from this device or drag them here to preview. Files stay on your device and are never uploaded.",
   },
 } as const satisfies AppDictionary;
 

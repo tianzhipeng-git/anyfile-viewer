@@ -10,6 +10,10 @@ Anyfile Viewer is a free, open-source file viewer that reads and previews local 
 
 The goal is broad format coverage with useful, fast, read-only previews. It focuses on viewing rather than editing, with lightweight startup and bounded resource use for large files.
 
+Start with [SketchUp SKP models](https://www.anyfile.top/en/formats/skp), [Photoshop PSB previews](https://www.anyfile.top/en/formats/psb), [Insta360 originals](https://www.anyfile.top/en/viewers/insta360) or [APNG animations](https://www.anyfile.top/en/formats/apng). Each guide explains the supported files and viewing limits.
+
+No file handy? [Open an original APNG sample](https://www.anyfile.top/en/view#file=https%3A%2F%2Fwww.anyfile.top%2Fsamples%2Fanimation%2Fanimated.apng) to try the viewer. Pause and frame controls are available when your browser supports frame decoding.
+
 ## What you can open
 
 | Category | Examples |

@@ -16,7 +16,7 @@ export interface Rendering3dDocument {
 }
 
 // The runtime takes ownership of the document, including initialization failure.
-export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument, locale: Locale, title: string) {
+export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument, locale: Locale, title: string, onFirstRender?: () => void) {
   const copy = selectMessages(locale, {
     en: { unsupported: "WebGL 2 is unavailable.", limit: "The model exceeds the geometry or GPU budget.", invalid: "The model contains invalid or empty geometry.", units: "Units unknown", vertices: "vertices", triangles: "triangles", size: "Dimensions" },
     "zh-CN": { unsupported: "当前环境不支持 WebGL 2。", limit: "模型超过几何或 GPU 资源上限。", invalid: "模型几何为空或无效。", units: "单位未知", vertices: "顶点", triangles: "三角面", size: "尺寸" },
@@ -53,7 +53,7 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
   controls.addEventListener("start", onInteraction);
   controls.listenToKeyEvents(renderer.domElement);
   let navigation: ReturnType<typeof createNavigation> | undefined;
-  let disposed = false; let frame = 0; let lost = false;
+  let disposed = false; let frame = 0; let lost = false; let rendered = false;
   const schedule = () => {
     if (disposed || lost || frame) return;
     frame = requestAnimationFrame((time) => {
@@ -62,6 +62,10 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
       if (playing && mixer) { mixer.update(Math.min(0.1, (time - lastTime) / 1000)); lastTime = time; }
       const moving = navigation?.update(time);
       renderer.render(scene, camera);
+      if (!rendered && !disposed && !lost && !renderer.getContext().isContextLost()) {
+        rendered = true;
+        onFirstRender?.();
+      }
       if (playing || moving) schedule();
     });
   };

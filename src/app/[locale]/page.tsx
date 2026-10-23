@@ -6,7 +6,7 @@ import { JsonLd } from "@/components/json-ld";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
-import { getCategories } from "@/lib/catalog";
+import { getCategories, getFormat } from "@/lib/catalog";
 
 const principleIcons = [LockKeyholeIcon, ZapIcon, FolderOpenIcon];
 const openSourceIcons = [Code2Icon, GitForkIcon, ScaleIcon];
@@ -16,6 +16,9 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
   if (!isPublishedLocale(candidate)) return null;
   const dictionary = await getDictionary(candidate);
   const categories = getCategories(candidate);
+  const featuredFormats = ["skp", "psb", "dwg", "step", "apng", "insv"]
+    .map((extension) => getFormat(extension, candidate))
+    .filter((format) => format !== undefined);
   const pageUrl = new URL(localePath(candidate), siteUrl()).toString();
 
   return (
@@ -47,6 +50,16 @@ export default async function Home({ params }: { params: Promise<{ locale: strin
             <Button nativeButton={false} size="lg" variant="outline" render={<a href="#formats" />}>{dictionary.home.browse}</Button>
           </div>
           <p className="text-xs text-muted-foreground">{dictionary.home.trust}</p>
+          <nav className="flex flex-col gap-3" aria-label={candidate === "zh-CN" ? "按文件格式开始" : "Start with your file format"}>
+            <p className="text-sm text-muted-foreground">{candidate === "zh-CN" ? "收到打不开的文件？选择格式查看使用方法。" : "Received a file you cannot open? Start with its format."}</p>
+            <ul className="flex flex-wrap justify-center gap-2">
+              {featuredFormats.map((format) => <li key={format.extension}>
+                <IsolationBoundaryLink href={localePath(candidate, `/formats/${format.extension}`)} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                  {format.extension.toUpperCase()} {candidate === "zh-CN" ? "查看器" : "viewer"}
+                </IsolationBoundaryLink>
+              </li>)}
+            </ul>
+          </nav>
         </div>
       </section>
       <section className="bg-foreground py-20 text-background">
