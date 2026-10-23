@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { PUBLISHED_LOCALES } from "../i18n/config";
 
-import { getCategory, getFormat, getPanoramaViewer, getPanoramaViewerForPlugin, getPanoramaViewersForExtension, getPlugin, publishedCategories, publishedFormatRoutes, publishedFormats, publishedPanoramaViewers, publishedPlugins, viewerManifests } from ".";
+import { getCategory, getFormat, getPanoramaViewer, getPanoramaViewerForPlugin, getPanoramaViewersForExtension, getPlugin, getRelatedFormats, publishedCategories, publishedFormatRoutes, publishedFormats, publishedPanoramaViewers, publishedPlugins, viewerManifests } from ".";
 import { manifestsForExtension } from "./manifests";
 
 const unique = (values: readonly string[]) => new Set(values).size === values.length;
@@ -83,6 +83,27 @@ describe("published SEO content", () => {
 
     for (const extension of ["md", "txt", "xml"]) {
       expect(getFormat(extension, "en")!.categoryId, extension).toBe("developer-artifacts");
+    }
+  });
+
+  it("links related viewing tasks before unrelated formats from the same category", () => {
+    const related = (extension: string) => getRelatedFormats(extension, "en").map((item) => item.extension);
+    expect(related("apng").slice(0, 3).sort()).toEqual(["avif", "gif", "webp"]);
+    expect(related("heic")[0]).toBe("jxl");
+    for (const unrelated of ["dcm", "360", "3gp", "aac"]) expect(related("heic")).not.toContain(unrelated);
+    expect(related("psb")[0]).toBe("psd");
+    expect(related("step").slice(0, 2).sort()).toEqual(["brep", "iges"]);
+    expect(related("stp")).toEqual(related("step"));
+    expect(related("not-a-format")).toEqual([]);
+    for (const { extension, categoryId } of publishedFormats) {
+      const items = getRelatedFormats(extension, "zh-CN");
+      expect(items.length).toBeLessThanOrEqual(4);
+      expect(unique(items.map((item) => item.extension))).toBe(true);
+      for (const item of items) {
+        expect(item.extension).not.toBe(extension);
+        expect(item.status).toBe("published");
+        expect(item.categoryId).toBe(categoryId);
+      }
     }
   });
 

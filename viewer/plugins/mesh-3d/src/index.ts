@@ -27,7 +27,9 @@ export const mesh3dViewer: FileViewerPlugin = {
         default: throw new Error("Unsupported extension");
       }
       if (signal.aborted) throw new DOMException("Aborted", "AbortError");
-      viewer = create3dViewer(context.container, document, locale, file.name);
+      viewer = create3dViewer(context.container, document, locale, file.name, () => {
+        if (!disposed && !signal.aborted) context.reportPreview?.({ outcome: "success", kind: "static" });
+      });
       signal.addEventListener("abort", dispose, { once: true });
       return { dispose };
     } catch (error) {

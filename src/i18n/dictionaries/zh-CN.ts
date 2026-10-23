@@ -69,6 +69,7 @@ const dictionary = {
     collapseSidebar: "收起文件栏", expandSidebar: "展开文件栏", chooseLocalFile: "选择本地文件",
     unopenedTitle: "尚未打开工作区", unopenedDescription: "选择或拖动文件/文件夹，这里会显示文件树",
     preview: "预览区", unknownType: "未知类型", workspaceFiles: "工作区文件",
+    insvPairHint: "X3 或 One RS 的 INSV 录像请同时选择匹配的 _00 和 _10 文件，也可打开它们所在的文件夹。",
   },
   viewer: {
     detecting: "正在检测文件格式并选择查看器…", detectionFailed: "无法检测这个文件的格式。", loadingViewer: "正在加载查看器…",
@@ -85,7 +86,7 @@ const dictionary = {
     fallbackTitle: "暂不支持此文件类型的专用预览",
     fallbackDescription: "当前以十六进制展示文件的原始内容。", openingTitle: "正在打开文件", failedTitle: "查看器打开失败",
     noViewerTitle: "没有匹配的查看器", selectTitle: "选择本地文件", noPlugin: "当前没有支持 {extension} 格式的插件。",
-    selectDescription: "选择 PDF、表格、代码、文本或结构化数据文件，内容只在浏览器本地处理。",
+    selectDescription: "选择此设备上的文件或将文件拖到这里，即可预览。文件留在你的设备上，不会上传。",
   },
 } as const satisfies AppDictionary;
 

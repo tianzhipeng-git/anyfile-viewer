@@ -25,6 +25,7 @@ import { PublicFileControls } from "@/components/public-file-controls";
 import { downloadPublicFile, PublicFileError } from "@/lib/public-file";
 import { FileTree } from "@/components/file-tree";
 import { ViewerHost } from "@/components/viewer-host";
+import { WorkspaceWelcome } from "@/components/workspace-welcome";
 import { WorkspaceSidebarResizer } from "@/components/workspace-sidebar-resizer";
 import {
   browserFileEntries,
@@ -400,6 +401,7 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
               fileSource={fileSource}
               relativePath={selectedEntry?.relativePath}
               workspace={workspace}
+              emptyState={!embedded && <WorkspaceWelcome dictionary={dictionary} busy={busy} onOpen={() => void openFiles()} />}
               header={(
                 <div className="flex min-w-0 items-center gap-2">
                   {!embedded && !sidebarOpen && (

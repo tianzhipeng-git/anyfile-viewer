@@ -10,6 +10,10 @@ Anyfile Viewer 是一个免费、开源的文件查看器，在你的设备上�
 
 项目优先追求广泛的格式覆盖，提供实用、快速的只读预览。专注于查看，不提供编辑；同时注重轻量启动，以及处理大文件时的资源控制。
 
+直接查看 [SketchUp SKP 模型](https://www.anyfile.top/zh-CN/formats/skp)、[Photoshop PSB 合成图](https://www.anyfile.top/zh-CN/formats/psb)、[Insta360 原片](https://www.anyfile.top/zh-CN/viewers/insta360)或 [APNG 动画](https://www.anyfile.top/zh-CN/formats/apng)。各入口均说明支持范围与查看限制。
+
+手边没有文件？[一键打开原创 APNG 样例](https://www.anyfile.top/zh-CN/view#file=https%3A%2F%2Fwww.anyfile.top%2Fsamples%2Fanimation%2Fanimated.apng)即可体验查看器。浏览器支持帧解码时，还可以暂停和逐帧查看。
+
 ## 可以打开什么
 
 | 类别 | 格式示例 |
@@ -41,7 +45,7 @@ Anyfile Viewer 是一个免费、开源的文件查看器，在你的设备上�
 
 所选文件在浏览器中读取、解码和渲染，不会上传文件内容进行转换或预览。查看器代码、WebAssembly 解码器及其他运行时资源可能按需从网络下载，因此本地处理不等于完全离线运行。
 
-线上站点使用 Vercel Analytics 和 Speed Insights。反馈仅在你提交表单时发送，不会附带你的文件。详情请阅读[隐私政策](https://www.anyfile.top/zh-CN/privacy)。
+线上站点在访客同意后使用 Google Analytics 4，并使用 Vercel Speed Insights 衡量页面性能；产品事件不包含文件名或文件内容，事件定义与统计口径见[测量说明](docs/product-measurement.md)。反馈仅在你提交表单时发送，不会附带你的文件。详情请阅读[隐私政策](https://www.anyfile.top/zh-CN/privacy)。
 
 ## 本地运行
 

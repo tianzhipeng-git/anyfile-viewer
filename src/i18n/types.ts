@@ -34,6 +34,7 @@ export type AppDictionary = {
     folderUnsupported: string; pickerFailed: string; droppedEmpty: string; accessErrorTitle: string;
     collapseSidebar: string; expandSidebar: string; chooseLocalFile: string; unopenedTitle: string;
     unopenedDescription: string; preview: string; unknownType: string; workspaceFiles: string;
+    insvPairHint: string;
   };
   viewer: {
     detecting: string; detectionFailed: string; loadingViewer: string; loadingNamedViewer: string;

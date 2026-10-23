@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        source: "/samples/design/color-study.psb",
+        // The default .psb MIME mapping describes an unrelated 3GPP format.
+        headers: [{ key: "Content-Type", value: "application/octet-stream" }],
+      },
+      {
         source: "/vendor/:dependency/:version/:path*",
         headers: [
           { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
