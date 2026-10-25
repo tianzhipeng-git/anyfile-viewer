@@ -1,5 +1,10 @@
 # SketchUp sample
 
+[![Open in Anyfile](https://www.anyfile.top/brand/open-in-anyfile.svg)](https://www.anyfile.top/en/view#file=https%3A%2F%2Fwww.anyfile.top%2Fsamples%2Fmodel%2Fchair-and-table.skp)
+
+Preview this model in your browser without installing SketchUp. Rotate and zoom
+the model; WebGL 2 is required. [Supported SKP files and limits](https://www.anyfile.top/en/formats/skp).
+
 `chair-and-table.skp` is a 30,748-byte legacy SketchUp v17 model from OpenSKP.
 It shows a chair and table with component placement and basic materials; it is
 not an architectural walkthrough scene.
