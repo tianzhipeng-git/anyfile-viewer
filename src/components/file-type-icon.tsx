@@ -39,6 +39,7 @@ import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
 import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
+import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
@@ -145,13 +146,18 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "presentation",
     icon: PresentationIcon,
-    extensions: manifestExtensions(powerpointManifest),
+    extensions: [
+      ...manifestExtensions(powerpointManifest),
+      ...manifestExtensions(legacyOfficeManifest).filter((extension) => extension === ".ppt"),
+    ],
   },
   {
     kind: "document",
     icon: FileTextIcon,
-    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest)
-      .filter((extension) => extension !== ".ai" && extension !== ".zip"),
+    extensions: [
+      ...manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest),
+      ...manifestExtensions(legacyOfficeManifest).filter((extension) => extension !== ".ppt"),
+    ].filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },
   {
     kind: "design",

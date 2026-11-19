@@ -40,6 +40,7 @@ import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
 import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
+import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import { wordManifest } from "@anyfile/word-viewer/manifest";
@@ -308,6 +309,17 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/powerpoint-viewer");
       return viewerPackage.powerpointViewer;
+    },
+  },
+  {
+    manifest: legacyOfficeManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/legacy-office-viewer/probe");
+      return probePackage.probeLegacyOffice(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/legacy-office-viewer");
+      return viewerPackage.legacyOfficeViewer;
     },
   },
   {

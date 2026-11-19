@@ -38,6 +38,7 @@ import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
 import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
+import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import { wordManifest } from "@anyfile/word-viewer/manifest";
@@ -49,7 +50,7 @@ export const viewerManifests: readonly ViewerPluginManifest[] = [
   mindMapManifest,
   visioManifest, djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
-  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, mppManifest, harManifest,
+  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, legacyOfficeManifest, mppManifest, harManifest,
   codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest,
   comicBookManifest, mobiManifest, fictionBookManifest, epubManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
 ];

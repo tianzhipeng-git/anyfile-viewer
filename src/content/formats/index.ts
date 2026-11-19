@@ -36,6 +36,7 @@ import { dbfFormat } from "./dbf";
 import { deflateFormat } from "./deflate";
 import { difFormat } from "./dif";
 import { dngFormat } from "./dng";
+import { docFormat } from "./doc";
 import { dxfFormat } from "./dxf";
 import { docxFormat } from "./docx";
 import { duckdbFormat } from "./duckdb";
@@ -97,6 +98,7 @@ import { psbFormat } from "./psb";
 import { psdFormat } from "./psd";
 import { psFormat } from "./ps";
 import { pnmFormat } from "./pnm";
+import { pptFormat } from "./ppt";
 import { prnFormat } from "./prn";
 import { pptxFormat } from "./pptx";
 import { pyzFormat } from "./pyz";
@@ -105,6 +107,7 @@ import { qpwFormat } from "./qpw";
 import { rafFormat } from "./raf";
 import { rarFormat } from "./rar";
 import { rawFormat } from "./raw";
+import { rtfFormat } from "./rtf";
 import { rwlFormat } from "./rwl";
 import { rw2Format } from "./rw2";
 import { slkFormat } from "./slk";
@@ -170,6 +173,7 @@ export const formatContents: readonly FormatContent[] = [
   deflateFormat,
   difFormat,
   dngFormat,
+  docFormat,
   dxfFormat,
   docxFormat,
   duckdbFormat,
@@ -233,6 +237,7 @@ export const formatContents: readonly FormatContent[] = [
   psdFormat,
   psFormat,
   pnmFormat,
+  pptFormat,
   prnFormat,
   pptxFormat,
   pyzFormat,
@@ -241,6 +246,7 @@ export const formatContents: readonly FormatContent[] = [
   rafFormat,
   rarFormat,
   rawFormat,
+  rtfFormat,
   rwlFormat,
   rw2Format,
   slkFormat,
