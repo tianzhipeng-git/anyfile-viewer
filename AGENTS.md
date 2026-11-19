@@ -53,6 +53,7 @@
 | 任务场景 | 必读文档 |
 |---|---|
 | 新增格式或插件、补充样例与测试、判断完成标准 | `docs/plugin-development.md` |
+| 执行或协助每周 dev → main review | `docs/weekly-review.md` |
 | 新增或修改查看器插件、Manifest、插件注册与选择、`open()` 上下文、工作区读取、生命周期、错误码、协议版本或协议合规测试 | `docs/viewer-plugin-protocol.md` |
 | 修改插件内的 DOM、布局、滚动、第三方渲染器、异步渲染、加载与错误 UI、样式、主题、无障碍、内容安全或渲染性能 | `docs/viewer-rendering-guidelines.md` |
 | 修改插件加载方式、静态/动态导入边界、SSG/SSR、Worker/WASM、jsDelivr 与本地回退、依赖版本、部署头、CSP 或首包体积 | `docs/viewer-loading-and-deployment.md` |
