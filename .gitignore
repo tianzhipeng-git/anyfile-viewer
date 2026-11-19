@@ -53,3 +53,6 @@ __pycache__/
 
 /public/source/
 /third_party/libredwg/**/*.log
+
+# Local agent research output
+/.agents/artifacts/
