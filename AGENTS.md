@@ -24,7 +24,7 @@
 | `scripts/` | 资产准备、门禁检查；`tools/` 自建 WASM 配方；`third_party/` 审核后的二进制产物 |
 
 # 工作流
-- 日常开发分支是 `dev`。每个任务从最新 `dev` 拉 `agent/<YYYY-MM-DD>-<topic>` 分支，一个分支只做一件事，完成后合并回 `dev`。不直接提交或合并到 `main`（`main` 自动部署到 Vercel，每周由人工 review 后从 `dev` 合并）。
+- 日常开发分支是 `dev`。每个任务从最新 `dev` 拉 `agent/<YYYY-MM-DD>-<topic>` 分支，一个分支只做一件事，完成后在本地合并回 `dev`（不提 PR）并推送 `origin dev`，然后删除该任务分支。不直接提交或合并到 `main`（`main` 自动部署到 Vercel，每周由人工 review 后从 `dev` 合并）。
 - 合并到 `dev` 前必须本地通过门禁；提交说明写清：做了什么、验证了什么、哪些需要人工浏览器验收（见 `docs/plugin-development.md` 第 6 节）。
 - 门禁失败时修代码，不改门禁。确需放宽预算、扩大 allowlist、跳过或删除测试时，在提交说明中单独写出理由，交给每周 review 判断。
 
