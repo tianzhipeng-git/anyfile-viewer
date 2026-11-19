@@ -51,6 +51,11 @@ for (const path of tracked) {
   }
 }
 
+// ROADMAP.md items: "- [ ] 低|中|高 | requirement | optional note".
+for (const [index, line] of read("ROADMAP.md").split("\n").entries()) {
+  if (/^- \[/.test(line) && !/^- \[[ x!]\] (低|中|高) \| \S/.test(line)) fail(`ROADMAP.md:${index + 1}: item must look like "- [ ] 中 | requirement | note"`);
+}
+
 // Plugin wiring.
 const policies = readJson("viewer/plugin-policies.json").plugins;
 const rootDependencies = readJson("package.json").dependencies;

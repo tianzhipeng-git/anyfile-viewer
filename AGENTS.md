@@ -24,6 +24,7 @@
 | `scripts/` | 资产准备、门禁检查；`tools/` 自建 WASM 配方；`third_party/` 审核后的二进制产物 |
 
 # 工作流
+- 任务来自根目录 `ROADMAP.md` 需求池，领取、拆分、完成标记规则见该文件。用户直接指定的任务优先。
 - 日常开发分支是 `dev`。每个任务从最新 `dev` 拉 `agent/<YYYY-MM-DD>-<topic>` 分支，一个分支只做一件事，完成后在本地合并回 `dev`（不提 PR）并推送 `origin dev`，然后删除该任务分支。不直接提交或合并到 `main`（`main` 自动部署到 Vercel，每周由人工 review 后从 `dev` 合并）。
 - 合并到 `dev` 前必须本地通过门禁；提交说明写清：做了什么、验证了什么、哪些需要人工浏览器验收（见 `docs/plugin-development.md` 第 6 节）。
 - 门禁失败时修代码，不改门禁。确需放宽预算、扩大 allowlist、跳过或删除测试时，在提交说明中单独写出理由，交给每周 review 判断。
@@ -54,6 +55,7 @@
 |---|---|
 | 新增格式或插件、补充样例与测试、判断完成标准 | `docs/plugin-development.md` |
 | 执行或协助每周 dev → main review | `docs/weekly-review.md` |
+| 领取每日任务或调研补充需求池 | `ROADMAP.md` |
 | 新增或修改查看器插件、Manifest、插件注册与选择、`open()` 上下文、工作区读取、生命周期、错误码、协议版本或协议合规测试 | `docs/viewer-plugin-protocol.md` |
 | 修改插件内的 DOM、布局、滚动、第三方渲染器、异步渲染、加载与错误 UI、样式、主题、无障碍、内容安全或渲染性能 | `docs/viewer-rendering-guidelines.md` |
 | 修改插件加载方式、静态/动态导入边界、SSG/SSR、Worker/WASM、jsDelivr 与本地回退、依赖版本、部署头、CSP 或首包体积 | `docs/viewer-loading-and-deployment.md` |
