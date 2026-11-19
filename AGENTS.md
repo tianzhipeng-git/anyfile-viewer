@@ -1,17 +1,17 @@
-<!-- BEGIN:nextjs-agent-rules -->
+# 代码
+这个codebase属于你(Coding Agent), 你对代码质量负责, 在开发升级改造项目时, 代码、文档都应该是为你自己服务的, 也就是说便于你:
+- 快速理解项目架构
+- 快速找到某功能涉及的代码位置和修改点
+- 减少改动面
+- 要有一些的测试、检查、门禁来防止代码腐化, 但是他们又要足够少, 防止无用的测试拖慢整体速度, 所以要删除无用的测试和检查
 
-# This is NOT the Next.js you know
+避免留下一些冗长的、无意义的、只会拖慢后续AI Agent对项目的理解和开发速度的东西.
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
-
-This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
-
-<!-- END:nextjs-agent-rules -->
-
-# 项目总体思路
+# 项目设计思路
 - 文件在浏览器中直接读取与预览，不上传到服务器, 不用下载桌面软件。 速度更快, 隐私更好。
 - 支持的文件格式, 超级超级多, 项目追求的主要是支持的格式多, 而不是支持等级高。
 - 只提供查看功能, 不提供编辑, 要轻量、快、能打开大文件。
+- 可以优先死磕那些有明确需求, 但是只能依赖大型桌面软件的文件格式.
 
 
 # 项目文档阅读路由
@@ -27,4 +27,16 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 | 设计或修改 `viewer-ui`、共享渲染基础设施、Canvas/视口/缩放/渲染调度/资源管理、renderer adapter，或评估 Lit、d3-zoom、Konva、PixiJS、OpenSeadragon、Three.js 等选型 | `docs/viewer-ui-and-rendering-architecture.md` |
 
 # 注意
-尽量不要使用内置无头浏览器进行真实测试验收, 无法支持文件选择器和WebGL的能力, 对于真实验收测试交给用户来操作, 需要的话 你可以操作我德鳄真实Chrome.
+尽量不要使用内置无头浏览器进行真实测试验收, 可能它无法支持文件选择器和WebGL的能力.
+
+
+# 关于nextjs
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
