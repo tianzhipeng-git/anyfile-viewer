@@ -55,5 +55,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/sqlite-viewer test
+pnpm test viewer/plugins/sqlite
 ```

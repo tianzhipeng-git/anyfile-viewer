@@ -85,7 +85,7 @@ pnpm start
 To test one plugin:
 
 ```bash
-pnpm --filter @anyfile/pdf-viewer test
+pnpm test viewer/plugins/pdf
 ```
 
 Deploy as a Next.js application and preserve the response headers in `next.config.ts`, including the viewer's cross-origin isolation headers. See the [loading and deployment guide](docs/viewer-loading-and-deployment.md).

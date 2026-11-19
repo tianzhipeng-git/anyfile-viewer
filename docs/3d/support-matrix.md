@@ -116,7 +116,7 @@
 
 60 张纹理合计 64,807,075 像素，共享 glTF adapter 总纹理额度改为 64 × 1024² 像素（RGBA 256 MiB；不含 mipmap 与渲染器开销），覆盖该工作负载。SKP Worker 传递结构化超限原因和数值；解析器内部 RangeError 与主动预算、超时分开显示。
 
-私有模型不纳入仓库。可用 `SKP_TEST_FILE=/absolute/path/to/model.skp pnpm --filter @anyfile/mesh-3d-viewer test` 运行实际解析与纹理预检回归。
+私有模型不纳入仓库。可用 `SKP_TEST_FILE=/absolute/path/to/model.skp pnpm test viewer/plugins/mesh-3d` 运行实际解析与纹理预检回归。
 
 真实 Chrome 验收：使用原始 SKP 单文件，经完整 Worker → GLB adapter → WebGL 流程显示 1,827,257 顶点、1,015,976 三角面与材质纹理；Top/Isometric 视图及缩放操作通过。更改 npm patch 后需刷新旧开发页面，避免热更新残留的模块/Worker。
 
@@ -136,7 +136,7 @@
 - 接入共享总览、观察点放置和漫游；不提供属性表、完整空间层级、纹理、碰撞、重力、BIM 校验或精确测量。web-ifc 未支持的几何可能省略。
 - 主文件 128 MiB；IFC 数据内存配置 512 MiB（不是整个 WASM 堆的硬上限）；输出 600 万顶点、256 MiB、4,096 次绘制；解析 120 秒超时或取消后终止 Worker。
 - 固定原创 `viewer/plugins/ifc/fixtures/room.ifc` 验证毫米转米、6 × 4 × 3.2 米房间、Y-up、变换、名称与颜色；真实 Chrome 打开、地面观察点放置、室内环顾及返回总览通过。完整工业模型兼容性矩阵仍待补。
-- `BasicHouse.ifc` 本地实测（50.3 MiB，IFC2X3）：Chrome 显示 884,073 顶点、617,376 三角面。空的轴线/曲线三角网格不视为文件损坏，不计绘制预算；仍校验非空几何的结构。样例不随仓库分发，可用 `IFC_TEST_FILE=/absolute/path/to/model.ifc pnpm --filter @anyfile/ifc-viewer test` 复测。
+- `BasicHouse.ifc` 本地实测（50.3 MiB，IFC2X3）：Chrome 显示 884,073 顶点、617,376 三角面。空的轴线/曲线三角网格不视为文件损坏，不计绘制预算；仍校验非空几何的结构。样例不随仓库分发，可用 `IFC_TEST_FILE=/absolute/path/to/model.ifc pnpm test viewer/plugins/ifc` 复测。
 - Worker 测试覆盖各来源失败清理、同源回退、取消、超时、文件错误不回退；插件测试覆盖损坏/超限输入、销毁和取消后不渲染。
 
 

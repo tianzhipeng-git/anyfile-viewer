@@ -37,5 +37,5 @@ probe 最多读取前 1 MiB 识别格式。解码在专用 Worker 中完成，�
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/general-raster-viewer test
+pnpm test viewer/plugins/general-raster
 ```

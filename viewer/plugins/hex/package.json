@@ -7,15 +7,10 @@
     ".": "./src/index.ts",
     "./manifest": "./src/manifest.ts"
   },
-  "scripts": {
-    "test": "vitest run"
-  },
   "dependencies": {
     "@anyfile/viewer-protocol": "workspace:*"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "workspace:*",
-    "happy-dom": "20.11.6",
-    "vitest": "4.1.11"
+    "@anyfile/viewer-test": "workspace:*"
   }
 }

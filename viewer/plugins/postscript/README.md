@@ -39,5 +39,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/postscript-viewer test
+pnpm test viewer/plugins/postscript
 ```

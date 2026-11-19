@@ -20,7 +20,7 @@ The native build needs no container. Go's standard library is the only dependenc
 MPP_GO=/path/to/go python3 tools/mppgo-build/build.py
 pnpm prepare:mpp
 node tools/mppgo-build/smoke.mjs viewer/plugins/mpp/examples/task-dates-2010.mpp
-pnpm --filter @anyfile/mpp-viewer test
+pnpm test viewer/plugins/mpp
 ```
 
 The recipe verifies the pinned upstream archive SHA-256, builds without local

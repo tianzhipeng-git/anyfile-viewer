@@ -1,6 +1,6 @@
-# DICOM 查看器
+# DICOM 查看器 (`dicom`)
 
-实现位于 `viewer/plugins/dicom`，支持 `.dcm` / `.dicom` 的 DICOM Part 10 文件。文件只在浏览器读取，没有网络上传、编辑或导出。
+支持 `.dcm` / `.dicom` 的 DICOM Part 10 文件。文件只在浏览器读取，没有网络上传、编辑或导出。
 
 ## 已实现范围
 
@@ -29,10 +29,12 @@
 - 取消和 dispose 终止 Worker、拒绝未完成请求、释放视口/Canvas/监听器并移除根节点。帧请求期间禁用相关输入，局部失败保留上一帧并标明失败。
 - `dicom-parser@1.8.21`（MIT）只进入延迟的 probe/Worker 代码，不进入页面外壳。许可随 prepare 发布到 `/vendor/licenses/dicom-parser/1.8.21/LICENSE`。
 
-## 验证记录（2026-10-04）
+## 开发与验证
 
-- 插件测试覆盖三种原生语法、存储位与符号位、重标定、灰度反转、padding、RGB 两种排列、多帧、窗函数、元数据降级、损坏/超限和取消/重复释放。
-- pydicom 公开 `CT_small.dcm`：128×128 CT 解码通过（临时下载验证，没有复制进仓库或作为联网单测依赖）。来源：<https://github.com/pydicom/pydicom/blob/main/src/pydicom/data/test_files/CT_small.dcm>。
-- 使用真实 Chrome 验证本地生产构建的合成多帧样例，确认灰度/RGB 画布显示、帧切换、缩放、旋转、窗宽调整及元数据降级。640×480 窗口收起文件栏后通过比例检查；固定缩放百分比字段宽度，避免工具栏换行与 fit 缩放互相触发布局抖动。
-- 样例位于 `viewer/plugins/dicom/examples`，用该目录下 `generate.mjs` 重新生成，不含患者信息。它们用于显示链路测试，不代表完整临床 IOD 合规样例。
-- 仍需用户用实际来源文件验收少见设备变体；不将合成样例和单个 CT 样例视为全格式覆盖。
+- [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
+- [examples/](examples/) 为 `generate.mjs` 生成的合成样例，不含患者信息，只用于显示链路测试，不代表完整临床 IOD 合规。
+- 公开真实样例可用 pydicom `CT_small.dcm`（<https://github.com/pydicom/pydicom/blob/main/src/pydicom/data/test_files/CT_small.dcm>）临时下载验证，不复制进仓库。
+
+```bash
+pnpm test viewer/plugins/dicom
+```

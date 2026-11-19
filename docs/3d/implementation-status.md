@@ -72,4 +72,4 @@ Docker LAZ 重建方面：在锁定的 Linux/amd64 镜像中，两次干净构�
 
 ## DWG 正式接入
 
-`cad-dwg` 已注册，识别 AC1012–AC1032 中已列明的文件签名，在独立 Worker 中运行自建 LibreDWG 0.14。基础文字、缓存标注、图块 OCS 与基点变换、实心填充及基础图案填充进入正式适配器。采用模型空间集合，避免混入转换器返回的布局对象。详细限制与验收见 [DWG 实现记录](dwg-implementation.md)。
+`cad-dwg` 已注册，识别 AC1012–AC1032 中已列明的文件签名，在独立 Worker 中运行自建 LibreDWG 0.14。基础文字、缓存标注、图块 OCS 与基点变换、实心填充及基础图案填充进入正式适配器。采用模型空间集合，避免混入转换器返回的布局对象。详细限制与验收见 [cad-dwg README](../../viewer/plugins/cad-dwg/README.md)。

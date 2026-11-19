@@ -40,5 +40,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/non-native-video-viewer test
+pnpm test viewer/plugins/non-native-video
 ```

@@ -38,5 +38,5 @@ FFmpeg 资产和许可证由共享包管理，构建、裁剪及部署约束见[
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/ffmpeg-audio-viewer test
+pnpm test viewer/plugins/ffmpeg-audio
 ```

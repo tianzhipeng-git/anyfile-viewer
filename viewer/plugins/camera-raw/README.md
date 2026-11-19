@@ -36,5 +36,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/camera-raw-viewer test
+pnpm test viewer/plugins/camera-raw
 ```

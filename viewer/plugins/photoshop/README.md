@@ -40,5 +40,5 @@ ag-psd 仅在完整插件路径使用，解码在专用 Worker 中完成。
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/photoshop-viewer test
+pnpm test viewer/plugins/photoshop
 ```

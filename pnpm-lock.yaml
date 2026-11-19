@@ -249,27 +249,13 @@ importers:
         specifier: 4.130.0
         version: 4.130.0(@cloudflare/workers-types@5.20260908.1)
 
-  viewer/dev-binary-core:
-    devDependencies:
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
+  viewer/dev-binary-core: {}
 
   viewer/ffmpeg-playback:
     dependencies:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../protocol
-    devDependencies:
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/i18n: {}
 
@@ -288,12 +274,6 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/browser-audio:
     dependencies:
@@ -313,12 +293,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/browser-image:
     dependencies:
@@ -332,12 +306,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/browser-video:
     dependencies:
@@ -348,12 +316,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/cad-2d:
     dependencies:
@@ -376,12 +338,6 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/cad-dwg:
     dependencies:
@@ -407,12 +363,6 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/cad-exchange:
     dependencies:
@@ -435,12 +385,6 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/camera-raw:
     dependencies:
@@ -457,12 +401,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/code:
     dependencies:
@@ -476,12 +414,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/comic-book:
     dependencies:
@@ -498,12 +430,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/dev-array:
     dependencies:
@@ -520,12 +446,6 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/dev-source-map:
     dependencies:
@@ -539,12 +459,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/dev-wasm:
     dependencies:
@@ -558,12 +472,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/dicom:
     dependencies:
@@ -576,13 +484,6 @@ importers:
       dicom-parser:
         specifier: 1.8.21
         version: 1.8.21
-    devDependencies:
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/dji-osmo:
     dependencies:
@@ -602,12 +503,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/duckdb:
     dependencies:
@@ -630,12 +525,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/epub:
     dependencies:
@@ -655,12 +544,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/excel:
     dependencies:
@@ -680,12 +563,6 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/ffmpeg-audio:
     dependencies:
@@ -699,12 +576,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/ffmpeg-video:
     dependencies:
@@ -718,12 +589,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/fictionbook:
     dependencies:
@@ -743,12 +608,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/general-raster:
     dependencies:
@@ -765,12 +624,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/gopro-max:
     dependencies:
@@ -790,12 +643,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/har:
     dependencies:
@@ -806,12 +653,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/hex:
     dependencies:
@@ -822,12 +663,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/ifc:
     dependencies:
@@ -853,12 +688,6 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/insta360:
     dependencies:
@@ -884,12 +713,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/mesh-3d:
     dependencies:
@@ -915,12 +738,6 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/mind-map:
     dependencies:
@@ -940,12 +757,6 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/mobi:
     dependencies:
@@ -965,12 +776,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/modern-raster:
     dependencies:
@@ -987,12 +792,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/mpp:
     dependencies:
@@ -1003,12 +802,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/non-native-audio:
     dependencies:
@@ -1028,12 +821,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/non-native-video:
     dependencies:
@@ -1050,12 +837,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/pdf:
     dependencies:
@@ -1069,12 +850,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/photoshop:
     dependencies:
@@ -1091,12 +866,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/pixelmator-pxd:
     dependencies:
@@ -1119,12 +888,6 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/point-cloud:
     dependencies:
@@ -1141,12 +904,6 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/postscript:
     dependencies:
@@ -1160,12 +917,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/powerpoint:
     dependencies:
@@ -1179,12 +930,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/print-3d:
     dependencies:
@@ -1204,12 +949,6 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/sqlite:
     dependencies:
@@ -1229,12 +968,6 @@ importers:
       '@types/sql.js':
         specifier: 1.4.11
         version: 1.4.11
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/svg:
     dependencies:
@@ -1248,12 +981,6 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/visio:
     dependencies:
@@ -1263,13 +990,6 @@ importers:
       '@anyfile/viewer-rendering':
         specifier: workspace:*
         version: link:../../rendering
-    devDependencies:
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/plugins/word:
     dependencies:
@@ -1286,12 +1006,6 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/protocol:
     dependencies:
@@ -1307,22 +1021,8 @@ importers:
       libraw-wasm:
         specifier: 1.6.0
         version: 1.6.0
-    devDependencies:
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
-  viewer/rendering:
-    devDependencies:
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
+  viewer/rendering: {}
 
   viewer/rendering-3d:
     dependencies:
@@ -1336,12 +1036,6 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
   viewer/rendering-publication:
     dependencies:
@@ -1355,33 +1049,15 @@ importers:
         specifier: workspace:*
         version: link:../protocol
 
-  viewer/runtime-assets:
-    devDependencies:
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
+  viewer/runtime-assets: {}
 
   viewer/testing:
     dependencies:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../protocol
-    devDependencies:
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
 
-  viewer/ui:
-    devDependencies:
-      happy-dom:
-        specifier: 20.11.6
-        version: 20.11.6
-      vitest:
-        specifier: 4.1.11
-        version: 4.1.11(@types/node@20.19.43)(happy-dom@20.11.6)(vite@8.2.2(@types/node@20.19.43)(esbuild@0.28.1)(jiti@2.7.0))
+  viewer/ui: {}
 
 packages:
 

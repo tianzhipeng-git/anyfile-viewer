@@ -40,5 +40,5 @@ ZIP 能力来自归档插件；章节清理、排版和导航复用 `@anyfile/re
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/epub-reader test
+pnpm test viewer/plugins/epub
 ```

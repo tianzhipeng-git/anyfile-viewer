@@ -37,5 +37,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/browser-image-viewer test
+pnpm test viewer/plugins/browser-image
 ```

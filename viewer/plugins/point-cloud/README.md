@@ -41,5 +41,5 @@ LAZ 除包依赖外需要已部署的 laz-perf 审核资产；普通文本和 LA
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/point-cloud-viewer test
+pnpm test viewer/plugins/point-cloud
 ```
