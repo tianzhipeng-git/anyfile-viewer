@@ -211,7 +211,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
+      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),
@@ -511,8 +511,14 @@ describe("viewer protocol", () => {
       .toEqual(["cad-2d", "hex-viewer"]);
     expect(findViewerRegistrations("report.docx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["word-document", "archive-metadata-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("legacy.doc", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["legacy-office", "hex-viewer"]);
+    expect(findViewerRegistrations("notes.rtf", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["legacy-office", "hex-viewer"]);
     expect(findViewerRegistrations("slides.pptx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["powerpoint-presentation", "archive-metadata-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("deck.ppt", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["legacy-office", "hex-viewer"]);
     expect(findViewerRegistrations("book.xlsx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["excel-workbook", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("rows.csv.gz", viewerRegistrations).map(({ manifest: item }) => item.id))

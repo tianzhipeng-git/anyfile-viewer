@@ -769,6 +769,11 @@
       "directory": "mind-map",
       "package": "@anyfile/mind-map-viewer",
       "runtimeSets": []
+    },
+    "legacy-office": {
+      "directory": "legacy-office",
+      "package": "@anyfile/legacy-office-viewer",
+      "runtimeSets": []
     }
   }
 }

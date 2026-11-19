@@ -100,6 +100,9 @@ importers:
       '@anyfile/insta360-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/insta360
+      '@anyfile/legacy-office-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/legacy-office
       '@anyfile/mesh-3d-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/mesh-3d
@@ -709,6 +712,16 @@ importers:
       mediabunny:
         specifier: 1.55.3
         version: 1.55.3
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+
+  viewer/plugins/legacy-office:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
