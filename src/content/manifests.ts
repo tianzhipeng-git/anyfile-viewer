@@ -7,6 +7,7 @@ import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
+import { epubManifest } from "@anyfile/epub-reader/manifest";
 import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
 import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
 import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
@@ -50,7 +51,7 @@ export const viewerManifests: readonly ViewerPluginManifest[] = [
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
   dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, mppManifest, harManifest,
   codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest,
-  comicBookManifest, mobiManifest, fictionBookManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
+  comicBookManifest, mobiManifest, fictionBookManifest, epubManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
 ];
 
 export function manifestsForExtension(extension: string) {

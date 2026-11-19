@@ -15,8 +15,8 @@ const PLUGINS_WITHOUT_SAMPLES = new Set([
   "fictionbook", "gopro-max", "hex", "insta360", "mobi", "pixelmator-pxd", "powerpoint", "sqlite",
 ]);
 // Registered plugins without a site page in src/content/manifests.ts.
-// epub has a format page but no plugin page yet; ffmpeg viewers are fallbacks.
-const UNPUBLISHED_PLUGINS = new Set(["epub", "ffmpeg-audio", "ffmpeg-video"]);
+// The FFmpeg viewers are fallbacks behind an unpublished extension set.
+const UNPUBLISHED_PLUGINS = new Set(["ffmpeg-audio", "ffmpeg-video"]);
 const SAMPLE_DIRECTORIES = ["examples", "fixtures"];
 const NON_SAMPLE = /^(readme|license|notice|sources?)(\.|$)|\.(md|json|txt|py|mjs|ts)$/i;
 
