@@ -101,7 +101,7 @@ try {
     await player.getByRole("button", { name: "Replay", exact: true }).click();
     await page.waitForFunction(() => window.__ffmpegPeak() > 0.01);
   });
-  for (const name of ["aiff-s24.aiff", "aifc-f32.aifc", "avi-video-only.avi", "avi-1080p.avi"]) {
+  for (const name of ["aiff-s24.aiff", "aifc-f32.aifc", "avi-video-only.avi", "avi-1080p.avi", "ps-mpeg2-ac3.vob", "ps-mpeg2-mp2.mpg", "asf-wmv2-wma2.wmv"]) {
     await check(`${name} playback`, async () => {
       await open(name); await player.getByRole("button", { name: "Play", exact: true }).click();
       await page.waitForFunction(() => Number(document.querySelector('.anyfile-ffmpeg-player__seek').value) > 0.4);

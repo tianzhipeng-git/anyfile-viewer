@@ -467,6 +467,10 @@ describe("viewer protocol", () => {
       .toEqual(["non-native-audio", "hex-viewer"]);
     expect(findViewerRegistrations("clip.avi", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["ffmpeg-video", "hex-viewer"]);
+    for (const extension of ["wmv", "asf", "mpg", "mpeg", "vob"]) {
+      expect(findViewerRegistrations(`clip.${extension}`, viewerRegistrations).map(({ manifest: item }) => item.id))
+        .toEqual(["ffmpeg-video", "hex-viewer"]);
+    }
     expect(findViewerRegistrations("tone.aiff", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["ffmpeg-audio", "hex-viewer"]);
     expect(findViewerRegistrations("tone.wav", viewerRegistrations).map(({ manifest: item }) => item.id))

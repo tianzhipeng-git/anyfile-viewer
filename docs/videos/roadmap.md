@@ -183,11 +183,10 @@ rotation、pixel aspect ratio、多轨切换、字幕、章节、准确逐帧 se
 
 `ffmpeg-video` 与 `ffmpeg-audio` 共用 `@anyfile/ffmpeg-playback` 和同一版本的 Worker/WASM 资产，独立维护 probe、manifest 与 UI。架构和资源边界见[FFmpeg 音视频播放架构](ffmpeg-playback-runtime-plan.md)。
 
-当前支持 AVI MPEG-4 Part 2 + MP3 或 video-only，Chromium 播放及生命周期证据见[播放验证](ffmpeg-playback-delivery.md)。
+当前支持 AVI（MPEG-4 Part 2 + MP3 或 video-only）、ASF/WMV（WMV2 + WMA2 或 video-only）与 MPEG-PS/VOB（MPEG-2 Video + AC-3/MP2），有界 probe、主轨交叉核对、Chromium 播放及生命周期证据见[播放验证](ffmpeg-playback-delivery.md)。
 
 待完成：
 
-- MPEG-PS/VOB、ASF/WMV 已有底层解码样例，需补有界 probe、主轨语义和完整播放验证。
 - 补齐目标浏览器、长时间播放、真实大文件尾部索引、CPU/进程内存和全量重建一致性证据。
 - 后续按需求增加 FLV、其他 AVI/MPEG-PS/ASF、普通 MOV/3GPP 和未覆盖的 MPEG-TS 组合。
 
