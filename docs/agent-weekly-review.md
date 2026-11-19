@@ -1,6 +1,6 @@
 # 每周 review：dev → main
 
-每周一次，把 `dev` 合并到 `main`（自动部署 Vercel）。目标是发现日常门禁抓不到的问题：门禁被放宽、架构腐化、需要真实浏览器验收的改动。可以让 Agent 按本文生成报告，结论由人判断。
+每周一次，把 `dev` 合并到 `main`（自动部署 Vercel）。目标是发现日常门禁抓不到的问题：门禁被放宽、架构腐化、需要真实浏览器验收的改动。
 
 ## 1. 准备
 
@@ -37,7 +37,7 @@ git diff $R --stat -- third_party/ tools/ THIRD_PARTY_NOTICES.md licenses/
 - `third_party/` 变化必须有对应的 `tools/` 配方变化，不能是手改产物。
 - 看 `.next/diagnostics/viewer-bundle-report.json`：首包和各插件体积有无异常增长。
 
-## 4. 架构与代码
+## 4. 架构与代码review
 
 - 新插件：README、`examples/` 真实样例与来源说明、测试是否像 `docs/plugin-development.md` 要求的那样断言具体内容，而不只是“没有抛错”。
 - 重复：新代码是否复制了其他插件的大段逻辑（应抽到 `viewer/*` 共享包）。
@@ -49,23 +49,26 @@ git diff $R --stat -- third_party/ tools/ THIRD_PARTY_NOTICES.md licenses/
 - 是否出现日期化验证流水、实施过程记录、`docs/<plugin>.md` 之类本应写进插件 README 的文件。
 - 支持矩阵和站点格式页的等级是否与实际能力一致。
 - `AGENTS.md` 和本目录规范是否需要因本周暴露的问题而更新——反复出现的问题应变成规则或门禁。
+- 处理需求池文件- `ROADMAP.md`：本周完成了哪些、新增了哪些。
+    - 已完成条目确实达到描述的范围；`[!]` 受阻条目决定重新拆分、降级或删除。
+    - 调研 Agent 新增条目的证据是否可信、难度是否合理；调整优先级顺序。
+    - 本次合并到 main 后，删除已发布的 `[x]` 条目。
+
+## 5. 架构升级契机
+及时的甄别和发现, 现有的架构设计、抽象和契约是否已经过时、落后, 阻碍到项目继续扩展, 提出架构升级方案供用户选择. 
 
 ## 6. 真实浏览器验收（人工）
-
 从本周提交说明里收集“需人工浏览器验收”的条目：
-
-```bash
-git log origin/main..dev --format='%h %s%n%b' | grep -n -A5 '人工浏览器验收'
-```
 
 用 `pnpm build && pnpm start` 在 Chrome 打开 `/en/view` 和 `/zh-CN/view`，用插件 `examples/` 中的样例逐项检查：打开、缩放/翻页/播放、窄窗口、切换文件、损坏文件的错误状态、DevTools 网络面板中没有上传文件内容。未通过的条目修复或回退后再合并。
 
-## 7. 需求池
+如果可以自行用浏览器验收的直接验收, 无法验收的留待用户确认.
 
-- `git diff origin/main...dev -- ROADMAP.md`：本周完成了哪些、新增了哪些。
-- 已完成条目确实达到描述的范围；`[!]` 受阻条目决定重新拆分、降级或删除。
-- 调研 Agent 新增条目的证据是否可信、难度是否合理；调整优先级顺序。
-- 本次合并到 main 后，删除已发布的 `[x]` 条目。
+## 7. 用户协商
+与用户协商确认上述过程中产生的待确认问题和阻塞点.
+
+在提出待确认问题前, 使用如下命令通知用户: 
+`lark-cli im +messages-send --user-id ou_a943cca571fcd87db12f30a8289a3e6b --text "你好" --as bot --json`
 
 ## 8. 合并与上线
 

@@ -11,7 +11,6 @@
 - 文件在浏览器中直接读取与预览，不上传到服务器, 不用下载桌面软件。 速度更快, 隐私更好。
 - 支持的文件格式, 超级超级多, 项目追求的主要是支持的格式多, 而不是支持等级高。
 - 只提供查看功能, 不提供编辑, 要轻量、快、能打开大文件。
-- 可以优先死磕那些有明确需求, 但是只能依赖大型桌面软件的文件格式.
 
 # 代码地图
 | 路径 | 内容 |
@@ -22,12 +21,6 @@
 | `src/content/` | 站点格式页、插件页、SEO 文案 |
 | `viewer/plugin-policies.json` | 每个插件的 bundle 预算与运行时资产策略 |
 | `scripts/` | 资产准备、门禁检查；`tools/` 自建 WASM 配方；`third_party/` 审核后的二进制产物 |
-
-# 工作流
-- 任务来自根目录 `ROADMAP.md` 需求池，领取、拆分、完成标记规则见该文件。用户直接指定的任务优先。
-- 日常开发分支是 `dev`。每个任务从最新 `dev` 拉 `agent/<YYYY-MM-DD>-<topic>` 分支，一个分支只做一件事，完成后在本地合并回 `dev`（不提 PR）并推送 `origin dev`，然后删除该任务分支。不直接提交或合并到 `main`（`main` 自动部署到 Vercel，每周由人工 review 后从 `dev` 合并）。
-- 合并到 `dev` 前必须本地通过门禁；提交说明写清：做了什么、验证了什么、哪些需要人工浏览器验收（见 `docs/plugin-development.md` 第 6 节）。
-- 门禁失败时修代码，不改门禁。确需放宽预算、扩大 allowlist、跳过或删除测试时，在提交说明中单独写出理由，交给每周 review 判断。
 
 # 门禁与命令
 | 命令 | 内容 | 何时 |
@@ -54,7 +47,8 @@
 | 任务场景 | 必读文档 |
 |---|---|
 | 新增格式或插件、补充样例与测试、判断完成标准 | `docs/plugin-development.md` |
-| 执行或协助每周 dev → main review | `docs/weekly-review.md` |
+| Agent执行每日自动开发 | `docs/agent-daily-dev.md` |
+| Agent执行或协助每周 dev → main review | `docs/agent-weekly-review.md` |
 | 领取每日任务或调研补充需求池 | `ROADMAP.md` |
 | 新增或修改查看器插件、Manifest、插件注册与选择、`open()` 上下文、工作区读取、生命周期、错误码、协议版本或协议合规测试 | `docs/viewer-plugin-protocol.md` |
 | 修改插件内的 DOM、布局、滚动、第三方渲染器、异步渲染、加载与错误 UI、样式、主题、无障碍、内容安全或渲染性能 | `docs/viewer-rendering-guidelines.md` |
