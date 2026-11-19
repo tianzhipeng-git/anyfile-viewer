@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./probe-io": "./src/probe-io.ts",
+    "./probe-asf": "./src/probe-asf.ts",
     "./client": "./src/client.ts"
   },
   "dependencies": {

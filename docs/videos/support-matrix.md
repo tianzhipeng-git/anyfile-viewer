@@ -1,6 +1,6 @@
 # 视频格式支持矩阵
 
-- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 已交付首批 AVI，并与音频阶段 3 共享 FFmpeg runtime；专业视频属于阶段 4
+- 状态：阶段 0、阶段 1 与阶段 2 已完成；阶段 3 已交付 AVI、ASF/WMV 与 MPEG-PS/VOB，并与音频阶段 3 共享 FFmpeg runtime；专业视频属于阶段 4
 - 事实来源：固定真实样例、目标环境中的真实播放、自动协议测试和锁定依赖
 - 覆盖口径：以实际可播放的容器 × 视频 codec × 音频 codec 组合计数，不以扩展名数量或最高支持等级计数
 
@@ -75,8 +75,8 @@ rotation、VFR、fragment、多轨、字幕、色彩和 HDR 只在影响声明�
 | MPEG-TS，188-byte，单 program | HEVC Main，8-bit 4:2:0 | MP3，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；Canvas 连续播放、非静音音频与 seek 通过 |
 | M2TS，192-byte，单 program | AVC/H.264 Baseline，8-bit 4:2:0 | 无 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；video-only、seek 与 resize 通过 |
 | AVI，单 RIFF、idx1、单主视频 | MPEG-4 Part 2，FMP4/XVID/DIVX/DX50/MP4V，最多 1080p 像素 | MP3 mono/stereo 或 video-only，8–96 kHz | FFmpeg video fallback | 3 | implemented | 3 | Chromium 145.0.7632.6 / Darwin 24.6.0 arm64；真实播放、声音、seek、重播与切换通过；不支持 OpenDML/多主轨，见[播放验证](ffmpeg-playback-delivery.md) |
-| MPEG-PS/VOB | MPEG-2 Video 等首批代表组合 | AC-3/MP2 等 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 spike；不包含 DVD 菜单、分支和加密语义 |
-| ASF/WMV | Windows Media Video 首批代表组合 | WMA 首批代表组合 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 spike；具体 codec/profile 以固定样例和端到端证据为准 |
+| MPEG-PS/VOB，MPEG-1 或 MPEG-2 pack 头、单主视频 | MPEG-2 Video，带 sequence extension，最多 1080p 像素 | AC-3 或 MPEG-1 Layer II 单音轨（stereo/mono），48/44.1/32 kHz | FFmpeg video fallback | 3 | verified | 3 | Chromium 145.0.7632.6 / Darwin 24.6.0 arm64；真实播放、主音频、seek、结束重播与清理通过；不接受 MPEG-1 视频、DTS/LPCM、多音轨，见[播放验证](ffmpeg-playback-delivery.md) |
+| ASF/WMV，Header Object + 单视频流 | WMV2，最多 1080p 像素 | WMA2 单音轨（stereo/mono）或 video-only | FFmpeg video fallback | 3 | verified | 3 | Chromium 145.0.7632.6 / Darwin 24.6.0 arm64；真实播放、主音频、seek、结束重播与清理通过；拒绝加密流、WMV1/VC-1 与 WMA1 音轨，见[播放验证](ffmpeg-playback-delivery.md) |
 | MPEG-TS | MPEG-1/2 Video、AC-3、多 program/多主音频等未声明组合 | 对应音频 | FFmpeg video fallback | 0 | planned | 3 | 阶段 3 按具体组合评估；多 program/多主音频仍需独立轨道语义 |
 | Ogg Video | Theora | Vorbis，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；OGV.js 软件解码，非静音 PCM 与 seek 通过 |
 | Ogg Video | Theora | Opus，48 kHz，单声道 | non-native video | 3 | verified | 3 | Chromium 151 / macOS 15.6.1；OGV.js 软件解码 |
