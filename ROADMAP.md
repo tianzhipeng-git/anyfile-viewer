@@ -14,7 +14,7 @@
 
 ## 需求
 
-- [ ] 低 | EPUB 阅读器补站点插件页（`src/content/plugins.ts`、`src/content/manifests.ts`），并移出 `scripts/check-repo.mjs` 的 UNPUBLISHED_PLUGINS | 格式页已标等级 4 但未列出阅读器，统计也缺插件 id
+- [x] 低 | EPUB 阅读器补站点插件页（`src/content/plugins.ts`、`src/content/manifests.ts`），并移出 `scripts/check-repo.mjs` 的 UNPUBLISHED_PLUGINS | 格式页已标等级 4 但未列出阅读器，统计也缺插件 id；2026-11-19 e2892df
 - [ ] 低 | `ffmpeg-video` 补齐 `.wmv` / `.asf` 与 `.mpg` / `.mpeg` / `.vob` 播放支持 | 复用已有 `@anyfile/ffmpeg-playback` 运行时；`docs/videos/roadmap.md` 阶段 3 待补有界 probe 与主轨验证，macOS 与浏览器原生打不开
 - [ ] 低 | `ffmpeg-audio` 补齐 `.wma`（ASF 音频）播放支持 | 复用已有 `@anyfile/ffmpeg-playback` 运行时；`docs/audio/roadmap.md` 阶段 3 待补独立 probe 与验证，浏览器与 macOS 原生不支持
 - [ ] 中 | 新增邮件查看器（`.eml` / `.msg`） | 解析 RFC 5322 MIME 与 Outlook CFBF `.msg`，展示安全清理正文与附件清单；无 Outlook 打开 `.msg` 搜索痛点极强，邮件高度隐私敏感不愿上传
