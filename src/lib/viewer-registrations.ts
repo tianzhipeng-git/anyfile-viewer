@@ -23,6 +23,7 @@ import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
+import { devNativeBinaryManifest } from "@anyfile/dev-native-binary-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
 import { djiOsmoManifest } from "@anyfile/dji-osmo-viewer/manifest";
@@ -393,6 +394,17 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/dev-source-map-viewer");
       return viewerPackage.devSourceMapViewer;
+    },
+  },
+  {
+    manifest: devNativeBinaryManifest,
+    async probe(context) {
+      const probePackage = await import("@anyfile/dev-native-binary-viewer/probe");
+      return probePackage.probeDevNativeBinary(context);
+    },
+    async load() {
+      const viewerPackage = await import("@anyfile/dev-native-binary-viewer");
+      return viewerPackage.devNativeBinaryViewer;
     },
   },
   {

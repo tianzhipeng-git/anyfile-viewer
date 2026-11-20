@@ -1,4 +1,5 @@
 import { mindMapFormats } from "./mind-map";
+import { nativeBinaryFormats } from "./native-binary";
 import { sceneExchangeFormats } from "./scene-exchange";
 import { ifcFormat } from "./ifc";
 import { visioFormats } from "./visio";
@@ -263,6 +264,7 @@ export const formatContents: readonly FormatContent[] = [
   usdzFormat,
   vsixFormat,
   wasmFormat,
+  ...nativeBinaryFormats,
   warFormat,
   wavFormat,
   wb1Format,

@@ -211,7 +211,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
+      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "dev-native-binary-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),
@@ -370,6 +370,25 @@ describe("viewer protocol", () => {
     );
     expect(sourceMap.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["dev-source-map-viewer", 3], ["hex-viewer", 1]]);
+
+    for (const nativeName of ["sample.elf", "sample.dll", "sample-universal.dylib", "sample.a", "sample.obj"]) {
+      const nativeBytes = readFileSync(join(process.cwd(), "viewer/plugins/dev-native-binary/examples", nativeName));
+      const nativeResolved = await resolveViewerRegistrations(
+        new File([nativeBytes], nativeName),
+        viewerRegistrations,
+        { signal: new AbortController().signal },
+      );
+      expect(nativeResolved.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+        .toEqual([["dev-native-binary-viewer", 1], ["hex-viewer", 1]]);
+    }
+
+    const wavefrontObj = await resolveViewerRegistrations(
+      new File(["v 0 0 0\nv 1 0 0\nf 1 2 1\n"], "mesh.obj"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(wavefrontObj.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["mesh-3d", 3], ["hex-viewer", 1]]);
 
     const duckdb = await resolveViewerRegistrations(
       new File([], "database.duckdb"), viewerRegistrations,
@@ -531,6 +550,12 @@ describe("viewer protocol", () => {
       .toEqual(["dev-wasm-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("bundle.js.map", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["dev-source-map-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("program.elf", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dev-native-binary-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("addon.node", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dev-native-binary-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("mesh.obj", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dev-native-binary-viewer", "mesh-3d", "hex-viewer"]);
     expect(findViewerRegistrations("database.duckdb", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["duckdb-data", "hex-viewer"]);
     expect(findViewerRegistrations("backup.tar.gz", viewerRegistrations).map(({ manifest: item }) => item.id))

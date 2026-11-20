@@ -18,6 +18,10 @@
 | NPZ 中选中的普通 NPY 数组 | `dev-array-viewer` | 3 | yes | yes | `arrays.npz`；stored 使用 range read，DEFLATE 只流式解到选中页，测试覆盖异常压缩比 |
 | WebAssembly `.wasm` | `dev-wasm-viewer` | 2 | yes | yes | 测试生成含 type、import、function、memory、export、start、custom 和 code section 的确定性模块；覆盖伪装、版本、损坏 LEB128、越界 section、异常数量和截断 |
 | ECMA-426 source map `.map` | `dev-source-map-viewer` | 3 | yes | yes | `viewer/plugins/dev-source-map/examples/sample.js.map`；测试覆盖普通 / indexed map、内嵌源码、ignore list、位置查询、损坏 JSON / VLQ、外部 section 禁止联网和资源上限 |
+| ELF `.elf` `.so` `.o` `.out` `.node` | `dev-native-binary-viewer` | 1 | yes | yes | `viewer/plugins/dev-native-binary/examples/sample.elf`、`sample.so`、`sample.o`；覆盖 ELF32/64、大小端、program/section headers、`.dynamic`、`PT_INTERP`、Build-ID 与符号摘要 |
+| PE / COFF `.exe` `.dll` `.obj` `.node` | `dev-native-binary-viewer` | 1 | yes | yes | `viewer/plugins/dev-native-binary/examples/sample.exe`、`sample.dll`、`sample.obj`；覆盖 PE32/PE32+、节表、导入/导出表、CodeView PDB、Authenticode/CLR 检测，以及与 Wavefront `.obj` 路由共存 |
+| Mach-O 与 Fat 二进制 `.dylib` `.bundle` `.o` `.node` | `dev-native-binary-viewer` | 1 | yes | yes | `viewer/plugins/dev-native-binary/examples/sample-universal.dylib`、`sample.bundle`；覆盖 32/64 位、Universal Fat 切片切换、segments/sections、`LC_LOAD_DYLIB`、`LC_RPATH`、UUID 与 `LC_SYMTAB` |
+| Unix archive `.a` `.lib` `.rlib` | `dev-native-binary-viewer` | 1 | yes | yes | `viewer/plugins/dev-native-binary/examples/sample.a`；覆盖 BSD `#1/` 与 GNU `//` 长文件名、符号索引、Go `__.PKGDEF`、Rust `.rlib` 与成员格式嗅探 |
 | DuckDB `.duckdb` `.ddb` | `duckdb-data` | 3 | yes | yes | 现有 DuckDB session / 分页 UI 测试；probe 测试覆盖等级、其他数据格式回退和取消 |
 
 ## 样例与门禁

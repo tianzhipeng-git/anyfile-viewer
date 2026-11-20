@@ -24,6 +24,7 @@ import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
+import { devNativeBinaryManifest } from "@anyfile/dev-native-binary-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
 import { djiOsmoManifest } from "@anyfile/dji-osmo-viewer/manifest";
@@ -217,7 +218,10 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "binary",
     icon: BinaryIcon,
-    extensions: [".bin", ".exe", ".dll", ".so", ".dylib", ".dmg", ".iso"],
+    extensions: [
+      ".bin", ".dmg", ".iso",
+      ...manifestExtensions(devNativeBinaryManifest).filter((extension) => extension !== ".obj"),
+    ],
   },
 ];
 

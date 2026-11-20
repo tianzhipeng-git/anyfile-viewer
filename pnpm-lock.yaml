@@ -52,6 +52,9 @@ importers:
       '@anyfile/dev-array-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/dev-array
+      '@anyfile/dev-native-binary-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/dev-native-binary
       '@anyfile/dev-source-map-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/dev-source-map
@@ -471,6 +474,19 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
+
+  viewer/plugins/dev-native-binary:
+    dependencies:
+      '@anyfile/dev-binary-core':
+        specifier: workspace:*
+        version: link:../../dev-binary-core
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
 
   viewer/plugins/dev-source-map:
     dependencies:
