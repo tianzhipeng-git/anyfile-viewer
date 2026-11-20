@@ -211,7 +211,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "dev-native-binary-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
+      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "font-viewer", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "dev-native-binary-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),
@@ -492,6 +492,10 @@ describe("viewer protocol", () => {
     }
     expect(findViewerRegistrations("tone.aiff", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["ffmpeg-audio", "hex-viewer"]);
+    for (const extension of ["ttf", "otf", "woff", "woff2"]) {
+      expect(findViewerRegistrations(`brand.${extension}`, viewerRegistrations).map(({ manifest: item }) => item.id))
+        .toEqual(["font-viewer", "hex-viewer"]);
+    }
     expect(findViewerRegistrations("tone.wma", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["ffmpeg-audio", "hex-viewer"]);
     expect(findViewerRegistrations("tone.wav", viewerRegistrations).map(({ manifest: item }) => item.id))

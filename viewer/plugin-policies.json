@@ -214,6 +214,11 @@
       "package": "@anyfile/excel-viewer",
       "runtimeSets": []
     },
+    "font-viewer": {
+      "directory": "font",
+      "package": "@anyfile/font-viewer",
+      "runtimeSets": []
+    },
     "general-raster": {
       "directory": "general-raster",
       "package": "@anyfile/general-raster-viewer",

@@ -85,6 +85,9 @@ importers:
       '@anyfile/fictionbook-reader':
         specifier: workspace:*
         version: link:viewer/plugins/fictionbook
+      '@anyfile/font-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/font
       '@anyfile/general-raster-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/general-raster
@@ -642,6 +645,16 @@ importers:
       '@anyfile/rendering-publication':
         specifier: workspace:*
         version: link:../../rendering-publication
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+
+  viewer/plugins/font:
+    dependencies:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol

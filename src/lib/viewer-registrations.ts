@@ -6,6 +6,7 @@ import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
 import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
 import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
+import { fontManifest } from "@anyfile/font-viewer/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { epubManifest } from "@anyfile/epub-reader/manifest";
@@ -185,6 +186,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
       const viewerPackage = await import("@anyfile/ffmpeg-audio-viewer");
       return viewerPackage.ffmpegAudioViewer;
     },
+  },
+  {
+    manifest: fontManifest,
+    async probe(context) { return (await import("@anyfile/font-viewer/probe")).probeFont(context); },
+    async load() { return (await import("@anyfile/font-viewer")).fontViewer; },
   },
   {
     manifest: browserImageManifest,
