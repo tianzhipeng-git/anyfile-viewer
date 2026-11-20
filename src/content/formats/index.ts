@@ -8,6 +8,7 @@ import { dicomFormat } from "./dicom";
 import { dwgFormat } from "./dwg";
 import { mobiFormats, comicArchiveFormats } from "./ebook-archives";
 import { fb2Format } from "./fb2";
+import { ttfFormat, woffFormat } from "./fonts";
 import { cadExchangeFormats } from "./cad-exchange";
 import { pointFormats } from "./point-cloud";
 import { meshFormats } from "./mesh-3d";
@@ -260,6 +261,7 @@ export const formatContents: readonly FormatContent[] = [
   tiffFormat,
   tsFormat,
   tsvFormat,
+  ttfFormat,
   txtFormat,
   usdzFormat,
   vsixFormat,
@@ -268,6 +270,7 @@ export const formatContents: readonly FormatContent[] = [
   warFormat,
   wavFormat,
   wb1Format,
+  woffFormat,
   webmFormat,
   webpFormat,
   whlFormat,

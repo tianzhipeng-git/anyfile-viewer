@@ -64,6 +64,7 @@
     "@anyfile/dev-wasm-viewer": "workspace:*",
     "@anyfile/dji-osmo-viewer": "workspace:*",
     "@anyfile/excel-viewer": "workspace:*",
+    "@anyfile/font-viewer": "workspace:*",
     "@anyfile/general-raster-viewer": "workspace:*",
     "@anyfile/gopro-max-viewer": "workspace:*",
     "@anyfile/har-viewer": "workspace:*",
