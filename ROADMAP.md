@@ -20,7 +20,7 @@
 - [ ] 中 | 新增邮件查看器（`.eml` / `.msg`） | 解析 RFC 5322 MIME 与 Outlook CFBF `.msg`，展示安全清理正文与附件清单；无 Outlook 打开 `.msg` 搜索痛点极强，邮件高度隐私敏感不愿上传
 - [ ] 中 | `archive-metadata-viewer` 补齐 `.7z` 归档目录查看 | 复用或抽取 `comic-book` 已有的 `comic-archive` libarchive WASM，无需新构建；macOS 与浏览器原生打不开 `.7z`，搜索需求高
 - [x] 高 | 新增旧版 Office 二进制文档查看器（`.doc` / `.ppt` / `.rtf`） | `docs/tasks/选格式.md` 明确列为差异化主战场；需 CFBF 二进制解析或轻量 WASM 方案，解决无桌面 Office 无法打开遗留文档的高频痛点；2026-11-20 9db3c6d
-- [ ] 低 | 新增字体查看器（`.ttf` / `.otf` / `.woff` / `.woff2`） | 用原生 `FontFace` 与轻量表头解析展示字形瀑布流、试打预览与元数据；搜索需求高，无需安装到系统即可本地查看
+- [x] 低 | 新增字体查看器（`.ttf` / `.otf` / `.woff` / `.woff2`） | 用原生 `FontFace` 与轻量表头解析展示字形瀑布流、试打预览与元数据；搜索需求高，无需安装到系统即可本地查看；2026-11-21 3b51885
 - [x] 高 | 新增 CHM 帮助文档查看器（`.chm`） | `docs/ebooks/roadmap.md` 阶段 7 未实施项；macOS/Linux 原生打不开，技术手册与旧资料搜索需求强，需 ITSF/LZX 解码与安全沙箱隔离；2026-11-20 be9c488
 - [ ] 中 | 新增网络抓包查看器（`.pcap` / `.pcapng`） | 解析包头与常见 TCP/UDP/DNS/HTTP 摘要、筛选与载荷检查；排查问题常需安装 Wireshark，流量数据极度敏感不愿上传
 - [ ] 中 | 新增地理轨迹与矢量数据查看器（`.geojson` / `.gpx` / `.kml` / `.shp`） | 纯本地 2D 坐标投影与属性表展示（不请求在线地图瓦片）；替代 QGIS / Google Earth，符合 `选格式.md` 地理数据免上传场景
