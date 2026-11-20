@@ -6,12 +6,12 @@
 
 | 插件 | 当前组合 | 边界 |
 |---|---|---|
-| `ffmpeg-video` | AVI MPEG-4 Part 2 + MP3 或 video-only | 单 RIFF、有效 idx1、单视频、最多一条音频；FMP4/XVID/DIVX/DX50/MP4V；最多 2,073,600 像素 |
-| `ffmpeg-audio` | AIFF PCM S16BE/S24BE；AIFC `fl32` PCM F32BE | 单音轨、mono/stereo、整数采样率 8–96 kHz、有效 COMM/SSND 和长度 |
+| `ffmpeg-video` | AVI MPEG-4 Part 2 + MP3 或 video-only；ASF/WMV（WMV2 + WMA2）；MPEG-PS/VOB（MPEG-2 Video + AC-3 或 MP2） | 单 RIFF、有效 idx1、单视频、最多一条音频；FMP4/XVID/DIVX/DX50/MP4V；最多 2,073,600 像素 |
+| `ffmpeg-audio` | AIFF PCM S16BE/S24BE；AIFC `fl32` PCM F32BE；ASF audio-only WMA v1/v2 | 单音轨、mono/stereo、整数采样率 8–96 kHz、有效 COMM/SSND 和长度；WMA 要求无主视频节目 |
 
 `insta360` 另使用同一 runtime 的双轨全景模式：两条 3840² HEVC 8-bit 4:2:0 + AAC，输出每路 1920²；有界缓冲保持双镜头与音频同一时间轴。软件解码不保证实时，实测与限制见 [INSV 验证](insv-ffmpeg-playback.md)。
 
-两个插件的当前支持等级为 3，分别维护 manifest、probe、UI 和支持矩阵。MPEG-PS/VOB、ASF/WMV/WMA 只有底层解码证据，尚未接入产品；APE 尚无固定验证样例。OpenDML、多主轨、字幕、HDR、专业色彩、精确显示比例、gapless 与 bit-perfect 不在当前声明中。
+两个插件的当前支持等级为 3，分别维护 manifest、probe、UI 和支持矩阵。APE 尚无固定验证样例。OpenDML、多主轨、字幕、HDR、专业色彩、精确显示比例、gapless 与 bit-perfect 不在当前声明中。
 
 宿主按扩展名产生候选，再按轻量 probe 的支持等级和注册顺序选择插件，同级时原生与 non-native 路径优先。`open()` 失败不自动切换插件。视频 probe 拒绝 audio-only；音频 probe 拒绝主视频节目，attached picture 不算主视频。编译包含某个 decoder 不等于产品支持该格式。
 
