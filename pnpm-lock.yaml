@@ -40,6 +40,9 @@ importers:
       '@anyfile/camera-raw-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/camera-raw
+      '@anyfile/chm-reader':
+        specifier: workspace:*
+        version: link:viewer/plugins/chm
       '@anyfile/code-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/code
@@ -400,6 +403,25 @@ importers:
       '@anyfile/viewer-rendering':
         specifier: workspace:*
         version: link:../../rendering
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+
+  viewer/plugins/chm:
+    dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../archive
+      '@anyfile/browser-image-viewer':
+        specifier: workspace:*
+        version: link:../browser-image
+      '@anyfile/rendering-publication':
+        specifier: workspace:*
+        version: link:../../rendering-publication
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*

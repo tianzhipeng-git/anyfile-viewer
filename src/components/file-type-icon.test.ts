@@ -17,6 +17,7 @@ describe("getFileTypeKind", () => {
     ["movie.mkv", "video"],
     ["recording.flac", "audio"],
     ["report.docx", "document"],
+    ["manual.chm", "document"],
     ["legacy.doc", "document"],
     ["notes.rtf", "document"],
     ["schedule.MPP", "document"],

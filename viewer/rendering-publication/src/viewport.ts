@@ -1,4 +1,5 @@
 import { ViewerError, type Locale } from "@anyfile/viewer-protocol";
+import { createPublicationSidebar } from "./sidebar";
 import type { PublicationSource, SafeChapter } from "./types";
 import { button, publicationCopy, select } from "./ui";
 export function createPublicationViewport(
@@ -22,7 +23,21 @@ export function createPublicationViewport(
 .anyfile-publication-reader__toolbar{display:flex;flex-wrap:wrap;gap:8px;padding:10px;border-bottom:1px solid var(--viewer-border);flex:none}
 .anyfile-publication-reader__toolbar select{max-width:240px}.anyfile-publication-reader__toolbar button,.anyfile-publication-reader__toolbar select{color:inherit;background:var(--viewer-background);border:1px solid var(--viewer-border);border-radius:5px;padding:5px}
 .anyfile-publication-reader__viewport{flex:1;min-height:0;overflow:auto;position:relative;overflow-anchor:none}.anyfile-publication-reader__chapter{box-sizing:border-box;min-height:100%;border-bottom:1px solid var(--viewer-border)}
-.anyfile-publication-reader__chapter iframe{display:block;width:100%;border:0}.anyfile-publication-reader__toolbar :focus-visible{outline:2px solid var(--viewer-accent)}
+.anyfile-publication-reader__chapter iframe{display:block;width:100%;border:0}.anyfile-publication-reader__toolbar :focus-visible,.anyfile-publication-reader__sidebar :focus-visible{outline:2px solid var(--viewer-accent)}
+.anyfile-publication-reader__body{flex:1;min-height:0;display:flex;overflow:hidden}
+.anyfile-publication-reader__sidebar{flex:0 0 250px;max-width:44vw;min-height:0;overflow:auto;border-right:1px solid var(--viewer-border);padding:8px;font-size:13px}
+.anyfile-publication-reader__sidebar[hidden]{display:none}
+.anyfile-publication-reader__tabs{display:flex;gap:4px;margin-bottom:8px}
+.anyfile-publication-reader__tabs button{flex:1;padding:4px 6px;border:1px solid var(--viewer-border);border-radius:4px;background:transparent;color:inherit;cursor:pointer}
+.anyfile-publication-reader__tabs button[aria-selected="true"]{border-color:var(--viewer-accent);font-weight:600}
+.anyfile-publication-reader__filter{width:100%;box-sizing:border-box;margin-bottom:8px;padding:4px 6px;border:1px solid var(--viewer-border);border-radius:4px;background:var(--viewer-background);color:inherit}
+.anyfile-publication-reader__tree{list-style:none;margin:0;padding-left:12px}
+.anyfile-publication-reader__panel>.anyfile-publication-reader__tree{padding-left:0}
+.anyfile-publication-reader__tree li{margin:2px 0}
+.anyfile-publication-reader__tree button{text-align:left;width:100%;padding:3px 5px;border:0;border-radius:4px;background:transparent;color:inherit;cursor:pointer;font:inherit}
+.anyfile-publication-reader__tree button[aria-current="page"]{font-weight:600;color:var(--viewer-accent)}
+.anyfile-publication-reader__tree summary{cursor:pointer}
+.anyfile-publication-reader__tree summary>button{width:auto;display:inline}
 `;
   let current = 0,
     size = 18,
@@ -94,13 +109,43 @@ export function createPublicationViewport(
       slots[pending.index].offsetTop + (element?.getBoundingClientRect().top ?? 0);
     pending = undefined;
   }
+  const hasSidebar = Boolean(book.tocTree?.length || book.index?.length);
+  const sidebar = hasSidebar
+    ? createPublicationSidebar(book, copy, (path, fragment) => {
+        const targetIndex = book.spine.findIndex((item) => item.path === path);
+        if (targetIndex < 0) return;
+        if (targetIndex !== current || fragment) {
+          history.push({ index: current, fragment: "" });
+          forwardHistory.length = 0;
+          updateNavButtons();
+        }
+        jump(targetIndex, fragment);
+      })
+    : undefined;
   const history: { index: number; fragment: string }[] = [];
+  const forwardHistory: { index: number; fragment: string }[] = [];
   const back = button(copy.back, () => {
     const target = history.pop();
-    if (target) jump(target.index, target.fragment);
-    back.disabled = !history.length;
+    if (target) {
+      forwardHistory.push({ index: current, fragment: "" });
+      jump(target.index, target.fragment);
+    }
+    updateNavButtons();
   });
   back.disabled = true;
+  const forward = button(copy.forward, () => {
+    const target = forwardHistory.pop();
+    if (target) {
+      history.push({ index: current, fragment: "" });
+      jump(target.index, target.fragment);
+    }
+    updateNavButtons();
+  });
+  forward.disabled = true;
+  function updateNavButtons() {
+    back.disabled = !history.length;
+    forward.disabled = !forwardHistory.length;
+  }
   const previous = button(copy.previous, () => jump(current - 1));
   const next = button(copy.next, () => jump(current + 1));
   const toc = select(
@@ -108,10 +153,13 @@ export function createPublicationViewport(
     book.toc.map((item, index) => [String(index), item.label]),
     (value) => {
       const item = book.toc[Number(value)];
-      jump(
-        book.spine.findIndex((chapter) => chapter.path === item.path),
-        item.fragment,
-      );
+      const targetIndex = book.spine.findIndex((chapter) => chapter.path === item.path);
+      if (targetIndex >= 0 && hasSidebar && targetIndex !== current) {
+        history.push({ index: current, fragment: "" });
+        forwardHistory.length = 0;
+        updateNavButtons();
+      }
+      jump(targetIndex, item.fragment);
     },
   );
   const font = select(
@@ -141,12 +189,21 @@ export function createPublicationViewport(
     },
   );
   measure.value = "760";
+  const body = document.createElement("div");
+  body.className = "anyfile-publication-reader__body";
+  if (sidebar) {
+    const toggleSidebar = button(copy.sidebar, () => {
+      sidebar.element.hidden = !sidebar.element.hidden;
+      toggleSidebar.setAttribute("aria-expanded", String(!sidebar.element.hidden));
+    });
+    toggleSidebar.setAttribute("aria-expanded", "true");
+    toolbar.append(title, toggleSidebar, back, forward, previous, next, toc);
+    body.append(sidebar.element, viewport);
+  } else {
+    toolbar.append(title, back, previous, next, toc);
+    body.append(viewport);
+  }
   toolbar.append(
-    title,
-    back,
-    previous,
-    next,
-    toc,
     font,
     line,
     measure,
@@ -162,7 +219,7 @@ export function createPublicationViewport(
       },
     ),
   );
-  root.append(style, toolbar, viewport);
+  root.append(style, toolbar, body);
   function unload(index: number) {
     const state = active.get(index);
     if (!state) return;
@@ -233,7 +290,8 @@ export function createPublicationViewport(
           if (target) {
             const origin = link as HTMLElement;
             history.push({ index, fragment: origin.id });
-            back.disabled = false;
+            forwardHistory.length = 0;
+            updateNavButtons();
             jump(
               book.spine.findIndex((item) => item.path === target.path),
               target.fragment,
@@ -265,6 +323,7 @@ export function createPublicationViewport(
     next.disabled = current === slots.length - 1;
     const tocIndex = book.toc.findIndex((item) => item.path === book.spine[current].path);
     if (tocIndex >= 0) toc.value = String(tocIndex);
+    sidebar?.setActive(book.spine[current].path);
     for (const index of active.keys()) if (Math.abs(index - current) > 1) unload(index);
     for (const index of [current, current - 1, current + 1])
       if (index >= 0 && index < slots.length && !active.has(index)) void load(index);

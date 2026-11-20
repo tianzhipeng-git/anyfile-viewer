@@ -39,7 +39,7 @@
 | CB7 | `.cb7` | 7z 索引和固实压缩、内存 | 同一漫画 UI + 有界 7z decoder | implemented |
 | CBT | `.cbt` | TAR 顺序读取、图片资源预算 | 同一漫画 UI + 切片 USTAR reader | implemented |
 | DjVu single/multipage | `.djvu`, `.djv` | IFF、页解码、文本层、许可 | DjVu.js 或其他可审计本地 decoder | planned spike |
-| CHM | `.chm` | ITSF/ITSP、LZX、目录/索引、恶意 HTML | 专用 Worker decoder + safe content host | planned spike |
+| CHM | `.chm` | ITSF/ITSP、LZX、目录/索引、恶意 HTML | 纯 TypeScript ITSF/LZX 解析 + `@anyfile/rendering-publication` 安全视口 | implemented |
 
 第二梯队不能统一包装成“导入 Calibre”。每个 parser/decoder 的许可、体积、维护、取消和畸形输入必须独立成立。
 
