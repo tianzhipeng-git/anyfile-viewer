@@ -39,9 +39,10 @@ viewer/plugins/<dir>/
 ## 4. 真实样例
 
 - 每个插件必须在 `examples/`（或 `fixtures/`）提供至少一个真实格式文件。优先使用上游测试集、可再分发公开样例或用真实软件/库生成的原创文件；手写字节只用于单元测试内的边界构造。
-- `examples/README.md` 写明来源 URL 或生成方式、许可证、每个文件覆盖什么。不能确认可再分发的文件不入库。
 - 单文件不超过 2 MiB（check:repo 强制），尽量小于 512 KiB。大文件、私有文件和公开下载集合通过环境变量启用的测试读取本地路径，例如 `IFC_TEST_FILE=/abs/model.ifc pnpm test viewer/plugins/ifc`；测试不联网。
 - 负样例文件名包含 `disguised`、`truncated`、`corrupt`、`invalid`、`unsupported` 或 `counterexample`。其余样例由 [plugin-examples.test.ts](../src/lib/plugin-examples.test.ts) 自动检查必须路由到本插件。
+
+至少使用一个非程序生成的、搜索下载的真实文件进行验证, 存放在~/Desktop/anyfile-examples/ 不进入项目目录, 如果搜索不到要告知用户.
 
 ## 5. 确定性测试
 
