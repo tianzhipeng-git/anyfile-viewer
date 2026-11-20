@@ -18,7 +18,8 @@
 | PalmDOC / MOBI7 / KF8 / 联合 MOBI / 无 DRM | `mobi-reader` | 正文、metadata、NCX 目录、常见图片、共享排版与安全视口 | 3 | verified（下述固定组合） | 256 MiB 文件及重建输出、32 MiB text、单 part 2 MiB；复杂样式/固定布局不完整 |
 | CBT / 普通 USTAR | `comic-book-reader` | 与 CBZ 共用页序、ComicInfo 和页面 UI，切片读取 | 4 | verified（下述固定组合） | 不支持 PAX/GNU 扩展、稀疏、链接、加密或分卷 |
 | CBR / RAR4、RAR5；CB7 / 7z Copy、LZMA、LZMA2 | `comic-book-reader` | Worker 顺序解压一次，按需解码/显示图片 | 4 | verified（下述固定组合） | 128 MiB 输入、128 MiB 总展开；无加密/分卷；RAR4 压缩变体尚待专门漫画证据 |
-| DjVu / CHM | 无专用插件 | 可能仅剩通用十六进制或无候选 | 0–1 | not implemented | 不能宣传为电子书阅读支持 |
+| CHM / ITSF v2-v3 / LZX | `chm-reader` | 目录树（.hhc）、关键词索引（.hhk）、主题 HTML、样式/图片、内部导航与沙箱隔离 | 4 | implemented | 128 MiB 输入与压缩区展开、2 MiB 单主题；禁用脚本/ActiveX/跨 CHM 链接与全文索引 |
+| DjVu | 无专用插件 | 可能仅剩通用十六进制或无候选 | 0–1 | not implemented | 不能宣传为电子书阅读支持 |
 
 当前有独立 EPUB/漫画/FB2/MOBI 阅读器；EPUB、FB2、MOBI 共用 `@anyfile/rendering-publication`。漫画保持独立，尚无 `@anyfile/rendering-comic`。格式 parser 相互隔离，ZIP 与原生图片能力按实际需要复用。真实注册竞争测试确认专用等级 4、archive 等级 2、hex 等级 1；不会自动回退。组合证据见 [验证记录](verification.md)。
 
@@ -37,7 +38,7 @@
 | CBR RAR4/RAR5 | `comic-book-reader` | 与 CBZ 共用页面 UI | 4 | verified（Stored / RAR5 固实） | 有界顺序解压一次；RAR4 Stored、RAR5 Stored/固实固定组合见证据 |
 | CB7 / CBT | `comic-book-reader` | 与 CBZ 共用页面 UI | 4 | verified（固定组合） | 7z Copy/LZMA/LZMA2 与 USTAR；预算见当前决策 |
 | DjVu single/multipage | `djvu-reader` | 页面渲染、缩略图、导航；文本层按证据 | 3–4 | blocked | GPL 分发方案未通过采用门禁；只有样例/许可 spike |
-| CHM | `chm-reader` | contents/index、topic HTML、内部导航 | 3–4 | planned spike | LZX、编码、HTML 安全与索引 |
+| CHM | `chm-reader` | contents/index、topic HTML、内部导航 | 4 | implemented | LZX、编码、HHC/HHK 与沙箱隔离已实现；全文索引不纳入首期，待真实浏览器验收 |
 | 历史/厂商格式 | 独立评估 | 先 metadata 或主要正文 spike | 1–3 | candidate | 需求、样例、parser、许可 |
 | 任意 DRM 组合 | 无 | 只检测并说明 | 不声明阅读等级 | blocked | 不解密、不规避保护 |
 

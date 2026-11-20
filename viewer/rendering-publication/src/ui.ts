@@ -3,9 +3,13 @@ export function publicationCopy(locale: Locale) {
   return selectMessages(locale, {
     en: {
       back: "Back to text",
+      forward: "Forward",
       previous: "Previous chapter",
       next: "Next chapter",
       contents: "Contents",
+      index: "Index",
+      filterIndex: "Filter index…",
+      sidebar: "Navigation",
       size: "Font size",
       spacing: "Line height",
       width: "Text width",
@@ -20,9 +24,13 @@ export function publicationCopy(locale: Locale) {
     },
     "zh-CN": {
       back: "返回正文",
+      forward: "前进",
       previous: "上一章",
       next: "下一章",
       contents: "目录",
+      index: "索引",
+      filterIndex: "筛选索引…",
+      sidebar: "导航栏",
       size: "字号",
       spacing: "行高",
       width: "内容宽度",

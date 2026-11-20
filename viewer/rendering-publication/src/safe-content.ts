@@ -48,7 +48,7 @@ export async function prepareChapter(
       !item ||
       !(font
         ? FONT_TYPES.has(item.type)
-        : /^image\/(?:jpeg|png|gif|webp|avif|svg\+xml)$/.test(item.type))
+        : /^image\/(?:jpeg|png|gif|webp|avif|svg\+xml|bmp|x-icon)$/.test(item.type))
     )
       return null;
     if (!zip.entries.has(ref.path)) {
@@ -222,7 +222,7 @@ export async function prepareChapter(
           "style",
           (await css(`p{${element.getAttribute("style")}}`, path)).replace(/^p\{|\}$/g, ""),
         );
-      if (tag === "a") {
+      if (tag === "a" && element.hasAttribute("href")) {
         const ref = localReference(path, element.getAttribute("href") ?? "");
         if (ref && book.spine.some((item) => item.path === ref.path)) {
           result.setAttribute("href", "#");

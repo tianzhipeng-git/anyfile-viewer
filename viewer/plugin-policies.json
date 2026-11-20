@@ -478,6 +478,11 @@
       "package": "@anyfile/epub-reader",
       "runtimeSets": []
     },
+    "chm-reader": {
+      "directory": "chm",
+      "package": "@anyfile/chm-reader",
+      "runtimeSets": []
+    },
     "comic-book-reader": {
       "directory": "comic-book",
       "package": "@anyfile/comic-book-reader",

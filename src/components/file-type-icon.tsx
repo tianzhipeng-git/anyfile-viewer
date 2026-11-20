@@ -9,6 +9,7 @@ import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { epubManifest } from "@anyfile/epub-reader/manifest";
+import { chmManifest } from "@anyfile/chm-reader/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
 import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
@@ -155,7 +156,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     kind: "document",
     icon: FileTextIcon,
     extensions: [
-      ...manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest),
+      ...manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, comicBookManifest),
       ...manifestExtensions(legacyOfficeManifest).filter((extension) => extension !== ".ppt"),
     ].filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },

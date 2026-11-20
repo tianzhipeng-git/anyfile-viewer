@@ -27,6 +27,7 @@ import { bmpFormat } from "./bmp";
 import { brFormat } from "./br";
 import { bz2Format } from "./bz2";
 import { cbzFormat } from "./cbz";
+import { chmFormat } from "./chm";
 import { cr2Format } from "./cr2";
 import { cr3Format } from "./cr3";
 import { crwFormat } from "./crw";
@@ -179,7 +180,7 @@ export const formatContents: readonly FormatContent[] = [
   duckdbFormat,
   earFormat,
   eggFormat,
-  epubFormat, ...mobiFormats, ...comicArchiveFormats,
+  epubFormat, chmFormat, ...mobiFormats, ...comicArchiveFormats,
   fb2Format,
   epsFormat,
   etFormat,

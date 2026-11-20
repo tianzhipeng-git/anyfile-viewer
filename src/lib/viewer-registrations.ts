@@ -9,6 +9,7 @@ import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { epubManifest } from "@anyfile/epub-reader/manifest";
+import { chmManifest } from "@anyfile/chm-reader/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
 import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
@@ -79,6 +80,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: epubManifest,
     async probe(context) { return (await import("@anyfile/epub-reader/probe")).probeEpub(context); },
     async load() { return (await import("@anyfile/epub-reader")).epubViewer; },
+  },
+  {
+    manifest: chmManifest,
+    async probe(context) { return (await import("@anyfile/chm-reader/probe")).probeChm(context); },
+    async load() { return (await import("@anyfile/chm-reader")).chmViewer; },
   },
   {
     manifest: djiOsmoManifest,
