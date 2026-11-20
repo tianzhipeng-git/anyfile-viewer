@@ -41,7 +41,7 @@
 | ADTS | AAC-LC | 48 kHz，stereo | browser audio | 3 | implemented | 3 | 阶段 1；Chromium 原生播放通过，其他环境待补证 |
 | ADTS | AAC Main / 非 LC profile | 合成对照或真实流 | non-native/FFmpeg audio | 0 | blocked | 3 | 现有 `adts-main` 反例仅为 bit-flip，Mediabunny 无法读取；本机 FFmpeg 无可用 Main/HE 编码器 |
 | AIFF；AIFC `fl32` | AIFF PCM S16BE/S24BE；AIFC PCM F32BE | mono/stereo，整数采样率 8–96 kHz | FFmpeg audio | 3 | implemented | 3 | Chromium 145.0.7632.6 / Darwin 24.6.0 arm64；首 PCM、非静音/静音播放、seek、结束与清理通过，见[播放验证](../videos/ffmpeg-playback-delivery.md) |
-| ASF audio-only | WMA v1/v2 首批代表组合 | mono/stereo | FFmpeg audio | 0 | planned | 3 | 与 ASF/WMV 视频共享 runtime，独立音频证据 |
+| ASF audio-only | WMA v1/v2 | mono/stereo，整数采样率 8–96 kHz | FFmpeg audio | 3 | implemented | 3 | Chromium 实测 WMA v1/v2 固定样例与 122 s 真实文件：非静音输出、seek、结束和清理通过，见[播放验证](../videos/ffmpeg-playback-delivery.md) |
 | APE | Monkey's Audio | 代表版本/压缩等级 | FFmpeg audio | 0 | candidate | 3 | 测 CPU、内存、seek 和取消后再决定 |
 | Musepack | SV7/SV8 | mono/stereo | FFmpeg audio | 0 | deferred | 3 | 后续按真实需求 |
 | AMR | AMR-NB/WB | mono | FFmpeg audio | 0 | deferred | 3 | 许可和真实需求评审后决定 |
