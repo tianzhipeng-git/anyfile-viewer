@@ -45,6 +45,10 @@ describe("getFileTypeKind", () => {
     ["module.wasm", "developer"],
     ["bundle.js.map", "developer"],
     ["matrix.npy", "developer"],
+    ["program.elf", "binary"],
+    ["library.dll", "binary"],
+    ["addon.node", "binary"],
+    ["archive.a", "binary"],
     ["unknown.anyfile", "unknown"],
   ] as const)("classifies %s as %s", (fileName, expectedKind) => {
     expect(getFileTypeKind(fileName)).toBe(expectedKind);

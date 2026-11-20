@@ -27,7 +27,7 @@
 - [ ] 低 | 新增 X.509 证书查看器（`.pem` / `.crt` / `.cer` / `.der`） | 纯 TS ASN.1 解析，展示颁发者、有效期、SAN、指纹与证书链；运维/开发者刚需且极度隐私敏感，不愿上传在线解码站
 - [ ] 低 | 新增日历与联系人查看器（`.ics` / `.vcf`） | 纯 TS 解析 iCalendar 日程与 vCard 联系人卡片；常见邮件附件，直接双击会被系统静默导入且含个人隐私
 - [ ] 高 | 新增 DjVu 电子书查看器（`.djvu` / `.djv`） | `docs/ebooks/roadmap.md` 阶段 6 未实施项；学术论文与扫描古籍常见格式，需安装 WinDjView 等桌面软件，需评估/自建 Worker WASM 与许可证合规
-- [ ] 高 | 新增原生二进制结构查看器（`.elf` / `.so` / `.dll` / `.exe` / `.dylib` / `.a`，`dev-native-binary-viewer`） | `docs/developer/more-dev.md` 阶段 5 未实施项；跨 C/C++/Go/Rust/Node 多生态，覆盖 ELF、PE/COFF、Mach-O 与 Unix archive 的有界结构检查
+- [x] 高 | 新增原生二进制结构查看器（`.elf` / `.so` / `.dll` / `.exe` / `.dylib` / `.a`，`dev-native-binary-viewer`） | `docs/developer/more-dev.md` 阶段 5 未实施项；跨 C/C++/Go/Rust/Node 多生态，覆盖 ELF、PE/COFF、Mach-O 与 Unix archive 的有界结构检查；2026-11-21 c8427d2
 - [ ] 低 | 为缺少真实样例的插件补 `examples/`，逐个移出 check-repo 的 PLUGINS_WITHOUT_SAMPLES | 先做 code、sqlite、hex、dev-wasm 等易获得样例的
 - [ ] 高 | 新增 GPU 纹理查看器（`.dds` / `.ktx` / `.ktx2`） | `docs/images/roadmap.md` 阶段 4 未实施项；游戏与 3D 资产开发高频痛点，需引入 Khronos/Basis WASM 转码并支持 mipmap、cubemap 与通道检查
 - [ ] 高 | 新增医学/科学体数据查看器（`.nii` / `.nii.gz` / `.nrrd`） | `docs/images/roadmap.md` 阶段 5 未实施项；科研/医疗影像高度敏感不愿上传，需三视图切片与窗宽窗位，替代 3D Slicer 等大型桌面软件

@@ -143,6 +143,11 @@
       "package": "@anyfile/dev-array-viewer",
       "runtimeSets": []
     },
+    "dev-native-binary-viewer": {
+      "directory": "dev-native-binary",
+      "package": "@anyfile/dev-native-binary-viewer",
+      "runtimeSets": []
+    },
     "dev-source-map-viewer": {
       "directory": "dev-source-map",
       "package": "@anyfile/dev-source-map-viewer",
