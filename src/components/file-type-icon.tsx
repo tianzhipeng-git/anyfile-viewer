@@ -34,6 +34,7 @@ import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
 import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
+import { calendarContactsManifest } from "@anyfile/calendar-contacts-viewer/manifest";
 import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
@@ -159,7 +160,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     kind: "document",
     icon: FileTextIcon,
     extensions: [
-      ...manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, djvuManifest, comicBookManifest),
+      ...manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, djvuManifest, comicBookManifest, calendarContactsManifest),
       ...manifestExtensions(legacyOfficeManifest).filter((extension) => extension !== ".ppt"),
     ].filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },

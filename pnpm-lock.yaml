@@ -37,6 +37,9 @@ importers:
       '@anyfile/cad-exchange-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/cad-exchange
+      '@anyfile/calendar-contacts-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/calendar-contacts
       '@anyfile/camera-raw-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/camera-raw
@@ -403,6 +406,16 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
+
+  viewer/plugins/calendar-contacts:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
 
   viewer/plugins/camera-raw:
     dependencies:

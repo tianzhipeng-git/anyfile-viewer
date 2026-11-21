@@ -116,7 +116,8 @@
     "@anyfile/dicom-viewer": "workspace:*",
     "@anyfile/ifc-viewer": "workspace:*",
     "@anyfile/mind-map-viewer": "workspace:*",
-    "@anyfile/x509-certificate-viewer": "workspace:*"
+    "@anyfile/x509-certificate-viewer": "workspace:*",
+    "@anyfile/calendar-contacts-viewer": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
