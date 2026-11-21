@@ -6,6 +6,6 @@ The decoder is official GNU LibreDWG 0.14, with the unmodified libredwg-web 0.7.
 
 `pnpm prepare:dwg` also produces matching application source and license downloads. `node scripts/publish-dwg-assets.mjs` publishes reviewed artifacts to the existing `anyfile-bucket` using authenticated Wrangler; it refuses to overwrite a differing immutable object. `node scripts/check-dwg-assets-online.mjs` validates public bytes, MIME, CORS and caching.
 
-For real-file regression, set `DWG_TEST_FILES` to a JSON array of absolute paths and optionally `DWG_TEST_REPORT` to an output JSON path, then run `pnpm --filter @anyfile/cad-dwg-viewer test`. Native fixtures are not sent to any remote service. Normal CI uses synthetic geometry, probe and lifecycle tests without requiring local user drawings.
+For real-file regression, set `DWG_TEST_FILES` to a JSON array of absolute paths and optionally `DWG_TEST_REPORT` to an output JSON path, then run `pnpm test viewer/plugins/cad-dwg`. Native fixtures are not sent to any remote service. Normal CI uses synthetic geometry, probe and lifecycle tests without requiring local user drawings.
 
 Pinned upstream regression sample URLs and hashes are recorded in [the fixture manifest](../../docs/3d/dwg-fixture-sources.json). Download samples outside the source tree and pass their absolute paths through `DWG_TEST_FILES`.

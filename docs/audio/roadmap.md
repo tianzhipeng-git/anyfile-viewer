@@ -157,11 +157,11 @@ BlobSource（有界缓存）
 
 `ffmpeg-audio` 与 `ffmpeg-video` 共用 `@anyfile/ffmpeg-playback` 和同一版本的 Worker/WASM 资产，独立维护 probe、manifest 与 UI。架构和资源边界见[FFmpeg 音视频播放架构](../videos/ffmpeg-playback-runtime-plan.md)。
 
-当前支持 AIFF S16BE/S24BE 与 AIFC F32BE，Chromium 播放及生命周期证据见[播放验证](../videos/ffmpeg-playback-delivery.md)。
+当前支持 AIFF S16BE/S24BE、AIFC F32BE 与 ASF audio-only WMA v1/v2，Chromium 播放及生命周期证据见[播放验证](../videos/ffmpeg-playback-delivery.md)。
 
 待完成：
 
-- ASF audio-only WMA 已有底层解码样例，需补独立 probe 和完整播放验证；APE 需先建立固定样例并测量解码、seek 与资源成本。
+- APE 需先建立固定样例并测量解码、seek 与资源成本。
 - 补齐目标浏览器、长时间播放、真实大文件尾部索引、CPU/进程内存和全量重建一致性证据。
 - 后续按需求评估 Musepack、AMR、AC-3/E-AC-3、Sun/NeXT、RealAudio 和更多 WAV/AIFF/WMA/APE 变体。
 

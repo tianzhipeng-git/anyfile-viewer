@@ -7,6 +7,9 @@ import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
+import { epubManifest } from "@anyfile/epub-reader/manifest";
+import { chmManifest } from "@anyfile/chm-reader/manifest";
+import { djvuManifest } from "@anyfile/djvu-reader/manifest";
 import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
 import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
 import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
@@ -20,6 +23,7 @@ import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
+import { devNativeBinaryManifest } from "@anyfile/dev-native-binary-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
 import { djiOsmoManifest } from "@anyfile/dji-osmo-viewer/manifest";
@@ -27,6 +31,8 @@ import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
+import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
+import { calendarContactsManifest } from "@anyfile/calendar-contacts-viewer/manifest";
 import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
@@ -37,6 +43,8 @@ import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
 import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
+import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
+import { fontManifest } from "@anyfile/font-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import { wordManifest } from "@anyfile/word-viewer/manifest";
@@ -48,9 +56,9 @@ export const viewerManifests: readonly ViewerPluginManifest[] = [
   mindMapManifest,
   visioManifest, djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
-  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, mppManifest, harManifest,
-  codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest,
-  comicBookManifest, mobiManifest, fictionBookManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
+  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, fontManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, legacyOfficeManifest, mppManifest, harManifest, certificateManifest, calendarContactsManifest,
+  codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest, devNativeBinaryManifest,
+  comicBookManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, djvuManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
 ];
 
 export function manifestsForExtension(extension: string) {

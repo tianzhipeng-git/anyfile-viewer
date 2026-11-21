@@ -8,15 +8,15 @@
     "./manifest": "./src/manifest.ts",
     "./probe": "./src/probe.ts"
   },
-  "scripts": { "test": "vitest run", "generate:examples": "node scripts/generate-examples.mjs" },
+  "scripts": {
+    "generate:examples": "node scripts/generate-examples.mjs"
+  },
   "dependencies": {
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",
     "jxl-oxide-wasm": "0.12.6"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "workspace:*",
-    "happy-dom": "20.11.6",
-    "vitest": "4.1.11"
+    "@anyfile/viewer-test": "workspace:*"
   }
 }

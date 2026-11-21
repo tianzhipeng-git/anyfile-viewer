@@ -85,7 +85,7 @@ pnpm start
 单独测试某个插件：
 
 ```bash
-pnpm --filter @anyfile/pdf-viewer test
+pnpm test viewer/plugins/pdf
 ```
 
 部署时按 Next.js 应用运行，并保留 `next.config.ts` 中的响应头，包括查看器所需的跨源隔离响应头。详见[加载与部署约定](docs/viewer-loading-and-deployment.md)。

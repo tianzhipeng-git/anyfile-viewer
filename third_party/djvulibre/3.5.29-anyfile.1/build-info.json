@@ -1,0 +1,82 @@
+{
+  "artifactVersion": "3.5.29-anyfile.1",
+  "upstream": {
+    "artifactVersion": "3.5.29-anyfile.1",
+    "core": {
+      "version": "3.5.29",
+      "url": "https://downloads.sourceforge.net/project/djvu/DjVuLibre/3.5.29/djvulibre-3.5.29.tar.gz",
+      "sha256": "d3b4b03ae2bdca8516a36ef6eb27b777f0528c9eda26745d9962824a3fdfeccf"
+    },
+    "image": "emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7",
+    "emscripten": "4.0.10"
+  },
+  "flags": [
+    "single-thread-emscripten-patch",
+    "no-xmltools",
+    "no-desktopfiles",
+    "no-jpeg",
+    "no-tiff",
+    "-O2",
+    "-fexceptions",
+    "emmalloc",
+    "DYNAMIC_EXECUTION=0"
+  ],
+  "stackBytes": 2097152,
+  "stackOverflowCheck": 2,
+  "initialMemoryBytes": 16777216,
+  "maximumMemoryBytes": 536870912,
+  "artifacts": {
+    "build-in-container.sh": {
+      "bytes": 1735,
+      "sha256": "0c1eade0de702b72b2098fd08ee5ad2f7106e0837a77757264aa49021dc42073"
+    },
+    "build.sh": {
+      "bytes": 419,
+      "sha256": "1e1c8da5eea882c43c6f61ef76725df91916aed29937887caa0c25f71de85a1a"
+    },
+    "COPYING": {
+      "bytes": 18092,
+      "sha256": "8177f97513213526df2cf6184d8ff986c675afb514d4e68a404010521b880643"
+    },
+    "COPYRIGHT": {
+      "bytes": 3065,
+      "sha256": "aca12808fc2c0c9d67ac550bc52864863eff8c92d3fc505fdf16d3a5903dbdb6"
+    },
+    "djvu_adapter.cpp": {
+      "bytes": 12526,
+      "sha256": "d6bc8970b37f3c6b34a47fb1de08306a38b7f99f9692e3aa18f6d5a4de65a0bd"
+    },
+    "djvu.js": {
+      "bytes": 73904,
+      "sha256": "c741e9e3f11c783c592a3edeed2c3de73f6cae4320d9b7d27602be7cc6f64c96"
+    },
+    "djvu.wasm": {
+      "bytes": 1011662,
+      "sha256": "b8565871b9a5d838174a4469c25e61cff782f3f6ee83eac4c07385d5ec495bd2"
+    },
+    "djvulibre-source.tar.gz": {
+      "bytes": 3716911,
+      "sha256": "d3b4b03ae2bdca8516a36ef6eb27b777f0528c9eda26745d9962824a3fdfeccf"
+    },
+    "fetch.mjs": {
+      "bytes": 783,
+      "sha256": "9c58b3eed4192278072135ba1c4fba4ac38ebac87b08906c5e3dc8015812a5fe"
+    },
+    "patches/single-thread-emscripten.patch": {
+      "bytes": 361,
+      "sha256": "c92119c572d16953ca2cc6276561513aed989860645a1e5eedc38d6698728588"
+    },
+    "SOURCE.md": {
+      "bytes": 1464,
+      "sha256": "cede746b12c02c08f3d7adbc53d97637355653e1f11c807f358d7cc83ffc10a5"
+    },
+    "upstream.json": {
+      "bytes": 398,
+      "sha256": "8bfc22d7b6cf6ad4c9e696ebb12cdaeb90ed1131d2a2c7ca40cec746f013d02e"
+    },
+    "write-build-info.mjs": {
+      "bytes": 1471,
+      "sha256": "477cbbc0902cb2f44bebe501466627f94197b86a9700ea74da02670b7ba62278"
+    }
+  }
+}

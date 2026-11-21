@@ -39,5 +39,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/safe-svg-viewer test
+pnpm test viewer/plugins/svg
 ```

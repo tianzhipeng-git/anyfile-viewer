@@ -8,16 +8,11 @@
     "./manifest": "./src/manifest.ts",
     "./probe": "./src/probe.ts"
   },
-  "scripts": {
-    "test": "vitest run"
-  },
   "dependencies": {
     "@anyfile/viewer-protocol": "workspace:*",
     "ace-builds": "1.44.0"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "workspace:*",
-    "happy-dom": "20.11.6",
-    "vitest": "4.1.11"
+    "@anyfile/viewer-test": "workspace:*"
   }
 }

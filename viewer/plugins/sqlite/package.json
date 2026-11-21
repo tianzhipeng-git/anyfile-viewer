@@ -8,9 +8,6 @@
     "./manifest": "./src/manifest.ts",
     "./probe": "./src/probe.ts"
   },
-  "scripts": {
-    "test": "vitest run"
-  },
   "dependencies": {
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-ui": "workspace:*",
@@ -18,8 +15,6 @@
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*",
-    "@types/sql.js": "1.4.11",
-    "happy-dom": "20.11.6",
-    "vitest": "4.1.11"
+    "@types/sql.js": "1.4.11"
   }
 }

@@ -9,6 +9,8 @@ import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
 import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { epubManifest } from "@anyfile/epub-reader/manifest";
+import { chmManifest } from "@anyfile/chm-reader/manifest";
+import { djvuManifest } from "@anyfile/djvu-reader/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
 import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
@@ -23,6 +25,7 @@ import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { codeManifest } from "@anyfile/code-viewer/manifest";
 import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
+import { devNativeBinaryManifest } from "@anyfile/dev-native-binary-viewer/manifest";
 import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
 import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
 import { djiOsmoManifest } from "@anyfile/dji-osmo-viewer/manifest";
@@ -30,6 +33,8 @@ import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
+import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
+import { calendarContactsManifest } from "@anyfile/calendar-contacts-viewer/manifest";
 import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
@@ -39,6 +44,7 @@ import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
 import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
+import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
@@ -145,13 +151,18 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "presentation",
     icon: PresentationIcon,
-    extensions: manifestExtensions(powerpointManifest),
+    extensions: [
+      ...manifestExtensions(powerpointManifest),
+      ...manifestExtensions(legacyOfficeManifest).filter((extension) => extension === ".ppt"),
+    ],
   },
   {
     kind: "document",
     icon: FileTextIcon,
-    extensions: manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, comicBookManifest)
-      .filter((extension) => extension !== ".ai" && extension !== ".zip"),
+    extensions: [
+      ...manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, djvuManifest, comicBookManifest, calendarContactsManifest),
+      ...manifestExtensions(legacyOfficeManifest).filter((extension) => extension !== ".ppt"),
+    ].filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },
   {
     kind: "design",
@@ -170,7 +181,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "developer",
     icon: BracesIcon,
-    extensions: manifestExtensions(devArrayManifest, devSourceMapManifest, devWasmManifest),
+    extensions: manifestExtensions(devArrayManifest, devSourceMapManifest, devWasmManifest, certificateManifest),
   },
   {
     kind: "database",
@@ -210,7 +221,10 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "binary",
     icon: BinaryIcon,
-    extensions: [".bin", ".exe", ".dll", ".so", ".dylib", ".dmg", ".iso"],
+    extensions: [
+      ".bin", ".dmg", ".iso",
+      ...manifestExtensions(devNativeBinaryManifest).filter((extension) => extension !== ".obj"),
+    ],
   },
 ];
 

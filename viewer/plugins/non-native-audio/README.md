@@ -42,5 +42,5 @@ Mediabunny 随完整实现加载，探测路径复用轻量容器检查模块。
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/non-native-audio-viewer test
+pnpm test viewer/plugins/non-native-audio
 ```

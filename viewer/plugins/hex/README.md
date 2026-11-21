@@ -54,5 +54,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/hex-viewer test
+pnpm test viewer/plugins/hex
 ```

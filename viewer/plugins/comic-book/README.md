@@ -39,5 +39,5 @@ CBR/CB7 额外使用源码构建的 libarchive Worker/WASM；ZIP 和图片能力
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/comic-book-reader test
+pnpm test viewer/plugins/comic-book
 ```

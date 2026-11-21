@@ -114,7 +114,7 @@ Status values are `new`, `in_progress`, `resolved`, `ignored`. Reply manually us
 pnpm --filter @anyfile/feedback-service check
 pnpm --filter @anyfile/feedback-service test
 pnpm lint
-pnpm test:app
+pnpm test --project app
 pnpm build
 ```
 

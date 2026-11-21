@@ -9,17 +9,12 @@
     "./probe": "./src/probe.ts",
     "./tiff": "./src/decode-tiff.ts"
   },
-  "scripts": {
-    "test": "vitest run"
-  },
   "dependencies": {
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",
     "geotiff": "3.0.5"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "workspace:*",
-    "happy-dom": "20.11.6",
-    "vitest": "4.1.11"
+    "@anyfile/viewer-test": "workspace:*"
   }
 }

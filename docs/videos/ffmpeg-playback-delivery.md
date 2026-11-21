@@ -4,12 +4,12 @@
 
 ## 浏览器验证
 
-[原始结果](evidence/ffmpeg-playback-browser.json)：2026-09-05，Playwright Chromium 145.0.7632.6 / Darwin 24.6.0 arm64。测试运行生产构建的 `/en/view` 页面，阻断 R2 请求以验证同源回退。
+[原始结果](evidence/ffmpeg-playback-browser.json)：2026-11-20，Playwright Chromium 145.0.7632.6 / Darwin 24.6.0 arm64。测试运行生产构建的 `/en/view` 页面，阻断 R2 请求以验证同源回退。
 
 | 范围 | 通过项 |
 |---|---|
-| 视频 | AVI MPEG-4 Part 2 + MP3、1080p、video-only；真实 Canvas 首帧与连续不同帧 |
-| 音频 | AIFF 16/24-bit、AIFC float32；analyser 非静音输出、有效静音、拒绝非有限 PCM |
+| 视频 | AVI MPEG-4 Part 2 + MP3、1080p、video-only；ASF/WMV（WMV2 + WMA2）；MPEG-PS/VOB（MPEG-2 Video + AC-3 与 MP2）；真实 Canvas 首帧、连续不同帧与非静音音频 |
+| 音频 | AIFF 16/24-bit、AIFC float32、ASF audio-only WMA v1/v2（另有 122 s 真实 WMA v2 文件）；analyser 非静音输出、有效静音、拒绝非有限 PCM |
 | 调度 | 首段视频时间戳与音频驱动位置误差小于 150 ms；暂停后静音且位置不变；音量 0/1 |
 | 交互 | 前后及快速连续 seek、结束、重播、窄/矮窗口 |
 | 清理 | 切换后释放 Worker/AudioContext |

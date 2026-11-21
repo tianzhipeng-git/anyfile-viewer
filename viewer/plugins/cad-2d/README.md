@@ -42,5 +42,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/cad-2d-viewer test
+pnpm test viewer/plugins/cad-2d
 ```

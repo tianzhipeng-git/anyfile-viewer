@@ -4,7 +4,7 @@ import { it, expect } from "vitest";
 import { IfcAPI } from "web-ifc";
 import { parseIfc } from "./parse";
 
-// Opt-in: IFC_TEST_FILE=/absolute/path/to/model.ifc pnpm --filter @anyfile/ifc-viewer test
+// Opt-in: IFC_TEST_FILE=/absolute/path/to/model.ifc pnpm test viewer/plugins/ifc
 it.skipIf(!process.env.IFC_TEST_FILE)("parses a local IFC model", async () => {
   const api = new IfcAPI(); await api.Init(); api.SetLogLevel(6);
   try {

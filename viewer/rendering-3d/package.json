@@ -6,16 +6,11 @@
   "exports": {
     ".": "./src/index.ts"
   },
-  "scripts": {
-    "test": "vitest run"
-  },
   "dependencies": {
     "three": "0.185.1",
     "@anyfile/viewer-protocol": "workspace:*"
   },
   "devDependencies": {
-    "@types/three": "0.185.4",
-    "vitest": "4.1.11",
-    "happy-dom": "20.11.6"
+    "@types/three": "0.185.4"
   }
 }

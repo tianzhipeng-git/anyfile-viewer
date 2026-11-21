@@ -24,9 +24,9 @@ Automatic layout uses the stored hierarchy and supported structure/direction set
 ## Verification
 
 ```sh
-pnpm --filter @anyfile/mind-map-viewer test
+pnpm test viewer/plugins/mind-map
 python3 viewer/plugins/mind-map/validation/download-samples.py /tmp/anyfile-mind-map-validation
-MIND_MAP_PUBLIC_SAMPLES=/tmp/anyfile-mind-map-validation pnpm --filter @anyfile/mind-map-viewer test
+MIND_MAP_PUBLIC_SAMPLES=/tmp/anyfile-mind-map-validation pnpm test viewer/plugins/mind-map
 ```
 
 Tests cover complete graph mounting, original left/right directions, independent floating coordinates, nonoverlapping logic/tree layouts, theme overrides, summaries/relationships, local images and SVG sanitization, attachments, search through folded branches, URL cleanup, format parsing, resource budgets, invalid input and lifecycle. The public corpus contains 33 valid maps and 3 negative XML fragments; parser/mount checks do not establish visual fidelity.

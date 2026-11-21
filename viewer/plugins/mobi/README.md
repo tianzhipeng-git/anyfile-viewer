@@ -41,5 +41,5 @@
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/mobi-reader test
+pnpm test viewer/plugins/mobi
 ```

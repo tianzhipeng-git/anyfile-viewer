@@ -1,0 +1,52 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Anyfile Examples//Sample Calendar//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Anyfile Examples Team Calendar
+X-WR-TIMEZONE:Europe/Berlin
+BEGIN:VEVENT
+SUMMARY:Release review\; roadmap 2026
+DTSTART:20261124T100000Z
+DTEND:20261124T110000Z
+UID:release-review@anyfile.invalid
+ATTENDEE:mailto:ana@anyfile.invalid
+ATTENDEE:mailto:ben@anyfile.invalid
+CATEGORIES:team\,review
+DESCRIPTION:Agenda:\n1. DjVu reader follow-up\n2. Certificate viewer revie
+ w\n3. Test budget
+LOCATION:Room 3.14 / video call
+ORGANIZER:mailto:lead@anyfile.invalid
+STATUS:CONFIRMED
+URL:https://anyfile.top/en/view
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Daily standup (Berlin)
+DTSTART;TZID=Europe/Berlin:20261123T093000
+DTEND;TZID=Europe/Berlin:20261123T094500
+UID:standup@anyfile.invalid
+RRULE:FREQ=WEEKLY;COUNT=40;BYDAY=MO,TU,WE,TH,FR
+DESCRIPTION:Floating local time with TZID parameter.
+LOCATION:Online
+BEGIN:VALARM
+ACTION:DISPLAY
+DESCRIPTION:Standup starts in 5 minutes
+TRIGGER:-PT5M
+END:VALARM
+END:VEVENT
+BEGIN:VEVENT
+SUMMARY:Company all-hands
+DTSTART;VALUE=DATE:20261204
+DTEND;VALUE=DATE:20261205
+UID:all-hands@anyfile.invalid
+DESCRIPTION:All-day event with escaped commas \\\, semicolons \\\; and new
+ lines.
+LOCATION:Main hall
+END:VEVENT
+BEGIN:VTODO
+DUE:20261127T170000Z
+PRIORITY:2
+STATUS:NEEDS-ACTION
+SUMMARY:Prepare demo files
+UID:prepare-demo@anyfile.invalid
+END:VTODO
+END:VCALENDAR

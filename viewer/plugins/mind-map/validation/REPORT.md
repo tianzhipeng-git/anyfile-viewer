@@ -27,7 +27,7 @@
 
 ```bash
 python3 viewer/plugins/mind-map/validation/download-samples.py /workspace/mind-map-public-validation
-MIND_MAP_PUBLIC_SAMPLES=/workspace/mind-map-public-validation corepack pnpm --filter @anyfile/mind-map-viewer test
+MIND_MAP_PUBLIC_SAMPLES=/workspace/mind-map-public-validation corepack pnpm test viewer/plugins/mind-map
 ```
 
 下载脚本读取 [public-samples.json](public-samples.json)，固定到提交内容并校验 SHA-256；已有匹配文件直接复用。未设置环境变量时，常规单元测试跳过公开样本套件，不产生网络请求。

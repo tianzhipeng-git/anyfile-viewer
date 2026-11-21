@@ -1,6 +1,6 @@
 # 音频查看架构
 
-- 状态：阶段 0 已完成；`browser-audio`、`non-native-audio` 与首批 AIFF/AIFC 的 `ffmpeg-audio` 已实现，跨浏览器完整验证继续按支持矩阵补证
+- 状态：阶段 0 已完成；`browser-audio`、`non-native-audio` 与覆盖 AIFF/AIFC、ASF audio-only WMA 的 `ffmpeg-audio` 已实现，跨浏览器完整验证继续按支持矩阵补证
 - 适用范围：浏览器本地打开的独立音频与 audio-only 容器文件
 - 不包含：视频内音频、流媒体、DRM、录音、编辑、转码和服务端处理
 

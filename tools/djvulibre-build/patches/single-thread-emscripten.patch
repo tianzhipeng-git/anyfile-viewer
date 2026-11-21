@@ -1,0 +1,13 @@
+--- a/libdjvu/GThreads.cpp
++++ b/libdjvu/GThreads.cpp
+@@ -429,6 +429,10 @@ GThread::create(void (*entry)(void*), void *arg)
+     return -1;
+   xentry = entry;
+   xarg = arg;
++#ifdef __EMSCRIPTEN__
++  start((void*)this);
++  return 0;
++#endif
+ #if DCETHREADS
+   int ret = pthread_create(&hthr, pthread_attr_default, GThread::start, (void*)this);
+   if (ret >= 0)

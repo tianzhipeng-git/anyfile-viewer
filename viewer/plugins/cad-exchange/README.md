@@ -41,5 +41,5 @@ OCCT 审核资产由项目部署；完整源码构建配方见 [tools/occt-impor
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/cad-exchange-viewer test
+pnpm test viewer/plugins/cad-exchange
 ```

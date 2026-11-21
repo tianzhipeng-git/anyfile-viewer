@@ -211,7 +211,23 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
+      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader", "djvu-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "font-viewer", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "x509-certificate", "calendar-contacts", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "dev-native-binary-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
+
+    const djvuBytes = readFileSync(join(process.cwd(), "viewer/plugins/djvu/examples/djvu3spec.djvu"));
+    const djvu = await resolveViewerRegistrations(
+      new File([djvuBytes], "spec.djvu"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(djvu.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["djvu-reader", 4], ["hex-viewer", 1]]);
+
+    const invalidDjvu = await resolveViewerRegistrations(
+      new File(["not a djvu"], "broken.djvu"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(invalidDjvu.map(({ registration: item }) => item.manifest.id)).toEqual(["hex-viewer"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),
@@ -371,6 +387,25 @@ describe("viewer protocol", () => {
     expect(sourceMap.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
       .toEqual([["dev-source-map-viewer", 3], ["hex-viewer", 1]]);
 
+    for (const nativeName of ["sample.elf", "sample.dll", "sample-universal.dylib", "sample.a", "sample.obj"]) {
+      const nativeBytes = readFileSync(join(process.cwd(), "viewer/plugins/dev-native-binary/examples", nativeName));
+      const nativeResolved = await resolveViewerRegistrations(
+        new File([nativeBytes], nativeName),
+        viewerRegistrations,
+        { signal: new AbortController().signal },
+      );
+      expect(nativeResolved.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+        .toEqual([["dev-native-binary-viewer", 1], ["hex-viewer", 1]]);
+    }
+
+    const wavefrontObj = await resolveViewerRegistrations(
+      new File(["v 0 0 0\nv 1 0 0\nf 1 2 1\n"], "mesh.obj"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(wavefrontObj.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["mesh-3d", 3], ["hex-viewer", 1]]);
+
     const duckdb = await resolveViewerRegistrations(
       new File([], "database.duckdb"), viewerRegistrations,
       { signal: new AbortController().signal },
@@ -467,7 +502,17 @@ describe("viewer protocol", () => {
       .toEqual(["non-native-audio", "hex-viewer"]);
     expect(findViewerRegistrations("clip.avi", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["ffmpeg-video", "hex-viewer"]);
+    for (const extension of ["wmv", "asf", "mpg", "mpeg", "vob"]) {
+      expect(findViewerRegistrations(`clip.${extension}`, viewerRegistrations).map(({ manifest: item }) => item.id))
+        .toEqual(["ffmpeg-video", "hex-viewer"]);
+    }
     expect(findViewerRegistrations("tone.aiff", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["ffmpeg-audio", "hex-viewer"]);
+    for (const extension of ["ttf", "otf", "woff", "woff2"]) {
+      expect(findViewerRegistrations(`brand.${extension}`, viewerRegistrations).map(({ manifest: item }) => item.id))
+        .toEqual(["font-viewer", "hex-viewer"]);
+    }
+    expect(findViewerRegistrations("tone.wma", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["ffmpeg-audio", "hex-viewer"]);
     expect(findViewerRegistrations("tone.wav", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["browser-audio", "non-native-audio", "hex-viewer"]);
@@ -507,18 +552,40 @@ describe("viewer protocol", () => {
       .toEqual(["cad-2d", "hex-viewer"]);
     expect(findViewerRegistrations("report.docx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["word-document", "archive-metadata-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("legacy.doc", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["legacy-office", "hex-viewer"]);
+    expect(findViewerRegistrations("notes.rtf", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["legacy-office", "hex-viewer"]);
     expect(findViewerRegistrations("slides.pptx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["powerpoint-presentation", "archive-metadata-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("deck.ppt", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["legacy-office", "hex-viewer"]);
+    expect(findViewerRegistrations("manual.chm", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["chm-reader", "hex-viewer"]);
     expect(findViewerRegistrations("book.xlsx", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["excel-workbook", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("rows.csv.gz", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["duckdb-data", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("network.har", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["http-archive", "hex-viewer"]);
+    for (const extension of ["pem", "crt", "cer", "der"]) {
+      expect(findViewerRegistrations(`server.${extension}`, viewerRegistrations).map(({ manifest: item }) => item.id))
+        .toEqual(["x509-certificate", "hex-viewer"]);
+    }
+    for (const extension of ["ics", "vcf"]) {
+      expect(findViewerRegistrations(`invite.${extension}`, viewerRegistrations).map(({ manifest: item }) => item.id))
+        .toEqual(["calendar-contacts", "hex-viewer"]);
+    }
     expect(findViewerRegistrations("module.wasm", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["dev-wasm-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("bundle.js.map", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["dev-source-map-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("program.elf", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dev-native-binary-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("addon.node", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dev-native-binary-viewer", "hex-viewer"]);
+    expect(findViewerRegistrations("mesh.obj", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["dev-native-binary-viewer", "mesh-3d", "hex-viewer"]);
     expect(findViewerRegistrations("database.duckdb", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["duckdb-data", "hex-viewer"]);
     expect(findViewerRegistrations("backup.tar.gz", viewerRegistrations).map(({ manifest: item }) => item.id))

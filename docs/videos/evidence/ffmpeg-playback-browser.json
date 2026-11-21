@@ -1,5 +1,5 @@
 {
-  "date": "2026-09-05T15:49:09.082Z",
+  "date": "2026-11-20T18:27:01.662Z",
   "browser": "145.0.7632.6",
   "os": {
     "type": "Darwin",
@@ -9,43 +9,63 @@
   "results": [
     {
       "name": "AVI real first frame; silent open; runtime fallback",
-      "milliseconds": 840.106625
+      "milliseconds": 853.686083
     },
     {
       "name": "AVI audible playback and pause",
-      "milliseconds": 1017.0861669999999
+      "milliseconds": 936.6400830000002
     },
     {
       "name": "AVI forward/backward and rapid seek, volume, end, replay",
-      "milliseconds": 3821.4706669999996
+      "milliseconds": 3834.97975
     },
     {
       "name": "Switching to AIFF closes previous audio and Worker",
-      "milliseconds": 2367.1301670000003
+      "milliseconds": 2291.3580420000008
     },
     {
       "name": "aiff-s24.aiff playback",
-      "milliseconds": 1375.7270829999998
+      "milliseconds": 1326.011292000001
     },
     {
       "name": "aifc-f32.aifc playback",
-      "milliseconds": 1382.5053750000006
+      "milliseconds": 1332.7220830000006
+    },
+    {
+      "name": "asf-wma1.wma playback",
+      "milliseconds": 1310.0737919999992
+    },
+    {
+      "name": "asf-wma2.wma playback",
+      "milliseconds": 1309.3277500000004
     },
     {
       "name": "avi-video-only.avi playback",
-      "milliseconds": 1291.1997089999986
+      "milliseconds": 1289.4085419999992
     },
     {
       "name": "avi-1080p.avi playback",
-      "milliseconds": 1384.7290830000002
+      "milliseconds": 1335.3620419999988
+    },
+    {
+      "name": "ps-mpeg2-ac3.vob playback",
+      "milliseconds": 3739.581957999999
+    },
+    {
+      "name": "ps-mpeg2-mp2.mpg playback",
+      "milliseconds": 4315.856291999997
+    },
+    {
+      "name": "asf-wmv2-wma2.wmv playback",
+      "milliseconds": 1318.331459000001
     },
     {
       "name": "Narrow/short player keeps controls accessible",
-      "milliseconds": 34.96574999999939
+      "milliseconds": 35.52754199999981
     },
     {
       "name": "Valid silence and corrupt PCM handling",
-      "milliseconds": 1952.5760830000017
+      "milliseconds": 1887.7586670000019
     }
   ],
   "failures": []

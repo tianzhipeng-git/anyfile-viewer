@@ -1,7 +1,13 @@
 import type { ProbeViewerContext } from "@anyfile/viewer-protocol";
+import { inspectAsf } from "@anyfile/ffmpeg-playback/probe-asf";
 import { ProbeReader, fourCC } from "@anyfile/ffmpeg-playback/probe-io";
 
 export interface AiffInfo { codec: string; channels: number; sampleRate: number; duration: number }
+export interface WmaInfo { codec: "wmav1" | "wmav2"; channels: number; sampleRate: number }
+export type FfmpegAudioInfo =
+  | ({ container: "aiff" } & AiffInfo)
+  | ({ container: "asf" } & WmaInfo);
+
 export async function inspectAiff({ file, signal }: ProbeViewerContext): Promise<AiffInfo | null> {
   try {
     const reader = new ProbeReader(file, signal), header = await reader.read(0, 12);
@@ -38,4 +44,20 @@ export async function inspectAiff({ file, signal }: ProbeViewerContext): Promise
     return info && dataBytes === requiredBytes && (kind === "AIFF" || version) ? info : null;
   } catch (error) { signal.throwIfAborted(); if (error instanceof DOMException && error.name === "AbortError") throw error; return null; }
 }
-export async function probeFfmpegAudio(context: ProbeViewerContext) { return await inspectAiff(context) ? 3 : 0; }
+
+/** ASF audio-only: exactly one supported WMA stream and no main video program. */
+export async function inspectWma(context: ProbeViewerContext): Promise<WmaInfo | null> {
+  const info = await inspectAsf(context);
+  return info && !info.video ? info.audio : null;
+}
+
+export async function inspectAudio(context: ProbeViewerContext): Promise<FfmpegAudioInfo | null> {
+  const aiff = await inspectAiff(context);
+  if (aiff) return { container: "aiff", ...aiff };
+  const wma = await inspectWma(context);
+  return wma ? { container: "asf", ...wma } : null;
+}
+
+export async function probeFfmpegAudio(context: ProbeViewerContext) {
+  return await inspectAudio(context) ? 3 : 0;
+}

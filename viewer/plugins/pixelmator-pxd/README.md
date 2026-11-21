@@ -40,5 +40,5 @@ TIFF 解码按需复用 `@anyfile/general-raster-viewer/tiff`，不为普通 PNG
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/pixelmator-pxd-viewer test
+pnpm test viewer/plugins/pixelmator-pxd
 ```

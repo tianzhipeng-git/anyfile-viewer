@@ -8,9 +8,6 @@
     "./manifest": "./src/manifest.ts",
     "./probe": "./src/probe.ts"
   },
-  "scripts": {
-    "test": "vitest run"
-  },
   "dependencies": {
     "@anyfile/browser-video-viewer": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
@@ -18,8 +15,6 @@
     "mediabunny": "1.55.3"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "workspace:*",
-    "happy-dom": "20.11.6",
-    "vitest": "4.1.11"
+    "@anyfile/viewer-test": "workspace:*"
   }
 }

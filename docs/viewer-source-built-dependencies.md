@@ -53,7 +53,7 @@ Prepare 必须：
 - 复制到精确版本化目录，不扫描“最新版本”或静默回退旧版本；
 - 公开分发所需的许可证、声明、源码和重链接材料。
 
-应用 URL 不直接指向 `tools/` 或 `third_party/`。自建审核产物按加载部署约定使用 R2 → 同源，小资源默认同源；即使已提交到公开仓库的固定 Git commit，也不得通过 jsDelivr 分发。
+应用 URL 不直接指向 `tools/` 或 `third_party/`。自建审核产物按[加载部署约定](viewer-loading-and-deployment.md#上传运行时资产到-r2)使用 R2 → 同源（上传至 `anyfile-bucket`），小资源默认同源；即使已提交到公开仓库的固定 Git commit，也不得通过 jsDelivr 分发。
 
 ## 5. 升级与 Patch
 

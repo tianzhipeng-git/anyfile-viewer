@@ -1,4 +1,5 @@
 import { mindMapFormats } from "./mind-map";
+import { nativeBinaryFormats } from "./native-binary";
 import { sceneExchangeFormats } from "./scene-exchange";
 import { ifcFormat } from "./ifc";
 import { visioFormats } from "./visio";
@@ -7,6 +8,7 @@ import { dicomFormat } from "./dicom";
 import { dwgFormat } from "./dwg";
 import { mobiFormats, comicArchiveFormats } from "./ebook-archives";
 import { fb2Format } from "./fb2";
+import { ttfFormat, woffFormat } from "./fonts";
 import { cadExchangeFormats } from "./cad-exchange";
 import { pointFormats } from "./point-cloud";
 import { meshFormats } from "./mesh-3d";
@@ -27,6 +29,7 @@ import { bmpFormat } from "./bmp";
 import { brFormat } from "./br";
 import { bz2Format } from "./bz2";
 import { cbzFormat } from "./cbz";
+import { chmFormat } from "./chm";
 import { cr2Format } from "./cr2";
 import { cr3Format } from "./cr3";
 import { crwFormat } from "./crw";
@@ -36,6 +39,8 @@ import { dbfFormat } from "./dbf";
 import { deflateFormat } from "./deflate";
 import { difFormat } from "./dif";
 import { dngFormat } from "./dng";
+import { djvuFormat } from "./djvu";
+import { docFormat } from "./doc";
 import { dxfFormat } from "./dxf";
 import { docxFormat } from "./docx";
 import { duckdbFormat } from "./duckdb";
@@ -50,6 +55,8 @@ import { geotiffFormat } from "./geotiff";
 import { gifFormat } from "./gif";
 import { gzFormat } from "./gz";
 import { harFormat } from "./har";
+import { certificateFormat } from "./certificates";
+import { icsFormat, vcfFormat } from "./calendar";
 import { heicFormat } from "./heic";
 import { icoFormat } from "./ico";
 import { inspFormat } from "./insp";
@@ -97,6 +104,7 @@ import { psbFormat } from "./psb";
 import { psdFormat } from "./psd";
 import { psFormat } from "./ps";
 import { pnmFormat } from "./pnm";
+import { pptFormat } from "./ppt";
 import { prnFormat } from "./prn";
 import { pptxFormat } from "./pptx";
 import { pyzFormat } from "./pyz";
@@ -105,6 +113,7 @@ import { qpwFormat } from "./qpw";
 import { rafFormat } from "./raf";
 import { rarFormat } from "./rar";
 import { rawFormat } from "./raw";
+import { rtfFormat } from "./rtf";
 import { rwlFormat } from "./rwl";
 import { rw2Format } from "./rw2";
 import { slkFormat } from "./slk";
@@ -170,12 +179,13 @@ export const formatContents: readonly FormatContent[] = [
   deflateFormat,
   difFormat,
   dngFormat,
+  docFormat,
   dxfFormat,
   docxFormat,
   duckdbFormat,
   earFormat,
   eggFormat,
-  epubFormat, ...mobiFormats, ...comicArchiveFormats,
+  epubFormat, chmFormat, djvuFormat, ...mobiFormats, ...comicArchiveFormats,
   fb2Format,
   epsFormat,
   etFormat,
@@ -185,6 +195,8 @@ export const formatContents: readonly FormatContent[] = [
   gifFormat,
   gzFormat,
   harFormat,
+  certificateFormat,
+  icsFormat, vcfFormat,
   heicFormat,
   icoFormat,
   inspFormat,
@@ -233,6 +245,7 @@ export const formatContents: readonly FormatContent[] = [
   psdFormat,
   psFormat,
   pnmFormat,
+  pptFormat,
   prnFormat,
   pptxFormat,
   pyzFormat,
@@ -241,6 +254,7 @@ export const formatContents: readonly FormatContent[] = [
   rafFormat,
   rarFormat,
   rawFormat,
+  rtfFormat,
   rwlFormat,
   rw2Format,
   slkFormat,
@@ -252,13 +266,16 @@ export const formatContents: readonly FormatContent[] = [
   tiffFormat,
   tsFormat,
   tsvFormat,
+  ttfFormat,
   txtFormat,
   usdzFormat,
   vsixFormat,
   wasmFormat,
+  ...nativeBinaryFormats,
   warFormat,
   wavFormat,
   wb1Format,
+  woffFormat,
   webmFormat,
   webpFormat,
   whlFormat,

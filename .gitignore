@@ -2,6 +2,7 @@
 
 # dependencies
 node_modules/
+/.pnpm-store/
 /.pnp
 .pnp.*
 .yarn/*
@@ -26,6 +27,7 @@ node_modules/
 # misc
 .DS_Store
 *.pem
+!viewer/plugins/certificate/examples/*.pem
 
 # debug
 npm-debug.log*
@@ -53,3 +55,7 @@ __pycache__/
 
 /public/source/
 /third_party/libredwg/**/*.log
+/third_party/djvulibre/**/*.log
+
+# Local agent research output
+/.agents/artifacts/

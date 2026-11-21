@@ -42,5 +42,5 @@ RAW 路径复用 `@anyfile/raw-decoder`，媒体和全景交互复用共享渲�
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/insta360-viewer test
+pnpm test viewer/plugins/insta360
 ```

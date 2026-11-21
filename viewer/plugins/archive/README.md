@@ -65,5 +65,5 @@ TAR 与各压缩包装格式的解析为项目内自研；gzip TAR 扫描使用�
 在仓库根目录运行插件测试：
 
 ```bash
-pnpm --filter @anyfile/archive-metadata-viewer test
+pnpm test viewer/plugins/archive
 ```

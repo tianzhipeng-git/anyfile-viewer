@@ -8,15 +8,12 @@
     "./manifest": "./src/manifest.ts",
     "./probe": "./src/probe.ts"
   },
-  "scripts": { "test": "vitest run" },
   "dependencies": {
     "@anyfile/raw-decoder": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*"
   },
   "devDependencies": {
-    "@anyfile/viewer-test": "workspace:*",
-    "happy-dom": "20.11.6",
-    "vitest": "4.1.11"
+    "@anyfile/viewer-test": "workspace:*"
   }
 }

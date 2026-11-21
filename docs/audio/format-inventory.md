@@ -28,7 +28,7 @@
 | 原生 FLAC stream | `.flac` | FLAC | 原生首批候选，metadata block 与 picture 需有界处理 |
 | ADTS | `.aac` `.adts` | AAC LC/HE 等 | 原生行为按环境验证；非原生路径可使用 Mediabunny + WebCodecs |
 | AIFF/AIFC | `.aif` `.aiff` `.aifc` | PCM、浮点及历史压缩 | FFmpeg audio 首批高价值候选 |
-| ASF audio-only | `.wma` `.asf` | WMA family | 与 ASF/WMV 视频共享 FFmpeg runtime spike，独立音频插件验收 |
+| ASF audio-only | `.wma` `.asf` | WMA family | 与 ASF/WMV 视频共享 FFmpeg runtime；`.wma` 的 WMA v1/v2 audio-only 已由 `ffmpeg-audio` 承接，`.asf` 仍走 `ffmpeg-video` |
 | Monkey's Audio | `.ape` | APE lossless | FFmpeg audio 后续候选，重点测 seek、CPU 和内存 |
 | Musepack | `.mpc` `.mpp` `.mp+` | Musepack SV7/SV8 | FFmpeg audio 后续候选 |
 | AMR | `.amr` `.awb` | AMR-NB/WB | FFmpeg audio 后续候选，需许可与真实需求评审 |
