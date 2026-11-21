@@ -25,16 +25,38 @@ export function decodeText(bytes: Uint8Array): string {
   return text.charCodeAt(0) === 0xfeff ? text.slice(1) : text;
 }
 
-/** RFC 5545 / RFC 6350 line unfolding: indented lines continue the previous logical line. */
+function hasQuotedPrintableHead(line: string): boolean {
+  let quoted = false;
+  let end = -1;
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index]!;
+    if (character === '"') quoted = !quoted;
+    else if (character === ":" && !quoted) {
+      end = index;
+      break;
+    }
+  }
+  if (end <= 0) return false;
+  return /;\s*(?:ENCODING\s*=\s*)?"?QUOTED-PRINTABLE"?(?=\s*(?:;|$))/i.test(line.slice(0, end));
+}
+
+/** RFC 5545 / RFC 6350 line unfolding plus vCard 2.1 quoted-printable soft line breaks. */
 export function logicalLines(text: string): string[] {
   const physical = text.replace(/\r\n?/g, "\n").split("\n");
   const lines: string[] = [];
+  let qpContinuation = false;
   for (const line of physical) {
-    if (lines.length > 0 && (line.startsWith(" ") || line.startsWith("\t"))) {
+    if (qpContinuation) {
+      const index = lines.length - 1;
+      lines[index] = `${lines[index]!.slice(0, -1)}${line}`;
+      qpContinuation = line.endsWith("=");
+    } else if (lines.length > 0 && (line.startsWith(" ") || line.startsWith("\t"))) {
       const index = lines.length - 1;
       lines[index] = `${lines[index]!}${line.slice(1)}`;
+      qpContinuation = lines[index]!.endsWith("=") && hasQuotedPrintableHead(lines[index]!);
     } else if (line.length > 0) {
       lines.push(line);
+      qpContinuation = line.endsWith("=") && hasQuotedPrintableHead(line);
     }
     if (lines.length > MAX_LINES) break;
   }
@@ -149,11 +171,22 @@ export function splitEscaped(value: string, separator = ";"): string[] {
   return parts;
 }
 
-/** Text value for display: quoted-printable and Base64 payloads are decoded once. */
+function decodeRawValue(raw: string, line: ContentLine): string {
+  const isQuotedPrintable =
+    line.params.ENCODING?.some((value) => value.toUpperCase() === "QUOTED-PRINTABLE") ||
+    line.params.TYPE?.some((value) => value.toUpperCase() === "QUOTED-PRINTABLE");
+  if (isQuotedPrintable) return unescapeText(decodeQuotedPrintable(raw, line.params.CHARSET?.[0]));
+  return unescapeText(raw);
+}
+
+/** Text value for display: quoted-printable payloads are decoded once before unescaping. */
 export function decodeValue(line: ContentLine): string {
-  const encoding = line.params.ENCODING?.[0]?.toUpperCase();
-  if (encoding === "QUOTED-PRINTABLE") return unescapeText(decodeQuotedPrintable(line.value, line.params.CHARSET?.[0]));
-  return unescapeText(line.value);
+  return decodeRawValue(line.value, line);
+}
+
+/** Split a structured value on unescaped separators before decoding and unescaping each component. */
+export function decodeStructuredValue(line: ContentLine, separator = ";"): string[] {
+  return splitEscaped(line.value, separator).map((part) => decodeRawValue(part, line));
 }
 
 export function isBase64Encoded(line: ContentLine): boolean {

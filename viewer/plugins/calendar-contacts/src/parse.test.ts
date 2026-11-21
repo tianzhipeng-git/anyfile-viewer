@@ -38,7 +38,7 @@ describe("iCalendar parsing", () => {
     expect(review!.location).toBe("Room 3.14 / video call");
     expect(review!.organizer).toEqual({ address: "lead@anyfile.invalid" });
     expect(review!.attendees.map(({ address }) => address)).toEqual(["ana@anyfile.invalid", "ben@anyfile.invalid"]);
-    expect(review!.categories).toEqual(["team", "review"]);
+    expect(review!.categories).toEqual(["team,review"]);
     expect(review!.status).toBe("CONFIRMED");
     expect(review!.url).toBe("https://anyfile.top/en/view");
 
@@ -100,7 +100,67 @@ describe("vCard parsing", () => {
     expect(document.contacts[0]!.categories).toEqual(["My Contacts"]);
     expect(document.contacts[2]!.formattedName).toBe("Ñ Ñ Ñ Ñ Ñ");
     expect(document.contacts[2]!.phones[0]).toEqual({ label: "CELL, PREF", value: "123456789" });
+    expect(document.contacts[3]!.formattedName).toBe(Array(11).fill("Ñ").join(" "));
+    expect(document.contacts[3]!.note).toBe(
+      "Ñ Ñ Ñ Ñ Ñ Ñ Ñ ÑÑ Ñ Ñ Ñ Ñ Ñ Ñ ÑÑ Ñ Ñ Ñ Ñ",
+    );
+    expect(document.contacts[4]!.emails[1]!.value).toBe("Ñ".repeat(14));
+    expect(document.contacts[4]!.organization).toBe("Ñ".repeat(12));
+    expect(document.contacts[5]!.organization).toBe("Ñ".repeat(44));
     expect(document.contacts.some(({ hasPhoto }) => hasPhoto)).toBe(true);
+  });
+
+  it("does not join non-quoted-printable lines ending in '='", () => {
+    const raw = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      "FN:Ada",
+      "URL:https://example.invalid/?q=",
+      "TITLE:Engineer",
+      "END:VCARD",
+    ].join("\r\n");
+    const document = parseContacts(parseComponentTree(logicalLines(raw)).children);
+    expect(document.contacts[0]).toMatchObject({
+      formattedName: "Ada",
+      urls: ["https://example.invalid/?q="],
+      title: "Engineer",
+    });
+  });
+
+  it("preserves escaped and quoted-printable separators inside structured vCard and iCalendar fields", () => {
+    const rawCard = [
+      "BEGIN:VCARD",
+      "VERSION:3.0",
+      "N:Doe\\;Sr.;Jane;;;",
+      "ORG:Acme\\; Co.;R&D",
+      "ADR;TYPE=WORK:;;123 Main\\; Suite 4;Portland;OR;97201;USA",
+      "ADR;ENCODING=QUOTED-PRINTABLE:;;456 Oak=3B Apt 2;Seattle;WA;98101;USA",
+      "CATEGORIES:Work\\, Inc.,Team",
+      "END:VCARD",
+    ].join("\r\n");
+    const contacts = parseContacts(parseComponentTree(logicalLines(rawCard)).children);
+    expect(contacts.contacts[0]).toMatchObject({
+      name: "Jane Doe;Sr.",
+      organization: "Acme; Co.",
+      categories: ["Work, Inc.", "Team"],
+      addresses: [
+        { label: "WORK", street: "123 Main; Suite 4", city: "Portland", region: "OR", postalCode: "97201", country: "USA" },
+        { label: undefined, street: "456 Oak; Apt 2", city: "Seattle", region: "WA", postalCode: "98101", country: "USA" },
+      ],
+    });
+
+    const rawCal = [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "BEGIN:VEVENT",
+      "SUMMARY:Sync",
+      "DTSTART:20261123T090000Z",
+      "CATEGORIES:Eng\\, Core,Release",
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n");
+    const cal = parseCalendar(parseComponentTree(logicalLines(rawCal)).children[0]!);
+    expect(cal.events[0]!.categories).toEqual(["Eng, Core", "Release"]);
   });
 
   it("reads a real Outlook 2.1 card with a folded Base64 photo", () => {

@@ -1,4 +1,4 @@
-import { decodeValue, propertiesOf, propertyOf, splitEscaped, textOf, type ContentComponent, type ContentLine } from "./parse";
+import { decodeStructuredValue, decodeValue, propertiesOf, propertyOf, textOf, type ContentComponent, type ContentLine } from "./parse";
 import type {
   CalendarDocument,
   CalendarEvent,
@@ -50,7 +50,7 @@ function readPerson(line: ContentLine): CalendarPerson {
 function readCategories(component: ContentComponent): string[] {
   const line = propertyOf(component, "CATEGORIES");
   if (!line) return [];
-  return splitEscaped(decodeValue(line), ",").map((item) => item.trim()).filter(Boolean).slice(0, 32);
+  return decodeStructuredValue(line, ",").map((item) => item.trim()).filter(Boolean).slice(0, 32);
 }
 
 function readEvent(component: ContentComponent): CalendarEvent {

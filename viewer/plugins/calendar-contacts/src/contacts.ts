@@ -1,4 +1,4 @@
-import { decodeValue, propertiesOf, propertyOf, splitEscaped, textOf, type ContentComponent, type ContentLine } from "./parse";
+import { decodeStructuredValue, decodeValue, propertiesOf, propertyOf, textOf, type ContentComponent, type ContentLine } from "./parse";
 import type { Contact, ContactAddress, ContactField, ContactsDocument } from "./types";
 
 const MAX_CONTACTS = 2000;
@@ -19,7 +19,7 @@ function propertyFields(component: ContentComponent, name: string): ContactField
 }
 
 function readAddress(line: ContentLine): ContactAddress {
-  const [poBox, extended, street, city, region, postalCode, country] = splitEscaped(decodeValue(line), ";");
+  const [poBox, extended, street, city, region, postalCode, country] = decodeStructuredValue(line, ";");
   const parts = { poBox: poBox?.trim(), extended: extended?.trim(), street, city, region, postalCode, country };
   const label = (line.params.TYPE ?? []).join(", ");
   return {
@@ -36,14 +36,14 @@ function readContact(card: ContentComponent): Contact {
   const formattedName = textOf(card, "FN");
   const structured = propertyOf(card, "N");
   const [family, given, additional, prefix, suffix] = structured
-    ? splitEscaped(decodeValue(structured), ";")
+    ? decodeStructuredValue(structured, ";")
     : [];
   const structuredName = [prefix, given, additional, family, suffix]
     .map((part) => part?.trim()).filter(Boolean).join(" ") || undefined;
-  const organization = propertyOf(card, "ORG") ? splitEscaped(decodeValue(propertyOf(card, "ORG")!), ";")[0]?.trim() : undefined;
+  const organization = propertyOf(card, "ORG") ? decodeStructuredValue(propertyOf(card, "ORG")!, ";")[0]?.trim() : undefined;
   const note = textOf(card, "NOTE");
   const categories = propertyOf(card, "CATEGORIES")
-    ? splitEscaped(decodeValue(propertyOf(card, "CATEGORIES")!), ",").map((item) => item.trim()).filter(Boolean).slice(0, 16)
+    ? decodeStructuredValue(propertyOf(card, "CATEGORIES")!, ",").map((item) => item.trim()).filter(Boolean).slice(0, 16)
     : [];
   const emails = propertyFields(card, "EMAIL");
   const name = formattedName ?? structuredName ?? organization ?? emails[0]?.value ?? "";

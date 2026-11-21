@@ -52,7 +52,7 @@ git diff $R --stat -- third_party/ tools/ THIRD_PARTY_NOTICES.md licenses/
 - 处理需求池文件- `ROADMAP.md`：本周完成了哪些、新增了哪些。
     - 已完成条目确实达到描述的范围；`[!]` 受阻条目决定重新拆分、降级或删除。
     - 调研 Agent 新增条目的证据是否可信、难度是否合理；调整优先级顺序。
-    - 本次合并到 main 后，删除已发布的 `[x]` 条目。
+    - 合并前在 `dev` 上删除本周已发布的 `[x]` 条目。
 
 ## 6. 架构升级契机
 及时的甄别和发现, 现有的架构设计、抽象和契约是否已经过时、落后, 阻碍到项目继续扩展, 提出架构升级方案供用户选择. 
@@ -75,6 +75,6 @@ git diff $R --stat -- third_party/ tools/ THIRD_PARTY_NOTICES.md licenses/
 
 ## 9. 合并与上线
 
-1. 在 GitHub 从 `dev` 向 `main` 提 PR，描述中附本周摘要和第 2–8 节结论，等待 `check`、`build` 通过后合并。
+1. 在 GitHub 从 `dev` 向 `main` 提 PR，描述中附本周摘要和第 2–8 节结论，等待 `check`、`build` 通过后使用 `Create a merge commit` 合并（不要使用 Squash merge，以保持 `dev` 与 `main` 历史对齐且可干净 revert）。
 2. Vercel 部署完成后，在线上打开几个本周涉及的格式页和查看页做冒烟；运行时资产从 R2/jsDelivr 加载的插件确认能初始化。
 3. 线上出问题时，在 GitHub 上 revert 合并提交恢复 `main`，修复在 `dev` 上进行。
