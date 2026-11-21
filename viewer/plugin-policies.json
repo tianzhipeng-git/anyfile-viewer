@@ -825,6 +825,11 @@
       "directory": "legacy-office",
       "package": "@anyfile/legacy-office-viewer",
       "runtimeSets": []
+    },
+    "x509-certificate": {
+      "directory": "certificate",
+      "package": "@anyfile/x509-certificate-viewer",
+      "runtimeSets": []
     }
   }
 }

@@ -27,6 +27,7 @@ node_modules/
 # misc
 .DS_Store
 *.pem
+!viewer/plugins/certificate/examples/*.pem
 
 # debug
 npm-debug.log*

@@ -175,6 +175,9 @@ importers:
       '@anyfile/word-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/word
+      '@anyfile/x509-certificate-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/certificate
       '@base-ui/react':
         specifier: ^1.7.0
         version: 1.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -412,6 +415,16 @@ importers:
       '@anyfile/viewer-rendering':
         specifier: workspace:*
         version: link:../../rendering
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+
+  viewer/plugins/certificate:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*

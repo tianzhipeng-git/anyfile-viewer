@@ -55,6 +55,7 @@ import { geotiffFormat } from "./geotiff";
 import { gifFormat } from "./gif";
 import { gzFormat } from "./gz";
 import { harFormat } from "./har";
+import { certificateFormat } from "./certificates";
 import { heicFormat } from "./heic";
 import { icoFormat } from "./ico";
 import { inspFormat } from "./insp";
@@ -193,6 +194,7 @@ export const formatContents: readonly FormatContent[] = [
   gifFormat,
   gzFormat,
   harFormat,
+  certificateFormat,
   heicFormat,
   icoFormat,
   inspFormat,

@@ -211,7 +211,7 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader", "djvu-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "font-viewer", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "dev-native-binary-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
+      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader", "djvu-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "font-viewer", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "x509-certificate", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "dev-native-binary-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
 
     const djvuBytes = readFileSync(join(process.cwd(), "viewer/plugins/djvu/examples/djvu3spec.djvu"));
     const djvu = await resolveViewerRegistrations(
@@ -568,6 +568,10 @@ describe("viewer protocol", () => {
       .toEqual(["duckdb-data", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("network.har", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["http-archive", "hex-viewer"]);
+    for (const extension of ["pem", "crt", "cer", "der"]) {
+      expect(findViewerRegistrations(`server.${extension}`, viewerRegistrations).map(({ manifest: item }) => item.id))
+        .toEqual(["x509-certificate", "hex-viewer"]);
+    }
     expect(findViewerRegistrations("module.wasm", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["dev-wasm-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("bundle.js.map", viewerRegistrations).map(({ manifest: item }) => item.id))
