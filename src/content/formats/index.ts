@@ -39,6 +39,7 @@ import { dbfFormat } from "./dbf";
 import { deflateFormat } from "./deflate";
 import { difFormat } from "./dif";
 import { dngFormat } from "./dng";
+import { djvuFormat } from "./djvu";
 import { docFormat } from "./doc";
 import { dxfFormat } from "./dxf";
 import { docxFormat } from "./docx";
@@ -182,7 +183,7 @@ export const formatContents: readonly FormatContent[] = [
   duckdbFormat,
   earFormat,
   eggFormat,
-  epubFormat, chmFormat, ...mobiFormats, ...comicArchiveFormats,
+  epubFormat, chmFormat, djvuFormat, ...mobiFormats, ...comicArchiveFormats,
   fb2Format,
   epsFormat,
   etFormat,

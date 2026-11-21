@@ -54,6 +54,7 @@ __pycache__/
 
 /public/source/
 /third_party/libredwg/**/*.log
+/third_party/djvulibre/**/*.log
 
 # Local agent research output
 /.agents/artifacts/

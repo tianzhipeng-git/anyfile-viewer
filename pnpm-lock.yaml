@@ -67,6 +67,9 @@ importers:
       '@anyfile/dji-osmo-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/dji-osmo
+      '@anyfile/djvu-reader':
+        specifier: workspace:*
+        version: link:viewer/plugins/djvu
       '@anyfile/duckdb-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/duckdb
@@ -543,6 +546,19 @@ importers:
       mediabunny:
         specifier: 1.55.3
         version: 1.55.3
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+
+  viewer/plugins/djvu:
+    dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
