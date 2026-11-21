@@ -46,6 +46,7 @@ import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
 import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
+import { calendarContactsManifest } from "@anyfile/calendar-contacts-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import { wordManifest } from "@anyfile/word-viewer/manifest";
@@ -353,6 +354,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: certificateManifest,
     async probe(context) { return (await import("@anyfile/x509-certificate-viewer/probe")).inspectCertificate(context); },
     async load() { return (await import("@anyfile/x509-certificate-viewer")).certificateViewer; },
+  },
+  {
+    manifest: calendarContactsManifest,
+    async probe(context) { return (await import("@anyfile/calendar-contacts-viewer/probe")).inspectCalendarContacts(context); },
+    async load() { return (await import("@anyfile/calendar-contacts-viewer")).calendarContactsViewer; },
   },
   {
     manifest: mindMapManifest,

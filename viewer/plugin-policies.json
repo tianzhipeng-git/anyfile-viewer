@@ -830,6 +830,11 @@
       "directory": "certificate",
       "package": "@anyfile/x509-certificate-viewer",
       "runtimeSets": []
+    },
+    "calendar-contacts": {
+      "directory": "calendar-contacts",
+      "package": "@anyfile/calendar-contacts-viewer",
+      "runtimeSets": []
     }
   }
 }

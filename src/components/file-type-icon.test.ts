@@ -18,6 +18,8 @@ describe("getFileTypeKind", () => {
     ["recording.flac", "audio"],
     ["report.docx", "document"],
     ["manual.chm", "document"],
+    ["meeting.ics", "document"],
+    ["contact.vcf", "document"],
     ["legacy.doc", "document"],
     ["notes.rtf", "document"],
     ["schedule.MPP", "document"],

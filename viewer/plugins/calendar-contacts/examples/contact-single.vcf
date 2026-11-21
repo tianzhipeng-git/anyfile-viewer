@@ -1,0 +1,12 @@
+BEGIN:VCARD
+VERSION:3.0
+ADR:;;1 Example Way;Portland;OR;97201;USA
+EMAIL:mei@example.anyfile.invalid
+FN:Mei Lin
+N:Lin;Mei;;;
+NOTE:Sample contact generated with vobject
+ORG:Anyfile Examples
+TEL:+1 555 0100
+TITLE:Maintainer
+URL:https://example.anyfile.invalid/~mei
+END:VCARD

@@ -1,0 +1,15 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Anyfile Examples//Sample Calendar//EN
+CALSCALE:GREGORIAN
+X-WR-CALNAME:Anyfile Examples Team Calendar
+X-WR-TIMEZONE:Europe/Berlin
+BEGIN:VEVENT
+SUMMARY:Release review\; roadmap 2026
+DTSTART:20261124T100000Z
+DTEND:20261124T110000Z
+UID:release-review@anyfile.invalid
+ATTENDEE:mailto:ana@anyfile.invalid
+ATTENDEE:mailto:ben@anyfile.invalid
+CATEGORIES:team\,review
+DESCRIPTI
