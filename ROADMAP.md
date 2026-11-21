@@ -26,7 +26,7 @@
 - [ ] 中 | 新增网络抓包查看器（`.pcap` / `.pcapng`） | 解析包头与常见 TCP/UDP/DNS/HTTP 摘要、筛选与载荷检查；排查问题常需安装 Wireshark，流量数据极度敏感不愿上传
 - [ ] 中 | 新增地理轨迹与矢量数据查看器（`.geojson` / `.gpx` / `.kml` / `.shp`） | 纯本地 2D 坐标投影与属性表展示（不请求在线地图瓦片）；替代 QGIS / Google Earth，符合 `选格式.md` 地理数据免上传场景
 - [ ] 低 | `ffmpeg-video` 补齐 `.flv`（Flash Video）播放 | `docs/videos/roadmap.md` 未实施项；现有 `ffmpeg-playback` WASM 已编入 `flv` demuxer/decoder（见 `tools/ffmpeg-playback-build/evidence/configure.txt`），补有界 probe、样例与注册即可免装桌面播放器
-- [x] 低 | 新增 BitTorrent 种子查看器（`.torrent`） | `torrent file viewer online` 搜索量高，用户只想看内部文件树、大小与 Tracker 而不想装客户端或上传；纯 JS Bencode 解析与 WebCrypto 计算 infohash，无新运行时。2026-11-22 56c63b8
+- [x] 低 | 新增 BitTorrent 种子查看器（`.torrent`） | `torrent file viewer online` 搜索量高，用户只想看内部文件树、大小与 Tracker 而不想装客户端或上传；纯 JS Bencode 解析与 WebCrypto 计算 infohash，无新运行时。2026-11-22 a859b74
 - [ ] 低 | 新增 Apple 属性列表查看器（`.plist`） | Windows/Linux 与浏览器打不开二进制 `bplist00`，`plist viewer online` 需求稳定且常含应用配置不便上传；纯 JS 解析 `bplist00`/XML 为树形与 JSON 视图，无新运行时
 - [ ] 低 | 新增 OpenRaster / Krita 分层设计图预览（`.ora` / `.kra`） | `docs/images/roadmap.md` 与 `docs/images/support-matrix.md` 未实施项；规范自带 `mergedimage.png` 与 `stack.xml` 图层树，复用现有 ZIP 与 `@anyfile/viewer-rendering` 无新运行时即可替代 Krita/GIMP 预览
 - [ ] 高 | 新增 Apple iWork 文档与演示查看器（`.pages` / `.key`） | Windows/Linux 原生完全打不开 Mac 发来的 `.pages`/`.key`（当前仅 `excel` 支持 `.numbers`），搜索需求极大；需解析 IWA（Snappy+Protobuf）或自建 `libetonyek` WASM 渲染版式
