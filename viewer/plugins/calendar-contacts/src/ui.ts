@@ -43,41 +43,36 @@ export function styles() {
     .anyfile-calendar-contacts * { box-sizing:border-box; }
     .anyfile-calendar-contacts__header { flex:none; padding:14px 18px 10px; border-bottom:1px solid var(--viewer-border,#ddd); }
     .anyfile-calendar-contacts__title { display:block; overflow:hidden; font-size:17px; text-overflow:ellipsis; white-space:nowrap; }
-    .anyfile-calendar-contacts__meta { display:block; margin-top:3px; color:#6b7280; font-size:12px; overflow-wrap:anywhere; }
+    .anyfile-calendar-contacts__meta { display:block; margin-top:3px; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); font-size:12px; overflow-wrap:anywhere; }
     .anyfile-calendar-contacts__toolbar { flex:none; display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:9px 18px; border-bottom:1px solid var(--viewer-border,#ddd); }
     .anyfile-calendar-contacts__search { box-sizing:border-box; width:min(360px,100%); height:32px; border:1px solid var(--viewer-border,#ccc); border-radius:7px; padding:0 10px; background:var(--viewer-background,#fff); color:inherit; font:inherit; font-size:13px; }
-    .anyfile-calendar-contacts__count { color:#6b7280; font-size:12px; }
+    .anyfile-calendar-contacts__count { color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); font-size:12px; }
     .anyfile-calendar-contacts__viewport { min-height:0; flex:1; overflow:auto; padding:14px 18px 28px; }
-    .anyfile-calendar-contacts__empty { padding:24px 0; color:#6b7280; font-size:13px; }
-    .anyfile-calendar-contacts__section-title { margin:18px 0 8px; font-size:13px; font-weight:600; letter-spacing:.02em; color:#6b7280; text-transform:uppercase; }
+    .anyfile-calendar-contacts__empty { padding:24px 0; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); font-size:13px; }
+    .anyfile-calendar-contacts__section-title { margin:18px 0 8px; font-size:13px; font-weight:600; letter-spacing:.02em; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); text-transform:uppercase; }
     .anyfile-calendar-contacts__event { display:flex; gap:14px; max-width:1000px; border-bottom:1px solid var(--viewer-border,#eee); padding:10px 0; }
-    .anyfile-calendar-contacts__when { flex:none; width:150px; font-size:12px; line-height:1.45; color:#6b7280; font-variant-numeric:tabular-nums; }
+    .anyfile-calendar-contacts__when { flex:none; width:150px; font-size:12px; line-height:1.45; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); font-variant-numeric:tabular-nums; }
     .anyfile-calendar-contacts__body { min-width:0; flex:1; }
     .anyfile-calendar-contacts__summary { margin:0; font-size:14px; font-weight:600; overflow-wrap:anywhere; }
     .anyfile-calendar-contacts__line { margin:4px 0 0; font-size:13px; line-height:1.5; overflow-wrap:anywhere; }
-    .anyfile-calendar-contacts__muted { color:#6b7280; }
+    .anyfile-calendar-contacts__muted { color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); }
     .anyfile-calendar-contacts__chips { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
-    .anyfile-calendar-contacts__chip { border:1px solid var(--viewer-border,#ccc); border-radius:999px; padding:1px 8px; font-size:11px; color:#4b5563; }
+    .anyfile-calendar-contacts__chip { border:1px solid var(--viewer-border,#ccc); border-radius:999px; padding:1px 8px; font-size:11px; color:color-mix(in srgb, var(--viewer-foreground,#111) 78%, transparent); }
     .anyfile-calendar-contacts__details { margin-top:8px; font-size:13px; }
     .anyfile-calendar-contacts__details summary { cursor:pointer; color:var(--viewer-accent,#2563eb); font-size:12px; }
     .anyfile-calendar-contacts__panel { margin-top:8px; display:grid; grid-template-columns:minmax(90px,140px) 1fr; gap:6px 14px; }
-    .anyfile-calendar-contacts__panel dt { color:#6b7280; }
+    .anyfile-calendar-contacts__panel dt { color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); }
     .anyfile-calendar-contacts__panel dd { margin:0; min-width:0; overflow-wrap:anywhere; white-space:pre-wrap; }
     .anyfile-calendar-contacts__grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; max-width:1200px; }
     .anyfile-calendar-contacts__card { border:1px solid var(--viewer-border,#ddd); border-radius:10px; padding:12px 14px; background:color-mix(in srgb, var(--viewer-foreground,#111) 2%, transparent); }
     .anyfile-calendar-contacts__who { display:flex; align-items:center; gap:10px; min-width:0; }
     .anyfile-calendar-contacts__monogram { flex:none; display:flex; align-items:center; justify-content:center; width:36px; height:36px; border-radius:50%; background:color-mix(in srgb, var(--viewer-accent,#2563eb) 16%, transparent); color:inherit; font-size:13px; font-weight:600; text-transform:uppercase; }
     .anyfile-calendar-contacts__name { min-width:0; overflow:hidden; font-size:14px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
-    .anyfile-calendar-contacts__role { min-width:0; overflow:hidden; color:#6b7280; font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
+    .anyfile-calendar-contacts__role { min-width:0; overflow:hidden; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); font-size:12px; text-overflow:ellipsis; white-space:nowrap; }
     .anyfile-calendar-contacts__fields { display:grid; grid-template-columns:auto; gap:4px; margin:10px 0 0; font-size:12.5px; }
     .anyfile-calendar-contacts__field { display:flex; gap:8px; min-width:0; }
-    .anyfile-calendar-contacts__label { flex:none; width:66px; color:#6b7280; }
+    .anyfile-calendar-contacts__label { flex:none; width:66px; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); }
     .anyfile-calendar-contacts__value { min-width:0; overflow-wrap:anywhere; }
-    @media (prefers-color-scheme:dark) {
-      .anyfile-calendar-contacts__meta, .anyfile-calendar-contacts__count, .anyfile-calendar-contacts__when, .anyfile-calendar-contacts__muted,
-      .anyfile-calendar-contacts__role, .anyfile-calendar-contacts__label, .anyfile-calendar-contacts__panel dt, .anyfile-calendar-contacts__section-title { color:#9ca3af; }
-      .anyfile-calendar-contacts__chip { color:#d1d5db; }
-    }
     @media (max-width:520px) {
       .anyfile-calendar-contacts__event { flex-direction:column; gap:4px; }
       .anyfile-calendar-contacts__when { width:auto; }

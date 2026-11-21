@@ -63,5 +63,6 @@ Agent 环境的无头浏览器无法可靠使用文件选择器和 WebGL，不�
 ## 7. 完成定义
 
 - `pnpm check` 通过；改动涉及注册、依赖、Worker/WASM、资产或 `next.config.ts` 时 `pnpm build` 也通过。
+- 新增或更新 `r2` 运行时资产时，按[加载部署约定](viewer-loading-and-deployment.md#上传运行时资产到-r2)参考 `cloudflare` skill 使用 `wrangler` 上传至 `anyfile-bucket` 并验证线上返回 HTTP 200。
 - 插件 README 与支持矩阵反映当前能力；没有新增日期化的验证记录或证据文件。
 - 没有为了通过门禁而放宽预算、扩大 allowlist、跳过或删除测试；确需调整时在提交说明中给出理由。

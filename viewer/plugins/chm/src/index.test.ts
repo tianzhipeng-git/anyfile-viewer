@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createViewerTestContext } from "@anyfile/viewer-test";
 import { readChmMetadata } from "./chm-metadata";
 import { parseChmDirectory } from "./itsf";
+import { createChmPublication } from "./publication";
 import { createChmSectionReader, parseControlData, parseResetTable } from "./section-reader";
 import { chmViewer } from "./index";
 import { probeChm } from "./probe";
@@ -51,6 +52,32 @@ describe("CHM reader", () => {
     const html = new TextDecoder().decode(await reader.readEntry(entry, 1024 * 1024, signal()));
     expect(html).toContain("Architecture Overview");
     expect(html).toContain("../assets/diagram.png");
+    reader.dispose();
+  });
+
+  it("normalizes CHM HTML inside an inert template without adopting images into the live document", async () => {
+    vi.spyOn(URL, "createObjectURL").mockImplementation(() => "blob:chm-diagram");
+    const revokeUrl = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
+
+    const file = exampleFile("sample-handbook.chm");
+    const dir = await parseChmDirectory(file, signal());
+    const reader = createChmSectionReader(file, dir);
+    const meta = await readChmMetadata(dir, reader, signal());
+    const publication = createChmPublication(file.name, dir, meta, reader, "en");
+
+    const createdTags: string[] = [];
+    const origCreateElement = document.createElement.bind(document);
+    vi.spyOn(document, "createElement").mockImplementation(((tagName: string, options?: ElementCreationOptions) => {
+      createdTags.push(tagName.toLowerCase());
+      return origCreateElement(tagName, options);
+    }) as typeof document.createElement);
+
+    const chapter = await publication.loadSection("topics/architecture.html", signal());
+    expect(createdTags.every((tag) => tag === "template")).toBe(true);
+    expect(chapter.html).toContain('src="blob:chm-diagram"');
+    expect(chapter.html).not.toContain("assets/diagram.png");
+    chapter.dispose();
+    expect(revokeUrl).toHaveBeenCalledWith("blob:chm-diagram");
     reader.dispose();
   });
 

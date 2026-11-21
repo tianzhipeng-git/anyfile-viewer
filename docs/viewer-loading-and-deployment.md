@@ -64,6 +64,23 @@
 
 所有来源提供同一精确版本。默认保留同源 fallback；确需省略时，在该运行时架构中说明不可用行为和失败 UI。同源 fallback 解决外部资产不可达，不意味着应用具备完整离线缓存能力。
 
+### 上传运行时资产到 R2
+
+自建产物与需要 R2 镜像的公共运行时资产发布到 Cloudflare R2 存储桶 `anyfile-bucket`（映射域名 `https://assets.anyfile.top`），对象键固定为 `vendor/<pkg>/<version>/<file>`。
+
+- 操作前参考 `cloudflare` skill 确认账号配置，使用 `wrangler r2 object put` 上传（校验与幂等上传范例见 [publish-dwg-assets.mjs](../scripts/publish-dwg-assets.mjs)）：
+
+```bash
+wrangler r2 object put "anyfile-bucket/vendor/<pkg>/<version>/<file>" \
+  --remote \
+  --file "public/vendor/<pkg>/<version>/<file>" \
+  --content-type "<mime>" \
+  --cache-control "public, max-age=31536000, immutable"
+```
+
+- 按文件类型设置 `--content-type`（`.wasm` 用 `application/wasm`，`.js`/`.mjs` 用 `text/javascript`，`.json` 用 `application/json`，`.gz`/`.tgz` 用 `application/gzip`，许可证/说明用 `text/plain`）。
+- 已发布版本不可覆盖修改；上传后需验证 `https://assets.anyfile.top/vendor/<pkg>/<version>/<file>` 返回 HTTP 200，且带 `Access-Control-Allow-Origin: *` 与 `Cross-Origin-Resource-Policy: cross-origin`。
+
 ## 4. 响应头与导航
 
 ### 查看页隔离

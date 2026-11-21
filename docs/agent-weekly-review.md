@@ -54,25 +54,27 @@ git diff $R --stat -- third_party/ tools/ THIRD_PARTY_NOTICES.md licenses/
     - 调研 Agent 新增条目的证据是否可信、难度是否合理；调整优先级顺序。
     - 本次合并到 main 后，删除已发布的 `[x]` 条目。
 
-## 5. 架构升级契机
+## 6. 架构升级契机
 及时的甄别和发现, 现有的架构设计、抽象和契约是否已经过时、落后, 阻碍到项目继续扩展, 提出架构升级方案供用户选择. 
 这是我们每周review工作的重点.
 
-## 6. 真实浏览器验收
+## 7. 真实浏览器验收
 从本周提交说明里收集“需人工浏览器验收”的条目：
 
-用 `pnpm build && pnpm start` 在 Chrome 打开 `/en/view` 和 `/zh-CN/view`，用插件 `examples/` 中的样例逐项检查：打开、缩放/翻页/播放、窄窗口、切换文件、损坏文件的错误状态、DevTools 网络面板中没有上传文件内容。未通过的条目修复或回退后再合并。
+用 `pnpm build && pnpm start` 在 Chrome 打开 `/en/view` 和 `/zh-CN/view`，用插件 `examples/` 中的样例逐项检查：打开、缩放/翻页/播放、窄窗口、切换文件、损坏文件的错误状态、DevTools 网络面板中无 `POST`/`PUT` 上传且无意外同源 404。未通过的条目修复或回退后再合并。
 
-如果可以自行用浏览器验收的直接验收, 无法验收的留待用户人工确认.
+使用 Chrome DevTools MCP 时，可通过临时本地只读 CORS 静态服务配合 `fetch` + `DataTransfer` 将 `viewer/plugins/*/examples/` 样例注入 `<input type="file">`（禁止把二进制样例转 base64 读入上下文）。如果可以自行用浏览器验收的直接验收, 无法验收的留待用户人工确认.
 
-## 7. 用户协商
-与用户协商确认上述过程中产生的待确认问题和阻塞点.
+## 8. 用户协商
+- review 过程中发现的明确小问题（无需产品或架构决策，如确定性 bug、文档/配置不一致、笔误、脚本过滤遗漏等），直接修复并通过检查验证，不要就此向用户请求确认。
+- 能通过本地 CLI、skill 或 MCP 直接核查与执行的事项（如用 `wrangler` 检查/上传 R2 资产、运行 Chrome 浏览器验收等），直接执行并验证，不要让用户代劳或反复确认。
+- 只将涉及产品/架构决策、架构升级方案选择以及真正的阻塞点留待与用户协商。
 
 在提出待确认问题前, 使用如下命令通知用户: 
 `lark-cli im +messages-send --user-id ou_a943cca571fcd87db12f30a8289a3e6b --text "你好" --as bot --json`
 
-## 8. 合并与上线
+## 9. 合并与上线
 
-1. 在 GitHub 从 `dev` 向 `main` 提 PR，描述中附本周摘要和第 2–7 节结论，等待 `check`、`build` 通过后合并。
+1. 在 GitHub 从 `dev` 向 `main` 提 PR，描述中附本周摘要和第 2–8 节结论，等待 `check`、`build` 通过后合并。
 2. Vercel 部署完成后，在线上打开几个本周涉及的格式页和查看页做冒烟；运行时资产从 R2/jsDelivr 加载的插件确认能初始化。
 3. 线上出问题时，在 GitHub 上 revert 合并提交恢复 `main`，修复在 `dev` 上进行。

@@ -65,34 +65,27 @@ function styles() {
     .anyfile-certificate-viewer__header { flex:none; display:flex; flex-wrap:wrap; align-items:center; gap:8px 12px; padding:14px 18px 10px; border-bottom:1px solid var(--viewer-border,#ddd); }
     .anyfile-certificate-viewer__title { min-width:0; flex:1; overflow:hidden; font-size:17px; text-overflow:ellipsis; white-space:nowrap; }
     .anyfile-certificate-viewer__badge { flex:none; border-radius:999px; padding:2px 10px; font-size:12px; font-weight:600; border:1px solid currentColor; }
-    .anyfile-certificate-viewer__badge--valid { color:#15803d; }
-    .anyfile-certificate-viewer__badge--expired { color:#b91c1c; }
-    .anyfile-certificate-viewer__badge--pending { color:#b45309; }
-    .anyfile-certificate-viewer__meta { flex:none; width:100%; font-size:12px; color:#6b7280; }
+    .anyfile-certificate-viewer__badge--valid { color:color-mix(in srgb, #22c55e 70%, var(--viewer-foreground,#111)); }
+    .anyfile-certificate-viewer__badge--expired { color:color-mix(in srgb, #ef4444 70%, var(--viewer-foreground,#111)); }
+    .anyfile-certificate-viewer__badge--pending { color:color-mix(in srgb, #f59e0b 65%, var(--viewer-foreground,#111)); }
+    .anyfile-certificate-viewer__meta { flex:none; width:100%; font-size:12px; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); }
     .anyfile-certificate-viewer__tabs { flex:none; display:flex; flex-wrap:wrap; gap:6px; padding:10px 18px; border-bottom:1px solid var(--viewer-border,#ddd); }
     .anyfile-certificate-viewer__tab { max-width:100%; overflow:hidden; border:1px solid var(--viewer-border,#ccc); border-radius:6px; padding:4px 10px; background:transparent; color:inherit; font:inherit; font-size:12px; text-overflow:ellipsis; white-space:nowrap; cursor:pointer; }
     .anyfile-certificate-viewer__tab[aria-pressed="true"] { border-color:var(--viewer-accent,#2563eb); background:color-mix(in srgb, var(--viewer-accent,#2563eb) 14%, transparent); font-weight:600; }
     .anyfile-certificate-viewer__viewport { min-height:0; flex:1; overflow:auto; padding:16px 18px 28px; }
     .anyfile-certificate-viewer__section { max-width:1100px; margin:0 auto 26px; }
-    .anyfile-certificate-viewer__heading { margin:0 0 10px; font-size:13px; font-weight:600; letter-spacing:.02em; color:#6b7280; text-transform:uppercase; }
+    .anyfile-certificate-viewer__heading { margin:0 0 10px; font-size:13px; font-weight:600; letter-spacing:.02em; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); text-transform:uppercase; }
     .anyfile-certificate-viewer__details { display:grid; grid-template-columns:minmax(120px,200px) 1fr; gap:7px 18px; margin:0; font-size:13px; }
-    .anyfile-certificate-viewer__details dt { color:#6b7280; }
+    .anyfile-certificate-viewer__details dt { color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); }
     .anyfile-certificate-viewer__details dd { margin:0; min-width:0; overflow-wrap:anywhere; }
     .anyfile-certificate-viewer__mono { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:12px; }
     .anyfile-certificate-viewer__list { margin:0; padding-left:18px; font-size:13px; }
     .anyfile-certificate-viewer__list li { overflow-wrap:anywhere; }
     .anyfile-certificate-viewer__table { width:100%; border-collapse:collapse; font-size:12px; }
     .anyfile-certificate-viewer__table th, .anyfile-certificate-viewer__table td { border-bottom:1px solid var(--viewer-border,#ddd); padding:6px 8px; text-align:left; vertical-align:top; }
-    .anyfile-certificate-viewer__table th { font-weight:600; color:#6b7280; }
+    .anyfile-certificate-viewer__table th { font-weight:600; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); }
     .anyfile-certificate-viewer__name { overflow-wrap:anywhere; }
-    .anyfile-certificate-viewer__oid { display:block; color:#6b7280; font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; }
-    @media (prefers-color-scheme:dark) {
-      .anyfile-certificate-viewer__heading, .anyfile-certificate-viewer__details dt, .anyfile-certificate-viewer__table th,
-      .anyfile-certificate-viewer__meta, .anyfile-certificate-viewer__oid { color:#9ca3af; }
-      .anyfile-certificate-viewer__badge--valid { color:#4ade80; }
-      .anyfile-certificate-viewer__badge--expired { color:#f87171; }
-      .anyfile-certificate-viewer__badge--pending { color:#fbbf24; }
-    }
+    .anyfile-certificate-viewer__oid { display:block; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:11px; }
   `;
   return style;
 }

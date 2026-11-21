@@ -18,7 +18,11 @@ export async function prepareGplApplicationSource(root) {
       if (entry.isSymbolicLink() || excluded.has(entry.name) || (entry.name.startsWith(".") && file !== ".gitignore")) {
         continue;
       }
-      if (["public/vendor", "public/source", "docs/tasks"].includes(file) || /\.(log|tsbuildinfo|pem)$/.test(file)) {
+      if (
+        ["public/vendor", "public/source", "docs/tasks"].includes(file)
+        || /\.(log|tsbuildinfo)$/.test(file)
+        || (file.endsWith(".pem") && !file.startsWith("viewer/plugins/certificate/examples/"))
+      ) {
         continue;
       }
       if (entry.isDirectory()) {

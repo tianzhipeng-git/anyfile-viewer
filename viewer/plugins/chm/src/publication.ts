@@ -81,7 +81,7 @@ function normalizeChmHtml(
   const fromKey = chmKey(entryPath);
 
   for (const el of Array.from(template.content.querySelectorAll("object, embed, applet"))) {
-    const notice = document.createElement("span");
+    const notice = template.content.ownerDocument.createElement("span");
     notice.textContent = `[${unsupportedObjectLabel}]`;
     el.replaceWith(notice);
   }
@@ -137,9 +137,7 @@ function normalizeChmHtml(
     }
   }
 
-  const wrapper = document.createElement("div");
-  wrapper.append(template.content.cloneNode(true));
-  return new TextEncoder().encode(wrapper.innerHTML);
+  return new TextEncoder().encode(template.innerHTML);
 }
 
 export function createChmPublication(

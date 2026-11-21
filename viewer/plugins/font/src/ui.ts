@@ -76,19 +76,18 @@ function styles() {
     .anyfile-font-viewer__field input { box-sizing:border-box; width:min(340px,52vw); height:32px; border:1px solid var(--viewer-border,#ddd); border-radius:7px; background:var(--viewer-background,#fff); color:inherit; padding:0 10px; font:inherit; }
     .anyfile-font-viewer__viewport { min-height:0; flex:1; overflow:auto; padding:16px 12px 28px; }
     .anyfile-font-viewer__section { max-width:1100px; margin:0 auto 26px; }
-    .anyfile-font-viewer__heading { margin:0 0 10px; font-size:13px; font-weight:600; letter-spacing:.02em; color:#6b7280; text-transform:uppercase; }
+    .anyfile-font-viewer__heading { margin:0 0 10px; font-size:13px; font-weight:600; letter-spacing:.02em; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); text-transform:uppercase; }
     .anyfile-font-viewer__row { display:flex; align-items:baseline; gap:12px; border-bottom:1px dashed var(--viewer-border,#ddd); padding:6px 0; }
-    .anyfile-font-viewer__size { flex:none; width:52px; font-size:11px; color:#6b7280; font-variant-numeric:tabular-nums; text-align:right; }
+    .anyfile-font-viewer__size { flex:none; width:52px; font-size:11px; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); font-variant-numeric:tabular-nums; text-align:right; }
     .anyfile-font-viewer__line { flex:1; min-width:0; overflow-wrap:anywhere; line-height:1.25; white-space:pre-wrap; }
     .anyfile-font-viewer__section--glyphs .anyfile-font-viewer__line { font-size:28px; line-height:1.5; }
     .anyfile-font-viewer__details { display:grid; grid-template-columns:minmax(120px,180px) 1fr; gap:6px 16px; margin:0; font-size:13px; }
-    .anyfile-font-viewer__details dt { color:#6b7280; }
+    .anyfile-font-viewer__details dt { color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); }
     .anyfile-font-viewer__details dd { margin:0; overflow-wrap:anywhere; }
-    .anyfile-font-viewer__note { margin:8px 0 0; font-size:12px; line-height:1.5; color:#6b7280; }
+    .anyfile-font-viewer__note { margin:8px 0 0; font-size:12px; line-height:1.5; color:color-mix(in srgb, var(--viewer-foreground,#111) 66%, transparent); }
     .anyfile-font-viewer__tables { width:100%; border-collapse:collapse; font-size:12px; }
     .anyfile-font-viewer__tables th, .anyfile-font-viewer__tables td { border-bottom:1px solid var(--viewer-border,#ddd); padding:4px 8px; text-align:left; font-variant-numeric:tabular-nums; }
     .anyfile-font-viewer__tables th:first-child, .anyfile-font-viewer__tables td:first-child { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; }
-    @media (prefers-color-scheme:dark) { .anyfile-font-viewer__heading, .anyfile-font-viewer__size, .anyfile-font-viewer__details dt, .anyfile-font-viewer__note { color:#9ca3af; } }
   `;
   return style;
 }
