@@ -55,6 +55,7 @@ import { geotiffFormat } from "./geotiff";
 import { gifFormat } from "./gif";
 import { gzFormat } from "./gz";
 import { harFormat } from "./har";
+import { torrentFormat } from "./torrent";
 import { certificateFormat } from "./certificates";
 import { icsFormat, vcfFormat } from "./calendar";
 import { heicFormat } from "./heic";
@@ -195,6 +196,7 @@ export const formatContents: readonly FormatContent[] = [
   gifFormat,
   gzFormat,
   harFormat,
+  torrentFormat,
   certificateFormat,
   icsFormat, vcfFormat,
   heicFormat,

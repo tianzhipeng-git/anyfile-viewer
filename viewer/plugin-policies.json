@@ -33,6 +33,11 @@
       "package": "@anyfile/browser-video-viewer",
       "runtimeSets": []
     },
+    "bittorrent-metadata": {
+      "directory": "torrent",
+      "package": "@anyfile/bittorrent-viewer",
+      "runtimeSets": []
+    },
     "cad-exchange": {
       "directory": "cad-exchange",
       "package": "@anyfile/cad-exchange-viewer",

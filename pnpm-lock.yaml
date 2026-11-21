@@ -19,6 +19,9 @@ importers:
       '@anyfile/archive-metadata-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/archive
+      '@anyfile/bittorrent-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/torrent
       '@anyfile/browser-audio-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/browser-audio
@@ -1083,6 +1086,16 @@ importers:
       '@anyfile/viewer-rendering':
         specifier: workspace:*
         version: link:../../rendering
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+
+  viewer/plugins/torrent:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*

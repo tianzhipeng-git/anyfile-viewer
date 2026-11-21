@@ -33,6 +33,7 @@ import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
+import { bittorrentManifest } from "@anyfile/bittorrent-viewer/manifest";
 import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
@@ -348,6 +349,13 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     async load() {
       const viewerPackage = await import("@anyfile/har-viewer");
       return viewerPackage.harViewer;
+    },
+  },
+  {
+    manifest: bittorrentManifest,
+    async load() {
+      const viewerPackage = await import("@anyfile/bittorrent-viewer");
+      return viewerPackage.bittorrentViewer;
     },
   },
   {

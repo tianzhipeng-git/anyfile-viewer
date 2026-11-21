@@ -568,6 +568,8 @@ describe("viewer protocol", () => {
       .toEqual(["duckdb-data", "archive-metadata-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("network.har", viewerRegistrations).map(({ manifest: item }) => item.id))
       .toEqual(["http-archive", "hex-viewer"]);
+    expect(findViewerRegistrations("movie.torrent", viewerRegistrations).map(({ manifest: item }) => item.id))
+      .toEqual(["bittorrent-metadata", "hex-viewer"]);
     for (const extension of ["pem", "crt", "cer", "der"]) {
       expect(findViewerRegistrations(`server.${extension}`, viewerRegistrations).map(({ manifest: item }) => item.id))
         .toEqual(["x509-certificate", "hex-viewer"]);
