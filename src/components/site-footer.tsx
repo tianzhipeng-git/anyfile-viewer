@@ -1,6 +1,5 @@
 import { ArrowUpRightIcon } from "lucide-react";
 
-import { AnalyticsPreferences } from "@/components/google-analytics";
 import { BrandMark } from "@/components/brand-mark";
 import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
 import { Separator } from "@/components/ui/separator";
@@ -44,9 +43,8 @@ export function SiteFooter({ locale, dictionary }: { locale: PublishedLocale; di
         <Separator />
         <div className="flex flex-col gap-1 py-3 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:gap-6">
           <p>{dictionary.common.copyright}</p>
-          <div className="flex flex-wrap items-center gap-x-5 [&>button]:min-h-9 [&>button]:rounded-sm [&>button]:focus-visible:outline-2 [&>button]:focus-visible:outline-offset-4 [&>button]:focus-visible:outline-ring">
+          <div className="flex flex-wrap items-center gap-x-5">
             <IsolationBoundaryLink href={localePath(locale, "/privacy")} className={linkClassName}>{dictionary.common.privacy}</IsolationBoundaryLink>
-            <AnalyticsPreferences locale={locale} />
           </div>
         </div>
       </div>

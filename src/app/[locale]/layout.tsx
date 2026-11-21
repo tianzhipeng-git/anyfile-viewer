@@ -50,7 +50,7 @@ export default async function LocaleLayout({
           <main className="flex flex-1 flex-col">{children}</main>
           <SiteFooter locale={locale} dictionary={dictionary} />
         </FeedbackProvider>
-        <GoogleAnalytics locale={locale} />
+        <GoogleAnalytics />
         <SafeSpeedInsights />
       </body>
     </html>
