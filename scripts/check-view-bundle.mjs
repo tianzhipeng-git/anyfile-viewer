@@ -15,7 +15,7 @@ const thirdPartyNotices = await readFile(join(projectRoot, "THIRD_PARTY_NOTICES.
 for (const marker of ["MPL-2.0", "CDDL-1.0", "LGPL-3.0-or-later", "libvips", "HEVC patent", "LibreDWG", "GPLv3"]) {
   if (!thirdPartyNotices.includes(marker)) throw new Error(`Third-party notices are missing ${marker}`);
 }
-for (const file of ["source/dwg.html", "source/application.tar.gz", "source/THIRD_PARTY_NOTICES.md", "vendor/libredwg/0.14-anyfile.1/COPYING"]) {
+for (const file of ["source/dwg.html", "source/djvu.html", "source/application.tar.gz", "source/THIRD_PARTY_NOTICES.md", "vendor/libredwg/0.14-anyfile.1/COPYING", "vendor/djvulibre/3.5.29-anyfile.1/COPYING"]) {
   await readFile(join(projectRoot, "public", file));
 }
 const html = await readFile(join(projectRoot, ".next/server/app/en/view.html"), "utf8");
@@ -54,6 +54,7 @@ const deferredImplementationMarkers = [
   "正在读取 Excel 工作簿",
   "正在读取 PowerPoint 演示文稿",
   "anyfile-pdf-viewer__viewport",
+  "anyfile-djvu-viewer__viewport",
   "anyfile-postscript-viewer__canvas",
   "stet_wasm_bg.wasm",
   "anyfile-photoshop-viewer__canvas",

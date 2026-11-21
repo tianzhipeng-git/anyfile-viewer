@@ -1,0 +1,10 @@
+{
+  "artifactVersion": "3.5.29-anyfile.1",
+  "core": {
+    "version": "3.5.29",
+    "url": "https://downloads.sourceforge.net/project/djvu/DjVuLibre/3.5.29/djvulibre-3.5.29.tar.gz",
+    "sha256": "d3b4b03ae2bdca8516a36ef6eb27b777f0528c9eda26745d9962824a3fdfeccf"
+  },
+  "image": "emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7",
+  "emscripten": "4.0.10"
+}

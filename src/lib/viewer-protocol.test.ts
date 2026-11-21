@@ -211,7 +211,23 @@ describe("viewer protocol", () => {
 
   it("uses specialized probes in the production registry", async () => {
     expect(viewerRegistrations.filter(({ probe }) => probe).map(({ manifest: item }) => item.id))
-      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "font-viewer", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "dev-native-binary-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
+      .toEqual(["microsoft-project", "dicom", "comic-book-reader", "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader", "djvu-reader", "dji-osmo", "gopro-max", "insta360", "browser-video", "non-native-video", "browser-audio", "non-native-audio", "ffmpeg-video", "ffmpeg-audio", "font-viewer", "browser-image", "modern-raster", "camera-raw", "general-raster", "pixelmator-pxd", "safe-svg", "photoshop-document", "pdfjs-pdf", "postscript-document", "word-document", "excel-workbook", "powerpoint-presentation", "legacy-office", "mind-map", "ace-code-text", "sqlite-database", "dev-array-viewer", "dev-wasm-viewer", "dev-source-map-viewer", "dev-native-binary-viewer", "duckdb-data", "archive-metadata-viewer", "cad-2d", "cad-dwg", "ifc", "cad-exchange", "point-cloud", "print-3d", "mesh-3d", "visio"]);
+
+    const djvuBytes = readFileSync(join(process.cwd(), "viewer/plugins/djvu/examples/djvu3spec.djvu"));
+    const djvu = await resolveViewerRegistrations(
+      new File([djvuBytes], "spec.djvu"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(djvu.map(({ registration: item, supportLevel }) => [item.manifest.id, supportLevel]))
+      .toEqual([["djvu-reader", 4], ["hex-viewer", 1]]);
+
+    const invalidDjvu = await resolveViewerRegistrations(
+      new File(["not a djvu"], "broken.djvu"),
+      viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(invalidDjvu.map(({ registration: item }) => item.manifest.id)).toEqual(["hex-viewer"]);
 
     const source = await resolveViewerRegistrations(
       new File(["export const answer = 42;\n"], "answer.ts"),

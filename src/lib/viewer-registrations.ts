@@ -11,6 +11,7 @@ import { mobiManifest } from "@anyfile/mobi-reader/manifest";
 import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
 import { epubManifest } from "@anyfile/epub-reader/manifest";
 import { chmManifest } from "@anyfile/chm-reader/manifest";
+import { djvuManifest } from "@anyfile/djvu-reader/manifest";
 import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
 import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
 import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
@@ -87,6 +88,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: chmManifest,
     async probe(context) { return (await import("@anyfile/chm-reader/probe")).probeChm(context); },
     async load() { return (await import("@anyfile/chm-reader")).chmViewer; },
+  },
+  {
+    manifest: djvuManifest,
+    async probe(context) { return (await import("@anyfile/djvu-reader/probe")).probeDjvu(context); },
+    async load() { return (await import("@anyfile/djvu-reader")).djvuViewer; },
   },
   {
     manifest: djiOsmoManifest,

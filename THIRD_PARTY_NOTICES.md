@@ -143,3 +143,9 @@ distributor's responsibility.
 The original project source remains Apache-2.0 where applicable. The DWG-enabled combined distribution is subject to GPLv3; Worker isolation does not waive these obligations. Original component notices remain applicable. No warranty is provided.
 
 GNU LibreDWG 0.14 is GPL-3.0-or-later; mlightcad/libredwg-web 0.7.10 is GPL-3.0. Exact source archives, license text, the source-build recipe and artifact hashes ship under `/vendor/libredwg/0.14-anyfile.1/`. The viewer links to `/source/dwg.html`, including a matching application-source download, source dependency links and build instructions.
+
+## DjVu integration: DjVuLibre
+
+The DjVu reader uses DjVuLibre 3.5.29 (`libdjvulibre`), licensed under GPL-2.0-or-later. Distribution of the DjVu-enabled combined application is subject to GPLv2+; Worker isolation does not waive these obligations. Original component notices remain applicable. No warranty is provided.
+
+Exact corresponding upstream source (`djvulibre-source.tar.gz`), `COPYING`, `COPYRIGHT`, the source-build recipe and artifact hashes ship under `/vendor/djvulibre/3.5.29-anyfile.1/` and `/vendor/licenses/djvulibre/3.5.29-anyfile.1/`. The viewer links to `/source/djvu.html`, including a matching application-source download, source dependency links and build instructions.
