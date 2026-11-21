@@ -31,6 +31,7 @@ import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
+import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
 import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
@@ -54,7 +55,7 @@ export const viewerManifests: readonly ViewerPluginManifest[] = [
   mindMapManifest,
   visioManifest, djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
-  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, fontManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, legacyOfficeManifest, mppManifest, harManifest,
+  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, fontManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, wordManifest, excelManifest, powerpointManifest, legacyOfficeManifest, mppManifest, harManifest, certificateManifest,
   codeManifest, sqliteManifest, devArrayManifest, devWasmManifest, devSourceMapManifest, devNativeBinaryManifest,
   comicBookManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, djvuManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
 ];

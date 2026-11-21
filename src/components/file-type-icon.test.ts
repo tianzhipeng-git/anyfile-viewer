@@ -45,6 +45,8 @@ describe("getFileTypeKind", () => {
     ["module.wasm", "developer"],
     ["bundle.js.map", "developer"],
     ["matrix.npy", "developer"],
+    ["server.pem", "developer"],
+    ["root.der", "developer"],
     ["program.elf", "binary"],
     ["library.dll", "binary"],
     ["addon.node", "binary"],

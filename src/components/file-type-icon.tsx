@@ -33,6 +33,7 @@ import { excelManifest } from "@anyfile/excel-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
+import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
 import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
@@ -179,7 +180,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "developer",
     icon: BracesIcon,
-    extensions: manifestExtensions(devArrayManifest, devSourceMapManifest, devWasmManifest),
+    extensions: manifestExtensions(devArrayManifest, devSourceMapManifest, devWasmManifest, certificateManifest),
   },
   {
     kind: "database",
