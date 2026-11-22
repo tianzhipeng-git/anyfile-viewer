@@ -99,11 +99,11 @@ Built with Next.js, React, TypeScript, and a pnpm workspace. Format implementati
 | `src/app/[locale]/` | Localized pages: home, categories, formats, plugin details, and viewer workspace |
 | `src/components/` | Website shell and file workspace |
 | `src/content/` | Format catalog and bilingual page content |
-| `src/lib/viewer-registrations.ts` | Plugin registration and dynamic loading |
-| `viewer/plugins/` | Individual format viewers |
+| `src/lib/viewer-registrations.ts`, `src/lib/registrations/` | Domain-grouped plugin registration and dynamic loading |
+| `viewer/plugins/` | Individual format viewers and per-plugin `policy.json` |
 | `viewer/protocol/` | Host/plugin interfaces and validation |
 | `viewer/ui/`, `viewer/rendering*/` | Shared UI and rendering infrastructure |
-| `viewer/runtime-assets/`, `viewer/plugin-policies.json` | Runtime asset loading and policies |
+| `viewer/runtime-assets/`, `viewer/plugin-policies.json` | Runtime asset loading and global budgets |
 | `tools/`, `third_party/` | Source-build recipes and audited third-party artifacts |
 | `services/feedback/` | Optional feedback backend |
 

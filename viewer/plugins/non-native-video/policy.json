@@ -1,0 +1,26 @@
+{
+  "runtimeSets": [
+    {
+      "id": "ogv",
+      "version": "1.9.0",
+      "versionPackageJson": "viewer/plugins/non-native-video/node_modules/ogv/package.json",
+      "assetPatterns": [
+        "public/vendor/ogv/1.9.0/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "ogg-video",
+          "assetPatterns": [
+            "public/vendor/ogv/1.9.0/ogv.js",
+            "public/vendor/ogv/1.9.0/ogv-demuxer-ogg-wasm.wasm",
+            "public/vendor/ogv/1.9.0/ogv-decoder-audio-vorbis-wasm.wasm",
+            "public/vendor/ogv/1.9.0/ogv-decoder-video-theora-wasm.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ]
+    }
+  ]
+}

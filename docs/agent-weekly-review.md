@@ -19,7 +19,7 @@ git diff --stat origin/main...dev | tail -1  # 改动规模
 ```bash
 R=origin/main...dev
 git diff $R -- scripts/check-repo.mjs scripts/check-*.mjs vitest.config.mts eslint.config.mjs tsconfig.json .github/
-git diff $R -- viewer/plugin-policies.json          # 预算是否被调高
+git diff $R -- viewer/plugin-policies.json 'viewer/plugins/*/policy.json'  # 预算是否被调高或新增例外
 git diff $R --diff-filter=D --name-only -- '*.test.ts'  # 删除的测试
 git diff $R | grep -nE '^\+.*\b(it|describe|test)\.(skip|only|todo)\b|eslint-disable|@ts-(ignore|expect-error)|as any'
 ```

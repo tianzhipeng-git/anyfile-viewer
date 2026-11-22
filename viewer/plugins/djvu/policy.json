@@ -1,0 +1,34 @@
+{
+  "runtimeSets": [
+    {
+      "id": "djvulibre",
+      "version": "3.5.29-anyfile.1",
+      "assetPatterns": [
+        "public/vendor/djvulibre/3.5.29-anyfile.1/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "decoder",
+          "assetPatterns": [
+            "public/vendor/djvulibre/3.5.29-anyfile.1/djvu.js",
+            "public/vendor/djvulibre/3.5.29-anyfile.1/djvu.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "r2",
+        "same-origin"
+      ],
+      "implementationFiles": [
+        "viewer/plugins/djvu/src/runtime.ts",
+        "viewer/plugins/djvu/src/worker-client.ts"
+      ],
+      "requiredMarkers": [
+        "3.5.29-anyfile.1",
+        "https://assets.anyfile.top/vendor/djvulibre/",
+        "/vendor/djvulibre/",
+        "initializeRuntimeFromSources"
+      ]
+    }
+  ]
+}

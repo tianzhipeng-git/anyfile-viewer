@@ -14,7 +14,7 @@
 ## 需求
 - [x] 高 | 清理和简化docs/ | 合并 6 领域文档至 `docs/domains/`、移除日期化证据与单插件文档并同步 README，docs Markdown 8346→1361 行。2026-11-22 c87e119
 - [x] 高 | 扩展 `@anyfile/viewer-ui` 为共享 Inspector UI Kit 与主题变量契约 | 补齐 12 个 `--viewer-*` 宿主主题 token，新增 `el()`/`formatBytes()`/shell/KV/数据表/筛选/标签/分页原语，迁移 8 个检查器插件并修复暗色模式失配。2026-11-22 bb58a0c
-- [ ] 高 | 拆分插件策略配置与接线元数据（`viewer/plugin-policies.json`、`src/lib/viewer-protocol.test.ts`） | 52 个插件已使 `plugin-policies.json` 达 840 行（逼近 1000 行门禁上限）、`viewer-protocol.test.ts` 达 598 行，且并行新增插件易在 6–7 个中心文件冲突；按插件拆分策略并分离协议契约与路由测试
+- [x] 高 | 拆分插件策略配置与接线元数据（`viewer/plugin-policies.json`、`src/lib/viewer-protocol.test.ts`） | 拆为全局预算 `viewer/plugin-policies.json`（850→10 行）+ 54 个插件 `policy.json`，按领域拆分 `src/lib/registrations/*.ts` 与 `src/lib/viewer-routing/*.test.ts`，`viewer-protocol.test.ts`（604→177 行）仅保留纯协议契约测试并消除硬编码 probe 列表与 `file-type-icon.tsx` 重复 manifest 导入。2026-11-22 0cdf444
 - [ ] 低 | 在 `@anyfile/runtime-assets` 中抽取共享 Worker RPC 客户端 | 20+ Worker+WASM 插件重复编写请求 ID 关联、超时、`AbortSignal` 终止、transferable 与运行时回退逻辑（如 `djvu/src/worker-client.ts` 近 200 行）；抽为轻量类型化 `createWorkerRpcClient` 减少泄漏与取消竞态
 - [ ] 高 | 抽取共享分页文档视口适配器（`PagedDocumentSource`） | `djvu` 与 `pdf` 各自实现 ~500–1000 行分页画布工具栏、缩放/适应、画布淘汰与大纲侧栏；抽到共享包（先从 `djvu` 抽起，再视情况迁 `pdf`）以复用至后续分页格式（TIFF/XPS/PostScript 等）
 - [ ] 高 | 完成 `docs/pwa-desktop-app.md`

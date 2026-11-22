@@ -2,18 +2,20 @@ import { readdir, readFile, writeFile } from "node:fs/promises";
 import { gzipSync } from "node:zlib";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadPluginPolicies } from "./plugin-policies.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const policy = JSON.parse(await readFile(join(projectRoot, "viewer/plugin-policies.json"), "utf8"));
+const policy = loadPluginPolicies(projectRoot);
 const loadableManifest = JSON.parse(await readFile(
   join(projectRoot, ".next/react-loadable-manifest.json"),
   "utf8",
 ));
+const registrationEntryPattern = /(?:^|\/)(?:viewer-registrations|registrations\/[^/]+)\.ts -> /;
 
 async function entryGzipBytes(specifier) {
-  const suffix = `viewer-registrations.ts -> ${specifier}`;
+  const suffix = ` -> ${specifier}`;
   const entries = Object.entries(loadableManifest)
-    .filter(([key]) => key.endsWith(suffix));
+    .filter(([key]) => registrationEntryPattern.test(key) && key.endsWith(suffix));
   const files = new Set(entries.flatMap(([, entry]) => entry.files).filter((file) => file.endsWith(".js")));
   if (files.size === 0) throw new Error(`No client dynamic chunk group found for ${specifier}`);
   const contents = await Promise.all([...files].map((file) => readFile(join(projectRoot, ".next", file))));
@@ -39,10 +41,7 @@ if (oversizedChunks.length > 0) {
 }
 
 for (const [id, plugin] of Object.entries(policy.plugins)) {
-  const packageJson = JSON.parse(await readFile(
-    join(projectRoot, "viewer/plugins", plugin.directory, "package.json"),
-    "utf8",
-  ));
+  const { packageJson } = plugin;
   const manifestSource = await readFile(
     join(projectRoot, "viewer/plugins", plugin.directory, packageJson.exports["./manifest"]),
   );

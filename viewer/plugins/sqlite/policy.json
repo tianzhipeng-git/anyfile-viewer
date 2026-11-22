@@ -1,0 +1,23 @@
+{
+  "runtimeSets": [
+    {
+      "id": "sqljs",
+      "version": "1.14.2",
+      "versionPackageJson": "viewer/plugins/sqlite/node_modules/sql.js/package.json",
+      "assetPatterns": [
+        ".next/static/media/sql-wasm.*.wasm"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "sqlite",
+          "assetPatterns": [
+            ".next/static/media/sql-wasm.*.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ]
+    }
+  ]
+}

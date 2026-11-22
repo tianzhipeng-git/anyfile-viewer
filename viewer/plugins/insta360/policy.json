@@ -1,0 +1,56 @@
+{
+  "runtimeSets": [
+    {
+      "id": "libraw",
+      "version": "1.6.0",
+      "versionPackageJson": "node_modules/libraw-wasm/package.json",
+      "assetPatterns": [
+        "public/vendor/libraw/1.6.0/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "x6-dng",
+          "assetPatterns": [
+            "public/vendor/libraw/1.6.0/index.js",
+            "public/vendor/libraw/1.6.0/worker.js",
+            "public/vendor/libraw/1.6.0/libraw.js",
+            "public/vendor/libraw/1.6.0/libraw.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ]
+    },
+    {
+      "id": "ffmpeg-playback",
+      "version": "9.0.1-anyfile.4",
+      "assetPatterns": [
+        "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "playback",
+          "assetPatterns": [
+            "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.js",
+            "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.wasm",
+            "public/vendor/ffmpeg-playback/9.0.1-anyfile.4/ffmpeg-playback.worker.js"
+          ]
+        }
+      ],
+      "sources": [
+        "r2",
+        "same-origin"
+      ],
+      "implementationFiles": [
+        "viewer/ffmpeg-playback/src/client.ts"
+      ],
+      "requiredMarkers": [
+        "9.0.1-anyfile.4",
+        "https://assets.anyfile.top/vendor/ffmpeg-playback/",
+        "/vendor/ffmpeg-playback/",
+        "initializeFfmpeg"
+      ]
+    }
+  ]
+}

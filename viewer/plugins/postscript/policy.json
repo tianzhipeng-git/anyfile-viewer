@@ -1,0 +1,31 @@
+{
+  "runtimeSets": [
+    {
+      "id": "stet",
+      "version": "0.8.1-anyfile.1",
+      "assetPatterns": [
+        "public/vendor/stet/0.8.1-anyfile.1/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "postscript",
+          "assetPatterns": [
+            "public/vendor/stet/0.8.1-anyfile.1/stet_wasm.js",
+            "public/vendor/stet/0.8.1-anyfile.1/stet_wasm_bg.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "r2",
+        "same-origin"
+      ],
+      "implementationFiles": [
+        "viewer/plugins/postscript/src/runtime.ts"
+      ],
+      "requiredMarkers": [
+        "https://assets.anyfile.top/vendor/stet/",
+        "LOCAL_ASSET_ROOT"
+      ]
+    }
+  ]
+}

@@ -1,56 +1,4 @@
-import { mindMapManifest } from "@anyfile/mind-map-viewer/manifest";
-import { ifcManifest } from "@anyfile/ifc-viewer/manifest";
-import { visioManifest } from "@anyfile/visio-viewer/manifest";
-import { mppManifest } from "@anyfile/mpp-viewer/manifest";
-import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
-import { dwgManifest } from "@anyfile/cad-dwg-viewer/manifest";
-import { ffmpegVideoManifest } from "@anyfile/ffmpeg-video-viewer/manifest";
-import { ffmpegAudioManifest } from "@anyfile/ffmpeg-audio-viewer/manifest";
-import { mobiManifest } from "@anyfile/mobi-reader/manifest";
-import { fictionBookManifest } from "@anyfile/fictionbook-reader/manifest";
-import { epubManifest } from "@anyfile/epub-reader/manifest";
-import { chmManifest } from "@anyfile/chm-reader/manifest";
-import { djvuManifest } from "@anyfile/djvu-reader/manifest";
-import { comicBookManifest } from "@anyfile/comic-book-reader/manifest";
-import { cadExchangeManifest } from "@anyfile/cad-exchange-viewer/manifest";
-import { pointCloudManifest } from "@anyfile/point-cloud-viewer/manifest";
-import { print3dManifest } from "@anyfile/print-3d-viewer/manifest";
-import { mesh3dManifest } from "@anyfile/mesh-3d-viewer/manifest";
-import { archiveMetadataManifest } from "@anyfile/archive-metadata-viewer/manifest";
-import { browserAudioManifest } from "@anyfile/browser-audio-viewer/manifest";
-import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
-import { browserVideoManifest } from "@anyfile/browser-video-viewer/manifest";
-import { cad2dManifest } from "@anyfile/cad-2d-viewer/manifest";
-import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
-import { codeManifest } from "@anyfile/code-viewer/manifest";
-import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
-import { devArrayManifest } from "@anyfile/dev-array-viewer/manifest";
-import { devNativeBinaryManifest } from "@anyfile/dev-native-binary-viewer/manifest";
-import { devSourceMapManifest } from "@anyfile/dev-source-map-viewer/manifest";
-import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
-import { djiOsmoManifest } from "@anyfile/dji-osmo-viewer/manifest";
-import { excelManifest } from "@anyfile/excel-viewer/manifest";
-import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
-import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
-import { harManifest } from "@anyfile/har-viewer/manifest";
-import { bittorrentManifest } from "@anyfile/bittorrent-viewer/manifest";
-import { mlWeightsManifest } from "@anyfile/ml-weights-viewer/manifest";
-import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
-import { calendarContactsManifest } from "@anyfile/calendar-contacts-viewer/manifest";
-import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
-import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
-import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
-import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifest";
-import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
-import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
-import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
-import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
-import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
-import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
-import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
-import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
-import type { ViewerPluginManifest } from "@anyfile/viewer-protocol";
-import { wordManifest } from "@anyfile/word-viewer/manifest";
+import { viewerRegistrations } from "@/lib/viewer-registrations";
 import {
   BinaryIcon,
   BracesIcon,
@@ -94,19 +42,27 @@ type FileTypeRule = {
   fileNames?: readonly string[];
 };
 
-function manifestExtensions(...manifests: readonly ViewerPluginManifest[]) {
-  return manifests.flatMap((manifest) =>
-    manifest.formats.flatMap((format) => format.extensions.filter((extension) => extension !== "*"))
+const manifestsById = new Map(viewerRegistrations.map(({ manifest }) => [manifest.id, manifest]));
+
+function pluginManifest(id: string) {
+  const manifest = manifestsById.get(id);
+  if (!manifest) throw new Error(`Unknown viewer manifest id in file-type-icon: ${id}`);
+  return manifest;
+}
+
+function pluginExtensions(...ids: readonly string[]) {
+  return ids.flatMap((id) =>
+    pluginManifest(id).formats.flatMap((format) => format.extensions.filter((extension) => extension !== "*"))
   );
 }
 
-function manifestFileNames(...manifests: readonly ViewerPluginManifest[]) {
-  return manifests.flatMap((manifest) =>
-    manifest.formats.flatMap((format) => format.fileNames ?? [])
+function pluginFileNames(...ids: readonly string[]) {
+  return ids.flatMap((id) =>
+    pluginManifest(id).formats.flatMap((format) => format.fileNames ?? [])
   );
 }
 
-const SPREADSHEET_EXTENSIONS = manifestExtensions(excelManifest)
+const SPREADSHEET_EXTENSIONS = pluginExtensions("excel-workbook")
   .filter((extension) => extension !== ".txt" && extension !== ".xml");
 
 // Rules are ordered by semantic specificity. This keeps files such as .docx
@@ -124,17 +80,9 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     kind: "image",
     icon: FileImageIcon,
     extensions: [
-      ...djiOsmoManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".jpg" || extension === ".jpeg"),
-      ...goProMaxManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".jpg" || extension === ".jpeg"),
-      ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".insp" || extension === ".dng"),
-      ...manifestExtensions(
-      browserImageManifest,
-      modernRasterManifest,
-      cameraRawManifest,
-      generalRasterManifest,
-      dicomManifest,
-      safeSvgManifest,
-      ),
+      ...pluginExtensions("dji-osmo", "gopro-max").filter((extension) => extension === ".jpg" || extension === ".jpeg"),
+      ...pluginExtensions("insta360").filter((extension) => extension === ".insp" || extension === ".dng"),
+      ...pluginExtensions("browser-image", "modern-raster", "camera-raw", "general-raster", "dicom", "safe-svg"),
     ],
   },
   {
@@ -143,10 +91,10 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     // `.ts` is far more commonly a TypeScript source file; the content probe still
     // routes real MPEG-TS files to the video viewer.
     extensions: [
-      ...djiOsmoManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".osv"),
-      ...goProMaxManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".360"),
-      ...insta360Manifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".lrv" || extension === ".insv"),
-      ...manifestExtensions(browserVideoManifest, nonNativeVideoManifest, ffmpegVideoManifest)
+      ...pluginExtensions("dji-osmo").filter((extension) => extension === ".osv"),
+      ...pluginExtensions("gopro-max").filter((extension) => extension === ".360"),
+      ...pluginExtensions("insta360").filter((extension) => extension === ".lrv" || extension === ".insv"),
+      ...pluginExtensions("browser-video", "non-native-video", "ffmpeg-video")
         .filter((extension) => extension !== ".ts"),
     ],
   },
@@ -154,59 +102,69 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     kind: "presentation",
     icon: PresentationIcon,
     extensions: [
-      ...manifestExtensions(powerpointManifest),
-      ...manifestExtensions(legacyOfficeManifest).filter((extension) => extension === ".ppt"),
+      ...pluginExtensions("powerpoint-presentation"),
+      ...pluginExtensions("legacy-office").filter((extension) => extension === ".ppt"),
     ],
   },
   {
     kind: "document",
     icon: FileTextIcon,
     extensions: [
-      ...manifestExtensions(pdfManifest, postscriptManifest, wordManifest, mppManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, djvuManifest, comicBookManifest, calendarContactsManifest),
-      ...manifestExtensions(legacyOfficeManifest).filter((extension) => extension !== ".ppt"),
+      ...pluginExtensions(
+        "pdfjs-pdf", "postscript-document", "word-document", "microsoft-project",
+        "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader",
+        "djvu-reader", "comic-book-reader", "calendar-contacts",
+      ),
+      ...pluginExtensions("legacy-office").filter((extension) => extension !== ".ppt"),
     ].filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },
   {
     kind: "design",
     icon: PaletteIcon,
-    extensions: manifestExtensions(mindMapManifest),
+    extensions: pluginExtensions("mind-map"),
   },
   {
     kind: "code",
     icon: FileCodeIcon,
     extensions: [
       ".json.gz", ".json.zst", ".jsonl.gz", ".jsonl.zst", ".ndjson.gz", ".ndjson.zst",
-      ...manifestExtensions(codeManifest, harManifest),
+      ...pluginExtensions("ace-code-text", "http-archive"),
     ],
-    fileNames: manifestFileNames(codeManifest),
+    fileNames: pluginFileNames("ace-code-text"),
   },
   {
     kind: "developer",
     icon: BracesIcon,
-    extensions: manifestExtensions(devArrayManifest, devSourceMapManifest, devWasmManifest, certificateManifest, bittorrentManifest, mlWeightsManifest),
+    extensions: pluginExtensions(
+      "dev-array-viewer", "dev-source-map-viewer", "dev-wasm-viewer",
+      "x509-certificate", "bittorrent-metadata", "ml-weights",
+    ),
   },
   {
     kind: "database",
     icon: DatabaseIcon,
-    extensions: manifestExtensions(sqliteManifest, duckdbManifest),
+    extensions: pluginExtensions("sqlite-database", "duckdb-data"),
   },
   {
     kind: "audio",
     icon: FileAudioIcon,
-    extensions: manifestExtensions(browserAudioManifest, nonNativeAudioManifest, ffmpegAudioManifest)
+    extensions: pluginExtensions("browser-audio", "non-native-audio", "ffmpeg-audio")
       .filter((extension) => ![".mp4", ".webm", ".ogg"].includes(extension)),
   },
   {
     kind: "model",
     icon: BoxIcon,
-    extensions: [...manifestExtensions(ifcManifest, cadExchangeManifest, mesh3dManifest, print3dManifest, pointCloudManifest), ".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
+    extensions: [
+      ...pluginExtensions("ifc", "cad-exchange", "mesh-3d", "print-3d", "point-cloud"),
+      ".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz",
+    ],
   },
   {
     kind: "design",
     icon: PaletteIcon,
     extensions: [
-      ...manifestExtensions(visioManifest, pixelmatorPxdManifest, photoshopManifest, cad2dManifest, dwgManifest),
-      ...pdfManifest.formats.flatMap((format) => format.extensions).filter((extension) => extension === ".ai"),
+      ...pluginExtensions("visio", "pixelmator-pxd", "photoshop-document", "cad-2d", "cad-dwg"),
+      ...pluginExtensions("pdfjs-pdf").filter((extension) => extension === ".ai"),
       ".psb", ".fig", ".sketch", ".xd", ".indd",
     ],
   },
@@ -218,14 +176,14 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "archive",
     icon: FileArchiveIcon,
-    extensions: manifestExtensions(archiveMetadataManifest),
+    extensions: pluginExtensions("archive-metadata-viewer"),
   },
   {
     kind: "binary",
     icon: BinaryIcon,
     extensions: [
       ".bin", ".dmg", ".iso",
-      ...manifestExtensions(devNativeBinaryManifest).filter((extension) => extension !== ".obj"),
+      ...pluginExtensions("dev-native-binary-viewer").filter((extension) => extension !== ".obj"),
     ],
   },
 ];

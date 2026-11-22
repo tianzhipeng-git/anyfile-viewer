@@ -2,29 +2,16 @@ import { readdir, readFile } from "node:fs/promises";
 import { gzipSync } from "node:zlib";
 import { dirname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadPluginPolicies, readRegistrationSource } from "./plugin-policies.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
-const policyPath = join(projectRoot, "viewer/plugin-policies.json");
-const policy = JSON.parse(await readFile(policyPath, "utf8"));
-if (policy.schemaVersion !== 1) throw new Error("Unsupported viewer plugin policy schema");
-
+const policy = loadPluginPolicies(projectRoot);
 const pluginsRoot = join(projectRoot, "viewer/plugins");
-const registrationSource = await readFile(join(projectRoot, "src/lib/viewer-registrations.ts"), "utf8");
-const pluginDirectories = (await readdir(pluginsRoot, { withFileTypes: true }))
-  .filter((entry) => entry.isDirectory())
-  .map((entry) => entry.name)
-  .sort();
-const discoveredPlugins = new Map();
+const registrationSource = readRegistrationSource(projectRoot);
+const discoveredIds = Object.keys(policy.plugins).sort();
 
-for (const directory of pluginDirectories) {
-  const root = join(pluginsRoot, directory);
-  const packageJson = JSON.parse(await readFile(join(root, "package.json"), "utf8"));
-  const manifestSource = await readFile(join(root, "src/manifest.ts"), "utf8");
-  const id = manifestSource.match(/\bid:\s*["']([^"']+)["']/)?.[1];
-  if (!id) throw new Error(`Viewer plugin ${directory} has no literal manifest id`);
-  if (discoveredPlugins.has(id)) throw new Error(`Duplicate viewer plugin id ${id}`);
-  discoveredPlugins.set(id, { directory, packageJson });
-
+for (const id of discoveredIds) {
+  const { packageJson } = policy.plugins[id];
   if (packageJson.exports?.["."] !== "./src/index.ts" || packageJson.exports?.["./manifest"] !== "./src/manifest.ts") {
     throw new Error(`${packageJson.name} must export separate viewer and manifest entry points`);
   }
@@ -36,14 +23,6 @@ for (const directory of pluginDirectories) {
   if (packageJson.exports?.["./probe"] && !registrationSource.includes(`import("${packageJson.name}/probe")`)) {
     throw new Error(`${packageJson.name} exports a probe that is not dynamically registered`);
   }
-}
-
-const configuredIds = Object.keys(policy.plugins).sort();
-const discoveredIds = [...discoveredPlugins.keys()].sort();
-if (JSON.stringify(configuredIds) !== JSON.stringify(discoveredIds)) {
-  const missing = discoveredIds.filter((id) => !configuredIds.includes(id));
-  const stale = configuredIds.filter((id) => !discoveredIds.includes(id));
-  throw new Error(`Viewer plugin policies do not match registrations; missing: ${missing.join(", ") || "none"}; stale: ${stale.join(", ") || "none"}`);
 }
 
 function globRegex(pattern) {
@@ -90,22 +69,19 @@ const reports = [];
 const singleLimit = policy.budgets.singleRuntimeAssetGzipMiB * 1024 * 1024;
 const coldStartLimit = policy.budgets.coldStartRuntimeGzipMiB * 1024 * 1024;
 
-for (const [id, pluginPolicy] of Object.entries(policy.plugins)) {
-  const discovered = discoveredPlugins.get(id);
-  if (pluginPolicy.directory !== discovered.directory || pluginPolicy.package !== discovered.packageJson.name) {
-    throw new Error(`Viewer plugin policy identity mismatch for ${id}`);
-  }
+for (const id of discoveredIds) {
+  const pluginPolicy = policy.plugins[id];
   const pluginSourceFiles = (await walk(join(pluginsRoot, pluginPolicy.directory, "src")))
     .filter((path) => /\.[cm]?[jt]sx?$/.test(path));
   const pluginSource = (await Promise.all(pluginSourceFiles.map((path) => readFile(join(projectRoot, path), "utf8")))).join("\n");
   if (/\/vendor\/|cdn\.jsdelivr\.net|assets\.anyfile\.top|new URL\([^\n]+\.wasm/.test(pluginSource)
     && pluginPolicy.runtimeSets.length === 0) {
-    throw new Error(`${id} references runtime assets but declares no runtime set`);
+    throw new Error(`${id} (${pluginPolicy.policyPath}) references runtime assets but declares no runtime set`);
   }
 
   for (const runtime of pluginPolicy.runtimeSets) {
     if (!runtime.id || !runtime.version || !Array.isArray(runtime.sources) || runtime.sources.length === 0) {
-      throw new Error(`${id} has an incomplete runtime asset declaration`);
+      throw new Error(`${id} (${pluginPolicy.policyPath}) has an incomplete runtime asset declaration`);
     }
     if (runtime.sources.some((source) => !["jsdelivr", "r2", "same-origin"].includes(source))
       || runtime.sources.at(-1) !== "same-origin") {
@@ -162,7 +138,7 @@ for (const [id, pluginPolicy] of Object.entries(policy.plugins)) {
 
 const unclaimed = runtimeFiles.filter((path) => !claimedFiles.has(path));
 if (unclaimed.length > 0) {
-  throw new Error(`Built runtime assets are missing from viewer/plugin-policies.json: ${unclaimed.join(", ")}`);
+  throw new Error(`Built runtime assets are missing from viewer/plugins/*/policy.json: ${unclaimed.join(", ")}`);
 }
 
 for (const report of reports) {

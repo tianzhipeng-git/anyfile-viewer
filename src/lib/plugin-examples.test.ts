@@ -2,8 +2,10 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { basename, join, relative } from "node:path";
 import { describe, expect, it } from "vitest";
 import { resolveViewerRegistrations } from "@anyfile/viewer-protocol";
-import policies from "../../viewer/plugin-policies.json";
+import { loadPluginPolicies } from "../../scripts/plugin-policies.mjs";
 import { viewerRegistrations } from "./viewer-registrations";
+
+const policies = loadPluginPolicies(process.cwd());
 
 // Every positive real sample in a plugin's examples/ or fixtures/ must route to that plugin.
 // Negative samples carry one of NEGATIVE_SAMPLE in the file name; plugin tests own their behavior.

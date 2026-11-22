@@ -1,0 +1,42 @@
+{
+  "runtimeSets": [
+    {
+      "id": "jxl-oxide",
+      "version": "0.12.6",
+      "versionPackageJson": "viewer/plugins/modern-raster/node_modules/jxl-oxide-wasm/package.json",
+      "assetPatterns": [
+        ".next/static/media/jxl_oxide_wasm_bg.*.wasm"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "jxl-fallback",
+          "assetPatterns": [
+            ".next/static/media/jxl_oxide_wasm_bg.*.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ]
+    },
+    {
+      "id": "libheif",
+      "version": "1.23.2-anyfile.1",
+      "assetPatterns": [
+        "public/vendor/libheif/1.23.2-anyfile.1/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "heif-fallback",
+          "assetPatterns": [
+            "public/vendor/libheif/1.23.2-anyfile.1/heif-decoder.js",
+            "public/vendor/libheif/1.23.2-anyfile.1/heif-decoder.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ]
+    }
+  ]
+}
