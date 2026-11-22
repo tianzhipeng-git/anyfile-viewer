@@ -6,11 +6,10 @@
 - 难度：`低`（一天内、无新运行时）、`中`（新解析器或较多 UI）、`高`（自建 WASM、大型依赖或跨多个插件）。
 - 备注：可选，一句话。来源证据、受阻原因、完成提交写在这里，不另建文档。
 
-规则：
-
-- **每日开发 Agent**：领取最靠上的 `[ ]` 条目；合并到 dev 时把条目改为 `[x]`，备注末尾加 `<YYYY-MM-DD> <commit>`。
-- **每周调研 Agent**：只追加或修改 `[ ]` 条目。追加前确认格式未被支持（`grep -rn '"\.<ext>"' viewer/plugins/*/src/manifest.ts`）且池中没有重复；备注写需求证据（搜索量、论坛求助、只能靠大型桌面软件打开等）。按项目思路排序：格式多优先于支持深，优先有明确需求但只能依赖大型桌面软件的格式。
-- **每周 review**：调整顺序和难度，处理 `[!]` 条目，删除已随 main 发布的 `[x]` 条目（历史在 git 中）。
+流程规则见：
+- 每日开发：`docs/agent-daily-dev.md`
+- 每周需求评估：`docs/agent-weekly-demand.md`
+- 每周 review：`docs/agent-weekly-review.md`
 
 ## 需求
 - [x] 高 | 清理和简化docs/ | 合并 6 领域文档至 `docs/domains/`、移除日期化证据与单插件文档并同步 README，docs Markdown 8346→1361 行。2026-11-22 c87e119
@@ -41,3 +40,8 @@
 - [ ] 中 | 抽取 dji-osmo / gopro-max / insta360 的双轨播放与全景渲染到共享包 | DJI 与 GoPro playback 约 375 行仅 64 行不同；需人工浏览器验收三种相机样例
 - [x] 中 | 合并 `docs/videos` 文档为当前状态（删除阶段证据与已完成计划，保留有效规则） | 已合并至 `docs/domains/videos.md`。2026-11-22 c87e119
 - [x] 中 | 合并 `docs/3d`、`docs/images`、`docs/ebooks`、`docs/audio` 文档为当前状态 | 已合并至 `docs/domains/`。2026-11-22 c87e119
+
+
+## 待处理建议
+在每日开发 Agent的执行过程中发现的问题, 更新在这个下方, 每周会经过评估和确认后加入需求池.
+- 这是一条测试建议, 哈哈哈
