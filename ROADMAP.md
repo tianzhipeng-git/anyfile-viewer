@@ -13,6 +13,9 @@
 
 ## 需求
 - [ ] 低 | 在 `@anyfile/runtime-assets` 中抽取共享 Worker RPC 客户端 | 20+ Worker+WASM 插件重复编写请求 ID 关联、超时、`AbortSignal` 终止、transferable 与运行时回退逻辑（如 `djvu/src/worker-client.ts` 近 200 行）；抽为轻量类型化 `createWorkerRpcClient` 减少泄漏与取消竞态
+- [ ] 中 | 构建版本化 Service Worker 与有界缓存淘汰 | 构建阶段注入 build ID，将 `/_next/static/*` 拆入 `anyfile-next-static-<buildId>` 以便发版激活时自动清理旧块，并为 `anyfile-runtime-v1` 增加有界 LRU 淘汰与满额恢复
+- [ ] 低 | 抽取共享插件 IO / Abort / Lifecycle 工具并补齐协议 `runtime-unavailable` 与 `reportPreview` 约束 | 收敛 14 份 `read-blob` / 48 处 `abortError` 重复实现并支持渐进读头，在 `@anyfile/viewer-protocol` 新增 `runtime-unavailable` 区分运行时拉取失败与环境不支持，补齐新插件 `reportPreview` 约束
+- [ ] 中 | 基于单点声明派生插件接线投影 | 收敛新增插件时的多点手工同步面（`src/content/manifests.ts`、`file-type-icon.tsx`、`src/lib/pwa/file-handlers.ts`、`docs/domains/*.md` 等），保持 `manifest.ts` 纯净与首包隔离边界
 - [ ] 高 | 抽取共享分页文档视口适配器（`PagedDocumentSource`） | `djvu` 与 `pdf` 各自实现 ~500–1000 行分页画布工具栏、缩放/适应、画布淘汰与大纲侧栏；抽到共享包（先从 `djvu` 抽起，再视情况迁 `pdf`）以复用至后续分页格式（TIFF/XPS/PostScript 等）
 - [ ] 中 | 新增邮件查看器（`.eml` / `.msg`） | 解析 RFC 5322 MIME 与 Outlook CFBF `.msg`，展示安全清理正文与附件清单；无 Outlook 打开 `.msg` 搜索痛点极强，邮件高度隐私敏感不愿上传
 - [ ] 中 | 新增 Microsoft Access 数据库查看器（`.mdb` / `.accdb`） | `open mdb/accdb online` 与 macOS 查看 Access 搜索痛点极强（Mac/Linux 无原生软件，数据库高度机密）；基于纯 JS `mdb-reader` 读取表结构与分页数据
@@ -24,8 +27,9 @@
 - [ ] 低 | 新增 OpenRaster / Krita 分层设计图预览（`.ora` / `.kra`） | `docs/domains/images.md` 未实施项；规范自带 `mergedimage.png` 与 `stack.xml` 图层树，复用现有 ZIP 与 `@anyfile/viewer-rendering` 无新运行时即可替代 Krita/GIMP 预览
 - [ ] 高 | 新增 Apple iWork 文档与演示查看器（`.pages` / `.key`） | Windows/Linux 原生完全打不开 Mac 发来的 `.pages`/`.key`（当前仅 `excel` 支持 `.numbers`），搜索需求极大；需解析 IWA（Snappy+Protobuf）或自建 `libetonyek` WASM 渲染版式
 - [ ] 高 | 新增统计软件数据查看器（`.sav` / `.dta` / `.sas7bdat`） | 科研/医疗/金融高频搜 `open sav without spss` 与 `sas7bdat/dta viewer`，数据严格保密不愿上传；需按 `tools/` 配方将 C 库 `ReadStat` 编为 WASM，支持变量/值标签与大表分页
-- [ ] 高 | 新增 Microsoft XPS 固定版式查看器（`.xps` / `.oxps`） | Win10/11 默认移除 XPS 查看器且 macOS/Linux 无原生支持，常见于发票/税务/医疗打印件极度敏感；需引入 MuPDF WASM 或 XAML 固定版式渲染管线
+- [ ] 高 | 新增 Microsoft XPS 固定版式查看器（`.xps` / `.oxps`） | Win10/11 默认移除 XPS 查看器且 macOS/Linux 无原生支持，常见于发票/税务/医疗打印件极度敏感；优先采用 ZIP + FixedPage XAML 固定版式渲染管线（避免引入 AGPLv3 协议的 MuPDF WASM）
 - [ ] 高 | 新增 CorelDRAW 矢量文件查看器（`.cdr`） | 印刷/设计行业搜 `open cdr without coreldraw` 痛点极强（软件昂贵且偏 Windows，设计稿涉密）；需自建 `libcdr`+`librevenge` WASM 配方渲染矢量页
+- [ ] 低 | 校准开发者与数据类格式页的 `typicalLevel` 支持等级 | 核对并统一 `torrent`、`safetensors`、`gguf`、`wasm`、`map`、`npy`/`npz`、`duckdb`、`har` 等格式页的 `typicalLevel`，使其与实际 `probe()` 返回值及 `docs/domains/` 支持矩阵一致
 - [ ] 低 | 为缺少真实样例的插件补 `examples/`，逐个移出 check-repo 的 PLUGINS_WITHOUT_SAMPLES | 先做 code、sqlite、hex、dev-wasm 等易获得样例的
 - [ ] 低 | 为 `ffmpeg-video` / `ffmpeg-audio` 补齐站点插件页与格式页，并移出 `scripts/check-repo.mjs` 的 UNPUBLISHED_PLUGINS | 两个回退插件当前仅注册未发布站点页面，补齐后完善插件目录与格式覆盖统计
 - [ ] 高 | 新增 GPU 纹理查看器（`.dds` / `.ktx` / `.ktx2`） | `docs/domains/images.md` 未实施项；游戏与 3D 资产开发高频痛点，需引入 Khronos/Basis WASM 转码并支持 mipmap、cubemap 与通道检查
