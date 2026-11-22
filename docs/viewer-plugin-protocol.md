@@ -224,7 +224,7 @@ interface WorkspaceEntry {
 
 ## 10. 验证入口
 
-- [协议与路由测试](../src/lib/viewer-protocol.test.ts)：Manifest、注册唯一性、匹配、probe 等级、稳定排序和取消；[i18n 测试](../src/i18n/i18n.test.ts)检查已注册名称与文案边界。
+- [协议契约测试](../src/lib/viewer-protocol.test.ts)：Manifest、注册唯一性、匹配、probe 等级、稳定排序和取消；`src/lib/viewer-routing/` 按领域覆盖生产路由与 `./probe` 接线；[i18n 测试](../src/i18n/i18n.test.ts)检查已注册名称与文案边界。
 - [工作区测试](../src/lib/workspace-reader.test.ts)：路径限制、目录与多文件读取。
 - [共享测试工具](../viewer/testing/src/index.ts)：容器、进度、延迟及跟踪读取辅助；具体成功、失败、取消和资源释放由各插件测试覆盖。
 - 新增或修改插件需验证成功打开、损坏与超限输入、opening/active 取消、重复销毁及销毁后无副作用。真实渲染和布局验收见[渲染规范](viewer-rendering-guidelines.md)。

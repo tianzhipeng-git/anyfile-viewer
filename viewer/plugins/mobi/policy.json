@@ -1,0 +1,29 @@
+{
+  "runtimeSets": [
+    {
+      "id": "libmobi",
+      "version": "0.12-anyfile.2",
+      "assetPatterns": [
+        "public/vendor/libmobi/0.12-anyfile.2/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "decode",
+          "assetPatterns": [
+            "public/vendor/libmobi/0.12-anyfile.2/mobi.js",
+            "public/vendor/libmobi/0.12-anyfile.2/mobi.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ],
+      "implementationFiles": [
+        "viewer/plugins/mobi/src/index.ts"
+      ],
+      "requiredMarkers": [
+        "/vendor/libmobi/0.12-anyfile.2/mobi.js"
+      ]
+    }
+  ]
+}

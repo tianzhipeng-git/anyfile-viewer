@@ -1,0 +1,29 @@
+{
+  "runtimeSets": [
+    {
+      "id": "comic-archive",
+      "version": "3.8.9-anyfile.1",
+      "assetPatterns": [
+        "public/vendor/comic-archive/3.8.9-anyfile.1/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "decode",
+          "assetPatterns": [
+            "public/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.js",
+            "public/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ],
+      "implementationFiles": [
+        "viewer/plugins/comic-book/src/archive-client.ts"
+      ],
+      "requiredMarkers": [
+        "/vendor/comic-archive/3.8.9-anyfile.1/comic-archive.js"
+      ]
+    }
+  ]
+}

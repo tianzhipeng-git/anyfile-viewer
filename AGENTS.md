@@ -15,11 +15,11 @@
 # 代码地图
 | 路径 | 内容 |
 |---|---|
-| `viewer/plugins/<dir>/` | 每个查看器插件一个 pnpm 包；插件文档是它的 `README.md`，真实样例在 `examples/` |
+| `viewer/plugins/<dir>/` | 每个查看器插件一个 pnpm 包；含 `policy.json`（运行时资产声明）、`README.md`、`examples/` 真实样例 |
 | `viewer/*`（protocol、ui、rendering*、runtime-assets、testing…） | 共享包，不注册为插件 |
-| `src/lib/viewer-registrations.ts` | 插件注册与路由顺序 |
+| `src/lib/viewer-registrations.ts`、`src/lib/registrations/*.ts` | 按领域拆分的插件注册与路由顺序 |
 | `src/content/` | 站点格式页、插件页、SEO 文案 |
-| `viewer/plugin-policies.json` | 每个插件的 bundle 预算与运行时资产策略 |
+| `viewer/plugin-policies.json` | 全局 bundle / 运行时资产预算（按插件策略在各插件 `policy.json`） |
 | `scripts/` | 资产准备、门禁检查；`tools/` 自建 WASM 配方；`third_party/` 审核后的二进制产物 |
 
 # 门禁与命令
@@ -37,7 +37,7 @@
 - 新依赖锁定精确版本；不手改 `third_party/` 产物，按 `tools/` 配方重建。
 - 文档只写当前状态：不写日期化验证流水、实施过程、被否方案；插件细节写在插件 README，不另建 `docs/<plugin>.md`。
 - 用户可见文案同时提供 `en` 与 `zh-CN`。
-- 新插件的体积约束写在 `viewer/plugin-policies.json`，不要在 `scripts/check-view-bundle.mjs` 里追加针对单个插件的硬编码检查。
+- 新插件的运行时资产策略写在 `viewer/plugins/<dir>/policy.json`（全局体积预算在 `viewer/plugin-policies.json`），不要在 `scripts/check-view-bundle.mjs` 里追加针对单个插件的硬编码检查。
 - 复制粘贴超过约 50 行的逻辑到第二个插件前，先抽到共享包或子路径导出。
 
 # 项目文档阅读路由

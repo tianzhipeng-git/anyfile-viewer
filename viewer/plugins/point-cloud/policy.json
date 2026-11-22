@@ -1,0 +1,23 @@
+{
+  "runtimeSets": [
+    {
+      "id": "laz-perf",
+      "version": "0.0.7-anyfile.1",
+      "assetPatterns": [
+        "public/vendor/laz-perf/0.0.7-anyfile.1/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "laz",
+          "assetPatterns": [
+            "public/vendor/laz-perf/0.0.7-anyfile.1/laz-perf.js",
+            "public/vendor/laz-perf/0.0.7-anyfile.1/laz-perf.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ]
+    }
+  ]
+}

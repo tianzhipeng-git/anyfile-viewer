@@ -1,0 +1,24 @@
+{
+  "runtimeSets": [
+    {
+      "id": "pdfjs",
+      "version": "6.2.108",
+      "versionPackageJson": "node_modules/pdfjs-dist/package.json",
+      "assetPatterns": [
+        ".next/static/media/pdf.worker.min.*.mjs",
+        "public/vendor/pdfjs/6.2.108/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "base-worker",
+          "assetPatterns": [
+            ".next/static/media/pdf.worker.min.*.mjs"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ]
+    }
+  ]
+}
