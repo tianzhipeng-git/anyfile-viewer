@@ -22,7 +22,7 @@
 - [ ] 中 | 新增邮件查看器（`.eml` / `.msg`） | 解析 RFC 5322 MIME 与 Outlook CFBF `.msg`，展示安全清理正文与附件清单；无 Outlook 打开 `.msg` 搜索痛点极强，邮件高度隐私敏感不愿上传
 - [ ] 中 | 新增 Microsoft Access 数据库查看器（`.mdb` / `.accdb`） | `open mdb/accdb online` 与 macOS 查看 Access 搜索痛点极强（Mac/Linux 无原生软件，数据库高度机密）；基于纯 JS `mdb-reader` 读取表结构与分页数据
 - [ ] 中 | `archive-metadata-viewer` 补齐 `.7z` 归档目录查看 | 复用或抽取 `comic-book` 已有的 `comic-archive` libarchive WASM，无需新构建；macOS 与浏览器原生打不开 `.7z`，搜索需求高
-- [x] 低 | 新增 ML 模型权重头查看器（`.safetensors` / `.gguf`） | AI 开发者高频搜 `gguf/safetensors metadata viewer`，模型动辄数 GB 无法上传；纯 JS `File.slice()` 仅读文件头即可毫秒级展示架构、量化与张量形状，无新运行时。2026-11-22 待合并
+- [x] 低 | 新增 ML 模型权重头查看器（`.safetensors` / `.gguf`） | AI 开发者高频搜 `gguf/safetensors metadata viewer`，模型动辄数 GB 无法上传；纯 JS `File.slice()` 仅读文件头即可毫秒级展示架构、量化与张量形状，无新运行时。2026-11-22 d50c0cb
 - [ ] 中 | 新增网络抓包查看器（`.pcap` / `.pcapng`） | 解析包头与常见 TCP/UDP/DNS/HTTP 摘要、筛选与载荷检查；排查问题常需安装 Wireshark，流量数据极度敏感不愿上传
 - [ ] 中 | 新增地理轨迹与矢量数据查看器（`.geojson` / `.gpx` / `.kml` / `.shp`） | 纯本地 2D 坐标投影与属性表展示（不请求在线地图瓦片）；替代 QGIS / Google Earth，符合 `选格式.md` 地理数据免上传场景
 - [ ] 低 | `ffmpeg-video` 补齐 `.flv`（Flash Video）播放 | `docs/domains/videos.md` 未实施项；现有 `ffmpeg-playback` WASM 已编入 `flv` demuxer/decoder（见 `tools/ffmpeg-playback-build/evidence/configure.txt`），补有界 probe、样例与注册即可免装桌面播放器
