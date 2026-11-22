@@ -138,7 +138,7 @@ export const DJVU_VIEWER_STYLES = `
 .anyfile-djvu-viewer__page-total,
 .anyfile-djvu-viewer__zoom {
   font-size: 12px;
-  color: var(--viewer-muted-foreground, #64748b);
+  color: var(--viewer-muted, color-mix(in srgb, var(--viewer-foreground, #111) 62%, transparent));
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }

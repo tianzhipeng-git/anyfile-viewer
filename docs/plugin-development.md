@@ -21,7 +21,7 @@ viewer/plugins/<dir>/
   src/*.test.ts
 ```
 
-参考实现：简单 DOM 插件看 `har`，Worker + WASM 看 `mpp`，Canvas/视口看 `dicom`，三维看 `ifc`。
+参考实现：结构/元数据检查插件优先使用 `@anyfile/viewer-ui` Inspector UI Kit（参考 `torrent`、`ml-weights`、`har`、`dev-native-binary`），Worker + WASM 看 `mpp`，Canvas/视口看 `dicom`，三维看 `ifc`。
 
 ## 3. 接线清单
 

@@ -63,7 +63,7 @@ export function createDjvuSidebar(
   } else {
     const empty = document.createElement("p");
     empty.textContent = copy.noOutline;
-    empty.style.cssText = "margin:8px;font-size:12px;color:var(--viewer-muted-foreground,#64748b)";
+    empty.style.cssText = "margin:8px;font-size:12px;color:var(--viewer-muted,color-mix(in srgb,var(--viewer-foreground,#111) 62%,transparent))";
     outlinePanel.append(empty);
   }
 

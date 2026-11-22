@@ -305,9 +305,16 @@ export function ViewerHost({
           style={{
             "--viewer-background": "var(--background)",
             "--viewer-foreground": "var(--foreground)",
+            "--viewer-surface": "var(--muted)",
+            "--viewer-muted": "var(--muted-foreground)",
             "--viewer-border": "var(--border)",
             "--viewer-accent": "var(--primary)",
+            "--viewer-accent-foreground": "var(--primary-foreground)",
+            "--viewer-danger": "var(--destructive)",
+            "--viewer-warning": "var(--support-partial)",
+            "--viewer-success": "var(--support-strong)",
             "--viewer-font-family": "var(--font-system)",
+            "--viewer-font-mono": "var(--font-monospace)",
           } as React.CSSProperties}
         />
         {visibleStatus !== "active" && (

@@ -291,6 +291,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
       '@zip.js/zip.js':
         specifier: 2.8.60
         version: 2.8.60
@@ -444,6 +447,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -521,6 +527,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -534,6 +543,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -547,6 +559,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -751,6 +766,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -875,6 +893,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -1109,6 +1130,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*

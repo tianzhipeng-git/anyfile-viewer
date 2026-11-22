@@ -6,9 +6,10 @@
 
 宿主容器占据工作区剩余空间，使用可收缩布局和 `overflow: auto`，并继承以下主题变量：
 
-`--viewer-background`、`--viewer-foreground`、`--viewer-border`、`--viewer-accent`、`--viewer-font-family`。
+- 基础色与字体：`--viewer-background`、`--viewer-foreground`、`--viewer-surface`、`--viewer-muted`、`--viewer-border`、`--viewer-font-family`、`--viewer-font-mono`
+- 语义色：`--viewer-accent`、`--viewer-accent-foreground`、`--viewer-danger`、`--viewer-warning`、`--viewer-success`
 
-插件只能依赖容器和公开变量，不能依赖宿主 React 结构、class、固定高度或窗口尺寸。
+插件只能依赖容器和公开变量，不能依赖宿主 React 结构、class、固定高度或窗口尺寸。元数据/结构检查类插件优先复用 `@anyfile/viewer-ui` 的 Inspector UI Kit 原语与 `viewerTheme` 变量，避免手写重复壳层和硬编码浅色背景。
 
 - 每次打开创建独立根节点，只修改自己拥有的节点；不修改、替换或移除宿主容器，不修改 `body` / `html`。
 - class、动画名和自定义属性使用插件或共享组件前缀，CSS 选择器限定在根节点内。
@@ -83,8 +84,8 @@
 
 ## 5. 主题与可访问性
 
-- 使用宿主主题变量并提供回退值，样式不覆盖宿主颜色方案、字体或焦点。
-- 次要/弱化色从宿主 CSS 变量派生（如 `color-mix(in srgb, var(--viewer-foreground, #111) ...)`），禁止把硬编码颜色写在 `@media (prefers-color-scheme: dark)` 中，避免宿主手动切换主题时对比度失配。
+- 使用宿主主题变量并提供回退值（优先通过 `@anyfile/viewer-ui` 的 `viewerTheme`），样式不覆盖宿主颜色方案、字体或焦点。
+- 表面色与弱化色优先使用 `--viewer-surface` / `--viewer-muted`，语义色使用 `--viewer-accent` / `--viewer-danger` / `--viewer-warning` / `--viewer-success` 并用 `color-mix()` 派生浅底，禁止在样式中硬编码浅色表面（如 `#f1f5f9`、`#fffbeb`）或把颜色写在 `@media (prefers-color-scheme: dark)` 中，避免宿主手动切换主题时对比度失配。
 - 用户可见文案、标题和 ARIA 使用 `context.locale`；长标签可截断，但保留完整可访问描述。
 - 按钮、选择器、交互画布支持键盘并具有名称，保留可见焦点，不禁用浏览器页面缩放。
 - 加载状态使用 `role="status"`，错误按场景使用 `role="alert"`，避免高频进度反复打断读屏。
