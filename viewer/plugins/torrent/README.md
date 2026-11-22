@@ -5,13 +5,13 @@
 - **插件 ID**：`bittorrent-metadata`
 - **格式入口**：`.torrent`
 
-查看 BitTorrent 种子（metainfo）的共享文件清单与大小、Tracker 与 Web 种子、分块大小、创建信息，以及由 `info` 字典原始字节计算的 SHA-1 InfoHash。不连接任何节点，也不下载内容。
+查看 BitTorrent 种子（metainfo，支持 v1 与 BEP 52 v2）的共享文件清单与大小、Tracker 与 Web 种子、分块大小、创建信息，以及由 `info` 字典原始字节计算的 InfoHash（v1 为 SHA-1，v2-only 为 SHA-256）。不连接任何节点，也不下载内容。
 
 ## 实现原理
 
 1. 以可取消的文件流读取整个种子文件（上限 32 MiB）。
 2. 自研 Bencode 解码器（`src/bencode.ts`）解析整数、字节串、列表与字典，限制嵌套深度，记录顶层 `info` 字典的原始字节区间。
-3. `src/parse.ts` 将解码结果映射为展示模型：文件树、多级 `announce-list` 与 `url-list`、分块数等，并用 WebCrypto 对 `info` 原始字节做 SHA-1 得到 InfoHash。
+3. `src/parse.ts` 将解码结果映射为展示模型：v1 文件列表或 v2 `file tree`、多级 `announce-list` 与 `url-list`、分块数等，并用 WebCrypto 对 `info` 原始字节计算 SHA-1（v1）/ SHA-256（v2-only）得到 InfoHash。
 4. `src/ui.ts` 用原生 DOM 渲染元数据区与可筛选、可按大小排序的文件表，全部文本以 `textContent` 写入。
 
 ## 依赖

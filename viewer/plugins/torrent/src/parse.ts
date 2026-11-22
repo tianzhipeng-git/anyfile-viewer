@@ -59,6 +59,26 @@ function webSeeds(info: Record<string, BencodeValue>): string[] {
   return urls;
 }
 
+function walkFileTree(node: Record<string, BencodeValue>, prefix: string[], out: TorrentFile[]): void {
+  for (const [segment, child] of Object.entries(node)) {
+    if (!isDictionary(child)) continue;
+    if (segment === "") {
+      const length = numberValue(child.length);
+      if (length !== undefined && prefix.length > 0) {
+        out.push({ path: prefix.join("/"), length: Math.max(0, length) });
+      }
+      continue;
+    }
+    walkFileTree(child, [...prefix, segment], out);
+  }
+}
+
+function isV2OnlyInfo(info: Record<string, BencodeValue>): boolean {
+  return numberValue(info["meta version"]) === 2
+    && !Array.isArray(info.files)
+    && numberValue(info.length) === undefined;
+}
+
 function files(info: Record<string, BencodeValue>): TorrentFile[] {
   const list = info.files;
   if (Array.isArray(list)) {
@@ -69,17 +89,25 @@ function files(info: Record<string, BencodeValue>): TorrentFile[] {
       return [{ path: pathParts.join("/"), length: Math.max(0, numberValue(entry.length) ?? 0) }];
     });
   }
-  // Single-file torrent: `length` sits at the info root and `name` is the file name.
+  // Single-file v1 torrent: `length` sits at the info root and `name` is the file name.
   const length = numberValue(info.length);
   const name = safeText(info.name);
-  return length !== undefined && name ? [{ path: name, length: Math.max(0, length) }] : [];
+  if (length !== undefined && name) return [{ path: name, length: Math.max(0, length) }];
+  // BEP 52 v2 torrent: files are stored in nested `file tree` dictionaries.
+  const fileTree = info["file tree"];
+  if (isDictionary(fileTree)) {
+    const result: TorrentFile[] = [];
+    walkFileTree(fileTree, [], result);
+    return result;
+  }
+  return [];
 }
 
-async function sha1Hex(bytes: Uint8Array): Promise<string | undefined> {
+async function digestHex(bytes: Uint8Array, algorithm: "SHA-1" | "SHA-256"): Promise<string | undefined> {
   const subtle = globalThis.crypto?.subtle;
   if (!subtle || bytes.length === 0) return undefined;
   try {
-    const digest = await subtle.digest("SHA-1", bytes.slice().buffer as ArrayBuffer);
+    const digest = await subtle.digest(algorithm, bytes.slice().buffer as ArrayBuffer);
     return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
   } catch {
     return undefined;
@@ -92,6 +120,9 @@ function toDocument(root: BencodeValue, infoHash?: string): TorrentDocument {
   if (!isDictionary(info)) throw new Error("Torrent has no info dictionary");
   const name = safeText(info.name);
   if (!name) throw new Error("Torrent info has no name");
+  if (isV2OnlyInfo(info) && !isDictionary(info["file tree"])) {
+    throw new Error("BitTorrent v2 info dictionary is missing file tree");
+  }
 
   const fileList = files(info);
   const totalSize = fileList.reduce((sum, file) => sum + file.length, 0);
@@ -173,7 +204,9 @@ export async function readTorrent(
   }
 
   const infoBytes = decoded.span ? bytes.subarray(decoded.span.start, decoded.span.end) : undefined;
-  const infoHash = infoBytes ? await sha1Hex(infoBytes) : undefined;
+  const infoNode = isDictionary(decoded.value) && isDictionary(decoded.value.info) ? decoded.value.info : undefined;
+  const hashAlgorithm = infoNode && isV2OnlyInfo(infoNode) ? "SHA-256" : "SHA-1";
+  const infoHash = infoBytes ? await digestHex(infoBytes, hashAlgorithm) : undefined;
   if (signal.aborted) throw abortError();
 
   try {

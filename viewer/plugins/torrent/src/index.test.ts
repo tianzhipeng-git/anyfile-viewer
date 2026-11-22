@@ -81,6 +81,24 @@ describe("torrent parser", () => {
     await expect(readTorrent(oversized, new AbortController().signal, () => {}))
       .rejects.toMatchObject({ code: "resource-limit" });
   });
+
+  it("parses BEP 52 v2-only torrents using file tree and SHA-256 infohash", async () => {
+    const infoRaw = "d9:file treed4:dir1d5:a.txtd0:d6:lengthi128eeee5:b.bind0:d6:lengthi64eeee12:meta versioni2e4:name7:v2-demo12:piece lengthi16384ee";
+    const v2Torrent = `d4:info${infoRaw}e`;
+    const expectedDigest = await globalThis.crypto.subtle.digest("SHA-256", encode(infoRaw).slice().buffer as ArrayBuffer);
+    const expectedHash = [...new Uint8Array(expectedDigest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+
+    const doc = await readTorrent(new File([v2Torrent], "v2.torrent"), new AbortController().signal, () => {}, "en");
+    expect(doc.name).toBe("v2-demo");
+    expect(doc.files).toEqual([
+      { path: "dir1/a.txt", length: 128 },
+      { path: "b.bin", length: 64 },
+    ]);
+    expect(doc.totalSize).toBe(192);
+    expect(doc.pieceLength).toBe(16384);
+    expect(doc.infoHash).toBe(expectedHash);
+    expect(doc.infoHash).toMatch(/^[0-9a-f]{64}$/);
+  });
 });
 
 describe("BitTorrent viewer", () => {

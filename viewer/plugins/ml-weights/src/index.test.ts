@@ -107,6 +107,16 @@ describe("ml-weights parser", () => {
     expect(parseGgufStruct(view, true, GGUF_SAMPLE.length).tensorCount).toBe(48);
     // Claiming the tensor data extends past the file must be rejected.
     expect(() => parseGgufStruct(view, true, 1000)).toThrow();
+
+    // Safetensors file truncated after a valid header must be rejected when offsets exceed payload size.
+    const headerJson = new TextEncoder().encode(JSON.stringify({
+      weight: { dtype: "F32", shape: [4], data_offsets: [0, 16] },
+    }));
+    const truncatedSt = new Uint8Array(8 + headerJson.length + 15); // 1 byte short of 16-byte payload
+    new DataView(truncatedSt.buffer).setBigUint64(0, BigInt(headerJson.length), true);
+    truncatedSt.set(headerJson, 8);
+    await expect(readModel(new File([truncatedSt.buffer as ArrayBuffer], "truncated.safetensors"), new AbortController().signal, () => {}, "en"))
+      .rejects.toMatchObject({ code: "invalid-file", message: expect.stringContaining("invalid data offsets") });
   });
 
   it("accepts valid GGUF files whose metadata is larger than tensor data", () => {

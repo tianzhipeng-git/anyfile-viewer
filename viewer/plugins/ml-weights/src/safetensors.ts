@@ -84,6 +84,7 @@ export function parseSafetensorsHeader(
   }
 
   const header = json as Record<string, HeaderEntry & { format?: unknown }>;
+  const payloadSize = fileSize - 8 - headerLength;
   const metadata: { key: string; value: string }[] = [];
   const tensors: ModelTensor[] = [];
   let totalParameters = 0;
@@ -101,7 +102,7 @@ export function parseSafetensorsHeader(
     if (!dtype) throw new ViewerError("invalid-file", copy.missingDtype(name));
     if (!isUintArray(entry.shape)) throw new ViewerError("invalid-file", copy.invalidShape(name));
     const offsets = entry.data_offsets;
-    if (!isUintArray(offsets) || offsets.length !== 2 || offsets[0] > offsets[1]) {
+    if (!isUintArray(offsets) || offsets.length !== 2 || offsets[0] > offsets[1] || offsets[1] > payloadSize) {
       throw new ViewerError("invalid-file", copy.invalidOffsets(name));
     }
 
