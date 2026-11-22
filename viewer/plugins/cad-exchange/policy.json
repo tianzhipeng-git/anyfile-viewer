@@ -1,0 +1,35 @@
+{
+  "runtimeSets": [
+    {
+      "id": "occt-import-js",
+      "version": "0.0.23-anyfile.1",
+      "assetPatterns": [
+        "public/vendor/occt-import-js/0.0.23-anyfile.1/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "cad-import",
+          "assetPatterns": [
+            "public/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.js",
+            "public/vendor/occt-import-js/0.0.23-anyfile.1/occt-import-js.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "r2",
+        "same-origin"
+      ],
+      "implementationFiles": [
+        "viewer/plugins/cad-exchange/src/runtime.ts",
+        "viewer/plugins/cad-exchange/src/worker-client.ts"
+      ],
+      "requiredMarkers": [
+        "0.0.23-anyfile.1",
+        "https://assets.anyfile.top/vendor/occt-import-js/",
+        "`/vendor/occt-import-js/",
+        "initializeRuntimeFromSources",
+        "OCCT_ASSET_SOURCES"
+      ]
+    }
+  ]
+}

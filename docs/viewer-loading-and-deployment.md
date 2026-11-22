@@ -20,7 +20,7 @@
 - 页面字典按 locale 在服务端加载，插件文案随完整实现加载；Server → Client props 可序列化，本地 `File` / handle 保留在客户端。
 - SSG/SSR 只生成外壳，不读取用户文件，也不在服务端初始化浏览器运行时。
 
-新增插件须更新 [注册表](../src/lib/viewer-registrations.ts)和[资产策略](../viewer/plugin-policies.json)。没有独立运行时资产也要显式声明空 `runtimeSets`。注册顺序仅用于同等级排序，不能替代内容 probe。
+新增插件须更新[注册表](../src/lib/viewer-registrations.ts)（对应领域 `src/lib/registrations/*.ts`）并在插件目录提供 `policy.json`。没有独立运行时资产也要显式声明空 `runtimeSets`。全局体积预算维护在 [plugin-policies.json](../viewer/plugin-policies.json)。注册顺序仅用于同等级排序，不能替代内容 probe。
 
 ## 2. 资产来源与准备
 
@@ -36,7 +36,7 @@
 
 许可证原件位于 `licenses/` 或 `third_party/`，prepare 同时复制需要公开分发的材料。可从 npm 恢复的二进制不重复提交到 `third_party/`。
 
-精确版本、资源模式、冷启动集合和来源顺序统一维护在 [plugin-policies.json](../viewer/plugin-policies.json)，不在本文另存一张容易过时的版本与体积表。格式专属初始化与许可细节保留在对应 runtime、构建配方及领域架构中。
+精确版本、资源模式、冷启动集合和来源顺序统一维护在各插件目录的 `policy.json`（全局预算见 [plugin-policies.json](../viewer/plugin-policies.json)），不在本文另存一张容易过时的版本与体积表。格式专属初始化与许可细节保留在对应 runtime、构建配方及领域架构中。
 
 ## 3. 分发与初始化回退
 

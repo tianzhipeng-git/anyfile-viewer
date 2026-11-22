@@ -65,8 +65,8 @@ const pages: Record<SiteInfoSlug, SiteInfoPage> = {
       {
         title: text("Website and performance data", "网站与性能数据"),
         paragraphs: [text(
-          "Like most websites, the hosting infrastructure receives ordinary request data such as IP address, browser information and requested pages. Anyfile uses Vercel Speed Insights for page performance. With your permission, Google Analytics 4 uses analytics cookies to measure visits, referral origins, task entries, file formats, size ranges, preview results and timing. We do not send file names, contents, local paths, raw errors or full remote file URLs. You can decline or change your choice using Analytics preferences in the footer.",
-          "与大多数网站一样，托管基础设施会接收 IP 地址、浏览器信息和所请求页面等常规访问数据。Anyfile 使用 Vercel Speed Insights 了解页面性能。经你同意后，Google Analytics 4 使用分析 Cookie 衡量访问、引荐来源、任务入口、文件格式、大小区间、预览结果和耗时；不发送文件名、内容、本地路径、原始错误或完整远端文件 URL。你可拒绝分析，也可随时通过页脚的“分析偏好”修改选择。",
+          "Like most websites, the hosting infrastructure receives ordinary request data such as IP address, browser information and requested pages. Anyfile uses Vercel Speed Insights for page performance. Google Analytics 4 is enabled by default using analytics cookies to measure visits, referral origins, task entries, file formats, size ranges, preview results and timing. We do not send file names, contents, local paths, raw errors or full remote file URLs. You can opt out of analytics at any time using the control on this page.",
+          "与大多数网站一样，托管基础设施会接收 IP 地址、浏览器信息和所请求页面等常规访问数据。Anyfile 使用 Vercel Speed Insights 了解页面性能。Anyfile 默认启用 Google Analytics 4 并使用分析 Cookie 衡量访问、引荐来源、任务入口、文件格式、大小区间、预览结果和耗时；不发送文件名、内容、本地路径、原始错误或完整远端文件 URL。你可随时通过本页下方的选项停用分析。",
         )],
       },
       {

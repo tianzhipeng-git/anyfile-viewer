@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Code2Icon, MailIcon } from "lucide-react";
 
+import { AnalyticsOptOut } from "@/components/google-analytics";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { SITE_INFO_SLUGS, getSiteInfoPage, isSiteInfoSlug } from "@/content/site-info";
 import { isPublishedLocale, localePath } from "@/i18n/config";
@@ -52,6 +53,7 @@ export default async function SiteInfoPage({ params }: { params: Promise<{ local
               </div>
             </section>
           ))}
+          {info === "privacy" && <AnalyticsOptOut locale={locale} />}
         </div>
         <div className="flex flex-wrap gap-3">
           <a className="inline-flex items-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold transition-colors hover:border-primary hover:text-primary" href="mailto:support@anyfile.top">

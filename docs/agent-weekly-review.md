@@ -19,7 +19,7 @@ git diff --stat origin/main...dev | tail -1  # 改动规模
 ```bash
 R=origin/main...dev
 git diff $R -- scripts/check-repo.mjs scripts/check-*.mjs vitest.config.mts eslint.config.mjs tsconfig.json .github/
-git diff $R -- viewer/plugin-policies.json          # 预算是否被调高
+git diff $R -- viewer/plugin-policies.json 'viewer/plugins/*/policy.json'  # 预算是否被调高或新增例外
 git diff $R --diff-filter=D --name-only -- '*.test.ts'  # 删除的测试
 git diff $R | grep -nE '^\+.*\b(it|describe|test)\.(skip|only|todo)\b|eslint-disable|@ts-(ignore|expect-error)|as any'
 ```
@@ -75,6 +75,9 @@ git diff $R --stat -- third_party/ tools/ THIRD_PARTY_NOTICES.md licenses/
 
 ## 9. 合并与上线
 
-1. 在 GitHub 从 `dev` 向 `main` 提 PR，描述中附本周摘要和第 2–8 节结论，等待 `check`、`build` 通过后使用 `Create a merge commit` 合并（不要使用 Squash merge，以保持 `dev` 与 `main` 历史对齐且可干净 revert）。
-2. Vercel 部署完成后，在线上打开几个本周涉及的格式页和查看页做冒烟；运行时资产从 R2/jsDelivr 加载的插件确认能初始化。
-3. 线上出问题时，在 GitHub 上 revert 合并提交恢复 `main`，修复在 `dev` 上进行。
+1. 用 `gh pr create --base main --head dev` 创建 PR，描述中附本周摘要与第 2–8 节结论。
+2. 用 `gh pr checks <pr> --watch` 等待 `check`、`build` 全部通过。
+3. 用 `gh api repos/{owner}/{repo}/pulls/<pr>/comments` 与 `.../reviews` 拉取自动/人工 PR 评论（如 `chatgpt-codex-connector[bot]`），逐条批判性评估；有效问题直接在 `dev` 修复、验证并推送，直至 CI 全绿且无未处理的有效建议。
+4. 用 `gh pr merge <pr> --merge` 合并（`Create a merge commit`，不要 Squash merge，也不要删除 `dev` 分支，以保持 `dev` 与 `main` 历史对齐且可干净 revert）。
+5. Vercel 部署完成后，在线上对本周新增格式页、插件页和查看页做冒烟，确认 R2/jsDelivr 运行时资产可正常加载。
+6. 线上出问题时，在 GitHub 上 revert 合并提交恢复 `main`，修复在 `dev` 上进行。

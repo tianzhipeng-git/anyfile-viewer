@@ -42,6 +42,7 @@
 | 包 | 用途 |
 |---|---|
 | `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `@anyfile/viewer-ui` | 共享 Inspector UI Kit 原语与宿主主题变量 |
 | `@zip.js/zip.js@2.8.60` | ZIP 目录读取与所需条目解压 |
 
 TAR 与各压缩包装格式的解析为项目内自研；gzip TAR 扫描使用浏览器 `DecompressionStream`。此外，本包向电子书插件导出受限的归档读取工具，这些工具的解压用途与本插件元数据界面分开。

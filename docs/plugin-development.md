@@ -13,6 +13,7 @@
 ```
 viewer/plugins/<dir>/
   package.json        # name @anyfile/<x>-viewer；exports: ".", "./manifest", "./probe"（如有）
+  policy.json         # 声明 runtimeSets（无独立运行时资产时写 {"runtimeSets": []}）
   README.md           # 当前能力、实现、依赖、限制、验证命令；不写日期和验证流水
   examples/           # 真实样例 + README.md（来源、许可证、每个文件的用途）
   src/manifest.ts     # 纯数据，只能导入 @anyfile/viewer-protocol 和本地纯数据
@@ -21,20 +22,20 @@ viewer/plugins/<dir>/
   src/*.test.ts
 ```
 
-参考实现：简单 DOM 插件看 `har`，Worker + WASM 看 `mpp`，Canvas/视口看 `dicom`，三维看 `ifc`。
+参考实现：结构/元数据检查插件优先使用 `@anyfile/viewer-ui` Inspector UI Kit（参考 `torrent`、`ml-weights`、`har`、`dev-native-binary`），Worker + WASM 看 `mpp`，Canvas/视口看 `dicom`，三维看 `ifc`。
 
 ## 3. 接线清单
 
 | 位置 | 内容 | 门禁 |
 |---|---|---|
+| `viewer/plugins/<dir>/policy.json` | 声明 `runtimeSets`（无运行时资产写 `[]`） | check:repo、build |
 | 根 `package.json` | `"@anyfile/<x>": "workspace:*"`，然后 `pnpm install` | check:repo |
-| `src/lib/viewer-registrations.ts` | 导入 Manifest，按路由优先级插入注册项 | check:repo |
-| `src/lib/viewer-protocol.test.ts` | 有 probe 时更新 probe 顺序断言，补路由用例 | test |
-| `viewer/plugin-policies.json` | 插件条目；有运行时资产时写 `runtimeSets` | check:repo、build |
+| `src/lib/registrations/<domain>.ts` | 导入 Manifest，按领域和路由优先级插入注册项（总入口 `src/lib/viewer-registrations.ts`） | check:repo |
+| `src/lib/viewer-routing/<domain>.test.ts` | 补充该领域路由用例（`registry.test.ts` 自动校验 `./probe` 接线） | test |
 | `src/content/manifests.ts`、`src/content/plugins.ts`、`src/content/formats/` | 站点插件页与格式页（中英文） | test |
-| `src/components/file-type-icon.tsx` | 文件树语义分类 | test |
+| `src/components/file-type-icon.tsx` | 将插件 ID 加入对应文件树语义分类 | test |
 | `scripts/prepare-*-assets.mjs`、`THIRD_PARTY_NOTICES.md` | 仅有运行时资产时 | build |
-| 领域支持矩阵（如 `docs/3d/support-matrix.md`） | 新格式的等级与验证状态 | 人工 |
+| 领域架构与支持矩阵（`docs/domains/*.md`，如 `docs/domains/3d.md`） | 新格式的等级与验证状态 | 人工 |
 
 ## 4. 真实样例
 

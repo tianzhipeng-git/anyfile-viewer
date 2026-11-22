@@ -99,11 +99,11 @@ pnpm test viewer/plugins/pdf
 | `src/app/[locale]/` | 多语言页面：首页、分类、格式、插件详情与查看器工作区 |
 | `src/components/` | 网站外壳与文件工作区 |
 | `src/content/` | 格式目录与双语页面内容 |
-| `src/lib/viewer-registrations.ts` | 插件注册与动态加载 |
-| `viewer/plugins/` | 各格式查看器 |
+| `src/lib/viewer-registrations.ts`、`src/lib/registrations/` | 按领域拆分的插件注册与动态加载 |
+| `viewer/plugins/` | 各格式查看器与单插件 `policy.json` |
 | `viewer/protocol/` | 宿主与插件的接口及校验 |
 | `viewer/ui/`、`viewer/rendering*/` | 共享 UI 与渲染基础设施 |
-| `viewer/runtime-assets/`、`viewer/plugin-policies.json` | 运行时资源加载与策略 |
+| `viewer/runtime-assets/`、`viewer/plugin-policies.json` | 运行时资源加载与全局预算 |
 | `tools/`、`third_party/` | 源码构建配方与经审核的第三方产物 |
 | `services/feedback/` | 可选反馈后端 |
 

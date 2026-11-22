@@ -1,8 +1,19 @@
 import { selectMessages, type Locale } from "@anyfile/viewer-protocol";
+import {
+  createBadge,
+  createDataTable,
+  createFilterInput,
+  createInspectorShell,
+  createKeyValueList,
+  createNotice,
+  createPager,
+  createSection,
+  el,
+  viewerTheme,
+} from "@anyfile/viewer-ui";
 
 import { formatBytes } from "../binary";
 import type { ArchiveEntry, ArchiveMetadata } from "../types";
-import { archiveViewerStyles } from "./styles";
 
 const PAGE_SIZE = 100;
 export const ARCHIVE_VIEWER_BUILD_MARKER = "__anyfile_archive_metadata_viewer_v1__";
@@ -36,28 +47,15 @@ function copyFor(locale: Locale): Copy {
       permissions: "Permissions", link: "Link", comment: "Comment",
     },
     "zh-CN": {
-    metadata: "容器元数据", entries: "条目列表", filter: "按路径过滤",
-    previous: "上一页", next: "下一页", noMatches: "没有匹配的条目。",
-    columns: ["路径", "类型", "原始大小", "压缩后大小", "修改时间", "方法"],
-    dangerous: "危险路径", encrypted: "已加密",
-    suspiciousCompression: "异常压缩比",
-    kind: { archive: "归档目录", wrapper: "压缩包装层", bare: "裸压缩流" },
-    permissions: "权限", link: "链接", comment: "注释",
+      metadata: "容器元数据", entries: "条目列表", filter: "按路径过滤",
+      previous: "上一页", next: "下一页", noMatches: "没有匹配的条目。",
+      columns: ["路径", "类型", "原始大小", "压缩后大小", "修改时间", "方法"],
+      dangerous: "危险路径", encrypted: "已加密",
+      suspiciousCompression: "异常压缩比",
+      kind: { archive: "归档目录", wrapper: "压缩包装层", bare: "裸压缩流" },
+      permissions: "权限", link: "链接", comment: "注释",
     },
   });
-}
-
-function element<K extends keyof HTMLElementTagNameMap>(tag: K, className?: string) {
-  const value = document.createElement(tag);
-  if (className) value.className = className;
-  return value;
-}
-
-function addText(parent: HTMLElement, tag: keyof HTMLElementTagNameMap, value: string, className?: string) {
-  const child = element(tag, className);
-  child.textContent = value;
-  parent.append(child);
-  return child;
 }
 
 function extraMetadata(entry: ArchiveEntry, copy: Copy): string {
@@ -80,27 +78,24 @@ function englishArchiveText(value: string | undefined, fallback: string): string
 
 type ArchiveText = (value: string | undefined, fallback: string) => string;
 
-function renderRows(body: HTMLTableSectionElement, entries: readonly ArchiveEntry[], copy: Copy, locale: Locale, archiveText: ArchiveText) {
-  body.replaceChildren();
-  for (const entry of entries) {
-    const row = element("tr");
-    const pathCell = element("td", "anyfile-archive-viewer__path");
-    addText(pathCell, "span", entry.path);
-    if (entry.dangerousPath) addText(pathCell, "span", copy.dangerous, "anyfile-archive-viewer__badge");
-    if (entry.encrypted) addText(pathCell, "span", copy.encrypted, "anyfile-archive-viewer__badge");
-    if (entry.suspiciousCompression) addText(pathCell, "span", copy.suspiciousCompression, "anyfile-archive-viewer__badge");
-    const extra = extraMetadata(entry, copy);
-    if (extra) addText(pathCell, "span", extra, "anyfile-archive-viewer__entry-meta");
-    row.append(pathCell);
-    for (const value of [
-      archiveText(entry.type, "Entry"),
-      entry.size === undefined ? "—" : formatBytes(entry.size),
-      entry.compressedSize === undefined ? "—" : formatBytes(entry.compressedSize),
-      entry.modified && !Number.isNaN(entry.modified.getTime()) ? entry.modified.toLocaleString(locale) : "—",
-      archiveText(entry.method, "Other"),
-    ]) addText(row, "td", value);
-    body.append(row);
-  }
+const extraStyles = `
+  .anyfile-archive-viewer__controls { display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px; }
+  .anyfile-archive-viewer__path { max-width:420px; overflow-wrap:anywhere; }
+  .anyfile-archive-viewer__flags { display:inline-flex; flex-wrap:wrap; gap:4px; margin-inline-start:6px; vertical-align:middle; }
+  .anyfile-archive-viewer__entry-meta { display:block; margin-top:3px; color:${viewerTheme.muted}; font-size:11px; }
+  .anyfile-archive-viewer__table { min-width:760px; }
+`;
+
+function buildPathCell(entry: ArchiveEntry, copy: Copy): HTMLDivElement {
+  const cell = el("div", "anyfile-archive-viewer__path", el("span", undefined, entry.path));
+  const flags: HTMLSpanElement[] = [];
+  if (entry.dangerousPath) flags.push(createBadge(copy.dangerous, "danger"));
+  if (entry.encrypted) flags.push(createBadge(copy.encrypted, "warning"));
+  if (entry.suspiciousCompression) flags.push(createBadge(copy.suspiciousCompression, "danger"));
+  if (flags.length > 0) cell.append(el("span", "anyfile-archive-viewer__flags", ...flags));
+  const extra = extraMetadata(entry, copy);
+  if (extra) cell.append(el("span", "anyfile-archive-viewer__entry-meta", extra));
+  return cell;
 }
 
 export function createArchiveView(fileName: string, metadata: ArchiveMetadata, locale: Locale) {
@@ -109,98 +104,96 @@ export function createArchiveView(fileName: string, metadata: ArchiveMetadata, l
     en: englishArchiveText,
     "zh-CN": (value, fallback) => value ?? fallback,
   });
-  const root = element("div", "anyfile-archive-viewer");
-  root.dataset.archiveViewerBuild = ARCHIVE_VIEWER_BUILD_MARKER;
-  const style = element("style");
-  style.textContent = archiveViewerStyles;
-  const header = element("header", "anyfile-archive-viewer__header");
-  const title = element("div", "anyfile-archive-viewer__title");
-  const name = addText(title, "strong", fileName);
-  name.title = fileName;
-  addText(title, "span", `${metadata.format} · ${archiveText(metadata.detectedBy, "Identified from the file signature and extension")}`);
-  addText(header, "span", copy.kind[metadata.kind], "anyfile-archive-viewer__kind");
-  header.prepend(title);
 
-  const metadataSection = element("section", "anyfile-archive-viewer__section");
-  addText(metadataSection, "h2", copy.metadata);
-  const fields = element("dl", "anyfile-archive-viewer__fields");
-  for (const field of metadata.fields) {
-    const item = element("div", "anyfile-archive-viewer__field");
-    addText(item, "dt", archiveText(field.label, "Metadata"));
-    addText(item, "dd", archiveText(field.value, "Available"));
-    fields.append(item);
+  const shell = createInspectorShell({
+    className: "anyfile-archive-viewer",
+    title: fileName,
+    subtitle: `${metadata.format} · ${archiveText(metadata.detectedBy, "Identified from the file signature and extension")}`,
+    badges: [{ text: copy.kind[metadata.kind], tone: "accent" }],
+    extraStyles,
+  });
+  shell.root.dataset.archiveViewerBuild = ARCHIVE_VIEWER_BUILD_MARKER;
+
+  shell.viewport.append(createSection(
+    copy.metadata,
+    createKeyValueList(
+      metadata.fields.map((field) => ({
+        label: archiveText(field.label, "Metadata"),
+        value: archiveText(field.value, "Available"),
+      })),
+      { variant: "cards" },
+    ),
+  ));
+
+  if (metadata.limitation) {
+    shell.viewport.append(createNotice(
+      archiveText(metadata.limitation, "Some archive metadata cannot be displayed."),
+      "warning",
+    ));
   }
-  metadataSection.append(fields);
-  root.append(style, header, metadataSection);
-  if (metadata.limitation) addText(root, "p", archiveText(metadata.limitation, "Some archive metadata cannot be displayed."), "anyfile-archive-viewer__notice");
 
   if (metadata.entries) {
-    const section = element("section", "anyfile-archive-viewer__section");
-    addText(section, "h2", copy.entries);
-    const controls = element("div", "anyfile-archive-viewer__controls");
-    const filter = element("input");
-    filter.type = "search";
-    filter.placeholder = copy.filter;
-    filter.setAttribute("aria-label", copy.filter);
-    filter.dataset.archiveFilter = "";
-    const previous = element("button");
-    previous.type = "button";
-    previous.textContent = copy.previous;
-    previous.dataset.previous = "";
-    const next = element("button");
-    next.type = "button";
-    next.textContent = copy.next;
-    next.dataset.next = "";
-    const pageMeta = addText(controls, "span", "", "anyfile-archive-viewer__muted");
-    pageMeta.dataset.meta = "";
-    controls.prepend(filter, previous, next);
-    const table = element("table", "anyfile-archive-viewer__table");
-    const head = element("thead");
-    const headRow = element("tr");
-    for (const column of copy.columns) {
-      const headerCell = addText(headRow, "th", column) as HTMLTableCellElement;
-      headerCell.scope = "col";
-    }
-    head.append(headRow);
-    const body = element("tbody");
-    table.append(head, body);
-    const empty = addText(section, "p", copy.noMatches, "anyfile-archive-viewer__empty");
-    let filtered = metadata.entries;
+    const allEntries = metadata.entries;
+    let filtered: readonly ArchiveEntry[] = allEntries;
     let pageIndex = 0;
+
+    const table = createDataTable({
+      className: "anyfile-archive-viewer__table",
+      columns: copy.columns.map((label, index) => ({
+        label,
+        align: index === 2 || index === 3 ? "end" : "start",
+        mono: index === 2 || index === 3,
+        nowrap: index !== 0,
+      })),
+      bordered: true,
+      stickyHeader: false,
+    });
+    const empty = el("p", "anyfile-inspector__empty", copy.noMatches);
+
+    const pager = createPager({
+      previousLabel: copy.previous,
+      nextLabel: copy.next,
+      onPageChange: (nextPage) => {
+        pageIndex = nextPage;
+        render();
+      },
+    });
+
     const render = () => {
       const start = pageIndex * PAGE_SIZE;
       const page = filtered.slice(start, start + PAGE_SIZE);
-      renderRows(body, page, copy, locale, archiveText);
-      table.hidden = page.length === 0;
+      table.setRows(page.map((entry) => [
+        buildPathCell(entry, copy),
+        archiveText(entry.type, "Entry"),
+        entry.size === undefined ? "—" : formatBytes(entry.size),
+        entry.compressedSize === undefined ? "—" : formatBytes(entry.compressedSize),
+        entry.modified && !Number.isNaN(entry.modified.getTime()) ? entry.modified.toLocaleString(locale) : "—",
+        archiveText(entry.method, "Other"),
+      ]));
+      table.table.hidden = page.length === 0;
       empty.hidden = page.length !== 0;
-      previous.disabled = pageIndex === 0;
-      next.disabled = start + PAGE_SIZE >= filtered.length;
-      pageMeta.textContent = filtered.length === 0 ? "0" : `${start + 1}–${start + page.length} / ${filtered.length}`;
+      pager.update({ page: pageIndex, pageSize: PAGE_SIZE, total: filtered.length });
     };
-    const onFilter = () => {
-      const query = filter.value.toLocaleLowerCase();
-      filtered = query ? metadata.entries!.filter((entry) => entry.path.toLocaleLowerCase().includes(query)) : metadata.entries!;
-      pageIndex = 0;
-      render();
-    };
-    const onPrevious = () => { pageIndex -= 1; render(); };
-    const onNext = () => { pageIndex += 1; render(); };
-    filter.addEventListener("input", onFilter);
-    previous.addEventListener("click", onPrevious);
-    next.addEventListener("click", onNext);
-    section.append(controls, table, empty);
-    root.append(section);
-    render();
-    return {
-      root,
-      dispose() {
-        filter.removeEventListener("input", onFilter);
-        previous.removeEventListener("click", onPrevious);
-        next.removeEventListener("click", onNext);
-        root.remove();
+
+    const filter = createFilterInput({
+      placeholder: copy.filter,
+      dataset: { archiveFilter: "" },
+      onInput: (query) => {
+        filtered = query ? allEntries.filter((entry) => entry.path.toLocaleLowerCase().includes(query)) : allEntries;
+        pageIndex = 0;
+        render();
       },
-    };
+    });
+
+    const controls = el("div", "anyfile-archive-viewer__controls", filter.input, pager.element);
+    shell.viewport.append(createSection(copy.entries, [controls, table.element, empty]));
+    shell.onDispose(() => {
+      filter.dispose();
+      pager.dispose();
+      table.dispose();
+    });
+    render();
   }
 
-  return { root, dispose() { root.remove(); } };
+  return { root: shell.root, dispose: () => shell.dispose() };
 }

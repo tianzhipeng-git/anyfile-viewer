@@ -11,4 +11,4 @@ Expand only these three structural table wrappers into their child record ranges
 Upstream: https://github.com/iamahsanmehmood/openskp (MIT).
 Remove this patch when an upstream release processes definition tables with equivalent bounded tree lifetime; verify the VFF regression and the opt-in large local model before upgrading. Tests also retain legacy v17 samples.
 
-The private regression model is not redistributed. Measurements and the invocation are recorded in `docs/3d/support-matrix.md`.
+The private regression model is not redistributed. Budget notes and the regression test invocation (`SKP_TEST_FILE`) are recorded in `docs/domains/3d.md` and `viewer/plugins/mesh-3d/README.md`.

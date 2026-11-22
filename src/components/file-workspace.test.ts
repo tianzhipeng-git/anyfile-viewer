@@ -63,3 +63,39 @@ it("keeps local file selection out of compact embeds", async () => {
   expect(container.querySelector('input[type="file"]')).toBeNull();
   expect(Array.from(container.querySelectorAll("button")).some((button) => button.textContent === english.workspace.chooseLocalFile)).toBe(false);
 });
+
+it("opens files delivered through the PWA File Handling launchQueue", async () => {
+  let consumer: LaunchConsumer | undefined;
+  window.launchQueue = {
+    setConsumer(next) {
+      consumer = next;
+    },
+  };
+  await act(async () => root.render(createElement(FileWorkspace, { locale: "en", dictionary: english })));
+  expect(consumer).toBeDefined();
+
+  const file = new File(["hello"], "launch-note.txt", { type: "text/plain" });
+  const handle = {
+    kind: "file" as const,
+    name: "launch-note.txt",
+    getFile: vi.fn(async () => file),
+  } as unknown as FileSystemFileHandle;
+
+  await act(async () => {
+    consumer?.({ files: [handle] });
+    await Promise.resolve();
+  });
+
+  expect(handle.getFile).toHaveBeenCalledTimes(1);
+  expect(container.textContent).toContain("launch-note.txt");
+  delete window.launchQueue;
+});
+
+it("does not register a launchQueue consumer in compact embeds", async () => {
+  const setConsumer = vi.fn();
+  window.launchQueue = { setConsumer };
+  window.history.replaceState(null, "", "/en/embed");
+  await act(async () => root.render(createElement(FileWorkspace, { locale: "en", dictionary: english, embedded: true })));
+  expect(setConsumer).not.toHaveBeenCalled();
+  delete window.launchQueue;
+});

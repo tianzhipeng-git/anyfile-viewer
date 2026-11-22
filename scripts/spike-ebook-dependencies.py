@@ -39,6 +39,6 @@ with tarfile.open(fileobj=io.BytesIO(data),mode='r:gz') as archive:
  runtime=archive.extractfile('package/dist/epub.min.js').read()
  report[0]['npmBaseline']['runtimeBytes']=len(runtime)
  report[0]['npmBaseline']['runtimeGzipBytes']=len(gzip.compress(runtime,mtime=0))
-output=ROOT/'docs/ebooks/evidence/dependency-spike.json';output.parent.mkdir(exist_ok=True)
+output=ROOT/'docs/tasks/ebooks-evidence/dependency-spike.json';output.parent.mkdir(parents=True,exist_ok=True)
 output.write_text(json.dumps({'schemaVersion':1,'samplePolicy':'Upstream research samples downloaded into a temporary directory only; not redistributed as publication fixtures. Source/license locations and hashes retained. Native header/index checks are not browser decoder support.','candidates':report},indent=2)+'\n')
 print(output)

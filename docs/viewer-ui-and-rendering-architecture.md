@@ -6,7 +6,7 @@
 
 | 包 | 当前能力 | 实际调用范围与边界 |
 |---|---|---|
-| [@anyfile/viewer-ui](../viewer/ui/src/index.ts) | 原生 DOM 分页表格、选择器、空态/局部错误、异步请求竞态与清理 | Data、SQLite、Excel；不是通用组件框架 |
+| [@anyfile/viewer-ui](../viewer/ui/src/index.ts) | Inspector UI Kit（`createInspectorShell`、`createKeyValueList`、`createDataTable`、`createFilterInput`/`createTabBar`/`createPager`/`createNotice`/`createBadge`/`createSection`、`el()`、`formatBytes()`、`viewerTheme` 主题变量契约）与 `createPagedTableViewer` | Data、SQLite、Excel 及结构/元数据检查类插件（Torrent、ML Weights、HAR、Archive、Certificate、WASM、Source Map、Native Binary 等）；零依赖原生 DOM 原语，不是通用组件框架 |
 | [@anyfile/viewer-rendering](../viewer/rendering/src/index.ts) | `InteractiveViewport`、`CanvasSurface`、`ResourceScope` | 图片及扁平合成图的视图交互、Canvas 2D 与资源登记；部分全景插件也复用资源登记 |
 | [@anyfile/viewer-rendering/audio](../viewer/rendering/src/audio-visualizer.ts) | `AudioVisualizer` | browser-audio、non-native-audio 的画布可视化；不承担解码或统一播放器 UI |
 | [@anyfile/rendering-3d](../viewer/rendering-3d/src/index.ts) | Three.js 场景显示、相机/视图控件、按需绘制、对象可见性、动画和资源释放 | CAD 2D、CAD exchange、网格、3D 打印、点云；接收已转换的运行时文档，不解析格式 |
@@ -48,13 +48,13 @@
 
 `rendering-3d` 已经是多个插件使用的共享层。插件把文件转换为 `Rendering3dDocument`，共享层接管场景资源，包括初始化失败时的释放；格式解析、关联资源、单位解释和领域元数据仍归插件。
 
-当前使用 Three.js WebGL renderer 与 OrbitControls，不把领域显示层扩成通用文件模型。支持范围和后续能力分别见 [3D 支持矩阵](3d/support-matrix.md)与[路线图](3d/roadmap.md)，不能以 Three.js 理论能力代替实际格式支持。
+当前使用 Three.js WebGL renderer 与 OrbitControls，不把领域显示层扩成通用文件模型。支持范围和候选能力见 [3D 与 CAD 架构及支持矩阵](domains/3d.md)，不能以 Three.js 理论能力代替实际格式支持。
 
 ### 章节阅读
 
 `rendering-publication` 通过 `PublicationSource` 加载安全章节，管理有界章节窗口和无脚本 iframe。包还提供实际复用的 markup 与内容清理工具；格式解码、容器读取和源数据适配仍由插件负责。
 
-固定页面和漫画的内容模型不同，不强行使用流式章节接口。领域边界见[电子书架构](ebooks/architecture.md)。
+固定页面和漫画的内容模型不同，不强行使用流式章节接口。领域边界见[电子书与漫画架构](domains/ebooks.md)。
 
 ## 4. 演进原则
 
@@ -66,7 +66,7 @@
 - 两个页面型插件出现相同可见性与回收需求后，再提取页面虚拟化；现有 PDF 调度可继续保持专用。
 - 场景图、GPU 2D 或 deep zoom 的新依赖由实际格式需求与测量触发，不预建万能 scene model 或 renderer adapter。
 
-音视频保留各自 manifest、probe、UI 和支持矩阵；可复用底层解码运行时。已采用的 FFmpeg 共享边界见[音视频播放架构](videos/ffmpeg-playback-runtime-plan.md)。未来规划不能写成已实现能力。
+音视频保留各自 manifest、probe、UI 和支持矩阵；可复用底层解码运行时。已采用的 FFmpeg 共享边界见[视频与 FFmpeg 架构](domains/videos.md#2-共享-anyfileffmpeg-playback-运行时)。未来规划不能写成已实现能力。
 
 ## 5. 加载与验证
 

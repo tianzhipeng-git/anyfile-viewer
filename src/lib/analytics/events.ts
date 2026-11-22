@@ -3,6 +3,7 @@ import type { ViewerInteraction, ViewerPreviewResult } from "@anyfile/viewer-pro
 
 export const GA_ID = "G-289W10FK5X";
 export const CONSENT_KEY = "anyfile-analytics-consent";
+export const CONSENT_CHANGE_EVENT = "analytics-consent-change";
 type Params = Record<string, string | number>;
 type EventName = "page_view" | "workspace_enter" | "file_selected" | "file_picker_cancelled" | "open_started" | "viewer_initialized" | "open_result" | "video_playback" | "preview_error" | "animation_control";
 
@@ -47,8 +48,17 @@ export function currentEntry(): string {
   return new URLSearchParams(window.location.hash.slice(1)).has("file") ? "public_url" : "direct";
 }
 
+let sessionConsent: boolean | undefined;
+
 export function consentGranted(): boolean {
-  try { return localStorage.getItem(CONSENT_KEY) === "granted"; } catch { return false; }
+  try {
+    const stored = localStorage.getItem(CONSENT_KEY);
+    if (stored === "denied") return false;
+    if (stored === "granted") return true;
+    return sessionConsent ?? true;
+  } catch {
+    return sessionConsent ?? false;
+  }
 }
 
 export function analyticsEnabled(): boolean {
@@ -58,6 +68,18 @@ export function analyticsEnabled(): boolean {
 export function updateAnalyticsConsent(granted: boolean) {
   window["ga-disable-G-289W10FK5X"] = !granted;
   window.gtag?.("consent", "update", { analytics_storage: granted ? "granted" : "denied" });
+}
+
+export function setAnalyticsConsent(granted: boolean): boolean {
+  sessionConsent = granted;
+  updateAnalyticsConsent(granted);
+  window.dispatchEvent(new Event(CONSENT_CHANGE_EVENT));
+  try {
+    localStorage.setItem(CONSENT_KEY, granted ? "granted" : "denied");
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 let initialized = false;

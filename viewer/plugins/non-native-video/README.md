@@ -29,7 +29,7 @@
 
 - Matroska 当前覆盖 AVC、HEVC、VP8、VP9、AV1 及 AAC、Opus、Vorbis、MP3、FLAC 主音频的已实现组合，不应将两组 codec 理解为任意笛卡尔积。
 - MPEG-TS 覆盖单路 AVC/HEVC 视频搭配 AAC、MP3 或无音频；QuickTime 覆盖 AVC/HEVC 搭配 16-bit PCM 或无音频，原生 AVC/AAC 由 browser-video 处理。
-- Ogg 覆盖一路 Theora 搭配 Vorbis、Opus 或无音频；WebCodecs 路径优先面向 Chromium，兼容性和高级语义缺失见[视频支持矩阵](../../../docs/videos/support-matrix.md)。
+- Ogg 覆盖一路 Theora 搭配 Vorbis、Opus 或无音频；WebCodecs 路径优先面向 Chromium，兼容性和高级语义缺失见[视频支持矩阵](../../../docs/domains/videos.md)。
 
 ## 开发与验证
 

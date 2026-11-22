@@ -6,14 +6,14 @@
 
 - **插件 ID**：`dji-osmo`
 - **格式入口**：`.jpg`、`.jpeg`、`.osv`
-- **能力**：Osmo / OQ001 的 15520×7760 GPano 等距柱状 JPEG；OSV 双 3840×3840 HEVC Main 10 鱼眼轨道及 AAC 双声道音频。
+- **能力**：Osmo / OQ001 的 15520×7760 GPano 等距柱状 JPEG（等级 5）；OSV 双 3840×3840 HEVC Main 10 鱼眼轨道及 AAC 48 kHz 双声道音频（等级 3）。
 - **数据处理**：文件在浏览器本地只读处理，不上传。
 
 ## 实现原理
 
-1. Manifest、轻量探测与完整实现分别导出，按文件内容识别已验证布局。
-2. OSV 使用 Mediabunny 本地 range 读取、WebCodecs 解码、Web Audio 音频调度及 WebGL 双鱼眼投影。
-3. 视频投影的镜头焦距、光心和平面内旋转参数由三份已有 OSV 样例联合标定；无需上传或整文件复制。
+1. [src/probe.ts](src/probe.ts) 按内容有界探测：JPEG 严格校验 15520×7760、EXIF `Osmo`/`OQ001` 与 GPano 等距柱状元数据；OSV（`ftyp→free→free→mdat(64-bit)→moov→camd`）读 64 KiB 头部并用顶层 box 长度定点跳转读取 ≤2 MiB `moov`，校验 `OQ001`/`Osmo 360`/`djmd`/`dbgi` 及双 3840² HEVC + AAC 轨道，忽略私有数据轨与 MJPEG 缩略轨。
+2. JPEG 按 `min(8192, WebGL MAX_TEXTURE_SIZE)` 保持 2:1 比例解码；OSV 使用 Mediabunny `BlobSource`（8 MiB 缓存）分段读取、WebCodecs 解码（每路 2 个 `CanvasSink` 槽）、Web Audio 主时钟（~1 s 预排）及 WebGL 片元着色器双鱼眼直接混合采样，不复制整文件或生成中间等距视频。
+3. 进度条拖动松手后才提交解码，seek 严格串行并丢弃过期请求；双镜头焦距、光心、旋转（`thetaMax=100°`、`blend=8°`）基于三份真实 OQ001 样例跨镜头重叠带拟合标定。
 
 ## 依赖
 

@@ -2,6 +2,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
+import { extractManifestId, loadGlobalPluginPolicy, readPluginPolicyFile, readRegistrationSource } from "./plugin-policies.mjs";
 
 const MAX_LINES = 1000;
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
@@ -57,17 +58,13 @@ for (const [index, line] of read("ROADMAP.md").split("\n").entries()) {
 }
 
 // Plugin wiring.
-const policies = readJson("viewer/plugin-policies.json").plugins;
+try { loadGlobalPluginPolicy("."); } catch (error) { fail(error.message); }
 const rootDependencies = readJson("package.json").dependencies;
-const registrations = read("src/lib/viewer-registrations.ts");
+const registrations = readRegistrationSource(".");
 const contentManifests = read("src/content/manifests.ts");
 const pluginDirectories = readdirSync("viewer/plugins").filter((name) => statSync(join("viewer/plugins", name)).isDirectory());
 const pluginPackages = new Map(pluginDirectories.map((name) => [readJson(join("viewer/plugins", name, "package.json")).name, name]));
-const policyDirectories = new Map(Object.entries(policies).map(([id, policy]) => [policy.directory, id]));
-
-for (const [id, policy] of Object.entries(policies)) {
-  if (!pluginDirectories.includes(policy.directory)) fail(`plugin-policies.json: ${id} points to missing viewer/plugins/${policy.directory}`);
-}
+const seenManifestIds = new Map();
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -80,11 +77,15 @@ for (const name of pluginDirectories) {
   const root = join("viewer/plugins", name);
   const pkg = readJson(join(root, "package.json"));
   const where = `viewer/plugins/${name}`;
-  if (!policyDirectories.has(name)) fail(`${where}: missing from viewer/plugin-policies.json`);
-  if (policies[policyDirectories.get(name)]?.package !== pkg.name) fail(`${where}: plugin-policies.json package must be ${pkg.name}`);
+  try { readPluginPolicyFile(root); } catch (error) { fail(`${where}: ${error.message}`); }
+  const manifestSource = read(join(root, "src/manifest.ts"));
+  const manifestId = extractManifestId(manifestSource);
+  if (!manifestId) fail(`${where}/src/manifest.ts: missing literal id`);
+  else if (seenManifestIds.has(manifestId)) fail(`${where}: duplicate manifest id ${manifestId} (also in viewer/plugins/${seenManifestIds.get(manifestId)})`);
+  else seenManifestIds.set(manifestId, name);
   if (pkg.exports?.["./manifest"] !== "./src/manifest.ts") fail(`${where}: package.json must export ./manifest from ./src/manifest.ts`);
   if (rootDependencies[pkg.name] !== "workspace:*") fail(`${where}: root package.json must depend on ${pkg.name}`);
-  if (!registrations.includes(`"${pkg.name}/manifest"`)) fail(`${where}: not registered in src/lib/viewer-registrations.ts`);
+  if (!registrations.includes(`"${pkg.name}/manifest"`)) fail(`${where}: not registered in src/lib/viewer-registrations.ts or src/lib/registrations/`);
   if (contentManifests.includes(`"${pkg.name}/manifest"`) === UNPUBLISHED_PLUGINS.has(name)) fail(`${where}: add it to src/content/manifests.ts (site pages) or UNPUBLISHED_PLUGINS`);
   if (!existsSync(join(root, "README.md"))) fail(`${where}: missing README.md`);
 

@@ -30,7 +30,7 @@
 
 - 当前入口覆盖 MPEG-1 Layer III MP3；WAVE 的 16/24-bit 整数及 32-bit 浮点 PCM；M4A/MP4 和 ADTS 的 AAC-LC；Ogg/WebM 的单轨 Opus/Vorbis；16/24-bit FLAC。
 - WAVE/FLAC 为单声道或双声道、采样率不高于 192 kHz；WebM 要求探测到 Cues 索引，M4A/MP4 不能包含视频轨道。
-- 实际播放受浏览器原生解码能力影响；完整组合和验证环境见[音频支持矩阵](../../../docs/audio/support-matrix.md)。
+- 实际播放受浏览器原生解码能力影响；完整组合和验证环境见[音频支持矩阵](../../../docs/domains/audio.md)。
 - 可视化为实时播放效果，不提供完整文件的离线波形分析或音频编辑。
 
 ## 开发与验证

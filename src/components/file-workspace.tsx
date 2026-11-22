@@ -292,6 +292,31 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
     else setError(dictionary.workspace.droppedEmpty);
   }
 
+  const launchHandlerRef = useRef<(handles: readonly FileSystemHandle[]) => Promise<void>>(async () => {});
+  useEffect(() => {
+    launchHandlerRef.current = async (handles) => {
+      const directory = handles.find((handle): handle is FileSystemDirectoryHandle => handle.kind === "directory");
+      if (directory) {
+        await loadDirectoryHandle(directory);
+        return;
+      }
+      const files = handles.filter((handle): handle is FileSystemFileHandle => handle.kind === "file");
+      if (files.length) await loadFileHandles(files);
+    };
+  });
+
+  useEffect(() => {
+    if (embedded || !window.launchQueue) return;
+    let active = true;
+    window.launchQueue.setConsumer((launchParams) => {
+      if (!active || !launchParams.files?.length) return;
+      void launchHandlerRef.current(launchParams.files);
+    });
+    return () => {
+      active = false;
+    };
+  }, [embedded]);
+
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4">
       {embedded && <PublicFileControls locale={locale} busy={busy} embedded onOpen={openPublicFile} onCancel={cancelDownload} />}

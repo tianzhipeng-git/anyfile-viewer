@@ -15,11 +15,11 @@
 # 代码地图
 | 路径 | 内容 |
 |---|---|
-| `viewer/plugins/<dir>/` | 每个查看器插件一个 pnpm 包；插件文档是它的 `README.md`，真实样例在 `examples/` |
+| `viewer/plugins/<dir>/` | 每个查看器插件一个 pnpm 包；含 `policy.json`（运行时资产声明）、`README.md`、`examples/` 真实样例 |
 | `viewer/*`（protocol、ui、rendering*、runtime-assets、testing…） | 共享包，不注册为插件 |
-| `src/lib/viewer-registrations.ts` | 插件注册与路由顺序 |
+| `src/lib/viewer-registrations.ts`、`src/lib/registrations/*.ts` | 按领域拆分的插件注册与路由顺序 |
 | `src/content/` | 站点格式页、插件页、SEO 文案 |
-| `viewer/plugin-policies.json` | 每个插件的 bundle 预算与运行时资产策略 |
+| `viewer/plugin-policies.json` | 全局 bundle / 运行时资产预算（按插件策略在各插件 `policy.json`） |
 | `scripts/` | 资产准备、门禁检查；`tools/` 自建 WASM 配方；`third_party/` 审核后的二进制产物 |
 
 # 门禁与命令
@@ -37,7 +37,7 @@
 - 新依赖锁定精确版本；不手改 `third_party/` 产物，按 `tools/` 配方重建。
 - 文档只写当前状态：不写日期化验证流水、实施过程、被否方案；插件细节写在插件 README，不另建 `docs/<plugin>.md`。
 - 用户可见文案同时提供 `en` 与 `zh-CN`。
-- 新插件的体积约束写在 `viewer/plugin-policies.json`，不要在 `scripts/check-view-bundle.mjs` 里追加针对单个插件的硬编码检查。
+- 新插件的运行时资产策略写在 `viewer/plugins/<dir>/policy.json`（全局体积预算在 `viewer/plugin-policies.json`），不要在 `scripts/check-view-bundle.mjs` 里追加针对单个插件的硬编码检查。
 - 复制粘贴超过约 50 行的逻辑到第二个插件前，先抽到共享包或子路径导出。
 
 # 项目文档阅读路由
@@ -55,6 +55,9 @@
 | 修改插件加载方式、静态/动态导入边界、SSG/SSR、Worker/WASM、jsDelivr 与本地回退、依赖版本、部署头、CSP 或首包体积 | `docs/viewer-loading-and-deployment.md` |
 | 从第三方源码自行构建 WASM、Worker、JavaScript glue 或其他二进制资产，维护 `tools/` 构建配方、`third_party/` 审核产物、patch、升级或 vendoring 流程 | `docs/viewer-source-built-dependencies.md`、`docs/viewer-loading-and-deployment.md` |
 | 设计或修改 `viewer-ui`、共享渲染基础设施、Canvas/视口/缩放/渲染调度/资源管理、renderer adapter，或评估 Lit、d3-zoom、Konva、PixiJS、OpenSeadragon、Three.js 等选型 | `docs/viewer-ui-and-rendering-architecture.md` |
+| 查询领域架构边界、支持矩阵与安全/依赖审计结论 | `docs/domains/{3d,audio,images,videos,ebooks,developer}.md` |
+| 修改站点格式/类别/插件页、i18n 或内容相似度审计 | `docs/seo/content-pages.md`、`docs/seo/i18n.md` |
+| 修改 PWA 安装、Web App Manifest、系统文件关联（File Handling API / `launchQueue`）或 Service Worker 离线缓存 | `docs/pwa-desktop-app.md` |
 
 # 注意
 尽量不要使用内置无头浏览器进行真实测试验收, 可能它无法支持文件选择器和WebGL的能力.

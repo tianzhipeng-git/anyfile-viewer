@@ -1,0 +1,26 @@
+{
+  "runtimeSets": [
+    {
+      "id": "libraw",
+      "version": "1.6.0",
+      "versionPackageJson": "node_modules/libraw-wasm/package.json",
+      "assetPatterns": [
+        "public/vendor/libraw/1.6.0/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "raw-decode",
+          "assetPatterns": [
+            "public/vendor/libraw/1.6.0/index.js",
+            "public/vendor/libraw/1.6.0/worker.js",
+            "public/vendor/libraw/1.6.0/libraw.js",
+            "public/vendor/libraw/1.6.0/libraw.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ]
+    }
+  ]
+}

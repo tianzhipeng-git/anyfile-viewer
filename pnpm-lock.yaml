@@ -19,6 +19,9 @@ importers:
       '@anyfile/archive-metadata-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/archive
+      '@anyfile/bittorrent-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/torrent
       '@anyfile/browser-audio-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/browser-audio
@@ -124,6 +127,9 @@ importers:
       '@anyfile/mind-map-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/mind-map
+      '@anyfile/ml-weights-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/ml-weights
       '@anyfile/mobi-reader':
         specifier: workspace:*
         version: link:viewer/plugins/mobi
@@ -285,6 +291,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
       '@zip.js/zip.js':
         specifier: 2.8.60
         version: 2.8.60
@@ -438,6 +447,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -515,6 +527,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -528,6 +543,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -541,6 +559,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -745,6 +766,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -863,6 +887,19 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
+
+  viewer/plugins/ml-weights:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
 
   viewer/plugins/mobi:
     dependencies:
@@ -1083,6 +1120,19 @@ importers:
       '@anyfile/viewer-rendering':
         specifier: workspace:*
         version: link:../../rendering
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+
+  viewer/plugins/torrent:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*

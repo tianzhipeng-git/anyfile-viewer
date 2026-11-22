@@ -31,7 +31,7 @@ Mediabunny 随完整实现加载，探测路径复用轻量容器检查模块。
 - 打开阶段要求 `AudioDecoder` 和 `AudioContext`，实际 codec 能力仍取决于浏览器。
 - `.mka` 覆盖 AAC、Opus、Vorbis、FLAC，必须只有一个主音轨且不含视频；WAVE 路径针对 A-law / μ-law，并使用 Mediabunny 软件 PCM 解码。
 - 声道数最多 2，采样率 8–192 kHz，时长最多 24 小时；文件读取缓存和单个 PCM buffer 分别最多 8 MiB，单 buffer 时长最多 2 秒。
-- 不提供转码、导出或任意多音轨混音；组合级范围见[音频支持矩阵](../../../docs/audio/support-matrix.md)。
+- 不提供转码、导出或任意多音轨混音；组合级范围见[音频支持矩阵](../../../docs/domains/audio.md)。
 
 ## 开发与验证
 

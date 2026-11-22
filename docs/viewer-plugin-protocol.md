@@ -135,7 +135,7 @@ interface ViewerController {
 ```
 
 - `file` 是标准浏览器 `File`；本地与公开 URL 输入复用同一接口，公开单文件不提供远程工作区。优先使用 `slice()`、`stream()` 或 Object URL；整体 `arrayBuffer()` / `text()` 必须有明确输入上限。
-- 文件输入预算约定（2026-09-12）：原有低于 100 MiB 的格式主文件输入上限统一提高到 128 MiB，已有更高上限保持不变。这是产品输入额度，不是实际内存占用保证；关联资源、解压、像素、几何、解析结构及内部缓冲区预算独立管理。
+- 文件输入预算约定：常规格式主文件输入上限默认 128 MiB，已有更高上限保持不变。这是产品输入额度，不是实际内存占用保证；关联资源、解压、像素、几何、解析结构及内部缓冲区预算独立管理。
 - `relativePath` 是当前文件在授权工作区中的路径，使用 `/`；普通文件选择时可不存在。
 - `container` 由宿主拥有。插件创建独立根节点，不修改容器本身或容器外 DOM。
 - `signal` 表示整个实例终止，涵盖 opening 和 active 阶段。
@@ -224,7 +224,7 @@ interface WorkspaceEntry {
 
 ## 10. 验证入口
 
-- [协议与路由测试](../src/lib/viewer-protocol.test.ts)：Manifest、注册唯一性、匹配、probe 等级、稳定排序和取消；[i18n 测试](../src/i18n/i18n.test.ts)检查已注册名称与文案边界。
+- [协议契约测试](../src/lib/viewer-protocol.test.ts)：Manifest、注册唯一性、匹配、probe 等级、稳定排序和取消；`src/lib/viewer-routing/` 按领域覆盖生产路由与 `./probe` 接线；[i18n 测试](../src/i18n/i18n.test.ts)检查已注册名称与文案边界。
 - [工作区测试](../src/lib/workspace-reader.test.ts)：路径限制、目录与多文件读取。
 - [共享测试工具](../viewer/testing/src/index.ts)：容器、进度、延迟及跟踪读取辅助；具体成功、失败、取消和资源释放由各插件测试覆盖。
 - 新增或修改插件需验证成功打开、损坏与超限输入、opening/active 取消、重复销毁及销毁后无副作用。真实渲染和布局验收见[渲染规范](viewer-rendering-guidelines.md)。

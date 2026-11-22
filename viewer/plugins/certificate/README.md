@@ -19,6 +19,7 @@
 | 包 | 用途 |
 |---|---|
 | `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `@anyfile/viewer-ui` | 共享 Inspector UI Kit 原语与宿主主题变量 |
 
 没有第三方解析器、Worker、WASM 或网络请求。
 
