@@ -38,9 +38,16 @@ export type AppDictionary = {
   };
   viewer: {
     detecting: string; detectionFailed: string; loadingViewer: string; loadingNamedViewer: string;
-    workspaceRequired: string; openFailedFallback: string; viewerLabel: string; supportLevelLabel: string;
+    workspaceRequired: string; openFailedFallback: string; offlineUncached: string; viewerLabel: string; supportLevelLabel: string;
     supportLevelDescriptions: readonly [string, string, string, string, string, string]; fallbackTitle: string;
     fallbackDescription: string; openingTitle: string; failedTitle: string; noViewerTitle: string;
     selectTitle: string; noPlugin: string; selectDescription: string;
+  };
+  pwa: {
+    installApp: string;
+    installingApp: string;
+    installSuccess: string;
+    installCanceled: string;
+    installFailed: string;
   };
 };

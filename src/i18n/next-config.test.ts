@@ -35,4 +35,15 @@ describe("localized routing configuration", () => {
       value: "public, max-age=31536000, immutable",
     });
   });
+
+  it("serves the service worker without stale HTTP caching and with root scope", async () => {
+    const headers = await nextConfig.headers?.();
+    const swHeaders = headers?.find(({ source }) => source === "/sw.js");
+    expect(swHeaders?.headers).toEqual(expect.arrayContaining([
+      { key: "Content-Type", value: "application/javascript; charset=utf-8" },
+      { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
+      { key: "Service-Worker-Allowed", value: "/" },
+      { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
+    ]));
+  });
 });

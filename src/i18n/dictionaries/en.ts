@@ -78,7 +78,9 @@ const dictionary = {
     detecting: "Detecting the file format and choosing a viewer…", detectionFailed: "Unable to detect this file format.",
     loadingViewer: "Loading viewer…", loadingNamedViewer: "Loading {name}…",
     workspaceRequired: "This viewer requires the file to be opened from a folder workspace.",
-    openFailedFallback: "Unable to open this file.", viewerLabel: "Viewer", supportLevelLabel: "Support level {level}",
+    openFailedFallback: "Unable to open this file.",
+    offlineUncached: "This format's viewer is not cached for offline use yet. Open it once while online to cache it.",
+    viewerLabel: "Viewer", supportLevelLabel: "Support level {level}",
     supportLevelDescriptions: [
       "Anyfile cannot meaningfully open this file yet. This reflects missing viewer support, not a damaged or problematic file.",
       "Anyfile can currently inspect only the underlying bytes, metadata, or structure. This reflects limited viewer capability, not poor file quality or problematic content.",
@@ -91,6 +93,13 @@ const dictionary = {
     openingTitle: "Opening file", failedTitle: "Viewer failed to open", noViewerTitle: "No matching viewer",
     selectTitle: "Choose a local file", noPlugin: "No plugin currently supports the {extension} format.",
     selectDescription: "Choose files from this device or drag them here to preview. Files stay on your device and are never uploaded.",
+  },
+  pwa: {
+    installApp: "Install app",
+    installingApp: "Installing…",
+    installSuccess: "Anyfile was installed or opened.",
+    installCanceled: "Installation was canceled.",
+    installFailed: "Installation could not start.",
   },
 } as const satisfies AppDictionary;
 
