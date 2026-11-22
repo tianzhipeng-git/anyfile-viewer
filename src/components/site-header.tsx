@@ -6,6 +6,7 @@ import { FeedbackTrigger } from "@/components/feedback/feedback-provider";
 
 import { BrandMark } from "@/components/brand-mark";
 import { IsolationBoundaryLink } from "@/components/isolation-boundary-link";
+import { PwaInstallButton } from "@/components/pwa-install-button";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { localePath, type PublishedLocale } from "@/i18n/config";
@@ -33,6 +34,7 @@ export function SiteHeader({ locale, dictionary }: { locale: PublishedLocale; di
           <SiteNavigation groups={groups} label={dictionary.common.mainNavigation} categoriesLabel={dictionary.common.categories} />
         </div>
         <div className="flex items-center gap-2">
+          <PwaInstallButton dictionary={dictionary.pwa} />
           <FeedbackTrigger variant="ghost" />
           <LanguageSwitcher locale={locale} label={dictionary.common.language} />
           <Button nativeButton={false} size="sm" render={<IsolationBoundaryLink href={localePath(locale, "/view")} />}>

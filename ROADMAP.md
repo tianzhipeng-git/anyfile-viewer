@@ -17,7 +17,7 @@
 - [x] 高 | 拆分插件策略配置与接线元数据（`viewer/plugin-policies.json`、`src/lib/viewer-protocol.test.ts`） | 拆为全局预算 `viewer/plugin-policies.json`（850→10 行）+ 54 个插件 `policy.json`，按领域拆分 `src/lib/registrations/*.ts` 与 `src/lib/viewer-routing/*.test.ts`，`viewer-protocol.test.ts`（604→177 行）仅保留纯协议契约测试并消除硬编码 probe 列表与 `file-type-icon.tsx` 重复 manifest 导入。2026-11-22 0cdf444
 - [ ] 低 | 在 `@anyfile/runtime-assets` 中抽取共享 Worker RPC 客户端 | 20+ Worker+WASM 插件重复编写请求 ID 关联、超时、`AbortSignal` 终止、transferable 与运行时回退逻辑（如 `djvu/src/worker-client.ts` 近 200 行）；抽为轻量类型化 `createWorkerRpcClient` 减少泄漏与取消竞态
 - [ ] 高 | 抽取共享分页文档视口适配器（`PagedDocumentSource`） | `djvu` 与 `pdf` 各自实现 ~500–1000 行分页画布工具栏、缩放/适应、画布淘汰与大纲侧栏；抽到共享包（先从 `djvu` 抽起，再视情况迁 `pdf`）以复用至后续分页格式（TIFF/XPS/PostScript 等）
-- [ ] 高 | 完成 `docs/pwa-desktop-app.md`
+- [x] 高 | 完成 `docs/pwa-desktop-app.md` | 实现按语言静态 Web App Manifest、195 个精选安全扩展名的 File Handling API 与 `launchQueue` 接入、`public/sw.js` 分层离线缓存（保 COOP/COEP 与 CORS+CORP 禁 opaque）及按需安装按钮。2026-11-22 2337e03
 - [ ] 中 | 新增邮件查看器（`.eml` / `.msg`） | 解析 RFC 5322 MIME 与 Outlook CFBF `.msg`，展示安全清理正文与附件清单；无 Outlook 打开 `.msg` 搜索痛点极强，邮件高度隐私敏感不愿上传
 - [ ] 中 | 新增 Microsoft Access 数据库查看器（`.mdb` / `.accdb`） | `open mdb/accdb online` 与 macOS 查看 Access 搜索痛点极强（Mac/Linux 无原生软件，数据库高度机密）；基于纯 JS `mdb-reader` 读取表结构与分页数据
 - [ ] 中 | `archive-metadata-viewer` 补齐 `.7z` 归档目录查看 | 复用或抽取 `comic-book` 已有的 `comic-archive` libarchive WASM，无需新构建；macOS 与浏览器原生打不开 `.7z`，搜索需求高

@@ -143,13 +143,17 @@ export function ViewerHost({
       setMessage(resolvedCandidates.length > 0 ? dictionary.loadingViewer : "");
     }).catch((error: unknown) => {
       if (abortController.signal.aborted || isViewerAbortError(error)) return;
+      const offline = typeof navigator !== "undefined" && !navigator.onLine;
       const viewerError = normalizeViewerError(error, dictionary.detectionFailed);
+      const messageText = offline && (!(error instanceof ViewerError) || viewerError.code === "open-failed")
+        ? dictionary.offlineUncached
+        : viewerError.message;
       attempt.fail(viewerError.code);
-      setRoutingResult({ file, fileSource, workspace, candidates: [], error: viewerError.message, attempt });
+      setRoutingResult({ file, fileSource, workspace, candidates: [], error: messageText, attempt });
     });
 
     return () => { abortController.abort(); attempt.stop(); };
-  }, [dictionary.detectionFailed, dictionary.loadingViewer, file, fileSource, workspace]);
+  }, [dictionary.detectionFailed, dictionary.loadingViewer, dictionary.offlineUncached, file, fileSource, workspace]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -233,10 +237,14 @@ export function ViewerHost({
       if (abortController.signal.aborted || isViewerAbortError(error)) return;
       container.replaceChildren();
       if (sessionRef.current === session) {
+        const offline = typeof navigator !== "undefined" && !navigator.onLine;
         const viewerError = normalizeViewerError(error, dictionary.openFailedFallback);
+        const messageText = offline && (!(error instanceof ViewerError) || viewerError.code === "open-failed")
+          ? dictionary.offlineUncached
+          : viewerError.message;
         attempt?.fail(viewerError.code);
         setStatus("error");
-        setMessage(viewerError.message);
+        setMessage(messageText);
       }
     });
 

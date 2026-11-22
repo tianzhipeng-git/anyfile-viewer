@@ -74,7 +74,9 @@ const dictionary = {
   viewer: {
     detecting: "正在检测文件格式并选择查看器…", detectionFailed: "无法检测这个文件的格式。", loadingViewer: "正在加载查看器…",
     loadingNamedViewer: "正在加载{name}…", workspaceRequired: "此查看器需要从文件夹工作区打开文件。",
-    openFailedFallback: "无法打开这个文件。", viewerLabel: "查看器", supportLevelLabel: "支持等级 {level}",
+    openFailedFallback: "无法打开这个文件。",
+    offlineUncached: "该格式的查看器尚未缓存到离线存储。请先在联网状态下打开一次，之后即可离线使用。",
+    viewerLabel: "查看器", supportLevelLabel: "支持等级 {level}",
     supportLevelDescriptions: [
       "Anyfile 当前无法有意义地打开此文件。这表示我们尚未提供相应查看能力，不代表文件损坏或存在问题。",
       "Anyfile 当前只能检查底层字节、元数据或结构。这表示我们的查看能力有限，不代表文件质量差或内容有问题。",
@@ -87,6 +89,13 @@ const dictionary = {
     fallbackDescription: "当前以十六进制展示文件的原始内容。", openingTitle: "正在打开文件", failedTitle: "查看器打开失败",
     noViewerTitle: "没有匹配的查看器", selectTitle: "选择本地文件", noPlugin: "当前没有支持 {extension} 格式的插件。",
     selectDescription: "选择此设备上的文件或将文件拖到这里，即可预览。文件留在你的设备上，不会上传。",
+  },
+  pwa: {
+    installApp: "安装应用",
+    installingApp: "正在安装…",
+    installSuccess: "已安装或打开 Anyfile 桌面应用。",
+    installCanceled: "已取消安装。",
+    installFailed: "无法启动安装。",
   },
 } as const satisfies AppDictionary;
 

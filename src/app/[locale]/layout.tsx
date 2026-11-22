@@ -1,18 +1,23 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { notFound } from "next/navigation";
 import { GoogleAnalytics } from "@/components/google-analytics";
+import { PwaLifecycle } from "@/components/pwa-lifecycle";
 import { SafeSpeedInsights } from "@/components/safe-speed-insights";
 
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { FeedbackProvider } from "@/components/feedback/feedback-provider";
-import { PUBLISHED_LOCALES, isPublishedLocale, siteUrl } from "@/i18n/config";
+import { PUBLISHED_LOCALES, isPublishedLocale, localePath, siteUrl } from "@/i18n/config";
 import { getDictionary } from "@/i18n/server";
 import { localizedPageMetadata } from "@/lib/seo";
 
 import "../globals.css";
 
 export const dynamicParams = false;
+
+export const viewport: Viewport = {
+  themeColor: "#1c1c1c",
+};
 
 export function generateStaticParams() {
   return PUBLISHED_LOCALES.map((locale) => ({ locale }));
@@ -30,6 +35,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return {
     ...pageMetadata,
     metadataBase: siteUrl(),
+    manifest: localePath(candidate, "/manifest.webmanifest"),
+    appleWebApp: {
+      capable: true,
+      title: "Anyfile",
+      statusBarStyle: "default",
+    },
   };
 }
 
@@ -50,6 +61,7 @@ export default async function LocaleLayout({
           <main className="flex flex-1 flex-col">{children}</main>
           <SiteFooter locale={locale} dictionary={dictionary} />
         </FeedbackProvider>
+        <PwaLifecycle />
         <GoogleAnalytics />
         <SafeSpeedInsights />
       </body>
