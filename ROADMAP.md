@@ -13,7 +13,7 @@
 - **每周 review**：调整顺序和难度，处理 `[!]` 条目，删除已随 main 发布的 `[x]` 条目（历史在 git 中）。
 
 ## 需求
-- [ ] 高 | 清理和简化docs/
+- [x] 高 | 清理和简化docs/ | 合并 6 领域文档至 `docs/domains/`、移除日期化证据与单插件文档并同步 README，docs Markdown 8346→1361 行。2026-11-22 c87e119
 - [ ] 高 | 扩展 `@anyfile/viewer-ui` 为共享 Inspector UI Kit 与主题变量契约 | 37/52 插件手写 `<style>` 与重复壳层/键值表/筛选栏且暗色模式易失配；补齐 `--viewer-muted`/`--viewer-surface` 等 token 及轻量可组合原语（shell、KV 列表、数据表、`el()`、`formatBytes()`），新插件优先采用
 - [ ] 高 | 拆分插件策略配置与接线元数据（`viewer/plugin-policies.json`、`src/lib/viewer-protocol.test.ts`） | 52 个插件已使 `plugin-policies.json` 达 840 行（逼近 1000 行门禁上限）、`viewer-protocol.test.ts` 达 598 行，且并行新增插件易在 6–7 个中心文件冲突；按插件拆分策略并分离协议契约与路由测试
 - [ ] 低 | 在 `@anyfile/runtime-assets` 中抽取共享 Worker RPC 客户端 | 20+ Worker+WASM 插件重复编写请求 ID 关联、超时、`AbortSignal` 终止、transferable 与运行时回退逻辑（如 `djvu/src/worker-client.ts` 近 200 行）；抽为轻量类型化 `createWorkerRpcClient` 减少泄漏与取消竞态
@@ -39,5 +39,5 @@
 - [ ] 高 | 新增医学/科学体数据查看器（`.nii` / `.nii.gz` / `.nrrd`） | `docs/domains/images.md` 未实施项；科研/医疗影像高度敏感不愿上传，需三视图切片与窗宽窗位，替代 3D Slicer 等大型桌面软件
 - [ ] 高 | 实现 ZIP 归档内文件按需点击预览（跨插件复用） | 在 `archive-metadata-viewer` 中点击未加密 ZIP 内图片/PDF/代码/表格时按需流式解压并复用对应查看器，涉及工作区协议与跨插件协作
 - [ ] 中 | 抽取 dji-osmo / gopro-max / insta360 的双轨播放与全景渲染到共享包 | DJI 与 GoPro playback 约 375 行仅 64 行不同；需人工浏览器验收三种相机样例
-- [ ] 中 | 合并 `docs/videos` 文档为当前状态（删除阶段证据与已完成计划，保留有效规则） | 按 AGENTS.md 文档规则
-- [ ] 中 | 合并 `docs/3d`、`docs/images`、`docs/ebooks`、`docs/audio` 文档为当前状态 | 同上，可拆成每目录一条
+- [x] 中 | 合并 `docs/videos` 文档为当前状态（删除阶段证据与已完成计划，保留有效规则） | 已合并至 `docs/domains/videos.md`。2026-11-22 c87e119
+- [x] 中 | 合并 `docs/3d`、`docs/images`、`docs/ebooks`、`docs/audio` 文档为当前状态 | 已合并至 `docs/domains/`。2026-11-22 c87e119
