@@ -33,7 +33,7 @@ LibreDWG 为 GPL-3.0-or-later，绑定为 GPL-3.0。DWG 组合分发受 GPLv3 �
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
-- 仓库不分发 DWG 样例；样例来源见 [dwg-fixture-sources.json](../../../docs/3d/dwg-fixture-sources.json)，原生回归结果见 [dwg-native-smoke.json](../../../docs/3d/dwg-native-smoke.json)。
+- 仓库不分发 DWG 样例；上游样例来源见 [dwg-fixture-sources.json](../../../tools/libredwg-build/dwg-fixture-sources.json)，领域支持矩阵见 [3D 与 CAD 架构](../../../docs/domains/3d.md)。
 - 截断和伪造文件必须以原生错误拒绝，不构建场景。
 
 ```bash

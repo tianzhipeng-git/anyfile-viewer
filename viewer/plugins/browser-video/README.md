@@ -27,7 +27,7 @@
 
 - 声明组合：MP4/M4V 的 AVC + AAC-LC、AVC 无音轨、HEVC + AAC-LC、AV1 + AAC-LC；MOV/QuickTime 与 3GP/3G2 的 AVC + AAC-LC；WebM 的 VP8 + Vorbis、VP9 + Opus、VP9 无音轨。
 - 解码能力依赖浏览器、操作系统和设备，扩展名相同不代表任意编码均可播放。
-- 不承诺字幕、多轨选择、HDR 色彩和专业时间线语义；组合级验证范围见[视频支持矩阵](../../../docs/videos/support-matrix.md)。
+- 不承诺字幕、多轨选择、HDR 色彩和专业时间线语义；组合级验证范围见[视频支持矩阵](../../../docs/domains/videos.md)。
 
 ## 开发与验证
 

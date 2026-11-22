@@ -11,9 +11,10 @@
 
 ## 实现原理
 
-1. [src/probe.ts](src/probe.ts) 检查 PostScript/EPS 签名及 Illustrator 类型。
-2. 解释器和栅格器位于独立可销毁 Worker，使用锁定版本、仅启用 PS/EPS 的 stet-wasm。
-3. 自建运行时优先从版本化 R2 资产加载，失败后尝试同版本同源资产；每次初始化失败先销毁原 Worker。
+1. [src/probe.ts](src/probe.ts) 做 4 KiB 有界探测，检查 PostScript DSC 或 DOS EPS 头；`.ai` 与 `pdfjs-pdf` 并发探测，PDF 签名由 PDF.js 以等级 4 命中，PostScript DSC 头由本插件以等级 3 命中。
+2. 解释器和栅格器位于独立可销毁模块 Worker，使用源码构建、锁定 `stet v0.8.1`（Apache-2.0 OR MIT，仅启用 PS/EPS，不含可选 PDF reader）的 `stet-wasm`（`/vendor/stet/0.8.1-anyfile.1/`，约 10.3 MiB gzip；配方见 [tools/stet-wasm-build](../../../tools/stet-wasm-build/)，`pnpm prepare:stet` 校验复制）。
+3. 自建运行时按 `R2 (assets.anyfile.top) → 同版本同源` 加载，不使用 jsDelivr；仅资产获取、Worker 创建或引擎初始化失败时销毁旧 Worker 并切换下一来源，文件解释或栅格化错误不触发整套运行时重试。
+4. 打开时先解释首页并返回尺寸，翻页时在 Worker 内按需发现后续页面。
 
 ## 依赖
 
@@ -26,9 +27,9 @@
 
 ## 已知限制
 
-- 输入最大 128 MiB、单次 Canvas 渲染最多 1600 万像素、Worker 操作最多 20 秒。
-- 浏览器 WASM 无法使用系统字体；缺失嵌入字体或不支持的 PostScript 运算符可能降低保真度，按主要内容等级 3 提供查看。
-- 不提供矢量编辑、格式转换或 Illustrator 完整文档语义。
+- 输入最大 128 MiB、单次 Canvas 渲染最多 1600 万像素、单次初始化/解释/栅格化最多 20 秒（超时直接终止 Worker 防无限循环）。
+- 浏览器 WASM 无法使用系统字体，未内嵌字体由 stet 内置 URW 度量兼容字体替代；不自动获取文档引用的远程文件或字体，按主要内容等级 3 提供查看。
+- 不提供文本选择、矢量编辑、打印、格式转换或 Illustrator 完整文档语义。
 
 ## 开发与验证
 

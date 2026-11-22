@@ -34,7 +34,7 @@ viewer/plugins/<dir>/
 | `src/content/manifests.ts`、`src/content/plugins.ts`、`src/content/formats/` | 站点插件页与格式页（中英文） | test |
 | `src/components/file-type-icon.tsx` | 文件树语义分类 | test |
 | `scripts/prepare-*-assets.mjs`、`THIRD_PARTY_NOTICES.md` | 仅有运行时资产时 | build |
-| 领域支持矩阵（如 `docs/3d/support-matrix.md`） | 新格式的等级与验证状态 | 人工 |
+| 领域架构与支持矩阵（`docs/domains/*.md`，如 `docs/domains/3d.md`） | 新格式的等级与验证状态 | 人工 |
 
 ## 4. 真实样例
 
