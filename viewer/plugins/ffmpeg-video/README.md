@@ -23,14 +23,14 @@
 | `@anyfile/ffmpeg-playback` | 共享 FFmpeg Worker/WASM 播放运行时、有界读取与 ASF 结构解析 |
 | `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
 
-共享 FFmpeg 运行时统一管理资产、队列和许可证，详见[共享 FFmpeg 方案](../../../docs/videos/ffmpeg-playback-runtime-plan.md)。
+共享 FFmpeg 运行时统一管理资产、队列和许可证，详见[共享 FFmpeg 运行时](../../../docs/domains/videos.md#2-共享-anyfileffmpeg-playback-运行时)。
 
 ## 已知限制
 
 - 只支持上述声明的组合：AVI 需要 `idx1` 索引与单一主视频；ASF 仅 WMV2 + WMA2，且拒绝加密流、多视频轨或多音轨；MPEG-PS 仅 MPEG-2 主视频 + 单条 AC-3/MP2 音轨，MPEG-1 视频、DTS/LPCM、多音轨与字幕私有流不进入声明范围。
 - 有界读取：ASF Header Object 最多 64 KiB，MPEG-PS 只看前 128 KiB，AVI 只按块读取头部与索引；超出窗口的结构不识别。
 - 要求 Worker、WebAssembly、VideoFrame 和 AudioContext；软件解码性能受设备影响。
-- 视频队列上限 32 MiB、PCM 队列上限 8 MiB；组合及验证范围见[视频支持矩阵](../../../docs/videos/support-matrix.md)。
+- 视频队列上限 32 MiB、PCM 队列上限 8 MiB；组合及验证范围见[视频支持矩阵](../../../docs/domains/videos.md)。
 
 ## 开发与验证
 

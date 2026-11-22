@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { chromium } from "playwright";
 const base = process.env.EBOOK_TEST_URL || "http://localhost:3107";
-const output = resolve("docs/ebooks/evidence");
+const output = resolve("docs/tasks/ebooks-evidence");
+await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ headless: true, ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}) });
 const page = await browser.newPage({ viewport: { width: 1100, height: 760 } });
 const results = [], attacks = [], errors = [], requests = [];

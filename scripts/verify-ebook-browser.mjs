@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { chromium } from "playwright";
 
 const base = process.env.EBOOK_TEST_URL || "http://localhost:3000";
-const output = resolve("docs/ebooks/evidence");
+const output = resolve("docs/tasks/ebooks-evidence");
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({
   headless: true,

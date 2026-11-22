@@ -55,6 +55,8 @@
 | 修改插件加载方式、静态/动态导入边界、SSG/SSR、Worker/WASM、jsDelivr 与本地回退、依赖版本、部署头、CSP 或首包体积 | `docs/viewer-loading-and-deployment.md` |
 | 从第三方源码自行构建 WASM、Worker、JavaScript glue 或其他二进制资产，维护 `tools/` 构建配方、`third_party/` 审核产物、patch、升级或 vendoring 流程 | `docs/viewer-source-built-dependencies.md`、`docs/viewer-loading-and-deployment.md` |
 | 设计或修改 `viewer-ui`、共享渲染基础设施、Canvas/视口/缩放/渲染调度/资源管理、renderer adapter，或评估 Lit、d3-zoom、Konva、PixiJS、OpenSeadragon、Three.js 等选型 | `docs/viewer-ui-and-rendering-architecture.md` |
+| 查询领域架构边界、支持矩阵与安全/依赖审计结论 | `docs/domains/{3d,audio,images,videos,ebooks,developer}.md` |
+| 修改站点格式/类别/插件页、i18n 或内容相似度审计 | `docs/seo/content-pages.md`、`docs/seo/i18n.md` |
 
 # 注意
 尽量不要使用内置无头浏览器进行真实测试验收, 可能它无法支持文件选择器和WebGL的能力.

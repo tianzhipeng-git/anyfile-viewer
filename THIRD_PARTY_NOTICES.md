@@ -104,10 +104,6 @@ corresponding data and font files independently of the Anyfile license.
 - dxf-parser 1.1.2 — MIT, https://github.com/gdsestimating/dxf-parser . Existing
   DXF parsing dependency, now invoked in a Worker with XYZ output preserved.
 
-No OpenCascade/occt-import-js binary is distributed by these additions. Its
-preliminary evaluation and unmet integration requirements are recorded in
-`docs/3d/dependency-audit.md`.
-
 ## CAD and compressed point clouds
 
 - occt-import-js 0.0.23-anyfile.1: LGPL-2.1, with Open CASCADE LGPL-2.1 and OCCT exception. Complete notices, pinned corresponding source links and build patch are in `third_party/occt-import-js/0.0.23-anyfile.1/` and copied to `/vendor/occt-import-js/0.0.23-anyfile.1/`.

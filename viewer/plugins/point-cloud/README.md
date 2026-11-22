@@ -36,7 +36,7 @@ LAZ 除包依赖外需要已部署的 laz-perf 审核资产；普通文本和 LA
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
 - 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
 - [样例说明](examples/README.md)：查看样例范围、来源或生成方法。
-- [3D 支持矩阵](../../../docs/3d/support-matrix.md)与[实现状态](../../../docs/3d/implementation-status.md)。
+- [3D 与 CAD 架构及支持矩阵](../../../docs/domains/3d.md)。
 
 在仓库根目录运行插件测试：
 

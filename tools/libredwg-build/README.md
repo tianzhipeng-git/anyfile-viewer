@@ -8,4 +8,4 @@ The decoder is official GNU LibreDWG 0.14, with the unmodified libredwg-web 0.7.
 
 For real-file regression, set `DWG_TEST_FILES` to a JSON array of absolute paths and optionally `DWG_TEST_REPORT` to an output JSON path, then run `pnpm test viewer/plugins/cad-dwg`. Native fixtures are not sent to any remote service. Normal CI uses synthetic geometry, probe and lifecycle tests without requiring local user drawings.
 
-Pinned upstream regression sample URLs and hashes are recorded in [the fixture manifest](../../docs/3d/dwg-fixture-sources.json). Download samples outside the source tree and pass their absolute paths through `DWG_TEST_FILES`.
+Pinned upstream regression sample URLs and hashes are recorded in [the fixture manifest](dwg-fixture-sources.json). Download samples outside the source tree and pass their absolute paths through `DWG_TEST_FILES`.

@@ -127,7 +127,7 @@ try {
   });
   assert.deepEqual(failures, []);
 } finally {
-  await mkdir("docs/videos/evidence", { recursive: true });
-  await writeFile("docs/videos/evidence/ffmpeg-playback-browser.json", JSON.stringify({ date: new Date().toISOString(), browser: browser.version(), os: { type: type(), release: release(), arch: arch() }, results, failures }, null, 2) + "\n");
+  await mkdir("docs/tasks/videos-evidence", { recursive: true });
+  await writeFile("docs/tasks/videos-evidence/ffmpeg-playback-browser.json", JSON.stringify({ date: new Date().toISOString(), browser: browser.version(), os: { type: type(), release: release(), arch: arch() }, results, failures }, null, 2) + "\n");
   await browser.close();
 }

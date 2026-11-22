@@ -102,8 +102,8 @@ Assembly verifies compiled artifact and relink input hashes, includes source,
 licenses and deterministic relink materials, then writes an artifact manifest.
 The product browser test is `node scripts/verify-ffmpeg-browser.mjs` against a
 production server at `FFMPEG_TEST_URL` (default http://127.0.0.1:3147).
-See [delivery evidence](../../docs/videos/ffmpeg-playback-delivery.md) for scope,
-resource bounds and browser coverage. Publish the complete prepared version directory
+See [video & FFmpeg architecture](../../docs/domains/videos.md) for scope,
+resource bounds and support matrix. Publish the complete prepared version directory
 to `anyfile-bucket/vendor/ffmpeg-playback/9.0.1-anyfile.4/`; verify public
 SHA-256, MIME, CORS/CORP and immutable caching at `https://assets.anyfile.top`.
 
@@ -124,7 +124,6 @@ On the local M3 Pro, three alternating runs of the same X4 sample showed
 30 lens pairs taking 10.760 s without SIMD versus 9.738 s with SIMD (median),
 a 1.105× throughput improvement. Video and PCM hashes were identical.
 This is a decode benchmark, not a browser playback or real-time guarantee.
-See [SIMD evidence](../../docs/videos/evidence/ffmpeg-simd-comparison.json).
 
 ## Threads and buffering (9.0.1-anyfile.4)
 
@@ -147,4 +146,4 @@ Three alternating terminal runs on the X4 sample measured 9.799 s versus
 3.604 s median for 30 lens pairs (2.72× throughput, about 8.32 pairs/s).
 The first 30 outputs per track match exactly; frame threads change event
 interleaving. Observed WASM heap was 355,991,552 bytes. This is not a
-browser playback or real-time guarantee. See the [thread evidence](../../docs/videos/evidence/ffmpeg-thread-comparison.json).
+browser playback or real-time guarantee.

@@ -30,13 +30,13 @@ OCCT 审核资产由项目部署；完整源码构建配方见 [tools/occt-impor
 
 - 输入最大 128 MiB、内核堆 256 MiB；输出最多 100 万顶点和 50 万三角形。
 - 仅提供离散几何查看，不进行精确 CAD 编辑、PMI 展示或几何有效性认证。
-- 上游畸形输入公告及剩余限制见[依赖审计](../../../docs/3d/dependency-audit.md)。
+- 上游畸形输入公告（CVE-2026-42481）及剩余限制见 [3D 安全与依赖审计](../../../docs/domains/3d.md#3-安全与依赖审计结论)。
 
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
 - 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
-- [3D 支持矩阵](../../../docs/3d/support-matrix.md)与[实现状态](../../../docs/3d/implementation-status.md)。
+- [3D 与 CAD 架构及支持矩阵](../../../docs/domains/3d.md)。
 
 在仓库根目录运行插件测试：
 
