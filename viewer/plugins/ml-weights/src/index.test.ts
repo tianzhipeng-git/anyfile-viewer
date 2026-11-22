@@ -1,14 +1,16 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { validateManifest, type Locale } from "@anyfile/viewer-protocol";
-import { createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer-test";
+import { assertReadsWithin, createTrackedFile, createViewerTestContext, type ViewerTestContext } from "@anyfile/viewer-test";
 
 import { mlWeightsViewer } from "./index";
 import { mlWeightsManifest } from "./manifest";
-import { parseGgufStruct } from "./gguf";
+import { MAX_GGUF_STRUCT_BYTES, parseGgufStruct } from "./gguf";
 import { readModel } from "./parse";
+import { MAX_SAFETENSORS_HEADER_BYTES } from "./safetensors";
+import { createModelView } from "./ui";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const GGUF_SAMPLE = new Uint8Array(readFileSync(join(HERE, "../examples/stories260K.gguf")));
@@ -25,6 +27,42 @@ function contextFor(contents: Uint8Array, name: string, locale: Locale = "zh-CN"
 afterEach(() => {
   for (const context of contexts.splice(0)) context.cleanup();
 });
+
+function buildSyntheticGguf(options: { version?: number; metadataPaddingBytes?: number; tensorPayloadBytes?: number } = {}) {
+  const version = options.version ?? 3;
+  const padding = options.metadataPaddingBytes ?? 0;
+  const tensorPayload = options.tensorPayloadBytes ?? 64;
+  const enc = new TextEncoder();
+  const key = enc.encode("general.description");
+  const value = new Uint8Array(padding).fill(0x61);
+  const tensorName = enc.encode("w");
+
+  // header (24) + kv (8 + key + 4 + 8 + value) + tensor (8 + name + 4 + 8 + 4 + 8)
+  const headerLen = 24 + (8 + key.length + 4 + 8 + value.length) + (8 + tensorName.length + 4 + 8 + 4 + 8);
+  const alignedDataStart = headerLen + ((32 - (headerLen % 32)) % 32);
+  const bytes = new Uint8Array(alignedDataStart + tensorPayload);
+  const view = new DataView(bytes.buffer);
+  let pos = 0;
+  const writeU32 = (v: number) => { view.setUint32(pos, v, true); pos += 4; };
+  const writeU64 = (v: number) => { view.setBigUint64(pos, BigInt(v), true); pos += 8; };
+  const writeStr = (s: Uint8Array) => { writeU64(s.length); bytes.set(s, pos); pos += s.length; };
+
+  bytes.set(enc.encode("GGUF"), 0);
+  pos = 4;
+  writeU32(version);
+  writeU64(1); // tensorCount
+  writeU64(1); // metadataCount
+  writeStr(key);
+  writeU32(8); // T_STRING
+  writeStr(value);
+  writeStr(tensorName);
+  writeU32(1); // ndims
+  writeU64(16); // shape [16]
+  writeU32(0); // F32 (64 bytes)
+  writeU64(0); // offset relative to tensorDataStart
+
+  return bytes;
+}
 
 describe("ml-weights parser", () => {
   it("derives tensor list and metadata from a real GGUF file", async () => {
@@ -70,13 +108,83 @@ describe("ml-weights parser", () => {
     // Claiming the tensor data extends past the file must be rejected.
     expect(() => parseGgufStruct(view, true, 1000)).toThrow();
   });
+
+  it("accepts valid GGUF files whose metadata is larger than tensor data", () => {
+    const bytes = buildSyntheticGguf({ metadataPaddingBytes: 2048, tensorPayloadBytes: 64 });
+    const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.length);
+    const doc = parseGgufStruct(view, true, bytes.length, "en");
+    expect(doc.tensorCount).toBe(1);
+    expect(doc.tensors[0]).toMatchObject({ name: "w", dtype: "F32", bytes: 64 });
+  });
+
+  it("rejects GGUF v1 files with localized invalid-file error", async () => {
+    const v1 = buildSyntheticGguf({ version: 1 });
+    await expect(readModel(new File([v1.slice().buffer as ArrayBuffer], "old.gguf"), new AbortController().signal, () => {}, "en"))
+      .rejects.toMatchObject({ code: "invalid-file", message: expect.stringContaining("Unsupported GGUF version 1") });
+  });
+
+  it("reads multi-GB GGUF headers incrementally without eagerly slicing 200 MiB", async () => {
+    const reads: Array<{ start: number; end: number }> = [];
+    const hugeSize = 4 * 1024 * 1024 * 1024; // 4 GiB simulated file
+    const fakeFile = {
+      name: "huge.gguf",
+      size: hugeSize,
+      slice(start = 0, end = hugeSize) {
+        reads.push({ start, end });
+        const sliceEnd = Math.min(end, GGUF_SAMPLE.length);
+        return new Blob([GGUF_SAMPLE.slice(start, sliceEnd)]);
+      },
+    } as unknown as File;
+
+    const doc = await readModel(fakeFile, new AbortController().signal, () => {}, "en");
+    expect(doc.tensorCount).toBe(48);
+    expect(Math.max(...reads.map((read) => read.end))).toBeLessThanOrEqual(1024 * 1024);
+  });
+
+  it("throws resource-limit for oversized safetensors and GGUF headers", async () => {
+    const stHead = new Uint8Array(8);
+    new DataView(stHead.buffer).setBigUint64(0, BigInt(MAX_SAFETENSORS_HEADER_BYTES + 16), true);
+    const oversizedSt = {
+      name: "huge-header.safetensors",
+      size: MAX_SAFETENSORS_HEADER_BYTES + 1024,
+      slice(start = 0, end = 8) {
+        return new Blob([stHead.slice(start, Math.min(end, stHead.length))]);
+      },
+    } as unknown as File;
+    await expect(readModel(oversizedSt, new AbortController().signal, () => {}, "en"))
+      .rejects.toMatchObject({ code: "resource-limit", message: expect.stringContaining("100 MiB") });
+
+    // GGUF claiming a metadata string larger than MAX_GGUF_STRUCT_BYTES inside an even larger file
+    const ggufHead = new Uint8Array(40);
+    const dv = new DataView(ggufHead.buffer);
+    ggufHead.set(new TextEncoder().encode("GGUF"), 0);
+    dv.setUint32(4, 3, true); // v3
+    dv.setBigUint64(8, BigInt(1), true); // tensorCount
+    dv.setBigUint64(16, BigInt(1), true); // metadataCount
+    dv.setBigUint64(24, BigInt(MAX_GGUF_STRUCT_BYTES + 64), true); // huge key length
+    const oversizedGguf = {
+      name: "huge-meta.gguf",
+      size: MAX_GGUF_STRUCT_BYTES + 4096,
+      slice(start = 0, end = 40) {
+        const clamped = Math.min(end, ggufHead.length);
+        return new Blob([ggufHead.slice(start, clamped)]);
+      },
+    } as unknown as File;
+    await expect(readModel(oversizedGguf, new AbortController().signal, () => {}, "en"))
+      .rejects.toMatchObject({ code: "resource-limit", message: expect.stringContaining("200 MiB") });
+  });
 });
 
 describe("ml-weights probe", () => {
-  it("returns support 3 for real GGUF and safetensors", async () => {
+  it("returns support 3 for real GGUF and safetensors with bounded reads", async () => {
     const { probeMlWeights } = await import("./probe");
-    expect(await probeMlWeights({ file: new File([GGUF_SAMPLE.slice().buffer as ArrayBuffer], "a.gguf"), signal: new AbortController().signal })).toBe(3);
-    expect(await probeMlWeights({ file: new File([SAFETENSORS_SAMPLE.slice().buffer as ArrayBuffer], "a.safetensors"), signal: new AbortController().signal })).toBe(3);
+    const ggufTracked = createTrackedFile(GGUF_SAMPLE, "a.gguf");
+    expect(await probeMlWeights({ file: ggufTracked.file, signal: new AbortController().signal })).toBe(3);
+    assertReadsWithin(ggufTracked.reads, [{ start: 0, end: 9 }]);
+
+    const stTracked = createTrackedFile(SAFETENSORS_SAMPLE, "a.safetensors");
+    expect(await probeMlWeights({ file: stTracked.file, signal: new AbortController().signal })).toBe(3);
+    assertReadsWithin(stTracked.reads, [{ start: 0, end: 9 }]);
   });
 
   it("returns 0 for unrelated bytes", async () => {
@@ -94,13 +202,15 @@ describe("ml-weights viewer", () => {
 
   it("renders overview and tensor list from the real GGUF sample", async () => {
     const test = contextFor(GGUF_SAMPLE, "stories260K.gguf");
-    const controller = await mlWeightsViewer.open(test.context);
+    const reportPreview = vi.fn();
+    const controller = await mlWeightsViewer.open({ ...test.context, reportPreview });
 
     expect(test.container.textContent).toContain("GGUF v3");
     expect(test.container.textContent).toContain("token_embd.weight");
     expect(test.container.textContent).toContain("llama.block_count");
     expect(test.container.querySelectorAll(".anyfile-ml-weights-viewer__table tbody tr").length).toBeGreaterThan(5);
     expect(test.progress.at(-1)?.stage).toBe("ready");
+    expect(reportPreview).toHaveBeenCalledExactlyOnceWith({ outcome: "success", kind: "structure" });
 
     const filter = test.container.querySelector<HTMLInputElement>("[data-ml-weights-filter]")!;
     filter.value = "output";
@@ -114,6 +224,45 @@ describe("ml-weights viewer", () => {
     expect(test.outside.dataset.viewerTestOutside).toBe("untouched");
   });
 
+  it("sorts the Size column by byte size rather than element count", () => {
+    const view = createModelView({
+      format: "safetensors",
+      name: "mixed.safetensors",
+      version: "Safetensors",
+      tensorCount: 2,
+      totalParameters: 10,
+      totalBytes: 20,
+      metadata: [],
+      tensors: [
+        { name: "many_small_elems", shape: [8], dtype: "U8", bytes: 8 },
+        { name: "fewer_wide_elems", shape: [3], dtype: "F32", bytes: 12 },
+      ],
+    }, "en");
+    document.body.append(view.root);
+    try {
+      const sortBtn = view.root.querySelector<HTMLButtonElement>(".anyfile-inspector__sort-btn")!;
+      sortBtn.click(); // initialSort: desc -> 12 B first
+      const descNames = [...view.root.querySelectorAll(".anyfile-ml-weights-viewer__table tbody tr td:first-child")]
+        .map((cell) => cell.textContent);
+      expect(descNames).toEqual(["fewer_wide_elems", "many_small_elems"]);
+
+      sortBtn.click(); // asc -> 8 B first
+      const ascNames = [...view.root.querySelectorAll(".anyfile-ml-weights-viewer__table tbody tr td:first-child")]
+        .map((cell) => cell.textContent);
+      expect(ascNames).toEqual(["many_small_elems", "fewer_wide_elems"]);
+    } finally {
+      view.dispose();
+    }
+  });
+
+  it("disposes an active view when aborted after opening", async () => {
+    const test = contextFor(GGUF_SAMPLE, "stories260K.gguf");
+    await mlWeightsViewer.open(test.context);
+    expect(test.container.childElementCount).toBe(1);
+    test.abortController.abort();
+    expect(test.container.childElementCount).toBe(0);
+  });
+
   it("renders tensor list from the real safetensors sample", async () => {
     const test = contextFor(SAFETENSORS_SAMPLE, "model.safetensors", "en");
     const controller = await mlWeightsViewer.open(test.context);
@@ -122,10 +271,20 @@ describe("ml-weights viewer", () => {
     await controller.dispose();
   });
 
-  it("rejects an invalid file through open()", async () => {
-    const test = contextFor(new TextEncoder().encode("not a model"), "bad.gguf");
-    await expect(mlWeightsViewer.open(test.context)).rejects.toMatchObject({ code: "invalid-file" });
-    expect(test.container.childElementCount).toBe(0);
+  it("rejects an invalid file through open() with localized messages", async () => {
+    const zh = contextFor(new TextEncoder().encode("not a model"), "bad.gguf", "zh-CN");
+    await expect(mlWeightsViewer.open(zh.context)).rejects.toMatchObject({
+      code: "invalid-file",
+      message: expect.stringContaining("Safetensors"),
+    });
+    expect(zh.container.childElementCount).toBe(0);
+
+    const en = contextFor(new TextEncoder().encode("GGUF\x03\x00\x00\x00"), "bad.gguf", "en");
+    await expect(mlWeightsViewer.open(en.context)).rejects.toMatchObject({
+      code: "invalid-file",
+      message: "GGUF file is too short.",
+    });
+    expect(en.container.childElementCount).toBe(0);
   });
 
   it("honours an abort during opening", async () => {

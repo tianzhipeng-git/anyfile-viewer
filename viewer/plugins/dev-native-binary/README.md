@@ -25,6 +25,7 @@
 |---|---|
 | `@anyfile/dev-binary-core` | 可取消的 `FileByteSource` 与有界范围读取 |
 | `@anyfile/viewer-protocol` | 插件协议、错误码与本地化辅助 |
+| `@anyfile/viewer-ui` | 共享 Inspector UI Kit 原语与宿主主题变量 |
 
 ## 已知限制
 

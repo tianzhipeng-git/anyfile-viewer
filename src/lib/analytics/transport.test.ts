@@ -71,3 +71,27 @@ it("attributes public and embedded previews without sending the source URL", asy
   expect(payload).toContain("https://www.anyfile.top/en/embed");
   expect(payload).not.toMatch(/raw.githubusercontent.com|file.csv|#file/);
 });
+
+it("fails closed when localStorage is unavailable and still applies in-session opt-out", async () => {
+  const getItem = vi.spyOn(localStorage, "getItem").mockImplementation(() => {
+    throw new DOMException("Blocked", "SecurityError");
+  });
+  const setItem = vi.spyOn(localStorage, "setItem").mockImplementation(() => {
+    throw new DOMException("Blocked", "SecurityError");
+  });
+  try {
+    const { consentGranted, setAnalyticsConsent, track } = await import("./events");
+    expect(consentGranted()).toBe(false);
+    track("page_view");
+    expect(window.dataLayer).toBeUndefined();
+
+    window.gtag = vi.fn();
+    expect(setAnalyticsConsent(false)).toBe(false);
+    expect(window["ga-disable-G-289W10FK5X"]).toBe(true);
+    expect(window.gtag).toHaveBeenLastCalledWith("consent", "update", { analytics_storage: "denied" });
+    expect(consentGranted()).toBe(false);
+  } finally {
+    getItem.mockRestore();
+    setItem.mockRestore();
+  }
+});

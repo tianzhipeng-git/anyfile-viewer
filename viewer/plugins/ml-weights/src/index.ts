@@ -19,7 +19,7 @@ function isAbortError(error: unknown) {
 }
 
 async function openModel(context: OpenViewerContext): Promise<ViewerController> {
-  const { container, file, locale, reportProgress, signal } = context;
+  const { container, file, locale, reportPreview, reportProgress, signal } = context;
   const copy = selectMessages(locale, {
     en: { reading: "Reading model weights…", rendering: "Preparing tensor list…", ready: "Model weights opened", invalid: "The file is damaged or is not a valid safetensors/GGUF model." },
     "zh-CN": { reading: "正在读取模型权重…", rendering: "正在整理张量清单…", ready: "模型权重已打开", invalid: "文件已损坏，或不是有效的 safetensors/GGUF 模型。" },
@@ -35,7 +35,7 @@ async function openModel(context: OpenViewerContext): Promise<ViewerController> 
 
   try {
     reportProgress({ stage: "reading", message: copy.reading, loaded: 0, total: file.size });
-    const document = await readModel(file, signal, reportProgress);
+    const document = await readModel(file, signal, reportProgress, locale);
     if (signal.aborted) throw abortError();
     reportProgress({ stage: "rendering", message: copy.rendering });
     view = createModelView(document, locale);
@@ -43,6 +43,7 @@ async function openModel(context: OpenViewerContext): Promise<ViewerController> 
     container.append(view.root);
     signal.addEventListener("abort", dispose, { once: true });
     reportProgress({ stage: "ready", message: copy.ready });
+    reportPreview?.({ outcome: "success", kind: "structure" });
     return { dispose };
   } catch (error) {
     dispose();

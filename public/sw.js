@@ -72,21 +72,37 @@ function extractShellAssetUrls(html) {
   return [...discovered];
 }
 
+async function safeCacheMatch(cacheName, key) {
+  try {
+    const cache = await caches.open(cacheName);
+    return await cache.match(key);
+  } catch {
+    return undefined;
+  }
+}
+
+async function safeCachePut(cacheName, key, response) {
+  try {
+    const cache = await caches.open(cacheName);
+    await cache.put(key, response);
+  } catch {
+    // Ignore quota or private-storage errors so caching never breaks live fetches.
+  }
+}
+
 async function warmImmutableAssets(assetUrls) {
   if (!assetUrls.length) return;
-  const cache = await caches.open(RUNTIME_CACHE);
   await Promise.allSettled(assetUrls.map(async (assetUrl) => {
-    const existing = await cache.match(assetUrl);
+    const existing = await safeCacheMatch(RUNTIME_CACHE, assetUrl);
     if (existing) return;
     const response = await fetch(assetUrl, { credentials: "same-origin" });
     if (isCacheableBasicResponse(response)) {
-      await cache.put(assetUrl, response);
+      await safeCachePut(RUNTIME_CACHE, assetUrl, response);
     }
   }));
 }
 
 async function precacheAppShell() {
-  const shellCache = await caches.open(SHELL_CACHE);
   const discoveredAssets = new Set();
 
   await Promise.allSettled(VIEWER_SHELL_URLS.map(async (viewerUrl) => {
@@ -98,63 +114,56 @@ async function precacheAppShell() {
     for (const assetUrl of extractShellAssetUrls(html)) {
       discoveredAssets.add(assetUrl);
     }
-    await shellCache.put(viewerUrl, response);
+    await safeCachePut(SHELL_CACHE, viewerUrl, response);
   }));
 
   await Promise.allSettled(STATIC_SHELL_URLS.map(async (assetUrl) => {
     const response = await fetch(assetUrl, { credentials: "same-origin" });
     if (isCacheableBasicResponse(response)) {
-      await shellCache.put(assetUrl, response);
+      await safeCachePut(SHELL_CACHE, assetUrl, response);
     }
   }));
 
   await warmImmutableAssets([...discoveredAssets]);
 }
 
-async function handleNavigation(request, url, event) {
-  const normalizedPath = normalizeViewerPath(url.pathname);
-  const viewerNavigation = isViewerRoute(normalizedPath);
-
+async function handleNavigation(request, normalizedPath, event) {
   try {
     const response = await fetch(request);
-    if (viewerNavigation && isCacheableBasicResponse(response) && hasCrossOriginIsolationHeaders(response)) {
+    if (isCacheableBasicResponse(response) && hasCrossOriginIsolationHeaders(response)) {
       const cacheCopy = response.clone();
       const htmlCopy = response.clone();
       event.waitUntil((async () => {
-        const shellCache = await caches.open(SHELL_CACHE);
-        await shellCache.put(normalizedPath, cacheCopy);
+        await safeCachePut(SHELL_CACHE, normalizedPath, cacheCopy);
         const html = await htmlCopy.text();
         await warmImmutableAssets(extractShellAssetUrls(html));
       })());
     }
     return response;
   } catch (error) {
-    const shellCache = await caches.open(SHELL_CACHE);
-    const cached = await shellCache.match(normalizedPath);
+    const cached = await safeCacheMatch(SHELL_CACHE, normalizedPath);
     if (cached) return cached;
     throw error;
   }
 }
 
 async function handleSameOriginImmutable(request) {
-  const cache = await caches.open(RUNTIME_CACHE);
-  const cached = await cache.match(request);
+  const cached = await safeCacheMatch(RUNTIME_CACHE, request);
   if (cached) return cached;
 
   const response = await fetch(request);
   if (isCacheableBasicResponse(response)) {
-    await cache.put(request, response.clone());
+    await safeCachePut(RUNTIME_CACHE, request, response.clone());
   }
   return response;
 }
 
 async function handleSameOriginShellAsset(request, event) {
-  const cache = await caches.open(SHELL_CACHE);
-  const cached = await cache.match(request);
+  const cached = await safeCacheMatch(SHELL_CACHE, request);
 
   const networkUpdate = fetch(request).then(async (response) => {
     if (isCacheableBasicResponse(response)) {
-      await cache.put(request, response.clone());
+      await safeCachePut(SHELL_CACHE, request, response.clone());
     }
     return response;
   });
@@ -167,9 +176,8 @@ async function handleSameOriginShellAsset(request, event) {
 }
 
 async function handleCrossOriginRuntime(url) {
-  const cache = await caches.open(RUNTIME_CACHE);
   const cacheKey = url.href;
-  const cached = await cache.match(cacheKey);
+  const cached = await safeCacheMatch(RUNTIME_CACHE, cacheKey);
   if (cached) return cached;
 
   // Always request trusted external runtimes in CORS mode without credentials so
@@ -181,7 +189,7 @@ async function handleCrossOriginRuntime(url) {
   });
   const response = await fetch(corsRequest);
   if (isCacheableCrossOriginRuntimeResponse(response)) {
-    await cache.put(cacheKey, response.clone());
+    await safeCachePut(RUNTIME_CACHE, cacheKey, response.clone());
   }
   return response;
 }
@@ -212,7 +220,10 @@ self.addEventListener("fetch", (event) => {
   if (url.protocol !== "http:" && url.protocol !== "https:") return;
 
   if (request.mode === "navigate" && url.origin === self.location.origin) {
-    event.respondWith(handleNavigation(request, url, event));
+    const normalizedPath = normalizeViewerPath(url.pathname);
+    if (isViewerRoute(normalizedPath)) {
+      event.respondWith(handleNavigation(request, normalizedPath, event));
+    }
     return;
   }
 

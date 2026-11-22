@@ -19,13 +19,14 @@
 | 包 | 用途 |
 |---|---|
 | `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `@anyfile/viewer-ui` | 共享 Inspector UI Kit 原语与宿主主题变量 |
 
 没有第三方解析器、Worker、WASM 或网络请求，使用浏览器 `DataView`/`TextDecoder`/DOM API。
 
 ## 已知限制
 
 - 仅展示结构与元数据，不加载张量数值、不做推理。
-- GGUF 支持版本 1–3，元数据与张量描述区上限 200 MiB；safetensors 头部上限 100 MiB。超出以 `resource-limit`/`invalid-file` 报错。
+- GGUF 支持版本 2–3，元数据与张量描述区上限 200 MiB；safetensors 头部上限 100 MiB。超出以 `resource-limit`/`invalid-file` 报错。
 - GGUF 量化张量的体积是按块大小估算（用于概览），非逐元素校验。
 - 张量表最多渲染前 5000 行，可按名称筛选与按体积排序。
 

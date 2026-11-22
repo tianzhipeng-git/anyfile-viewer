@@ -93,7 +93,7 @@ class Decoder {
 
   private dictionary(depth: number, topLevel: boolean): Record<string, BencodeValue> {
     this.pos += 1; // consume 'd'
-    const result: Record<string, BencodeValue> = {};
+    const result: Record<string, BencodeValue> = Object.create(null);
     while (this.bytes[this.pos] !== 0x65 /* e */) {
       const byte = this.bytes[this.pos];
       if (byte === undefined) throw new BencodeError("Unterminated dictionary", this.pos);

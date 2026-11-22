@@ -57,6 +57,7 @@
 | 设计或修改 `viewer-ui`、共享渲染基础设施、Canvas/视口/缩放/渲染调度/资源管理、renderer adapter，或评估 Lit、d3-zoom、Konva、PixiJS、OpenSeadragon、Three.js 等选型 | `docs/viewer-ui-and-rendering-architecture.md` |
 | 查询领域架构边界、支持矩阵与安全/依赖审计结论 | `docs/domains/{3d,audio,images,videos,ebooks,developer}.md` |
 | 修改站点格式/类别/插件页、i18n 或内容相似度审计 | `docs/seo/content-pages.md`、`docs/seo/i18n.md` |
+| 修改 PWA 安装、Web App Manifest、系统文件关联（File Handling API / `launchQueue`）或 Service Worker 离线缓存 | `docs/pwa-desktop-app.md` |
 
 # 注意
 尽量不要使用内置无头浏览器进行真实测试验收, 可能它无法支持文件选择器和WebGL的能力.

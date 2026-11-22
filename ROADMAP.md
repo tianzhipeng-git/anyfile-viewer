@@ -12,20 +12,14 @@
 - 每周 review：`docs/agent-weekly-review.md`
 
 ## 需求
-- [x] 高 | 清理和简化docs/ | 合并 6 领域文档至 `docs/domains/`、移除日期化证据与单插件文档并同步 README，docs Markdown 8346→1361 行。2026-11-22 c87e119
-- [x] 高 | 扩展 `@anyfile/viewer-ui` 为共享 Inspector UI Kit 与主题变量契约 | 补齐 12 个 `--viewer-*` 宿主主题 token，新增 `el()`/`formatBytes()`/shell/KV/数据表/筛选/标签/分页原语，迁移 8 个检查器插件并修复暗色模式失配。2026-11-22 bb58a0c
-- [x] 高 | 拆分插件策略配置与接线元数据（`viewer/plugin-policies.json`、`src/lib/viewer-protocol.test.ts`） | 拆为全局预算 `viewer/plugin-policies.json`（850→10 行）+ 54 个插件 `policy.json`，按领域拆分 `src/lib/registrations/*.ts` 与 `src/lib/viewer-routing/*.test.ts`，`viewer-protocol.test.ts`（604→177 行）仅保留纯协议契约测试并消除硬编码 probe 列表与 `file-type-icon.tsx` 重复 manifest 导入。2026-11-22 0cdf444
 - [ ] 低 | 在 `@anyfile/runtime-assets` 中抽取共享 Worker RPC 客户端 | 20+ Worker+WASM 插件重复编写请求 ID 关联、超时、`AbortSignal` 终止、transferable 与运行时回退逻辑（如 `djvu/src/worker-client.ts` 近 200 行）；抽为轻量类型化 `createWorkerRpcClient` 减少泄漏与取消竞态
 - [ ] 高 | 抽取共享分页文档视口适配器（`PagedDocumentSource`） | `djvu` 与 `pdf` 各自实现 ~500–1000 行分页画布工具栏、缩放/适应、画布淘汰与大纲侧栏；抽到共享包（先从 `djvu` 抽起，再视情况迁 `pdf`）以复用至后续分页格式（TIFF/XPS/PostScript 等）
-- [x] 高 | 完成 `docs/pwa-desktop-app.md` | 实现按语言静态 Web App Manifest、195 个精选安全扩展名的 File Handling API 与 `launchQueue` 接入、`public/sw.js` 分层离线缓存（保 COOP/COEP 与 CORS+CORP 禁 opaque）及按需安装按钮。2026-11-22 2337e03
 - [ ] 中 | 新增邮件查看器（`.eml` / `.msg`） | 解析 RFC 5322 MIME 与 Outlook CFBF `.msg`，展示安全清理正文与附件清单；无 Outlook 打开 `.msg` 搜索痛点极强，邮件高度隐私敏感不愿上传
 - [ ] 中 | 新增 Microsoft Access 数据库查看器（`.mdb` / `.accdb`） | `open mdb/accdb online` 与 macOS 查看 Access 搜索痛点极强（Mac/Linux 无原生软件，数据库高度机密）；基于纯 JS `mdb-reader` 读取表结构与分页数据
 - [ ] 中 | `archive-metadata-viewer` 补齐 `.7z` 归档目录查看 | 复用或抽取 `comic-book` 已有的 `comic-archive` libarchive WASM，无需新构建；macOS 与浏览器原生打不开 `.7z`，搜索需求高
-- [x] 低 | 新增 ML 模型权重头查看器（`.safetensors` / `.gguf`） | AI 开发者高频搜 `gguf/safetensors metadata viewer`，模型动辄数 GB 无法上传；纯 JS `File.slice()` 仅读文件头即可毫秒级展示架构、量化与张量形状，无新运行时。2026-11-22 d50c0cb
 - [ ] 中 | 新增网络抓包查看器（`.pcap` / `.pcapng`） | 解析包头与常见 TCP/UDP/DNS/HTTP 摘要、筛选与载荷检查；排查问题常需安装 Wireshark，流量数据极度敏感不愿上传
 - [ ] 中 | 新增地理轨迹与矢量数据查看器（`.geojson` / `.gpx` / `.kml` / `.shp`） | 纯本地 2D 坐标投影与属性表展示（不请求在线地图瓦片）；替代 QGIS / Google Earth，符合 `选格式.md` 地理数据免上传场景
 - [ ] 低 | `ffmpeg-video` 补齐 `.flv`（Flash Video）播放 | `docs/domains/videos.md` 未实施项；现有 `ffmpeg-playback` WASM 已编入 `flv` demuxer/decoder（见 `tools/ffmpeg-playback-build/evidence/configure.txt`），补有界 probe、样例与注册即可免装桌面播放器
-- [x] 低 | 新增 BitTorrent 种子查看器（`.torrent`） | `torrent file viewer online` 搜索量高，用户只想看内部文件树、大小与 Tracker 而不想装客户端或上传；纯 JS Bencode 解析与 WebCrypto 计算 infohash，无新运行时。2026-11-22 a859b74
 - [ ] 低 | 新增 Apple 属性列表查看器（`.plist`） | Windows/Linux 与浏览器打不开二进制 `bplist00`，`plist viewer online` 需求稳定且常含应用配置不便上传；纯 JS 解析 `bplist00`/XML 为树形与 JSON 视图，无新运行时
 - [ ] 低 | 新增 OpenRaster / Krita 分层设计图预览（`.ora` / `.kra`） | `docs/domains/images.md` 未实施项；规范自带 `mergedimage.png` 与 `stack.xml` 图层树，复用现有 ZIP 与 `@anyfile/viewer-rendering` 无新运行时即可替代 Krita/GIMP 预览
 - [ ] 高 | 新增 Apple iWork 文档与演示查看器（`.pages` / `.key`） | Windows/Linux 原生完全打不开 Mac 发来的 `.pages`/`.key`（当前仅 `excel` 支持 `.numbers`），搜索需求极大；需解析 IWA（Snappy+Protobuf）或自建 `libetonyek` WASM 渲染版式
@@ -38,10 +32,7 @@
 - [ ] 高 | 新增医学/科学体数据查看器（`.nii` / `.nii.gz` / `.nrrd`） | `docs/domains/images.md` 未实施项；科研/医疗影像高度敏感不愿上传，需三视图切片与窗宽窗位，替代 3D Slicer 等大型桌面软件
 - [ ] 高 | 实现 ZIP 归档内文件按需点击预览（跨插件复用） | 在 `archive-metadata-viewer` 中点击未加密 ZIP 内图片/PDF/代码/表格时按需流式解压并复用对应查看器，涉及工作区协议与跨插件协作
 - [ ] 中 | 抽取 dji-osmo / gopro-max / insta360 的双轨播放与全景渲染到共享包 | DJI 与 GoPro playback 约 375 行仅 64 行不同；需人工浏览器验收三种相机样例
-- [x] 中 | 合并 `docs/videos` 文档为当前状态（删除阶段证据与已完成计划，保留有效规则） | 已合并至 `docs/domains/videos.md`。2026-11-22 c87e119
-- [x] 中 | 合并 `docs/3d`、`docs/images`、`docs/ebooks`、`docs/audio` 文档为当前状态 | 已合并至 `docs/domains/`。2026-11-22 c87e119
 
 
 ## 待处理建议
 在每日开发 Agent的执行过程中发现的问题, 更新在这个下方, 每周会经过评估和确认后加入需求池.
-- 这是一条测试建议, 哈哈哈

@@ -84,6 +84,23 @@ function SupportLevelBadge({
   );
 }
 
+export function resolveViewerErrorMessage(
+  error: unknown,
+  fallbackMessage: string,
+  offlineMessage: string,
+  offline: boolean = typeof navigator !== "undefined" && !navigator.onLine,
+): { readonly viewerError: ViewerError; readonly message: string } {
+  const viewerError = normalizeViewerError(error, fallbackMessage);
+  const likelyUncachedOffline =
+    !(error instanceof ViewerError)
+    || viewerError.code === "open-failed"
+    || viewerError.code === "unsupported-environment";
+  return {
+    viewerError,
+    message: offline && likelyUncachedOffline ? offlineMessage : viewerError.message,
+  };
+}
+
 export function ViewerHost({
   file,
   header,
@@ -143,11 +160,11 @@ export function ViewerHost({
       setMessage(resolvedCandidates.length > 0 ? dictionary.loadingViewer : "");
     }).catch((error: unknown) => {
       if (abortController.signal.aborted || isViewerAbortError(error)) return;
-      const offline = typeof navigator !== "undefined" && !navigator.onLine;
-      const viewerError = normalizeViewerError(error, dictionary.detectionFailed);
-      const messageText = offline && (!(error instanceof ViewerError) || viewerError.code === "open-failed")
-        ? dictionary.offlineUncached
-        : viewerError.message;
+      const { viewerError, message: messageText } = resolveViewerErrorMessage(
+        error,
+        dictionary.detectionFailed,
+        dictionary.offlineUncached,
+      );
       attempt.fail(viewerError.code);
       setRoutingResult({ file, fileSource, workspace, candidates: [], error: messageText, attempt });
     });
@@ -237,11 +254,11 @@ export function ViewerHost({
       if (abortController.signal.aborted || isViewerAbortError(error)) return;
       container.replaceChildren();
       if (sessionRef.current === session) {
-        const offline = typeof navigator !== "undefined" && !navigator.onLine;
-        const viewerError = normalizeViewerError(error, dictionary.openFailedFallback);
-        const messageText = offline && (!(error instanceof ViewerError) || viewerError.code === "open-failed")
-          ? dictionary.offlineUncached
-          : viewerError.message;
+        const { viewerError, message: messageText } = resolveViewerErrorMessage(
+          error,
+          dictionary.openFailedFallback,
+          dictionary.offlineUncached,
+        );
         attempt?.fail(viewerError.code);
         setStatus("error");
         setMessage(messageText);

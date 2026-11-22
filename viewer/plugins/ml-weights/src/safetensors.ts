@@ -1,8 +1,37 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { selectMessages, ViewerError, type Locale } from "@anyfile/viewer-protocol";
 
 import type { ModelDocument, ModelTensor } from "./types";
 
 export const MAX_SAFETENSORS_HEADER_BYTES = 100 * 1024 * 1024;
+
+function safetensorsCopy(locale: Locale) {
+  return selectMessages(locale, {
+    en: {
+      headerTooLarge: "Safetensors header exceeds the 100 MiB browser limit.",
+      invalidLength: "Invalid safetensors header length or truncated file.",
+      invalidJson: "Safetensors header is not valid JSON.",
+      invalidStructure: "Invalid safetensors header structure.",
+      missingDesc: (name: string) => `Tensor ${name} is missing its descriptor.`,
+      missingDtype: (name: string) => `Tensor ${name} is missing its data type.`,
+      invalidShape: (name: string) => `Tensor ${name} has an invalid shape.`,
+      invalidOffsets: (name: string) => `Tensor ${name} has invalid data offsets.`,
+      byteMismatch: (name: string) => `Tensor ${name} byte length does not match its shape or data type.`,
+      noTensors: "This safetensors file does not contain any tensors.",
+    },
+    "zh-CN": {
+      headerTooLarge: "Safetensors 头部超过 100 MiB 浏览器安全上限。",
+      invalidLength: "Safetensors 头部长度无效或文件被截断。",
+      invalidJson: "Safetensors 头部不是有效的 JSON。",
+      invalidStructure: "Safetensors 头部结构无效。",
+      missingDesc: (name: string) => `张量 ${name} 缺少描述。`,
+      missingDtype: (name: string) => `张量 ${name} 缺少数据类型。`,
+      invalidShape: (name: string) => `张量 ${name} 的形状无效。`,
+      invalidOffsets: (name: string) => `张量 ${name} 的偏移无效。`,
+      byteMismatch: (name: string) => `张量 ${name} 的字节数与形状或类型不符。`,
+      noTensors: "Safetensors 文件不包含任何张量。",
+    },
+  });
+}
 
 const DTYPE_BYTES: Record<string, number> = {
   BOOL: 1, U8: 1, I8: 1, F8_E4M3: 1, F8_E5M2: 1,
@@ -30,19 +59,28 @@ function isUintArray(value: unknown): value is number[] {
  * that many bytes of UTF-8 JSON describing the tensors, then raw tensor data.
  * Only the header is read; tensor data is never loaded.
  */
-export function parseSafetensorsHeader(fileSize: number, headerLength: number, headerBytes: Uint8Array): ModelDocument {
-  if (headerLength <= 0 || headerLength > MAX_SAFETENSORS_HEADER_BYTES || headerLength > fileSize - 8) {
-    throw new ViewerError("invalid-file", "Safetensors 头部长度无效或文件被截断。");
+export function parseSafetensorsHeader(
+  fileSize: number,
+  headerLength: number,
+  headerBytes: Uint8Array,
+  locale: Locale = "en",
+): ModelDocument {
+  const copy = safetensorsCopy(locale);
+  if (headerLength <= 0 || headerLength > fileSize - 8) {
+    throw new ViewerError("invalid-file", copy.invalidLength);
+  }
+  if (headerLength > MAX_SAFETENSORS_HEADER_BYTES) {
+    throw new ViewerError("resource-limit", copy.headerTooLarge);
   }
 
   let json: unknown;
   try {
     json = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(headerBytes));
   } catch {
-    throw new ViewerError("invalid-file", "Safetensors 头部不是有效的 JSON。");
+    throw new ViewerError("invalid-file", copy.invalidJson);
   }
   if (typeof json !== "object" || json === null || Array.isArray(json)) {
-    throw new ViewerError("invalid-file", "Safetensors 头部结构无效。");
+    throw new ViewerError("invalid-file", copy.invalidStructure);
   }
 
   const header = json as Record<string, HeaderEntry & { format?: unknown }>;
@@ -58,13 +96,13 @@ export function parseSafetensorsHeader(fileSize: number, headerLength: number, h
       }
       continue;
     }
-    if (typeof entry !== "object" || entry === null) throw new ViewerError("invalid-file", `张量 ${name} 缺少描述。`);
+    if (typeof entry !== "object" || entry === null) throw new ViewerError("invalid-file", copy.missingDesc(name));
     const dtype = typeof entry.dtype === "string" ? entry.dtype : undefined;
-    if (!dtype) throw new ViewerError("invalid-file", `张量 ${name} 缺少数据类型。`);
-    if (!isUintArray(entry.shape)) throw new ViewerError("invalid-file", `张量 ${name} 的形状无效。`);
+    if (!dtype) throw new ViewerError("invalid-file", copy.missingDtype(name));
+    if (!isUintArray(entry.shape)) throw new ViewerError("invalid-file", copy.invalidShape(name));
     const offsets = entry.data_offsets;
     if (!isUintArray(offsets) || offsets.length !== 2 || offsets[0] > offsets[1]) {
-      throw new ViewerError("invalid-file", `张量 ${name} 的偏移无效。`);
+      throw new ViewerError("invalid-file", copy.invalidOffsets(name));
     }
 
     const shape = entry.shape;
@@ -72,7 +110,7 @@ export function parseSafetensorsHeader(fileSize: number, headerLength: number, h
     const byteLength = offsets[1] - offsets[0];
     const expected = elementBytes(dtype) !== undefined ? elementCount * elementBytes(dtype)! : byteLength;
     if (byteLength !== expected) {
-      throw new ViewerError("invalid-file", `张量 ${name} 的字节数与形状或类型不符。`);
+      throw new ViewerError("invalid-file", copy.byteMismatch(name));
     }
 
     totalParameters += elementCount;
@@ -80,7 +118,7 @@ export function parseSafetensorsHeader(fileSize: number, headerLength: number, h
     tensors.push({ name, shape, dtype, bytes: byteLength });
   }
 
-  if (tensors.length === 0) throw new ViewerError("invalid-file", "Safetensors 文件不包含任何张量。");
+  if (tensors.length === 0) throw new ViewerError("invalid-file", copy.noTensors);
 
   return {
     format: "safetensors",

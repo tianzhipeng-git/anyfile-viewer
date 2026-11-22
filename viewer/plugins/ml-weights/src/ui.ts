@@ -18,14 +18,14 @@ function copyFor(locale: Locale) {
     overview: "概览", metadata: "元数据", tensors: "张量", format: "格式", architecture: "架构",
     tensorCount: "张量数", parameters: "参数量", weightSize: "权重体积", key: "键", value: "值",
     tensorName: "张量", dtype: "类型", shape: "形状", size: "大小", filter: "筛选张量名称",
-    empty: "没有匹配的张量", hidden: "张量过多，仅显示前 5000 个。", sortAsc: "按元素数升序",
-    sortDesc: "按元素数降序", metaEmpty: "文件没有额外的元数据。",
+    empty: "没有匹配的张量", hidden: "张量过多，仅显示前 5000 个。", sortAsc: "按大小升序",
+    sortDesc: "按大小降序", metaEmpty: "文件没有额外的元数据。",
   }, en: {
     overview: "Overview", metadata: "Metadata", tensors: "Tensors", format: "Format", architecture: "Architecture",
     tensorCount: "Tensors", parameters: "Parameters", weightSize: "Weight size", key: "Key", value: "Value",
     tensorName: "Tensor", dtype: "Type", shape: "Shape", size: "Size", filter: "Filter tensor names",
-    empty: "No matching tensors", hidden: "Too many tensors; only the first 5000 are shown.", sortAsc: "Sort by element count ascending",
-    sortDesc: "Sort by element count descending", metaEmpty: "This file has no extra metadata.",
+    empty: "No matching tensors", hidden: "Too many tensors; only the first 5000 are shown.", sortAsc: "Sort by size ascending",
+    sortDesc: "Sort by size descending", metaEmpty: "This file has no extra metadata.",
   } });
 }
 
@@ -83,7 +83,6 @@ export function createModelView(document: ModelDocument, locale: Locale) {
     createSection(copy.metadata, metaContent, { headingLevel: 3 }),
   );
 
-  const elementsOf = (shape: readonly number[]) => shape.reduce((product, dimension) => product * dimension, 1);
   let query = "";
   let sort: SortDirection = "none";
 
@@ -115,7 +114,7 @@ export function createModelView(document: ModelDocument, locale: Locale) {
   const render = () => {
     let visible = query ? document.tensors.filter((tensor) => tensor.name.toLowerCase().includes(query)) : document.tensors;
     if (sort !== "none") {
-      visible = [...visible].sort((a, b) => (sort === "asc" ? elementsOf(a.shape) - elementsOf(b.shape) : elementsOf(b.shape) - elementsOf(a.shape)));
+      visible = [...visible].sort((a, b) => (sort === "asc" ? a.bytes - b.bytes : b.bytes - a.bytes));
     }
     const capped = visible.slice(0, MAX_ROWS);
     tensorTable.setRows(

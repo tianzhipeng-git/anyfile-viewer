@@ -1,4 +1,4 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { selectMessages, ViewerError, type Locale } from "@anyfile/viewer-protocol";
 
 import type { ModelDocument, ModelMetadataEntry, ModelTensor } from "./types";
 
@@ -8,6 +8,40 @@ import type { ModelDocument, ModelMetadataEntry, ModelTensor } from "./types";
 
 export const MAX_GGUF_STRUCT_BYTES = 200 * 1024 * 1024;
 const MAX_ARRAY_DEPTH = 8;
+
+export class GgufBoundsError extends Error {
+  constructor() {
+    super("GGUF structure extends past the current read window.");
+    this.name = "GgufBoundsError";
+  }
+}
+
+function ggufCopy(locale: Locale) {
+  return selectMessages(locale, {
+    en: {
+      outOfBounds: "GGUF structure extends past the readable file range.",
+      invalidMetaType: (type: number) => `Invalid GGUF metadata type ${type}.`,
+      arrayTooDeep: "GGUF metadata array nesting is too deep.",
+      nestedArray: "Nested GGUF metadata arrays are not supported.",
+      invalidArrayType: (type: number) => `Invalid GGUF array element type ${type}.`,
+      unsupportedVersion: (version: number) => `Unsupported GGUF version ${version} (versions 2–3 are supported).`,
+      tooManyDims: (name: string) => `Tensor ${name} has more than 4 dimensions.`,
+      dataOutOfRange: "GGUF tensor data extends past the end of the file.",
+      noTensors: "This GGUF file does not contain any tensors.",
+    },
+    "zh-CN": {
+      outOfBounds: "GGUF 结构超出可读范围。",
+      invalidMetaType: (type: number) => `GGUF 元数据类型 ${type} 无效。`,
+      arrayTooDeep: "GGUF 元数据数组嵌套过深。",
+      nestedArray: "GGUF 嵌套数组不受支持。",
+      invalidArrayType: (type: number) => `GGUF 数组元素类型 ${type} 无效。`,
+      unsupportedVersion: (version: number) => `不支持的 GGUF 版本 ${version}（仅支持版本 2–3）。`,
+      tooManyDims: (name: string) => `张量 ${name} 维度数超过 4。`,
+      dataOutOfRange: "GGUF 张量数据超出文件范围。",
+      noTensors: "GGUF 文件不包含任何张量。",
+    },
+  });
+}
 
 const GGML_TYPE_LABELS: Record<number, string> = {
   0: "F32", 1: "F16", 2: "Q4_0", 3: "Q4_1", 6: "Q5_0", 7: "Q5_1", 8: "Q8_0", 9: "Q8_1",
@@ -47,7 +81,7 @@ class Cursor {
   constructor(readonly view: DataView, readonly littleEndian: boolean) {}
 
   private ensure(bytes: number) {
-    if (this.pos + bytes > this.view.byteLength) throw new ViewerError("invalid-file", "GGUF 结构超出可读范围。");
+    if (bytes < 0 || this.pos + bytes > this.view.byteLength) throw new GgufBoundsError();
   }
   u32(): number { this.ensure(4); const v = this.view.getUint32(this.pos, this.littleEndian); this.pos += 4; return v; }
   u64(): number { this.ensure(8); const v = this.view.getBigUint64(this.pos, this.littleEndian); this.pos += 8; return Number(v); }
@@ -78,7 +112,7 @@ function scalarTypeBytes(type: number): number | undefined {
   }
 }
 
-function readScalar(cursor: Cursor, type: number): string {
+function readScalar(cursor: Cursor, type: number, copy: ReturnType<typeof ggufCopy>): string {
   switch (type) {
     case T_UINT8: return String(cursor.u8());
     case T_INT8: return String(cursor.i8());
@@ -91,27 +125,27 @@ function readScalar(cursor: Cursor, type: number): string {
     case T_INT64: return String(cursor.i64());
     case T_FLOAT64: return String(cursor.f64());
     case T_BOOL: return cursor.u8() !== 0 ? "true" : "false";
-    default: throw new ViewerError("invalid-file", `GGUF 元数据类型 ${type} 无效。`);
+    default: throw new ViewerError("invalid-file", copy.invalidMetaType(type));
   }
 }
 
 /** Read a metadata value, summarising arrays instead of expanding every element. */
-function readValue(cursor: Cursor, type: number, depth: number): string {
+function readValue(cursor: Cursor, type: number, depth: number, copy: ReturnType<typeof ggufCopy>): string {
   if (type === T_STRING) return cursor.string();
-  if (type !== T_ARRAY) return readScalar(cursor, type);
+  if (type !== T_ARRAY) return readScalar(cursor, type, copy);
 
-  if (depth > MAX_ARRAY_DEPTH) throw new ViewerError("invalid-file", "GGUF 元数据数组嵌套过深。");
+  if (depth > MAX_ARRAY_DEPTH) throw new ViewerError("invalid-file", copy.arrayTooDeep);
   const elementType = cursor.u32();
   const length = cursor.u64();
-  if (elementType === T_ARRAY) throw new ViewerError("invalid-file", "GGUF 嵌套数组不受支持。");
+  if (elementType === T_ARRAY) throw new ViewerError("invalid-file", copy.nestedArray);
   const fixed = elementType === T_STRING ? undefined : scalarTypeBytes(elementType);
   if (fixed === undefined && elementType !== T_STRING) {
-    throw new ViewerError("invalid-file", `GGUF 数组元素类型 ${elementType} 无效。`);
+    throw new ViewerError("invalid-file", copy.invalidArrayType(elementType));
   }
   if (fixed !== undefined) {
     // Skip fixed-width arrays in one step instead of element by element.
     cursor.pos += fixed * length;
-    if (cursor.pos > cursor.view.byteLength) throw new ViewerError("invalid-file", "GGUF 数组超出可读范围。");
+    if (cursor.pos > cursor.view.byteLength) throw new GgufBoundsError();
     return `[${length.toLocaleString("en-US")} values]`;
   }
   const preview: string[] = [];
@@ -141,11 +175,17 @@ export function detectEndianness(magic: DataView): "little" | "big" | undefined 
   return undefined;
 }
 
-export function parseGgufStruct(view: DataView, littleEndian: boolean, fileSize: number): ModelDocument {
+export function parseGgufStruct(
+  view: DataView,
+  littleEndian: boolean,
+  fileSize: number,
+  locale: Locale = "en",
+): ModelDocument {
+  const copy = ggufCopy(locale);
   const cursor = new Cursor(view, littleEndian);
   cursor.pos = 4;
   const version = cursor.u32();
-  if (version < 1 || version > 3) throw new ViewerError("invalid-file", `不支持的 GGUF 版本 ${version}。`);
+  if (version < 2 || version > 3) throw new ViewerError("invalid-file", copy.unsupportedVersion(version));
   const tensorCount = cursor.u64();
   const metadataCount = cursor.u64();
 
@@ -153,7 +193,7 @@ export function parseGgufStruct(view: DataView, littleEndian: boolean, fileSize:
   for (let index = 0; index < metadataCount; index += 1) {
     const key = cursor.string();
     const type = cursor.u32();
-    metadata.push({ key, value: readValue(cursor, type, 0) });
+    metadata.push({ key, value: readValue(cursor, type, 0, copy) });
   }
 
   const lookup = new Map(metadata.map((entry) => [entry.key, entry.value]));
@@ -163,11 +203,11 @@ export function parseGgufStruct(view: DataView, littleEndian: boolean, fileSize:
   const tensors: ModelTensor[] = [];
   let totalParameters = 0;
   let totalBytes = 0;
-  let dataStartMax = cursor.pos;
+  let dataStartMax = 0;
   for (let index = 0; index < tensorCount; index += 1) {
     const name = cursor.string();
     const dimensionCount = cursor.u32();
-    if (dimensionCount > 4) throw new ViewerError("invalid-file", `张量 ${name} 维度数超过 4。`);
+    if (dimensionCount > 4) throw new ViewerError("invalid-file", copy.tooManyDims(name));
     const shape: number[] = [];
     for (let dimension = 0; dimension < dimensionCount; dimension += 1) shape.push(cursor.u64());
     const type = cursor.u32();
@@ -181,9 +221,9 @@ export function parseGgufStruct(view: DataView, littleEndian: boolean, fileSize:
   }
 
   const tensorDataStart = cursor.pos + ((alignment - (cursor.pos % alignment)) % alignment);
-  if (tensorDataStart + dataStartMax > fileSize) throw new ViewerError("invalid-file", "GGUF 张量数据超出文件范围。");
+  if (tensorDataStart + dataStartMax > fileSize) throw new ViewerError("invalid-file", copy.dataOutOfRange);
 
-  if (tensors.length === 0) throw new ViewerError("invalid-file", "GGUF 文件不包含任何张量。");
+  if (tensors.length === 0) throw new ViewerError("invalid-file", copy.noTensors);
 
   const architecture = lookup.get("general.architecture");
   return {

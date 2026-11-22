@@ -340,4 +340,51 @@ describe("service worker offline caching and isolation", () => {
     const runtime = await harness.caches.open("anyfile-runtime-v1");
     expect(runtime.store.has(vendorUrl)).toBe(false);
   });
+
+  it("bypasses non-viewer same-origin navigations", async () => {
+    const harness = createServiceWorkerHarness(async () => new FakeResponse({ body: "seo-page" }));
+
+    expect((await harness.dispatchFetch(new FakeRequest(`${ORIGIN}/en`, { mode: "navigate" }))).handled).toBe(false);
+    expect((await harness.dispatchFetch(new FakeRequest(`${ORIGIN}/en/formats/pdf`, { mode: "navigate" }))).handled).toBe(false);
+    expect((await harness.dispatchFetch(new FakeRequest(`${ORIGIN}/zh-CN/privacy`, { mode: "navigate" }))).handled).toBe(false);
+    expect(harness.fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("returns live network responses even when cache writes throw QuotaExceededError", async () => {
+    const r2Url = "https://assets.anyfile.top/vendor/libredwg/0.14-anyfile.1/dist/libredwg-web.wasm";
+    const chunkUrl = `${ORIGIN}/_next/static/chunks/heavy.js`;
+    const iconUrl = `${ORIGIN}/brand/anyfile-192.png`;
+    const harness = createServiceWorkerHarness(async (input) => {
+      const url = typeof input === "string" ? input : input.url;
+      if (url === r2Url) {
+        return new FakeResponse({
+          type: "cors",
+          headers: { "cross-origin-resource-policy": "cross-origin" },
+          body: "wasm-live",
+        });
+      }
+      return new FakeResponse({ body: "live-ok" });
+    });
+
+    const quotaError = new DOMException("Storage quota exceeded", "QuotaExceededError");
+    const runtime = await harness.caches.open("anyfile-runtime-v1");
+    const shell = await harness.caches.open("anyfile-shell-v1");
+    vi.spyOn(runtime, "put").mockRejectedValue(quotaError);
+    vi.spyOn(shell, "put").mockRejectedValue(quotaError);
+
+    const sameOrigin = await harness.dispatchFetch(new FakeRequest(chunkUrl));
+    expect(sameOrigin.handled).toBe(true);
+    expect(sameOrigin.response?.status).toBe(200);
+    expect(await sameOrigin.response?.text()).toBe("live-ok");
+
+    const crossOrigin = await harness.dispatchFetch(new FakeRequest(r2Url, { mode: "cors" }));
+    expect(crossOrigin.handled).toBe(true);
+    expect(crossOrigin.response?.status).toBe(200);
+    expect(await crossOrigin.response?.text()).toBe("wasm-live");
+
+    const shellAsset = await harness.dispatchFetch(new FakeRequest(iconUrl));
+    expect(shellAsset.handled).toBe(true);
+    expect(shellAsset.response?.status).toBe(200);
+    expect(await shellAsset.response?.text()).toBe("live-ok");
+  });
 });

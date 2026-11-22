@@ -19,7 +19,7 @@ function isAbortError(error: unknown) {
 }
 
 async function openTorrent(context: OpenViewerContext): Promise<ViewerController> {
-  const { container, file, locale, reportProgress, signal } = context;
+  const { container, file, locale, reportPreview, reportProgress, signal } = context;
   const copy = selectMessages(locale, {
     en: { reading: "Reading torrent file…", rendering: "Preparing torrent metadata…", ready: "Torrent file opened", invalid: "The file is damaged or is not a valid torrent file." },
     "zh-CN": { reading: "正在读取种子文件…", rendering: "正在整理种子元数据…", ready: "种子文件已打开", invalid: "文件已损坏，或不是有效的种子文件。" },
@@ -35,7 +35,7 @@ async function openTorrent(context: OpenViewerContext): Promise<ViewerController
 
   try {
     reportProgress({ stage: "reading", message: copy.reading, loaded: 0, total: file.size });
-    const document = await readTorrent(file, signal, reportProgress);
+    const document = await readTorrent(file, signal, reportProgress, locale);
     if (signal.aborted) throw abortError();
     reportProgress({ stage: "rendering", message: copy.rendering });
     view = createTorrentView(file.name, document, locale);
@@ -43,6 +43,7 @@ async function openTorrent(context: OpenViewerContext): Promise<ViewerController
     container.append(view.root);
     signal.addEventListener("abort", dispose, { once: true });
     reportProgress({ stage: "ready", message: copy.ready });
+    reportPreview?.({ outcome: "success", kind: "structure" });
     return { dispose };
   } catch (error) {
     dispose();

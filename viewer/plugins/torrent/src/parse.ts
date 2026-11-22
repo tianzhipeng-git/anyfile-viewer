@@ -1,4 +1,4 @@
-import { ViewerError, type ViewerOpenProgress } from "@anyfile/viewer-protocol";
+import { selectMessages, ViewerError, type Locale, type ViewerOpenProgress } from "@anyfile/viewer-protocol";
 
 import { BencodeError, decodeBencodeWithSpan, type BencodeValue } from "./bencode";
 import type { TorrentDocument, TorrentFile, TorrentTracker } from "./types";
@@ -121,9 +121,20 @@ export async function readTorrent(
   file: File,
   signal: AbortSignal,
   reportProgress: (progress: ViewerOpenProgress) => void,
+  locale: Locale = "en",
 ): Promise<TorrentDocument> {
+  const copy = selectMessages(locale, {
+    en: {
+      limit: "This torrent file exceeds the 32 MiB browser limit.",
+      invalid: "The file is damaged or is not a valid torrent file.",
+    },
+    "zh-CN": {
+      limit: "种子文件超过 32 MiB，无法在浏览器中安全解析。",
+      invalid: "文件已损坏，或不是有效的种子文件。",
+    },
+  });
   if (file.size > MAX_TORRENT_BYTES) {
-    throw new ViewerError("resource-limit", "种子文件超过 32 MiB，无法在浏览器中安全解析。", { cause: file.size });
+    throw new ViewerError("resource-limit", copy.limit, { cause: file.size });
   }
   if (signal.aborted) throw abortError();
 
@@ -157,7 +168,7 @@ export async function readTorrent(
   try {
     decoded = decodeBencodeWithSpan(bytes, "info");
   } catch (error) {
-    if (error instanceof BencodeError) throw new ViewerError("invalid-file", "文件已损坏，或不是有效的种子文件。", { cause: error });
+    if (error instanceof BencodeError) throw new ViewerError("invalid-file", copy.invalid, { cause: error });
     throw error;
   }
 
@@ -168,6 +179,6 @@ export async function readTorrent(
   try {
     return toDocument(decoded.value, infoHash);
   } catch (error) {
-    throw new ViewerError("invalid-file", "文件已损坏，或不是有效的种子文件。", { cause: error });
+    throw new ViewerError("invalid-file", copy.invalid, { cause: error });
   }
 }

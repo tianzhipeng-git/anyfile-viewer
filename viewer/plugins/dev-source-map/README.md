@@ -21,6 +21,7 @@
 |---|---|
 | `@anyfile/dev-binary-core` | 二进制游标与有界文件读取 |
 | `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `@anyfile/viewer-ui` | 共享 Inspector UI Kit 原语与宿主主题变量 |
 
 解析为项目内实现，无第三方 Source Map 库或 WASM。
 

@@ -42,6 +42,14 @@ describe("bencode decoder", () => {
     expect(() => decodeBencode(encode("5:abc"))).toThrow(BencodeError);
     expect(() => decodeBencode(encode("d3:foo3:barbad"))).toThrow(BencodeError); // trailing bytes
   });
+
+  it("handles Object.prototype key names in dictionaries without collision", () => {
+    const dict = decodeBencode(encode("d11:constructori1e8:toStringi2e9:__proto__i3ee")) as Record<string, number>;
+    expect(Object.getPrototypeOf(dict)).toBeNull();
+    expect(dict.constructor).toBe(1);
+    expect(dict.toString).toBe(2);
+    expect(dict["__proto__"]).toBe(3);
+  });
 });
 
 describe("torrent parser", () => {
@@ -83,8 +91,9 @@ describe("BitTorrent viewer", () => {
 
   it("renders metadata and the file tree from the real sample", async () => {
     const test = contextFor(sampleBytes);
+    const reportPreview = vi.fn();
     const directRead = vi.spyOn(test.context.file, "arrayBuffer");
-    const controller = await bittorrentViewer.open(test.context);
+    const controller = await bittorrentViewer.open({ ...test.context, reportPreview });
 
     expect(test.container.textContent).toContain("Sintel");
     expect(test.container.textContent).toContain("Sintel.mp4");
@@ -93,6 +102,7 @@ describe("BitTorrent viewer", () => {
     expect(test.container.querySelectorAll(".anyfile-torrent-viewer__table tbody tr").length).toBeGreaterThan(5);
     expect(directRead).not.toHaveBeenCalled();
     expect(test.progress.at(-1)?.stage).toBe("ready");
+    expect(reportPreview).toHaveBeenCalledExactlyOnceWith({ outcome: "success", kind: "structure" });
 
     const filter = test.container.querySelector<HTMLInputElement>("[data-torrent-filter]")!;
     filter.value = "poster";
@@ -106,10 +116,32 @@ describe("BitTorrent viewer", () => {
     expect(test.outside.dataset.viewerTestOutside).toBe("untouched");
   });
 
-  it("rejects an invalid file through open()", async () => {
-    const test = contextFor("d4:infod4:name0:e", "invalid.torrent");
-    await expect(bittorrentViewer.open(test.context)).rejects.toMatchObject({ code: "invalid-file" });
+  it("disposes an active view when aborted after opening", async () => {
+    const test = contextFor(sampleBytes);
+    await bittorrentViewer.open(test.context);
+    expect(test.container.childElementCount).toBe(1);
+    test.abortController.abort();
     expect(test.container.childElementCount).toBe(0);
+  });
+
+  it("rejects an invalid file through open() with localized messages", async () => {
+    const zh = contextFor("d4:infod4:name0:e", "invalid.torrent", "zh-CN");
+    await expect(bittorrentViewer.open(zh.context)).rejects.toMatchObject({
+      code: "invalid-file",
+      message: expect.stringContaining("种子文件"),
+    });
+    expect(zh.container.childElementCount).toBe(0);
+
+    const en = contextFor("not a torrent", "invalid.torrent", "en");
+    await expect(bittorrentViewer.open(en.context)).rejects.toMatchObject({
+      code: "invalid-file",
+      message: "The file is damaged or is not a valid torrent file.",
+    });
+    expect(en.container.childElementCount).toBe(0);
+
+    const oversized = { name: "big.torrent", size: MAX_TORRENT_BYTES + 1 } as File;
+    await expect(readTorrent(oversized, new AbortController().signal, () => {}, "en"))
+      .rejects.toMatchObject({ code: "resource-limit", message: expect.stringContaining("32 MiB") });
   });
 
   it("cancels a pending read during opening", async () => {

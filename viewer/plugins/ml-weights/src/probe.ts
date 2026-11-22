@@ -1,8 +1,11 @@
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
 
-import { detectEndianness } from "./gguf";
-
 const GGUF_MAGIC_SIZE = 4;
+const GGUF_MAGIC = 0x47475546; // 'G' 'G' 'U' 'F'
+
+function hasGgufMagic(view: DataView): boolean {
+  return view.getUint32(0, false) === GGUF_MAGIC || view.getUint32(0, true) === GGUF_MAGIC;
+}
 
 /**
  * Content probe: recognises GGUF by its magic and safetensors by the invariant
@@ -16,7 +19,7 @@ export async function probeMlWeights({ file, signal }: ProbeViewerContext): Prom
   const head = new Uint8Array(await file.slice(0, 9).arrayBuffer());
   if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");
 
-  if (head.length >= GGUF_MAGIC_SIZE && detectEndianness(new DataView(head.buffer, head.byteOffset, GGUF_MAGIC_SIZE))) {
+  if (head.length >= GGUF_MAGIC_SIZE && hasGgufMagic(new DataView(head.buffer, head.byteOffset, GGUF_MAGIC_SIZE))) {
     return 3;
   }
   // safetensors: 8-byte little-endian length, then the JSON header must start with '{'.

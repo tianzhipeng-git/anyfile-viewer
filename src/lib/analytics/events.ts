@@ -48,8 +48,17 @@ export function currentEntry(): string {
   return new URLSearchParams(window.location.hash.slice(1)).has("file") ? "public_url" : "direct";
 }
 
+let sessionConsent: boolean | undefined;
+
 export function consentGranted(): boolean {
-  try { return localStorage.getItem(CONSENT_KEY) !== "denied"; } catch { return true; }
+  try {
+    const stored = localStorage.getItem(CONSENT_KEY);
+    if (stored === "denied") return false;
+    if (stored === "granted") return true;
+    return sessionConsent ?? true;
+  } catch {
+    return sessionConsent ?? false;
+  }
 }
 
 export function analyticsEnabled(): boolean {
@@ -62,10 +71,15 @@ export function updateAnalyticsConsent(granted: boolean) {
 }
 
 export function setAnalyticsConsent(granted: boolean): boolean {
-  try { localStorage.setItem(CONSENT_KEY, granted ? "granted" : "denied"); } catch { return false; }
+  sessionConsent = granted;
   updateAnalyticsConsent(granted);
   window.dispatchEvent(new Event(CONSENT_CHANGE_EVENT));
-  return true;
+  try {
+    localStorage.setItem(CONSENT_KEY, granted ? "granted" : "denied");
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 let initialized = false;

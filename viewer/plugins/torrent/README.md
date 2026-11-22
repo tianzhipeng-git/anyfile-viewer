@@ -19,8 +19,9 @@
 | 包 | 用途 |
 |---|---|
 | `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
+| `@anyfile/viewer-ui` | 共享 Inspector UI Kit 原语与宿主主题变量 |
 
-没有第三方解析器、Worker、WASM 或网络请求，使用浏览器 Bencode/DOM/WebCrypto API。
+没有第三方解析器、Worker、WASM 或网络请求，使用自研 Bencode 解码器与浏览器 DOM/WebCrypto API。
 
 ## 已知限制
 

@@ -21,6 +21,7 @@
 | Source Map (`.map`) | `dev-source-map-viewer` | 3 | verified | ECMA-426 普通与 indexed map、内嵌源码、ignore list 与位置查询；禁止加载外部 URL |
 | ELF / PE-COFF / Mach-O & Fat / Unix Archive (`.elf` `.so` `.o` `.out` `.exe` `.dll` `.obj` `.dylib` `.bundle` `.node` `.a` `.lib` `.rlib`) | `dev-native-binary-viewer` | 1 | verified | 头部、节/段表、动态依赖、导入导出、Universal Fat 切片、UUID/Build-ID/CodeView PDB、符号摘要与 `.a`/`.rlib` 成员嗅探 |
 | DuckDB (`.duckdb` `.ddb`) | `duckdb-data` | 3 | verified | 只读表结构与分页查询，有界 probe |
+| Safetensors / GGUF 模型权重 (`.safetensors` `.gguf`) | `ml-weights` | 3 | implemented | 仅读文件头展示架构、参数量、量化类型、元数据与张量表（GGUF v2–v3 上限 200 MiB，safetensors 头部上限 100 MiB），不加载张量本体 |
 
 ## 3. 未实现候选族
 
