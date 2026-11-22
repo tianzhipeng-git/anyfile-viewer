@@ -34,6 +34,7 @@ import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
 import { bittorrentManifest } from "@anyfile/bittorrent-viewer/manifest";
+import { mlWeightsManifest } from "@anyfile/ml-weights-viewer/manifest";
 import { hexManifest } from "@anyfile/hex-viewer/manifest";
 import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
@@ -357,6 +358,11 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = [
       const viewerPackage = await import("@anyfile/bittorrent-viewer");
       return viewerPackage.bittorrentViewer;
     },
+  },
+  {
+    manifest: mlWeightsManifest,
+    async probe(context) { return (await import("@anyfile/ml-weights-viewer/probe")).probeMlWeights(context); },
+    async load() { return (await import("@anyfile/ml-weights-viewer")).mlWeightsViewer; },
   },
   {
     manifest: certificateManifest,

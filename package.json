@@ -73,6 +73,7 @@
     "@anyfile/hex-viewer": "workspace:*",
     "@anyfile/insta360-viewer": "workspace:*",
     "@anyfile/legacy-office-viewer": "workspace:*",
+    "@anyfile/ml-weights-viewer": "workspace:*",
     "@anyfile/modern-raster-viewer": "workspace:*",
     "@anyfile/non-native-video-viewer": "workspace:*",
     "@anyfile/non-native-audio-viewer": "workspace:*",

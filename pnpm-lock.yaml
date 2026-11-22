@@ -127,6 +127,9 @@ importers:
       '@anyfile/mind-map-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/mind-map
+      '@anyfile/ml-weights-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/ml-weights
       '@anyfile/mobi-reader':
         specifier: workspace:*
         version: link:viewer/plugins/mobi
@@ -866,6 +869,16 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
+
+  viewer/plugins/ml-weights:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
 
   viewer/plugins/mobi:
     dependencies:

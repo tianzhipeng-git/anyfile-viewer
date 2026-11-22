@@ -1,0 +1,17 @@
+{
+  "name": "@anyfile/ml-weights-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts",
+    "./probe": "./src/probe.ts"
+  },
+  "dependencies": {
+    "@anyfile/viewer-protocol": "workspace:*"
+  },
+  "devDependencies": {
+    "@anyfile/viewer-test": "workspace:*"
+  }
+}

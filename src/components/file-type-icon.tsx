@@ -34,6 +34,7 @@ import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
 import { goProMaxManifest } from "@anyfile/gopro-max-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
 import { bittorrentManifest } from "@anyfile/bittorrent-viewer/manifest";
+import { mlWeightsManifest } from "@anyfile/ml-weights-viewer/manifest";
 import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
 import { calendarContactsManifest } from "@anyfile/calendar-contacts-viewer/manifest";
 import { insta360Manifest } from "@anyfile/insta360-viewer/manifest";
@@ -182,7 +183,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "developer",
     icon: BracesIcon,
-    extensions: manifestExtensions(devArrayManifest, devSourceMapManifest, devWasmManifest, certificateManifest, bittorrentManifest),
+    extensions: manifestExtensions(devArrayManifest, devSourceMapManifest, devWasmManifest, certificateManifest, bittorrentManifest, mlWeightsManifest),
   },
   {
     kind: "database",

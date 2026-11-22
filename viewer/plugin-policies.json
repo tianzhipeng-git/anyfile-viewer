@@ -38,6 +38,11 @@
       "package": "@anyfile/bittorrent-viewer",
       "runtimeSets": []
     },
+    "ml-weights": {
+      "directory": "ml-weights",
+      "package": "@anyfile/ml-weights-viewer",
+      "runtimeSets": []
+    },
     "cad-exchange": {
       "directory": "cad-exchange",
       "package": "@anyfile/cad-exchange-viewer",
