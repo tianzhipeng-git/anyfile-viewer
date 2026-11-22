@@ -6,7 +6,7 @@
 
 | 包 | 当前能力 | 实际调用范围与边界 |
 |---|---|---|
-| [@anyfile/viewer-ui](../viewer/ui/src/index.ts) | 原生 DOM 分页表格、选择器、空态/局部错误、异步请求竞态与清理 | Data、SQLite、Excel；不是通用组件框架 |
+| [@anyfile/viewer-ui](../viewer/ui/src/index.ts) | Inspector UI Kit（`createInspectorShell`、`createKeyValueList`、`createDataTable`、`createFilterInput`/`createTabBar`/`createPager`/`createNotice`/`createBadge`/`createSection`、`el()`、`formatBytes()`、`viewerTheme` 主题变量契约）与 `createPagedTableViewer` | Data、SQLite、Excel 及结构/元数据检查类插件（Torrent、ML Weights、HAR、Archive、Certificate、WASM、Source Map、Native Binary 等）；零依赖原生 DOM 原语，不是通用组件框架 |
 | [@anyfile/viewer-rendering](../viewer/rendering/src/index.ts) | `InteractiveViewport`、`CanvasSurface`、`ResourceScope` | 图片及扁平合成图的视图交互、Canvas 2D 与资源登记；部分全景插件也复用资源登记 |
 | [@anyfile/viewer-rendering/audio](../viewer/rendering/src/audio-visualizer.ts) | `AudioVisualizer` | browser-audio、non-native-audio 的画布可视化；不承担解码或统一播放器 UI |
 | [@anyfile/rendering-3d](../viewer/rendering-3d/src/index.ts) | Three.js 场景显示、相机/视图控件、按需绘制、对象可见性、动画和资源释放 | CAD 2D、CAD exchange、网格、3D 打印、点云；接收已转换的运行时文档，不解析格式 |

@@ -8,7 +8,8 @@
     "./manifest": "./src/manifest.ts"
   },
   "dependencies": {
-    "@anyfile/viewer-protocol": "workspace:*"
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-ui": "workspace:*"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*"

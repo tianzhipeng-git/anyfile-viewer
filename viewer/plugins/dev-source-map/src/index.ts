@@ -11,20 +11,20 @@ async function openSourceMap(context: OpenViewerContext) {
   }, en: {
     parsing: "Parsing source map…", ready: "Source map opened", invalid: "The file is not a valid ECMA-426 source map.",
   } });
-  let root: HTMLElement | undefined;
+  let view: { root: HTMLElement; dispose(): void } | undefined;
   let disposed = false;
   const dispose = () => {
     if (disposed) return;
     disposed = true;
     signal.removeEventListener("abort", dispose);
-    root?.remove();
+    view?.dispose();
   };
   try {
     reportProgress({ stage: "parsing", message: copy.parsing });
     const document = await parseSourceMap(file, signal);
     if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");
-    root = createSourceMapView(file.name, document, context.locale);
-    container.append(root);
+    view = createSourceMapView(file.name, document, context.locale);
+    container.append(view.root);
     signal.addEventListener("abort", dispose, { once: true });
     reportProgress({ stage: "ready", message: copy.ready });
     return { dispose };

@@ -26,22 +26,22 @@ async function openNativeBinary(context: OpenViewerContext) {
     },
   });
 
-  let root: HTMLElement | undefined;
+  let view: { root: HTMLElement; dispose(): void } | undefined;
   let disposed = false;
   const dispose = () => {
     if (disposed) return;
     disposed = true;
     signal.removeEventListener("abort", dispose);
-    root?.remove();
-    root = undefined;
+    view?.dispose();
+    view = undefined;
   };
 
   try {
     reportProgress({ stage: "parsing", message: copy.parsing });
     const report = await parseNativeBinary(file, signal);
     if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");
-    root = createNativeBinaryView(file.name, report, context.locale);
-    container.append(root);
+    view = createNativeBinaryView(file.name, report, context.locale);
+    container.append(view.root);
     signal.addEventListener("abort", dispose, { once: true });
     reportProgress({ stage: "ready", message: copy.ready });
     reportPreview?.({ outcome: "success", kind: "structure" });
