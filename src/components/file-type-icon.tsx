@@ -104,6 +104,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     extensions: [
       ...pluginExtensions("powerpoint-presentation"),
       ...pluginExtensions("legacy-office").filter((extension) => extension === ".ppt"),
+      ...pluginExtensions("iwork").filter((extension) => extension === ".key"),
     ],
   },
   {
@@ -116,6 +117,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
         "djvu-reader", "comic-book-reader", "calendar-contacts",
       ),
       ...pluginExtensions("legacy-office").filter((extension) => extension !== ".ppt"),
+      ...pluginExtensions("iwork").filter((extension) => extension === ".pages"),
     ].filter((extension) => extension !== ".ai" && extension !== ".zip"),
   },
   {

@@ -64,6 +64,16 @@ describe("document and office routing", () => {
     }
   });
 
+  it("routes iWork packages by content: IWA Pages/Keynote ahead of archive inspection, PEM keys away", async () => {
+    const signal = new AbortController().signal;
+    const pages = readFileSync(join(process.cwd(), "viewer/plugins/iwork/examples/testPages2013.pages"));
+    const resolved = await resolveViewerRegistrations(new File([pages], "letter.pages"), viewerRegistrations, { signal });
+    expect(resolved.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["iwork", 3], ["hex-viewer", 1]]);
+    const pem = await resolveViewerRegistrations(new File(["-----BEGIN PRIVATE KEY-----\n"], "server.key"), viewerRegistrations, { signal });
+    expect(pem.map(({ registration }) => registration.manifest.id)).toEqual(["hex-viewer"]);
+  });
+
   it.each(["records.csv", "records.tsv"])("routes %s to main-content table viewers", async (name) => {
     const resolved = await resolveViewerRegistrations(
       new File(["name,value\nAlice,42\n"], name), viewerRegistrations,

@@ -118,6 +118,9 @@ importers:
       '@anyfile/insta360-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/insta360
+      '@anyfile/iwork-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/iwork
       '@anyfile/legacy-office-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/legacy-office
@@ -839,6 +842,28 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
+
+  viewer/plugins/iwork:
+    dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../archive
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
+      '@zip.js/zip.js':
+        specifier: 2.8.60
+        version: 2.8.60
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
 
   viewer/plugins/legacy-office:
     dependencies:

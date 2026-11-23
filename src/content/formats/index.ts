@@ -71,6 +71,7 @@ import { jpgFormat } from "./jpg";
 import { jsonFormat } from "./json";
 import { jsonlFormat } from "./jsonl";
 import { jxlFormat } from "./jxl";
+import { keyFormat } from "./key";
 import { kmzFormat } from "./kmz";
 import { lz4Format } from "./lz4";
 import { lrvFormat } from "./lrv";
@@ -99,6 +100,7 @@ import { omeTiffFormat } from "./ome-tiff";
 import { opusFormat } from "./opus";
 import { orfFormat } from "./orf";
 import { osvFormat } from "./osv";
+import { pagesFormat } from "./pages";
 import { parquetFormat } from "./parquet";
 import { pdfFormat } from "./pdf";
 import { pefFormat } from "./pef";
@@ -214,6 +216,7 @@ export const formatContents: readonly FormatContent[] = [
   jsonFormat,
   jsonlFormat,
   jxlFormat,
+  keyFormat,
   kmzFormat,
   lz4Format,
   lrvFormat,
@@ -243,6 +246,7 @@ export const formatContents: readonly FormatContent[] = [
   opusFormat,
   orfFormat,
   osvFormat,
+  pagesFormat,
   parquetFormat,
   pdfFormat,
   pefFormat,
