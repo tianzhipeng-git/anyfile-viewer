@@ -1,5 +1,6 @@
 import { calendarContactsManifest } from "@anyfile/calendar-contacts-viewer/manifest";
 import { excelManifest } from "@anyfile/excel-viewer/manifest";
+import { iworkManifest } from "@anyfile/iwork-viewer/manifest";
 import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
 import { mindMapManifest } from "@anyfile/mind-map-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
@@ -39,6 +40,11 @@ export const documentRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: powerpointManifest,
     async probe(context) { return (await import("@anyfile/powerpoint-viewer/probe")).probePowerPointPresentation(context); },
     async load() { return (await import("@anyfile/powerpoint-viewer")).powerpointViewer; },
+  },
+  {
+    manifest: iworkManifest,
+    async probe(context) { return (await import("@anyfile/iwork-viewer/probe")).probeIwork(context); },
+    async load() { return (await import("@anyfile/iwork-viewer")).iworkViewer; },
   },
   {
     manifest: legacyOfficeManifest,

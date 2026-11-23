@@ -41,3 +41,5 @@
 
 ## 待处理建议
 在每日开发 Agent的执行过程中发现的问题, 更新在这个下方, 每周会经过评估和确认后加入需求池.
+
+- `viewer/plugins/djvu/src/probe.test.ts` 在 Node 26 下失败（干净 dev 同样复现）：测试把 `readFileSync` 返回的 Buffer 直接交给 `createTrackedFile`，后者 `bytes.slice().buffer` 对池化 Buffer 取到整个共享池，导致 probe 读到错误字节返回 0。建议 `createTrackedFile` 改为 `new Uint8Array(bytes)` 拷贝，或测试先转 `Uint8Array`；同时确认本地/CI Node 版本（`engines` 要求 24.x）。
