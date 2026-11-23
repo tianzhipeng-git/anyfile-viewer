@@ -8,6 +8,7 @@ import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { wordManifest } from "@anyfile/word-viewer/manifest";
+import { xpsManifest } from "@anyfile/xps-viewer/manifest";
 import type { ViewerPluginRegistration } from "@anyfile/viewer-protocol";
 
 export const documentRegistrations: readonly ViewerPluginRegistration[] = [
@@ -25,6 +26,11 @@ export const documentRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: postscriptManifest,
     async probe(context) { return (await import("@anyfile/postscript-viewer/probe")).probePostscript(context); },
     async load() { return (await import("@anyfile/postscript-viewer")).postscriptViewer; },
+  },
+  {
+    manifest: xpsManifest,
+    async probe(context) { return (await import("@anyfile/xps-viewer/probe")).probeXps(context); },
+    async load() { return (await import("@anyfile/xps-viewer")).xpsViewer; },
   },
   {
     manifest: wordManifest,
