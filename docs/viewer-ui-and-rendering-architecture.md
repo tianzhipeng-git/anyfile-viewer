@@ -9,7 +9,8 @@
 | [@anyfile/viewer-ui](../viewer/ui/src/index.ts) | Inspector UI Kit（`createInspectorShell`、`createKeyValueList`、`createDataTable`、`createFilterInput`/`createTabBar`/`createPager`/`createNotice`/`createBadge`/`createSection`、`el()`、`formatBytes()`、`viewerTheme` 主题变量契约）与 `createPagedTableViewer` | Data、SQLite、Excel 及结构/元数据检查类插件（Torrent、ML Weights、HAR、Archive、Certificate、WASM、Source Map、Native Binary 等）；零依赖原生 DOM 原语，不是通用组件框架 |
 | [@anyfile/viewer-rendering](../viewer/rendering/src/index.ts) | `InteractiveViewport`、`CanvasSurface`、`ResourceScope` | 图片及扁平合成图的视图交互、Canvas 2D 与资源登记；部分全景插件也复用资源登记 |
 | [@anyfile/viewer-rendering/audio](../viewer/rendering/src/audio-visualizer.ts) | `AudioVisualizer` | browser-audio、non-native-audio 的画布可视化；不承担解码或统一播放器 UI |
-| [@anyfile/viewer-rendering/paged](../viewer/rendering/src/paged/index.ts) | `PagedDocumentSource`、`createPagedDocumentViewport`、分页工具栏/缩放/适应、画布淘汰、目录与缩略图侧栏、可选文本层 | DjVu、PDF（及后续 TIFF/XPS/PostScript 等固定分页格式）；不承担格式解码或 Worker 管理 |
+| [@anyfile/viewer-rendering/paged](../viewer/rendering/src/paged/index.ts) | `PagedDocumentSource`、`createPagedDocumentViewport`、分页工具栏/缩放/适应、画布淘汰、目录与缩略图侧栏、可选文本层 | DjVu、PDF、XPS、OFD（及后续 TIFF/PostScript 等固定分页格式）；不承担格式解码或 Worker 管理 |
+| [@anyfile/viewer-rendering/fixed-layout](../viewer/rendering/src/fixed-layout/index.ts) | `parseTrueType`（`glyf` 字形轮廓、`cmap`、`hmtx`）、`SharedResourceCache`（引用计数 + 预算 LRU） | XPS、OFD 按字形索引绘制内嵌字体并跨页共享已解码字体/图片；不注册全局字体 |
 | [@anyfile/rendering-3d](../viewer/rendering-3d/src/index.ts) | Three.js 场景显示、相机/视图控件、按需绘制、对象可见性、动画和资源释放 | CAD 2D、CAD exchange、网格、3D 打印、点云；接收已转换的运行时文档，不解析格式 |
 | [@anyfile/rendering-publication](../viewer/rendering-publication/src/index.ts) | 章节窗口、目录/内部链接、阅读样式、安全 iframe 与清理 | EPUB、FB2、MOBI；另有 markup / safe-content 子入口复用章节解析与清理 |
 

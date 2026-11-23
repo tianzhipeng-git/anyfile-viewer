@@ -1,4 +1,4 @@
-import type { GlyphOutlineFont } from "./font";
+import type { GlyphOutlineFont } from "@anyfile/viewer-rendering/fixed-layout";
 import type { Geometry, Matrix } from "./geometry";
 import { ITALIC_SLANT, type Brush, type GradientStop, type Rect, type XpsNode, type XpsPage } from "./model";
 import type { XpsImage } from "./resources";

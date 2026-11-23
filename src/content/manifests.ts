@@ -47,6 +47,7 @@ import { iworkManifest } from "@anyfile/iwork-viewer/manifest";
 import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { xpsManifest } from "@anyfile/xps-viewer/manifest";
+import { ofdManifest } from "@anyfile/ofd-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
 import { fontManifest } from "@anyfile/font-viewer/manifest";
@@ -62,7 +63,7 @@ export const viewerManifests: readonly ViewerPluginManifest[] = [
   mindMapManifest,
   visioManifest, djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
-  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, fontManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, xpsManifest, wordManifest, excelManifest, powerpointManifest, iworkManifest, legacyOfficeManifest, mppManifest, harManifest, bittorrentManifest, mlWeightsManifest, certificateManifest, calendarContactsManifest, plistManifest,
+  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, fontManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, xpsManifest, ofdManifest, wordManifest, excelManifest, powerpointManifest, iworkManifest, legacyOfficeManifest, mppManifest, harManifest, bittorrentManifest, mlWeightsManifest, certificateManifest, calendarContactsManifest, plistManifest,
   codeManifest, sqliteManifest, statDataManifest, devArrayManifest, devWasmManifest, devSourceMapManifest, devNativeBinaryManifest,
   comicBookManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, djvuManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
 ];

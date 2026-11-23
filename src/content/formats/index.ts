@@ -49,6 +49,7 @@ import { eggFormat } from "./egg";
 import { epubFormat } from "./epub";
 import { epsFormat } from "./eps";
 import { xpsFormat } from "./xps";
+import { ofdFormat } from "./ofd";
 import { etFormat } from "./et";
 import { flacFormat } from "./flac";
 import { fodsFormat } from "./fods";
@@ -197,6 +198,7 @@ export const formatContents: readonly FormatContent[] = [
   fb2Format,
   epsFormat,
   xpsFormat,
+  ofdFormat,
   etFormat,
   flacFormat,
   fodsFormat,

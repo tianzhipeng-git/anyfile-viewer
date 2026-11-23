@@ -124,6 +124,7 @@
     "@anyfile/x509-certificate-viewer": "workspace:*",
     "@anyfile/calendar-contacts-viewer": "workspace:*",
     "@anyfile/xps-viewer": "workspace:*",
+    "@anyfile/ofd-viewer": "workspace:*",
     "@anyfile/plist-viewer": "workspace:*"
   },
   "devDependencies": {

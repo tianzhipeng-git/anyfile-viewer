@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./audio": "./src/audio-visualizer.ts",
+    "./fixed-layout": "./src/fixed-layout/index.ts",
     "./paged": "./src/paged/index.ts"
   },
   "dependencies": {

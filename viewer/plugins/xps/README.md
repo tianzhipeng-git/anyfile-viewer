@@ -16,8 +16,8 @@
 2. [src/package.ts](src/package.ts) 用 zip.js 惰性读取 OPC 部件：部件名不区分大小写并解码百分号转义，重组交错的 `<part>/[n].piece … [n].last.piece`，按 BOM 解码 UTF-8/UTF-16，读取 `_rels/*.rels` 关系。
 3. [src/document.ts](src/document.ts) 沿 `_rels/.rels` 的 fixedrepresentation → FixedDocumentSequence → FixedDocument → PageContent 收集页面，`LinkTargets` 与页面部件名用于解析 DocumentStructure 的 `OutlineEntry` 目录。XPS 与 OpenXPS 只是命名空间不同，所有匹配按 `localName` 进行。
 4. [src/model.ts](src/model.ts) 把 FixedPage 转为显示树（Canvas/Path/Glyphs）：解析属性与属性元素两种写法、`{StaticResource}` 作用域链与远程 `.dict`、画刷、`PathGeometry`、`Indices` 簇映射；节点数、字形数与嵌套深度受预算约束。[src/geometry.ts](src/geometry.ts) 负责矩阵与路径语法（缩写语法即 SVG 路径加 `F0/F1` 填充规则），[src/color.ts](src/color.ts) 负责 sRGB / scRGB / ContextColor（无 ICC 近似）。
-5. [src/font.ts](src/font.ts) 按部件名 GUID 还原混淆字体，自实现 TrueType `cmap`(4/12)、`hmtx`、`loca`/`glyf`（含复合字形）读取，输出字体单位下的路径；字体不注册到 `document.fonts`。
-6. [src/resources.ts](src/resources.ts) 按需加载字体与图片（JPEG/PNG/GIF 用 `createImageBitmap`，TIFF 动态导入 `general-raster-viewer/tiff`，读取 JFIF/pHYs DPI 以换算 Viewbox），引用计数 + 预算淘汰。
+5. [src/font.ts](src/font.ts) 按部件名 GUID 还原混淆字体；TrueType `cmap`(4/12)、`hmtx`、`loca`/`glyf`（含复合字形）读取由共享 `@anyfile/viewer-rendering/fixed-layout` 提供（与 `ofd` 共用），输出字体单位下的路径；字体不注册到 `document.fonts`。
+6. [src/resources.ts](src/resources.ts) 按需加载字体与图片（JPEG/PNG/GIF 用 `createImageBitmap`，TIFF 动态导入 `general-raster-viewer/tiff`，读取 JFIF/pHYs DPI 以换算 Viewbox），引用计数 + 预算淘汰（共享 `SharedResourceCache`）。
 7. [src/painter.ts](src/painter.ts) 用 Canvas 2D 绘制：非纯色填充先裁剪再铺画刷，非纯色描边与不透明度蒙版用临时图层合成；[src/text.ts](src/text.ts) 生成文本层；[src/view.ts](src/view.ts) 接入分页视口并缓存最近 8 个解析页面。
 
 ## 依赖
@@ -26,7 +26,7 @@
 |---|---|
 | `@anyfile/archive-metadata-viewer` | probe 复用的 ZIP 中央目录读取 |
 | `@anyfile/general-raster-viewer` | `./tiff` 子路径，按需解码 TIFF 图片画刷 |
-| `@anyfile/viewer-rendering` | `./paged` 分页视口、缩略图、目录与文本层 |
+| `@anyfile/viewer-rendering` | `./paged` 分页视口、缩略图、目录与文本层；`./fixed-layout` TrueType 字形轮廓与资源缓存 |
 | `@zip.js/zip.js@2.8.60` | OPC 部件惰性解压 |
 
 ## 已知限制

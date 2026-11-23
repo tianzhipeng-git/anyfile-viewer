@@ -112,7 +112,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     icon: FileTextIcon,
     extensions: [
       ...pluginExtensions(
-        "pdfjs-pdf", "postscript-document", "xps-reader", "word-document", "microsoft-project",
+        "pdfjs-pdf", "postscript-document", "xps-reader", "ofd-reader", "word-document", "microsoft-project",
         "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader",
         "djvu-reader", "comic-book-reader", "calendar-contacts",
       ),
