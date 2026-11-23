@@ -114,7 +114,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
       ...pluginExtensions(
         "pdfjs-pdf", "postscript-document", "xps-reader", "ofd-reader", "word-document", "microsoft-project",
         "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader",
-        "djvu-reader", "comic-book-reader", "calendar-contacts",
+        "djvu-reader", "comic-book-reader", "calendar-contacts", "outlook-pst",
       ),
       ...pluginExtensions("legacy-office").filter((extension) => extension !== ".ppt"),
       ...pluginExtensions("iwork").filter((extension) => extension === ".pages"),

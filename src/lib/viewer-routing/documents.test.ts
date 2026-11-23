@@ -122,6 +122,10 @@ describe("document and office routing", () => {
       .toEqual(["legacy-office", "hex-viewer"]);
     expect(findViewerRegistrations("book.xlsx", viewerRegistrations).map(({ manifest }) => manifest.id))
       .toEqual(["excel-workbook", "archive-metadata-viewer", "hex-viewer"]);
+    for (const extension of ["pst", "ost"]) {
+      expect(findViewerRegistrations(`mailbox.${extension}`, viewerRegistrations).map(({ manifest }) => manifest.id))
+        .toEqual(["outlook-pst", "hex-viewer"]);
+    }
     for (const extension of ["ics", "vcf"]) {
       expect(findViewerRegistrations(`invite.${extension}`, viewerRegistrations).map(({ manifest }) => manifest.id))
         .toEqual(["calendar-contacts", "hex-viewer"]);

@@ -63,6 +63,7 @@ import { safetensorsFormat } from "./safetensors";
 import { ggufFormat } from "./gguf";
 import { certificateFormat } from "./certificates";
 import { icsFormat, vcfFormat } from "./calendar";
+import { ostFormat, pstFormat } from "./pst";
 import { heicFormat } from "./heic";
 import { icoFormat } from "./ico";
 import { inspFormat } from "./insp";
@@ -211,7 +212,7 @@ export const formatContents: readonly FormatContent[] = [
   safetensorsFormat,
   ggufFormat,
   certificateFormat,
-  icsFormat, vcfFormat,
+  icsFormat, vcfFormat, pstFormat, ostFormat,
   heicFormat,
   icoFormat,
   inspFormat,

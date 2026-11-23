@@ -24,6 +24,7 @@
 | DuckDB (`.duckdb` `.ddb`) | `duckdb-data` | 3 | verified | 只读表结构与分页查询，有界 probe |
 | Safetensors / GGUF 模型权重 (`.safetensors` `.gguf`) | `ml-weights` | 3 | implemented | 仅读文件头展示架构、参数量、量化类型、元数据与张量表（GGUF v2–v3 上限 200 MiB，safetensors 头部上限 100 MiB），不加载张量本体 |
 | Apple 属性列表 (`.plist`) | `apple-plist` | 3 | verified | 自研二进制 `bplist00`（trailer+对象表）与 XML 分词器解码为可展开树；字典/数组/字符串/整数/实数/布尔/日期/data/UID；深度 2048、对象 50 万、文件 64 MiB 上限，只读不写回 |
+| Outlook 邮箱归档（`.pst` `.ost`） | `outlook-pst` | 3 | verified | 自研 MS-PST NDB/LTP/消息层，`Blob.slice` 随机读取索引页与数据块；ANSI/Unicode/2013+ 4K 压缩 OST；文件夹树、内容表分页、正文（HTML 沙箱 + 远程引用拦截 / LZFu RTF / 纯文本）、收件人、邮件头与附件保存；不支持 cyclic 加密，日历/联系人仅通用字段，ANSI 待真实样例验证 |
 
 ## 3. 未实现候选族
 

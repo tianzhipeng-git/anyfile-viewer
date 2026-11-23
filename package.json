@@ -125,7 +125,8 @@
     "@anyfile/calendar-contacts-viewer": "workspace:*",
     "@anyfile/xps-viewer": "workspace:*",
     "@anyfile/ofd-viewer": "workspace:*",
-    "@anyfile/plist-viewer": "workspace:*"
+    "@anyfile/plist-viewer": "workspace:*",
+    "@anyfile/pst-viewer": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

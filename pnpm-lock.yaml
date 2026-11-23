@@ -175,6 +175,9 @@ importers:
       '@anyfile/print-3d-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/print-3d
+      '@anyfile/pst-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/pst
       '@anyfile/safe-svg-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/svg
@@ -1176,6 +1179,19 @@ importers:
       '@types/three':
         specifier: 0.185.4
         version: 0.185.4
+
+  viewer/plugins/pst:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
 
   viewer/plugins/sqlite:
     dependencies:
