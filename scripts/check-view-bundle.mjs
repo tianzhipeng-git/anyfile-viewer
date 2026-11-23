@@ -53,6 +53,7 @@ const deferredImplementationMarkers = [
   "正在读取 Word 文档",
   "正在读取 Excel 工作簿",
   "正在读取 PowerPoint 演示文稿",
+  "anyfile-paged-viewer__viewport",
   "anyfile-pdf-viewer__viewport",
   "anyfile-djvu-viewer__viewport",
   "anyfile-postscript-viewer__canvas",

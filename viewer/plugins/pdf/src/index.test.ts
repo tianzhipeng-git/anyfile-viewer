@@ -210,4 +210,54 @@ describe("PDF viewer protocol compliance", () => {
     expect(context.container.querySelector(".anyfile-pdf-viewer")).not.toBeNull();
     await controller.dispose();
   });
+
+  it("loads PDF outline bookmarks and evicts offscreen page proxies on large documents", async () => {
+    const cleanups: number[] = [];
+    const pages = Array.from({ length: 12 }, (_, idx) => ({
+      cleanup: vi.fn(() => cleanups.push(idx)),
+      getViewport: ({ scale }: { scale: number }) => ({ height: 800 * scale, width: 600 * scale }),
+      render: vi.fn(() => ({ cancel: vi.fn(), promise: Promise.resolve() })),
+    }));
+    const document = {
+      numPages: 12,
+      getPage: vi.fn(async (pageNumber: number) => pages[pageNumber - 1]),
+      getOutline: vi.fn(async () => [{ title: "Section 10", dest: [{ num: 10 }], items: [] }]),
+      getPageIndex: vi.fn(async () => 9),
+    };
+    const task = {
+      destroyed: false,
+      destroy: vi.fn(async () => {
+        task.destroyed = true;
+      }),
+      promise: Promise.resolve(document),
+    };
+    pdfEngine.loadPdfDocument.mockReturnValue(task);
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("about:blank#outline-pdf");
+    vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({} as CanvasRenderingContext2D);
+    vi.spyOn(HTMLElement.prototype, "scrollIntoView").mockImplementation(() => undefined);
+
+    const context = testContext(validPdf());
+    const controller = await pdfViewer.open(context.context);
+
+    await vi.waitFor(() => {
+      expect(context.container.querySelector(".anyfile-paged-viewer__outline-btn")?.textContent)
+        .toBe("Section 10");
+    });
+
+    // Click outline item to jump directly to page 10 without loading pages 2..9
+    (context.container.querySelector(".anyfile-paged-viewer__outline-btn") as HTMLButtonElement).click();
+    await vi.waitFor(() => expect(document.getPage).toHaveBeenCalledWith(10));
+
+    // Jump through 9 more pages to exceed the 8-page active canvas budget and trigger eviction cleanup
+    const pageInput = context.container.querySelector(".anyfile-paged-viewer__page-input") as HTMLInputElement;
+    for (let pageNumber = 2; pageNumber <= 9; pageNumber += 1) {
+      pageInput.value = String(pageNumber);
+      pageInput.dispatchEvent(new Event("change"));
+      await Promise.resolve();
+    }
+    await vi.waitFor(() => expect(cleanups.length).toBeGreaterThan(0));
+
+    await controller.dispose();
+  });
 });

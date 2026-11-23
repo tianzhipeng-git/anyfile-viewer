@@ -16,36 +16,24 @@ import { abortError } from "./read-blob";
 function getCopy(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, { "zh-CN": {
     checking: "正在检查 PDF 文件…",
-    fitWidth: "适合宽度",
     invalid: "文件内容不是有效的 PDF 文档。",
     loading: "正在加载 PDF…",
-    nextPage: "下一页",
     openFailed: "无法打开 PDF 文件。",
-    page: "第",
     password: "PDF 密码",
     passwordIncorrect: "密码不正确，请重新输入。",
     passwordPrompt: "这个 PDF 受密码保护，请输入打开密码。",
     passwordSubmit: "解锁",
-    previousPage: "上一页",
     renderFailed: "部分页面渲染失败，请尝试调整缩放或重新打开文件。",
-    zoomIn: "放大",
-    zoomOut: "缩小",
   }, en: {
     checking: "Checking the PDF file…",
-    fitWidth: "Fit width",
     invalid: "The file is not a valid PDF document.",
     loading: "Loading PDF…",
-    nextPage: "Next page",
     openFailed: "Unable to open the PDF file.",
-    page: "Page",
     password: "PDF password",
     passwordIncorrect: "The password is incorrect. Try again.",
     passwordPrompt: "This PDF is password protected. Enter its password to open it.",
     passwordSubmit: "Unlock",
-    previousPage: "Previous page",
     renderFailed: "Some pages could not be rendered. Try changing the zoom or reopening the file.",
-    zoomIn: "Zoom in",
-    zoomOut: "Zoom out",
   } });
 }
 
@@ -60,7 +48,7 @@ function isInvalidPdfError(error: unknown) {
 async function openPdf(context: OpenViewerContext): Promise<ViewerController> {
   const { container, file, reportProgress, signal } = context;
   const copy = getCopy(context.locale);
-  const view = createPdfView(file.name, copy);
+  const view = createPdfView(file.name, context.locale, copy);
   let objectUrl = "";
   let loadingTask: PDFDocumentLoadingTask | undefined;
   let disposed = false;
