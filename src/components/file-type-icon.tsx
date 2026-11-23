@@ -139,7 +139,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     icon: BracesIcon,
     extensions: pluginExtensions(
       "dev-array-viewer", "dev-source-map-viewer", "dev-wasm-viewer",
-      "x509-certificate", "bittorrent-metadata", "ml-weights",
+      "x509-certificate", "bittorrent-metadata", "ml-weights", "apple-plist",
     ),
   },
   {
