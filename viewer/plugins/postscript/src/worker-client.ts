@@ -1,7 +1,7 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
 import { initializeRuntimeFromSources } from "@anyfile/runtime-assets";
+import { createWorkerRpcClient, type WorkerRpcClient } from "@anyfile/runtime-assets";
+import { ViewerError } from "@anyfile/viewer-protocol";
 
-import { abortError } from "./read-blob";
 import { STET_ASSET_SOURCES } from "./runtime";
 import type {
   PostscriptWorkerRequest,
@@ -11,99 +11,55 @@ import type {
 const OPERATION_TIMEOUT_MS = 20_000;
 
 export class PostscriptWorkerClient {
-  private readonly worker: Worker;
+  private readonly rpc: WorkerRpcClient<PostscriptWorkerRequest, PostscriptWorkerResponse>;
   private nextId = 1;
-  private disposed = false;
-  private readonly cancellations = new Set<() => void>();
 
   constructor(private readonly signal: AbortSignal) {
-    this.worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
-    signal.addEventListener("abort", this.dispose, { once: true });
+    const worker = new Worker(new URL("./worker.ts", import.meta.url), { type: "module" });
+    this.rpc = createWorkerRpcClient<PostscriptWorkerRequest, PostscriptWorkerResponse>(worker, {
+      signal,
+      defaultTimeoutMs: OPERATION_TIMEOUT_MS,
+      timeoutError: () => ({ code: "resource-limit", message: "PostScript processing exceeded the time limit." }),
+      workerError: () => ({ code: "open-failed", message: "PostScript Worker failed." }),
+    });
   }
 
   async initialize(source: (typeof STET_ASSET_SOURCES)[number]) {
-    await this.request({
-      type: "init",
-      id: this.nextId++,
-      runtimeUrl: source.runtimeUrl,
-      wasmUrl: source.wasmUrl,
-    }, "ready");
+    await this.rpc.send(
+      {
+        type: "init",
+        id: this.nextId++,
+        runtimeUrl: source.runtimeUrl,
+        wasmUrl: source.wasmUrl,
+      },
+      { expectedType: "ready" },
+    );
   }
 
   async open(buffer: ArrayBuffer, fileName: string) {
-    return this.request(
+    return this.rpc.send(
       { type: "open", id: this.nextId++, buffer, fileName },
-      "opened",
-      [buffer],
+      { expectedType: "opened", transfer: [buffer] },
     );
   }
 
   async render(pageIndex: number, width: number, height: number) {
-    return this.request(
+    return this.rpc.send(
       { type: "render", id: this.nextId++, pageIndex, width, height },
-      "rendered",
+      { expectedType: "rendered" },
     );
   }
 
   async step() {
-    return this.request({ type: "step", id: this.nextId++ }, "stepped");
+    return this.rpc.send({ type: "step", id: this.nextId++ }, { expectedType: "stepped" });
   }
 
-  private request<T extends PostscriptWorkerResponse["type"]>(
-    request: PostscriptWorkerRequest,
-    expectedType: T,
-    transfer: Transferable[] = [],
-  ): Promise<Extract<PostscriptWorkerResponse, { type: T }>> {
-    if (this.disposed || this.signal.aborted) return Promise.reject(abortError());
-    return new Promise((resolve, reject) => {
-      const cleanup = () => {
-        clearTimeout(timeout);
-        this.cancellations.delete(cancel);
-        this.worker.removeEventListener("message", onMessage);
-        this.worker.removeEventListener("error", onWorkerError);
-        this.signal.removeEventListener("abort", onAbort);
-      };
-      const onAbort = () => {
-        cleanup();
-        reject(abortError());
-      };
-      const onWorkerError = () => {
-        cleanup();
-        this.dispose();
-        reject(new ViewerError("open-failed", "PostScript Worker failed."));
-      };
-      const onMessage = (event: MessageEvent<PostscriptWorkerResponse>) => {
-        if (!("id" in event.data) || event.data.id !== request.id) return;
-        cleanup();
-        if (event.data.type === expectedType) {
-          resolve(event.data as Extract<PostscriptWorkerResponse, { type: T }>);
-        } else if (event.data.type === "error") {
-          reject(new ViewerError(event.data.code, event.data.message));
-        }
-      };
-      const timeout = setTimeout(() => {
-        cleanup();
-        this.dispose();
-        reject(new ViewerError("resource-limit", "PostScript processing exceeded the time limit."));
-      }, OPERATION_TIMEOUT_MS);
-      const cancel = () => {
-        cleanup();
-        reject(abortError());
-      };
-      this.cancellations.add(cancel);
-      this.worker.addEventListener("message", onMessage);
-      this.worker.addEventListener("error", onWorkerError);
-      this.signal.addEventListener("abort", onAbort, { once: true });
-      this.worker.postMessage(request, transfer);
-    });
+  get disposed() {
+    return this.rpc.disposed;
   }
 
   readonly dispose = () => {
-    if (this.disposed) return;
-    this.disposed = true;
-    this.signal.removeEventListener("abort", this.dispose);
-    for (const cancel of [...this.cancellations]) cancel();
-    this.worker.terminate();
+    this.rpc.dispose();
   };
 }
 

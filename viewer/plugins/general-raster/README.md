@@ -15,6 +15,7 @@ probe 最多读取前 1 MiB 识别格式。解码在专用 Worker 中完成，�
 
 | 包 | 用途 |
 |---|---|
+| `@anyfile/runtime-assets` | 共享 Worker RPC 客户端 |
 | `@anyfile/viewer-protocol` | 插件协议、错误类型与本地化辅助 |
 | `@anyfile/viewer-rendering` | 共享图片、音频或全景视口与资源管理 |
 | `geotiff@3.0.5` | TIFF/BigTIFF 解析与像素解码 |

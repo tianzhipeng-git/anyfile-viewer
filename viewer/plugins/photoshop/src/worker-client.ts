@@ -1,50 +1,38 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { createWorkerRpcClient, type WorkerRpcClient } from "@anyfile/runtime-assets";
 
 import type { PhotoshopWorkerRequest, PhotoshopWorkerResponse } from "./types";
 
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
-
 export class PhotoshopDecoderWorker {
   private worker?: Worker;
+  private rpc?: WorkerRpcClient<PhotoshopWorkerRequest, PhotoshopWorkerResponse>;
   private nextId = 1;
-  private disposed = false;
 
-  constructor(private readonly signal: AbortSignal) {
-    signal.addEventListener("abort", this.dispose, { once: true });
-  }
+  constructor(private readonly signal: AbortSignal) {}
 
   decode(file: File): Promise<Extract<PhotoshopWorkerResponse, { type: "decoded" }>> {
-    if (this.disposed || this.signal.aborted) return Promise.reject(abortError());
-    const worker = this.worker ??= new Worker(new URL("./decoder-worker.ts", import.meta.url), { type: "module" });
-    const id = this.nextId++;
-    return new Promise((resolve, reject) => {
-      const cleanup = () => {
-        worker.removeEventListener("message", onMessage);
-        worker.removeEventListener("error", onError);
-        this.signal.removeEventListener("abort", onAbort);
-      };
-      const onAbort = () => { cleanup(); this.dispose(); reject(abortError()); };
-      const onError = () => { cleanup(); reject(new ViewerError("invalid-file", "Photoshop decoder worker failed.")); };
-      const onMessage = (event: MessageEvent<PhotoshopWorkerResponse>) => {
-        if (event.data.id !== id) return;
-        cleanup();
-        if (event.data.type === "decoded") resolve(event.data);
-        else reject(new ViewerError(event.data.code, event.data.message));
-      };
-      worker.addEventListener("message", onMessage);
-      worker.addEventListener("error", onError);
-      this.signal.addEventListener("abort", onAbort, { once: true });
-      const request: PhotoshopWorkerRequest = { type: "decode", id, file };
-      worker.postMessage(request);
+    const rpc = this.ensureRpc();
+    return rpc.send(
+      { type: "decode", id: this.nextId++, file },
+      { expectedType: "decoded" },
+    );
+  }
+
+  private ensureRpc(): WorkerRpcClient<PhotoshopWorkerRequest, PhotoshopWorkerResponse> {
+    if (this.rpc) return this.rpc;
+    if (this.signal.aborted) {
+      throw new DOMException("Viewer operation aborted.", "AbortError");
+    }
+    this.worker = new Worker(new URL("./decoder-worker.ts", import.meta.url), { type: "module" });
+    this.rpc = createWorkerRpcClient<PhotoshopWorkerRequest, PhotoshopWorkerResponse>(this.worker, {
+      signal: this.signal,
+      workerError: () => ({ code: "invalid-file", message: "Photoshop decoder worker failed." }),
     });
+    return this.rpc;
   }
 
   readonly dispose = () => {
-    if (this.disposed) return;
-    this.disposed = true;
-    this.signal.removeEventListener("abort", this.dispose);
+    this.rpc?.dispose();
+    this.rpc = undefined;
     this.worker?.terminate();
     this.worker = undefined;
   };

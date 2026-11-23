@@ -1,4 +1,5 @@
 import { initializeRuntimeFromSources } from "@anyfile/runtime-assets";
+import { createWorkerRpcClient, type WorkerRpcClient } from "@anyfile/runtime-assets";
 import { ViewerError } from "@anyfile/viewer-protocol";
 import { DJVU_LIMITS } from "./limits";
 import { DJVU_ASSET_SOURCES } from "./runtime";
@@ -21,36 +22,40 @@ function resolveAssetUrl(path: string): string {
 }
 
 export class DjvuWorkerClient {
-  private readonly worker: Worker;
+  private readonly rpc: WorkerRpcClient<DjvuWorkerRequest, DjvuWorkerResponse>;
   private nextId = 1;
-  private disposed = false;
-  private readonly cancellations = new Set<() => void>();
 
   constructor(private readonly signal: AbortSignal) {
-    this.worker = new Worker(new URL("./decoder.worker.ts", import.meta.url), { type: "module" });
-    signal.addEventListener("abort", this.dispose, { once: true });
+    const worker = new Worker(new URL("./decoder.worker.ts", import.meta.url), { type: "module" });
+    this.rpc = createWorkerRpcClient<DjvuWorkerRequest, DjvuWorkerResponse>(worker, {
+      signal,
+      timeoutError: (request) => ({
+        code: request.type === "init" ? "unsupported-environment" : "resource-limit",
+        message:
+          request.type === "init"
+            ? "DjVu runtime initialization timed out."
+            : "DjVu operation exceeded the time limit.",
+      }),
+      workerError: () => ({ code: "open-failed", message: "DjVu Worker failed." }),
+    });
   }
 
   async initialize(source: (typeof DJVU_ASSET_SOURCES)[number]) {
-    await this.request(
+    await this.rpc.send(
       {
         type: "init",
         id: this.nextId++,
         runtimeUrl: resolveAssetUrl(source.runtimeUrl),
         wasmUrl: resolveAssetUrl(source.wasmUrl),
       },
-      "ready",
-      [],
-      DJVU_LIMITS.initTimeoutMs,
+      { expectedType: "ready", timeoutMs: DJVU_LIMITS.initTimeoutMs },
     );
   }
 
   async open(buffer: ArrayBuffer): Promise<DjvuOpenResult> {
-    const response = await this.request(
+    const response = await this.rpc.send(
       { type: "open", id: this.nextId++, buffer },
-      "opened",
-      [buffer],
-      DJVU_LIMITS.operationTimeoutMs,
+      { expectedType: "opened", transfer: [buffer], timeoutMs: DJVU_LIMITS.operationTimeoutMs },
     );
     return response.document;
   }
@@ -61,7 +66,7 @@ export class DjvuWorkerClient {
     height: number,
     options: { thumbnail?: boolean; signal?: AbortSignal } = {},
   ): Promise<{ width: number; height: number; rgba: ArrayBuffer }> {
-    const response = await this.request(
+    const response = await this.rpc.send(
       {
         type: "render",
         id: this.nextId++,
@@ -70,102 +75,25 @@ export class DjvuWorkerClient {
         height,
         thumbnail: options.thumbnail,
       },
-      "rendered",
-      [],
-      DJVU_LIMITS.operationTimeoutMs,
-      options.signal,
+      { expectedType: "rendered", timeoutMs: DJVU_LIMITS.operationTimeoutMs, signal: options.signal },
     );
     return { width: response.width, height: response.height, rgba: response.rgba };
   }
 
   async getPageText(pageIndex: number, callSignal?: AbortSignal): Promise<DjvuPageText | null> {
-    const response = await this.request(
+    const response = await this.rpc.send(
       { type: "text", id: this.nextId++, pageIndex },
-      "text",
-      [],
-      DJVU_LIMITS.operationTimeoutMs,
-      callSignal,
+      { expectedType: "text", timeoutMs: DJVU_LIMITS.operationTimeoutMs, signal: callSignal },
     );
     return response.pageText;
   }
 
-  private request<T extends DjvuWorkerResponse["type"]>(
-    request: DjvuWorkerRequest,
-    expectedType: T,
-    transfer: Transferable[],
-    timeoutMs: number,
-    callSignal?: AbortSignal,
-  ): Promise<Extract<DjvuWorkerResponse, { type: T }>> {
-    if (this.disposed || this.signal.aborted || callSignal?.aborted) {
-      return Promise.reject(abortError());
-    }
-    return new Promise((resolve, reject) => {
-      const cleanup = () => {
-        clearTimeout(timeout);
-        this.cancellations.delete(cancel);
-        this.worker.removeEventListener("message", onMessage);
-        this.worker.removeEventListener("error", onWorkerError);
-        this.signal.removeEventListener("abort", onAbort);
-        callSignal?.removeEventListener("abort", onCallAbort);
-      };
-      const onAbort = () => {
-        cleanup();
-        reject(abortError());
-      };
-      const onCallAbort = () => {
-        cleanup();
-        reject(abortError());
-      };
-      const onWorkerError = () => {
-        cleanup();
-        this.dispose();
-        reject(new ViewerError("open-failed", "DjVu Worker failed."));
-      };
-      const onMessage = (event: MessageEvent<DjvuWorkerResponse>) => {
-        if (!("id" in event.data) || event.data.id !== request.id) return;
-        cleanup();
-        if (event.data.type === expectedType) {
-          resolve(event.data as Extract<DjvuWorkerResponse, { type: T }>);
-        } else if (event.data.type === "error") {
-          reject(new ViewerError(event.data.code, event.data.message));
-        }
-      };
-      const timeout = setTimeout(() => {
-        cleanup();
-        this.dispose();
-        reject(
-          new ViewerError(
-            request.type === "init" ? "unsupported-environment" : "resource-limit",
-            request.type === "init"
-              ? "DjVu runtime initialization timed out."
-              : "DjVu operation exceeded the time limit.",
-          ),
-        );
-      }, timeoutMs);
-      const cancel = () => {
-        cleanup();
-        reject(abortError());
-      };
-      this.cancellations.add(cancel);
-      this.worker.addEventListener("message", onMessage);
-      this.worker.addEventListener("error", onWorkerError);
-      this.signal.addEventListener("abort", onAbort, { once: true });
-      callSignal?.addEventListener("abort", onCallAbort, { once: true });
-      try {
-        this.worker.postMessage(request, transfer);
-      } catch (error) {
-        cleanup();
-        reject(error);
-      }
-    });
+  get disposed() {
+    return this.rpc.disposed;
   }
 
   readonly dispose = () => {
-    if (this.disposed) return;
-    this.disposed = true;
-    this.signal.removeEventListener("abort", this.dispose);
-    for (const cancel of [...this.cancellations]) cancel();
-    this.worker.terminate();
+    this.rpc.dispose();
   };
 }
 

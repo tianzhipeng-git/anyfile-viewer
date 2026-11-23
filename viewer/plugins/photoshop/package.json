@@ -9,6 +9,7 @@
     "./probe": "./src/probe.ts"
   },
   "dependencies": {
+    "@anyfile/runtime-assets": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",
     "ag-psd": "31.0.2"
