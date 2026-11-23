@@ -193,6 +193,9 @@ importers:
       '@anyfile/x509-certificate-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/certificate
+      '@anyfile/xps-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/xps
       '@base-ui/react':
         specifier: ^1.7.0
         version: 1.7.0(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -1211,6 +1214,31 @@ importers:
       docx-preview:
         specifier: 0.4.0
         version: 0.4.0
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
+
+  viewer/plugins/xps:
+    dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../archive
+      '@anyfile/general-raster-viewer':
+        specifier: workspace:*
+        version: link:../general-raster
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      '@zip.js/zip.js':
+        specifier: 2.8.60
+        version: 2.8.60
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
