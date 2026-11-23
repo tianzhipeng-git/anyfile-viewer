@@ -18,6 +18,15 @@
 - [ ] 低 | 抽取共享插件 IO / Abort / Lifecycle 工具并补齐协议 `runtime-unavailable` 与 `reportPreview` 约束 | 收敛 14 份 `read-blob` / 48 处 `abortError` 重复实现并支持渐进读头，在 `@anyfile/viewer-protocol` 新增 `runtime-unavailable` 区分运行时拉取失败与环境不支持，补齐新插件 `reportPreview` 约束
 - [ ] 中 | 基于单点声明派生插件接线投影 | 收敛新增插件时的多点手工同步面（`src/content/manifests.ts`、`file-type-icon.tsx`、`src/lib/pwa/file-handlers.ts`、`docs/domains/*.md` 等），保持 `manifest.ts` 纯净与首包隔离边界
 - [x] 高 | 抽取共享分页文档视口适配器（`PagedDocumentSource`） | `djvu` 与 `pdf` 各自实现 ~500–1000 行分页画布工具栏、缩放/适应、画布淘汰与大纲侧栏；抽到共享包（先从 `djvu` 抽起，再视情况迁 `pdf`）以复用至后续分页格式（TIFF/XPS/PostScript 等）；2026-11-23 2f8dc80
+- [ ] 低 | 修复 `createTrackedFile` 在 Node 26 下对池化 `Buffer` 切片越界导致 `djvu` 单测失败 | `viewer/testing/src/index.ts` 中 `bytes.slice().buffer` 会取到 Node 池化 Buffer 的共享底层缓冲区；需改为独立拷贝并核对本地/CI Node 版本一致性
+- [ ] 高 | 新增 OFD 版式文档查看器（`.ofd`） | 中国电子发票、政务公文与电子合同标配，macOS/Windows/浏览器原生完全打不开，只能装专用客户端且发票合同高度隐私不敢上传；需支持固定版式矢量、嵌入字体与电子签章展示
+- [ ] 高 | 新增 Outlook 邮件归档查看器（`.pst` / `.ost`） | 高频搜 `open pst without outlook` 与 Mac 打开 `.pst`，离职交接、老电脑备份与法务审计常见数百 MB 至数 GB 邮件库，全量隐私绝对不敢上传；需按需随机读取目录树、分页列表与附件
+- [ ] 高 | 新增科学多维数据容器查看器（`.h5` / `.hdf5` / `.nc` / `.nc4` / `.mat`） | AI/科研/气象/遥感/工程高频搜 `hdf5 viewer online` 与 `open mat without matlab`，文件常达数百 MB 且涉密不愿上传；需按需浏览分组树、属性元数据、大数组切片表与 2D 切片预览
+- [ ] 高 | 新增 OpenEXR / HDR 高动态范围图像查看器（`.exr` / `.hdr`） | 影视后期、3D 渲染与游戏开发高频搜 `exr viewer online`，浏览器原生打不开且在线工具常压成 8-bit；需支持多通道（AOV）切换、曝光/Gamma/色调映射调节与 360° HDRI 环境球预览
+- [ ] 高 | 新增设计源文件查看器（`.fig` / `.sketch`） | 研发/产品/Windows 用户高频搜 `open sketch on windows` 与 `fig file viewer`，无 Mac 或付费账号打不开客户/离职设计师发来的涉密稿件；需支持画板浏览、图层树与文字/尺寸检查
+- [ ] 高 | 新增通用 3D 场景与高斯泼溅查看器（`.usdz` / `.usd` / `.usdc` / `.splat` / `.spz`） | Windows/Android 原生打不开 Apple AR `.usdz`（当前仅 `archive` 列 ZIP 目录），3D Gaussian Splatting 正成空间计算与 3D 扫描主流；需支持 3D 场景交互渲染与高斯泼溅实时浏览
+- [ ] 高 | 新增 GB 级超大日志与结构化文本流式查看器 | 排查故障时打开数 GB `.log`/`.jsonl`/`.csv` 极易卡死浏览器与普通编辑器，且日志含敏感业务数据不能上传；需秒开、虚拟滚动、流式正则搜索过滤与日志级别高亮
+- [ ] 高 | 实现本地分屏文件对比（Side-by-Side Diff） | 法务/财务/研发/设计师高频需免上传对比两份敏感文件（PDF/DOCX 文档、表格、图片/PSD 卷帘与像素差值、代码/JSON）；跨插件复用现有渲染器，打造强差异化平台能力
 - [ ] 中 | 新增邮件查看器（`.eml` / `.msg`） | 解析 RFC 5322 MIME 与 Outlook CFBF `.msg`，展示安全清理正文与附件清单；无 Outlook 打开 `.msg` 搜索痛点极强，邮件高度隐私敏感不愿上传
 - [ ] 中 | 新增 Microsoft Access 数据库查看器（`.mdb` / `.accdb`） | `open mdb/accdb online` 与 macOS 查看 Access 搜索痛点极强（Mac/Linux 无原生软件，数据库高度机密）；基于纯 JS `mdb-reader` 读取表结构与分页数据
 - [ ] 中 | `archive-metadata-viewer` 补齐 `.7z` 归档目录查看 | 复用或抽取 `comic-book` 已有的 `comic-archive` libarchive WASM，无需新构建；macOS 与浏览器原生打不开 `.7z`，搜索需求高
@@ -42,5 +51,3 @@
 
 ## 待处理建议
 在每日开发 Agent的执行过程中发现的问题, 更新在这个下方, 每周会经过评估和确认后加入需求池.
-
-- `viewer/plugins/djvu/src/probe.test.ts` 在 Node 26 下失败（干净 dev 同样复现）：测试把 `readFileSync` 返回的 Buffer 直接交给 `createTrackedFile`，后者 `bytes.slice().buffer` 对池化 Buffer 取到整个共享池，导致 probe 读到错误字节返回 0。建议 `createTrackedFile` 改为 `new Uint8Array(bytes)` 拷贝，或测试先转 `Uint8Array`；同时确认本地/CI Node 版本（`engines` 要求 24.x）。
