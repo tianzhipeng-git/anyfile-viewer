@@ -86,6 +86,16 @@ describe("document and office routing", () => {
     expect(docx.map(({ registration }) => registration.manifest.id)).toEqual(["hex-viewer"]);
   });
 
+  it("routes OFD packages by their OFD.xml entry ahead of archive inspection", async () => {
+    const signal = new AbortController().signal;
+    const ofd = readFileSync(join(process.cwd(), "viewer/plugins/ofd/examples/invoice-sample.ofd"));
+    const resolved = await resolveViewerRegistrations(new File([ofd], "invoice.ofd"), viewerRegistrations, { signal });
+    expect(resolved.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["ofd-reader", 4], ["hex-viewer", 1]]);
+    const zip = await resolveViewerRegistrations(new File(["PK\u0003\u0004"], "disguised.ofd"), viewerRegistrations, { signal });
+    expect(zip.map(({ registration }) => registration.manifest.id)).toEqual(["hex-viewer"]);
+  });
+
   it.each(["records.csv", "records.tsv"])("routes %s to main-content table viewers", async (name) => {
     const resolved = await resolveViewerRegistrations(
       new File(["name,value\nAlice,42\n"], name), viewerRegistrations,

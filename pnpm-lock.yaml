@@ -148,6 +148,9 @@ importers:
       '@anyfile/non-native-video-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/non-native-video
+      '@anyfile/ofd-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/ofd
       '@anyfile/pdf-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/pdf
@@ -1020,6 +1023,28 @@ importers:
       '@anyfile/viewer-test':
         specifier: workspace:*
         version: link:../../testing
+
+  viewer/plugins/ofd:
+    dependencies:
+      '@anyfile/archive-metadata-viewer':
+        specifier: workspace:*
+        version: link:../archive
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      '@zip.js/zip.js':
+        specifier: 2.8.60
+        version: 2.8.60
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
 
   viewer/plugins/pdf:
     dependencies:

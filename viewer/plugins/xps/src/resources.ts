@@ -1,4 +1,11 @@
-import { FontFormatError, deobfuscateFont, parseTrueType, type GlyphOutlineFont } from "./font";
+import {
+  FontFormatError,
+  SharedResourceCache,
+  parseTrueType,
+  type GlyphOutlineFont,
+} from "@anyfile/viewer-rendering/fixed-layout";
+
+import { deobfuscateFont } from "./font";
 import { XPS_LIMITS } from "./limits";
 import type { XpsPackage } from "./package";
 
@@ -10,13 +17,6 @@ export interface XpsImage {
   readonly width: number;
   readonly height: number;
   close(): void;
-}
-
-interface CacheEntry<T> {
-  readonly promise: Promise<T | null>;
-  cost: number;
-  value?: T | null;
-  users: number;
 }
 
 function sniffImage(bytes: Uint8Array) {
@@ -79,78 +79,41 @@ async function decodeImage(bytes: Uint8Array, signal: AbortSignal): Promise<XpsI
   };
 }
 
-function isAbort(error: unknown) {
-  return error instanceof DOMException && error.name === "AbortError";
-}
-
 /** Reference-counted, budgeted caches for decoded fonts and images shared across pages. */
 export class XpsResources {
-  private readonly fonts = new Map<string, CacheEntry<GlyphOutlineFont>>();
-  private readonly images = new Map<string, CacheEntry<XpsImage>>();
-  private disposed = false;
+  private readonly fonts: SharedResourceCache<GlyphOutlineFont>;
+  private readonly images: SharedResourceCache<XpsImage>;
 
   constructor(
     private readonly pkg: XpsPackage,
     private readonly signal: AbortSignal,
-  ) {}
+  ) {
+    this.fonts = new SharedResourceCache(XPS_LIMITS.fontCacheBytes, (key) => this.loadFont(key));
+    this.images = new SharedResourceCache(XPS_LIMITS.imageCachePixels, (part) => this.loadImage(part), (image) => image.close());
+  }
 
   /** Loads (or reuses) the parts and pins them until the returned release function runs. */
   async acquire(fontParts: Iterable<string>, imageParts: Iterable<string>) {
-    const fontEntries = [...new Set(fontParts)].map((part) => [part, this.entry(this.fonts, part, () => this.loadFont(part))] as const);
-    const imageEntries = [...new Set(imageParts)].map((part) => [part, this.entry(this.images, part, () => this.loadImage(part))] as const);
-    for (const [, entry] of [...fontEntries, ...imageEntries]) entry.users += 1;
-    let released = false;
-    const release = () => {
-      if (released) return;
-      released = true;
-      for (const [, entry] of [...fontEntries, ...imageEntries]) entry.users -= 1;
-      this.evict();
-    };
+    const fonts = await this.fonts.acquire(fontParts);
     try {
-      const fonts = new Map<string, GlyphOutlineFont | null>();
-      const images = new Map<string, XpsImage | null>();
-      for (const [part, entry] of fontEntries) fonts.set(part, await entry.promise);
-      for (const [part, entry] of imageEntries) images.set(part, await entry.promise);
-      return { fonts, images, release };
+      const images = await this.images.acquire(imageParts);
+      return {
+        fonts: fonts.values,
+        images: images.values,
+        release() {
+          fonts.release();
+          images.release();
+        },
+      };
     } catch (error) {
-      release();
+      fonts.release();
       throw error;
     }
   }
 
   dispose() {
-    this.disposed = true;
-    for (const entry of this.images.values()) entry.value?.close();
-    this.images.clear();
-    this.fonts.clear();
-  }
-
-  private entry<T>(cache: Map<string, CacheEntry<T>>, part: string, load: () => Promise<{ value: T | null; cost: number }>) {
-    const existing = cache.get(part);
-    if (existing) {
-      cache.delete(part);
-      cache.set(part, existing); // most recently used last
-      return existing;
-    }
-    const entry: CacheEntry<T> = {
-      cost: 0,
-      users: 0,
-      promise: load().then(
-        ({ value, cost }) => {
-          entry.value = value;
-          entry.cost = cost;
-          if (this.disposed && value && "close" in (value as object)) (value as unknown as XpsImage).close();
-          return value;
-        },
-        (error: unknown) => {
-          cache.delete(part);
-          if (isAbort(error)) throw error;
-          return null; // A broken resource only blanks the elements that use it.
-        },
-      ),
-    };
-    cache.set(part, entry);
-    return entry;
+    this.images.dispose();
+    this.fonts.dispose();
   }
 
   /** `key` is `part#face` (see `XpsNode.font`). */
@@ -171,22 +134,5 @@ export class XpsResources {
     const bytes = await this.pkg.bytes(part, XPS_LIMITS.imageBytes);
     const value = await decodeImage(bytes, this.signal);
     return { value, cost: value ? value.pixelWidth * value.pixelHeight : 0 };
-  }
-
-  private evict() {
-    trim(this.fonts, XPS_LIMITS.fontCacheBytes);
-    trim(this.images, XPS_LIMITS.imageCachePixels, (image) => image.close());
-  }
-}
-
-function trim<T>(cache: Map<string, CacheEntry<T>>, budget: number, close?: (value: T) => void) {
-  let total = 0;
-  for (const entry of cache.values()) total += entry.cost;
-  for (const [part, entry] of cache) {
-    if (total <= budget) return;
-    if (entry.users > 0 || entry.value === undefined) continue;
-    cache.delete(part);
-    total -= entry.cost;
-    if (entry.value) close?.(entry.value);
   }
 }

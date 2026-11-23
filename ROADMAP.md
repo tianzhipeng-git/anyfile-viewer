@@ -19,7 +19,7 @@
 - [ ] 中 | 基于单点声明派生插件接线投影 | 收敛新增插件时的多点手工同步面（`src/content/manifests.ts`、`file-type-icon.tsx`、`src/lib/pwa/file-handlers.ts`、`docs/domains/*.md` 等），保持 `manifest.ts` 纯净与首包隔离边界
 - [x] 高 | 抽取共享分页文档视口适配器（`PagedDocumentSource`） | `djvu` 与 `pdf` 各自实现 ~500–1000 行分页画布工具栏、缩放/适应、画布淘汰与大纲侧栏；抽到共享包（先从 `djvu` 抽起，再视情况迁 `pdf`）以复用至后续分页格式（TIFF/XPS/PostScript 等）；2026-11-23 2f8dc80
 - [ ] 低 | 修复 `createTrackedFile` 在 Node 26 下对池化 `Buffer` 切片越界导致 `djvu` 单测失败 | `viewer/testing/src/index.ts` 中 `bytes.slice().buffer` 会取到 Node 池化 Buffer 的共享底层缓冲区；需改为独立拷贝并核对本地/CI Node 版本一致性
-- [ ] 高 | 新增 OFD 版式文档查看器（`.ofd`） | 中国电子发票、政务公文与电子合同标配，macOS/Windows/浏览器原生完全打不开，只能装专用客户端且发票合同高度隐私不敢上传；需支持固定版式矢量、嵌入字体与电子签章展示
+- [x] 高 | 新增 OFD 版式文档查看器（`.ofd`） | 中国电子发票、政务公文与电子合同标配，macOS/Windows/浏览器原生完全打不开，只能装专用客户端且发票合同高度隐私不敢上传；需支持固定版式矢量、嵌入字体与电子签章展示；新插件 `ofd` 纯 JS 渲染模板/图层/复合图元/图案到共享分页 Canvas 视口，TrueType 轮廓与资源缓存抽到 `@anyfile/viewer-rendering/fixed-layout`（与 xps 共用），签章从 SES 签名值取 PNG 或嵌套印章 OFD，不验签，待人工浏览器验收 2026-11-23 648457e
 - [ ] 高 | 新增 Outlook 邮件归档查看器（`.pst` / `.ost`） | 高频搜 `open pst without outlook` 与 Mac 打开 `.pst`，离职交接、老电脑备份与法务审计常见数百 MB 至数 GB 邮件库，全量隐私绝对不敢上传；需按需随机读取目录树、分页列表与附件
 - [ ] 高 | 新增科学多维数据容器查看器（`.h5` / `.hdf5` / `.nc` / `.nc4` / `.mat`） | AI/科研/气象/遥感/工程高频搜 `hdf5 viewer online` 与 `open mat without matlab`，文件常达数百 MB 且涉密不愿上传；需按需浏览分组树、属性元数据、大数组切片表与 2D 切片预览
 - [ ] 高 | 新增 OpenEXR / HDR 高动态范围图像查看器（`.exr` / `.hdr`） | 影视后期、3D 渲染与游戏开发高频搜 `exr viewer online`，浏览器原生打不开且在线工具常压成 8-bit；需支持多通道（AOV）切换、曝光/Gamma/色调映射调节与 360° HDRI 环境球预览

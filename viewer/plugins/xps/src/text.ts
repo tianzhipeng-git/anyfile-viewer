@@ -1,6 +1,6 @@
 import type { PagedTextLayer, PagedTextWord } from "@anyfile/viewer-rendering/paged";
 
-import type { GlyphOutlineFont } from "./font";
+import type { GlyphOutlineFont } from "@anyfile/viewer-rendering/fixed-layout";
 import { IDENTITY, applyMatrix, multiply, type Matrix } from "./geometry";
 import type { XpsNode, XpsPage } from "./model";
 

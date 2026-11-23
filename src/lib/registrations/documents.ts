@@ -4,6 +4,7 @@ import { iworkManifest } from "@anyfile/iwork-viewer/manifest";
 import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
 import { mindMapManifest } from "@anyfile/mind-map-viewer/manifest";
 import { mppManifest } from "@anyfile/mpp-viewer/manifest";
+import { ofdManifest } from "@anyfile/ofd-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
@@ -31,6 +32,11 @@ export const documentRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: xpsManifest,
     async probe(context) { return (await import("@anyfile/xps-viewer/probe")).probeXps(context); },
     async load() { return (await import("@anyfile/xps-viewer")).xpsViewer; },
+  },
+  {
+    manifest: ofdManifest,
+    async probe(context) { return (await import("@anyfile/ofd-viewer/probe")).probeOfd(context); },
+    async load() { return (await import("@anyfile/ofd-viewer")).ofdViewer; },
   },
   {
     manifest: wordManifest,

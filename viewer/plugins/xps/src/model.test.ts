@@ -1,10 +1,11 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { parseTrueType } from "@anyfile/viewer-rendering/fixed-layout";
 
 import { parseColor } from "./color";
 import { loadXpsDocument } from "./document";
-import { deobfuscateFont, parseTrueType } from "./font";
+import { deobfuscateFont } from "./font";
 import { parseAbbreviatedGeometry } from "./geometry";
 import { parseGlyphRun, type XpsNode } from "./model";
 import { XpsPackage } from "./package";

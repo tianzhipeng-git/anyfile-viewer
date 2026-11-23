@@ -1,9 +1,10 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { parseTrueType } from "@anyfile/viewer-rendering/fixed-layout";
 
 import { loadXpsDocument } from "./document";
-import { deobfuscateFont, parseTrueType } from "./font";
+import { deobfuscateFont } from "./font";
 import { XpsPackage } from "./package";
 import { paintPage } from "./painter";
 import type { XpsImage } from "./resources";
