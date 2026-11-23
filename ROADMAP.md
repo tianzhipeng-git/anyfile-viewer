@@ -12,7 +12,7 @@
 - 每周 review：`docs/agent-weekly-review.md`
 
 ## 需求
-- [x] 低 | 在 `@anyfile/runtime-assets` 中抽取共享 Worker RPC 客户端 | 20+ Worker+WASM 插件重复编写请求 ID 关联、超时、`AbortSignal` 终止、transferable 与运行时回退逻辑（如 `djvu/src/worker-client.ts` 近 200 行）；抽为轻量类型化 `createWorkerRpcClient` 减少泄漏与取消竞态。2026-11-23 迁移 djvu/postscript/general-raster/photoshop，工厂与单测见 `viewer/runtime-assets/src/worker-rpc.ts`
+- [x] 低 | 在 `@anyfile/runtime-assets` 中抽取共享 Worker RPC 客户端 | 20+ Worker+WASM 插件重复编写请求 ID 关联、超时、`AbortSignal` 终止、transferable 与运行时回退逻辑（如 `djvu/src/worker-client.ts` 近 200 行）；抽为轻量类型化 `createWorkerRpcClient` 减少泄漏与取消竞态。2026-11-23 迁移 djvu/postscript/general-raster/photoshop，工厂与单测见 `viewer/runtime-assets/src/worker-rpc.ts` 2026-11-23 7c38d60
 - [ ] 中 | 构建版本化 Service Worker 与有界缓存淘汰 | 构建阶段注入 build ID，将 `/_next/static/*` 拆入 `anyfile-next-static-<buildId>` 以便发版激活时自动清理旧块，并为 `anyfile-runtime-v1` 增加有界 LRU 淘汰与满额恢复
 - [ ] 中 | 右上角中英文切换时，会丢失已经打开的文件和工作区状态.
 - [ ] 低 | 抽取共享插件 IO / Abort / Lifecycle 工具并补齐协议 `runtime-unavailable` 与 `reportPreview` 约束 | 收敛 14 份 `read-blob` / 48 处 `abortError` 重复实现并支持渐进读头，在 `@anyfile/viewer-protocol` 新增 `runtime-unavailable` 区分运行时拉取失败与环境不支持，补齐新插件 `reportPreview` 约束
