@@ -46,6 +46,7 @@ export const PWA_FILE_HANDLER_GROUPS: readonly PwaFileHandlerGroup[] = [
       "application/vnd.ms-xpsdocument": [".xps"],
       "application/oxps": [".oxps"],
       "application/ofd": [".ofd"],
+      "application/vnd.ms-outlook": [".pst", ".ost"],
       "application/x-xmind": [".xmind", ".mmap", ".mm"],
     },
   },

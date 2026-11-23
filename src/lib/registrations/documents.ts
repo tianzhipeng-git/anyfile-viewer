@@ -8,6 +8,7 @@ import { ofdManifest } from "@anyfile/ofd-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
 import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
+import { pstManifest } from "@anyfile/pst-viewer/manifest";
 import { wordManifest } from "@anyfile/word-viewer/manifest";
 import { xpsManifest } from "@anyfile/xps-viewer/manifest";
 import type { ViewerPluginRegistration } from "@anyfile/viewer-protocol";
@@ -67,6 +68,11 @@ export const documentRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: calendarContactsManifest,
     async probe(context) { return (await import("@anyfile/calendar-contacts-viewer/probe")).inspectCalendarContacts(context); },
     async load() { return (await import("@anyfile/calendar-contacts-viewer")).calendarContactsViewer; },
+  },
+  {
+    manifest: pstManifest,
+    async probe(context) { return (await import("@anyfile/pst-viewer/probe")).probePst(context); },
+    async load() { return (await import("@anyfile/pst-viewer")).pstViewer; },
   },
   {
     manifest: mindMapManifest,
