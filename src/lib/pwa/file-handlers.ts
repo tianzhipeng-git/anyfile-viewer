@@ -43,6 +43,8 @@ export const PWA_FILE_HANDLER_GROUPS: readonly PwaFileHandlerGroup[] = [
       "application/vnd.ms-project": [".mpp"],
       "application/vnd.ms-visio.drawing": [".vsdx", ".vsd"],
       "application/postscript": [".ps", ".eps", ".ai"],
+      "application/vnd.ms-xpsdocument": [".xps"],
+      "application/oxps": [".oxps"],
       "application/x-xmind": [".xmind", ".mmap", ".mm"],
     },
   },

@@ -37,7 +37,7 @@
 - [ ] 低 | 新增 OpenRaster / Krita 分层设计图预览（`.ora` / `.kra`） | `docs/domains/images.md` 未实施项；规范自带 `mergedimage.png` 与 `stack.xml` 图层树，复用现有 ZIP 与 `@anyfile/viewer-rendering` 无新运行时即可替代 Krita/GIMP 预览
 - [x] 高 | 新增 Apple iWork 文档与演示查看器（`.pages` / `.key`） | Windows/Linux 原生完全打不开 Mac 发来的 `.pages`/`.key`（当前仅 `excel` 支持 `.numbers`），搜索需求极大；需解析 IWA（Snappy+Protobuf）或自建 `libetonyek` WASM 渲染版式；新插件 `iwork` 自解析 IWA 提取文本/缩略图/备注（不渲染版式），兼容嵌套 Index.zip 与 iWork '09 XML 2026-11-22 7fd9310
 - [x] 高 | 新增统计软件数据查看器（`.sav` / `.dta` / `.sas7bdat`） | 科研/医疗/金融高频搜 `open sav without spss` 与 `sas7bdat/dta viewer`，数据严格保密不愿上传；需按 `tools/` 配方将 C 库 `ReadStat` 编为 WASM，支持变量/值标签与大表分页；新插件 `stat-data` 自建 ReadStat 1.1.9 WASM 按需读文件，另含 `.zsav`/`.por`/`.xpt` 2026-11-22 fc48693
-- [ ] 高 | 新增 Microsoft XPS 固定版式查看器（`.xps` / `.oxps`） | Win10/11 默认移除 XPS 查看器且 macOS/Linux 无原生支持，常见于发票/税务/医疗打印件极度敏感；优先采用 ZIP + FixedPage XAML 固定版式渲染管线（避免引入 AGPLv3 协议的 MuPDF WASM）
+- [x] 高 | 新增 Microsoft XPS 固定版式查看器（`.xps` / `.oxps`） | Win10/11 默认移除 XPS 查看器且 macOS/Linux 无原生支持，常见于发票/税务/医疗打印件极度敏感；优先采用 ZIP + FixedPage XAML 固定版式渲染管线（避免引入 AGPLv3 协议的 MuPDF WASM）；新插件 `xps` 纯 JS 解析 FixedPage 并自读 TrueType 字形轮廓绘制到共享分页 Canvas 视口，待人工浏览器验收 2026-11-23 6447fc6
 - [ ] 高 | 新增 CorelDRAW 矢量文件查看器（`.cdr`） | 印刷/设计行业搜 `open cdr without coreldraw` 痛点极强（软件昂贵且偏 Windows，设计稿涉密）；需自建 `libcdr`+`librevenge` WASM 配方渲染矢量页
 - [ ] 低 | 校准开发者与数据类格式页的 `typicalLevel` 支持等级 | 核对并统一 `torrent`、`safetensors`、`gguf`、`wasm`、`map`、`npy`/`npz`、`duckdb`、`har` 等格式页的 `typicalLevel`，使其与实际 `probe()` 返回值及 `docs/domains/` 支持矩阵一致
 - [ ] 低 | 为缺少真实样例的插件补 `examples/`，逐个移出 check-repo 的 PLUGINS_WITHOUT_SAMPLES | 先做 code、sqlite、hex、dev-wasm 等易获得样例的

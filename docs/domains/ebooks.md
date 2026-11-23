@@ -1,11 +1,11 @@
 # 电子书与漫画阅读架构及支持矩阵
 
-本文件记录电子书/漫画/固定页阅读插件的共享架构、内容安全模型、权威资源预算与当前支持矩阵。各插件细节与测试命令见 `viewer/plugins/{epub,fictionbook,comic-book,mobi,chm,djvu}/README.md`。
+本文件记录电子书/漫画/固定页阅读插件的共享架构、内容安全模型、权威资源预算与当前支持矩阵。各插件细节与测试命令见 `viewer/plugins/{epub,fictionbook,comic-book,mobi,chm,djvu,xps}/README.md`。
 
 ## 1. 架构边界与共享层
 
 - **`@anyfile/rendering-publication`**：服务流式章节出版物（`epub-reader`、`fictionbook-reader`、`mobi-reader`），通过 `PublicationSource` / `SafeChapter` 契约管理 3 章活跃窗口、目录/锚点导航、阅读样式与安全 iframe；不含格式解析器或 ZIP 依赖。
-- **独立阅读器**：`comic-book-reader`（CBZ/CBR/CB7/CBT）、`chm-reader`（CHM）、`djvu-reader`（DjVu）保留独立视口。
+- **独立阅读器**：`comic-book-reader`（CBZ/CBR/CB7/CBT）、`chm-reader`（CHM）、`djvu-reader`（DjVu）保留独立视口；`djvu-reader` 与 `xps-reader`（XPS/OpenXPS）共用 `@anyfile/viewer-rendering/paged` 分页视口。
 - **ZIP 复用**：`@anyfile/archive-metadata-viewer/zip-catalog` 与 `/zip-source`（基于 `@zip.js/zip.js@2.8.60`，仅 Stored/Deflate，有界 `WritableStream`，禁止 `file.arrayBuffer()`）。
 - **测试夹具**：自动化协议与插件测试共享 `docs/ebooks/fixtures/`（含 `phase45/` 与 `fonts/Abel-Regular.ttf` SIL OFL 1.1），维护清单见其目录下 `manifest.json`。
 
@@ -28,6 +28,7 @@
 | CBZ / CBT / CBR / CB7（无加密/分卷） | `comic-book-reader` | 4 | verified | 自然页序、ComicInfo、单/双页、滚动、RTL；≤5,000 页、≤16 MiB/页、≤8 MP/页（GIF/WebP/APNG 计帧像素，不含动画 AVIF）、≤5 活跃页；ZIP ≤2 GiB / 4 MiB 目录 / 10,000 条目 / 32 MiB 单条目 / 1000:1；CBT 仅 USTAR（≤2 GiB / 5 MiB 头）；CBR(RAR4/5)/CB7(Copy/LZMA/LZMA2) 用自建 `libarchive 3.8.9-anyfile.1` Worker 单遍顺序解压（输入与总展开 ≤128 MiB / 1000:1 / WASM 16–256 MiB / 60 s）；RAR4 压缩变体待补专项样例 |
 | CHM (ITSF v2–3 / LZX) | `chm-reader` | 4 | verified | `.hhc` 目录树、`.hhk` 索引、主题 HTML/样式/图片、沙箱隔离；输入与压缩区展开 ≤128 MiB、单主题 ≤2 MiB；禁用脚本/ActiveX/跨 CHM 链接与全文索引 |
 | DjVu（单页 / bundled 多页） | `djvu-reader` | 4 | verified | Canvas 分页、目录树、虚拟化缩略图、可选隐藏文本层；输入 ≤128 MiB、≤5,000 页、≤16 MP/页、≤5 活跃 Canvas；GPLv2+ 源码见 `/source/djvu.html`；不支持 indirect 多文件、`BGjp` 背景与 OCR |
+| XPS / OpenXPS（`.xps` / `.oxps`，无 DRM） | `xps-reader` | 4 | implemented | 纯 JS：zip.js 读 OPC 包（含交错 piece），FixedPage → 显示树 → Canvas；路径/纯色与渐变/图片与视觉画刷（含平铺）/裁剪/变换/不透明度蒙版，内嵌与混淆 TrueType 字形轮廓、可选文本层、DocumentStructure 目录；输入 ≤512 MiB、≤10,000 页、单页 ≤20 万元素 / 50 万字形、单图 ≤64 MP；不支持 JPEG XR、CFF 字体（回退系统字体）、ICC 与超链接 |
 | 通用归档检查（EPUB/CBZ 等） | `archive-metadata-viewer` | 2 | implemented | 手动备选，仅列目录与压缩信息 |
 
 ## 4. 明确排除与未实现候选

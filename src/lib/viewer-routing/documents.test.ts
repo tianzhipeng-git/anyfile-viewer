@@ -74,6 +74,18 @@ describe("document and office routing", () => {
     expect(pem.map(({ registration }) => registration.manifest.id)).toEqual(["hex-viewer"]);
   });
 
+  it("routes XPS and OpenXPS packages by FixedPage content", async () => {
+    const signal = new AbortController().signal;
+    const xps = readFileSync(join(process.cwd(), "viewer/plugins/xps/examples/testPPT.xps"));
+    for (const name of ["slides.xps", "slides.oxps"]) {
+      const resolved = await resolveViewerRegistrations(new File([xps], name), viewerRegistrations, { signal });
+      expect(resolved.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+        .toEqual([["xps-reader", 4], ["hex-viewer", 1]]);
+    }
+    const docx = await resolveViewerRegistrations(new File(["PK\u0003\u0004"], "disguised.xps"), viewerRegistrations, { signal });
+    expect(docx.map(({ registration }) => registration.manifest.id)).toEqual(["hex-viewer"]);
+  });
+
   it.each(["records.csv", "records.tsv"])("routes %s to main-content table viewers", async (name) => {
     const resolved = await resolveViewerRegistrations(
       new File(["name,value\nAlice,42\n"], name), viewerRegistrations,
