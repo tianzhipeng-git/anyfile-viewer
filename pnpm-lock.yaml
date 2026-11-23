@@ -157,6 +157,9 @@ importers:
       '@anyfile/pixelmator-pxd-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/pixelmator-pxd
+      '@anyfile/plist-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/plist
       '@anyfile/point-cloud-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/point-cloud
@@ -1074,6 +1077,19 @@ importers:
       fflate:
         specifier: 0.8.3
         version: 0.8.3
+
+  viewer/plugins/plist:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
 
   viewer/plugins/point-cloud:
     dependencies:

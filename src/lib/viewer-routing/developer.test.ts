@@ -70,6 +70,14 @@ describe("developer, data and archive routing", () => {
     expect(duckdb.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
       .toEqual([["duckdb-data", 3], ["hex-viewer", 1]]);
 
+    const plistBytes = readFileSync(join(process.cwd(), "viewer/plugins/plist/examples/app-config.binary.plist"));
+    const plist = await resolveViewerRegistrations(
+      new File([plistBytes], "config.plist"), viewerRegistrations,
+      { signal: new AbortController().signal },
+    );
+    expect(plist.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["apple-plist", 3], ["hex-viewer", 1]]);
+
     const tgzBytes = readFileSync(join(process.cwd(), "viewer/plugins/archive/examples/package.tgz"));
     const tgz = await resolveViewerRegistrations(
       new File([tgzBytes], "package.tgz"), viewerRegistrations,
@@ -94,6 +102,8 @@ describe("developer, data and archive routing", () => {
       expect(findViewerRegistrations(`server.${extension}`, viewerRegistrations).map(({ manifest }) => manifest.id))
         .toEqual(["x509-certificate", "hex-viewer"]);
     }
+    expect(findViewerRegistrations("Preferences.plist", viewerRegistrations).map(({ manifest }) => manifest.id))
+      .toEqual(["apple-plist", "hex-viewer"]);
     expect(findViewerRegistrations("module.wasm", viewerRegistrations).map(({ manifest }) => manifest.id))
       .toEqual(["dev-wasm-viewer", "hex-viewer"]);
     expect(findViewerRegistrations("bundle.js.map", viewerRegistrations).map(({ manifest }) => manifest.id))

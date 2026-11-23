@@ -8,6 +8,7 @@ import { devWasmManifest } from "@anyfile/dev-wasm-viewer/manifest";
 import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
 import { mlWeightsManifest } from "@anyfile/ml-weights-viewer/manifest";
+import { plistManifest } from "@anyfile/plist-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import { statDataManifest } from "@anyfile/stat-data-viewer/manifest";
 import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
@@ -26,6 +27,11 @@ export const developerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: mlWeightsManifest,
     async probe(context) { return (await import("@anyfile/ml-weights-viewer/probe")).probeMlWeights(context); },
     async load() { return (await import("@anyfile/ml-weights-viewer")).mlWeightsViewer; },
+  },
+  {
+    manifest: plistManifest,
+    async probe(context) { return (await import("@anyfile/plist-viewer/probe")).probePlistFile(context); },
+    async load() { return (await import("@anyfile/plist-viewer")).plistViewer; },
   },
   {
     manifest: certificateManifest,

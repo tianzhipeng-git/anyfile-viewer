@@ -197,6 +197,7 @@ export const PWA_FILE_HANDLER_GROUPS: readonly PwaFileHandlerGroup[] = [
       "application/x-bittorrent": [".torrent"],
       "application/x-safetensors": [".safetensors"],
       "application/x-gguf": [".gguf"],
+      "application/x-plist": [".plist"],
       "application/x-har+json": [".har"],
       "text/calendar": [".ics"],
       "text/vcard": [".vcf"],

@@ -57,6 +57,7 @@ import { gifFormat } from "./gif";
 import { gzFormat } from "./gz";
 import { harFormat } from "./har";
 import { torrentFormat } from "./torrent";
+import { plistFormat } from "./plist";
 import { safetensorsFormat } from "./safetensors";
 import { ggufFormat } from "./gguf";
 import { certificateFormat } from "./certificates";
@@ -204,6 +205,7 @@ export const formatContents: readonly FormatContent[] = [
   gzFormat,
   harFormat,
   torrentFormat,
+  plistFormat,
   safetensorsFormat,
   ggufFormat,
   certificateFormat,

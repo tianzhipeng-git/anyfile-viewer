@@ -33,7 +33,7 @@
 - [ ] 中 | 新增网络抓包查看器（`.pcap` / `.pcapng`） | 解析包头与常见 TCP/UDP/DNS/HTTP 摘要、筛选与载荷检查；排查问题常需安装 Wireshark，流量数据极度敏感不愿上传
 - [ ] 中 | 新增地理轨迹与矢量数据查看器（`.geojson` / `.gpx` / `.kml` / `.shp`） | 纯本地 2D 坐标投影与属性表展示（不请求在线地图瓦片）；替代 QGIS / Google Earth，符合 `选格式.md` 地理数据免上传场景
 - [ ] 低 | `ffmpeg-video` 补齐 `.flv`（Flash Video）播放 | `docs/domains/videos.md` 未实施项；现有 `ffmpeg-playback` WASM 已编入 `flv` demuxer/decoder（见 `tools/ffmpeg-playback-build/evidence/configure.txt`），补有界 probe、样例与注册即可免装桌面播放器
-- [ ] 低 | 新增 Apple 属性列表查看器（`.plist`） | Windows/Linux 与浏览器打不开二进制 `bplist00`，`plist viewer online` 需求稳定且常含应用配置不便上传；纯 JS 解析 `bplist00`/XML 为树形与 JSON 视图，无新运行时
+- [x] 低 | 新增 Apple 属性列表查看器（`.plist`） | Windows/Linux 与浏览器打不开二进制 `bplist00`，`plist viewer online` 需求稳定且常含应用配置不便上传；纯 JS 解析 `bplist00`/XML 为树形与 JSON 视图，无新运行时。新插件 `apple-plist` 自研二进制 trailer+对象表解码器与 XML 分词器，可展开树 + 即时筛选 2026-11-24 2e5f2ba
 - [ ] 低 | 新增 OpenRaster / Krita 分层设计图预览（`.ora` / `.kra`） | `docs/domains/images.md` 未实施项；规范自带 `mergedimage.png` 与 `stack.xml` 图层树，复用现有 ZIP 与 `@anyfile/viewer-rendering` 无新运行时即可替代 Krita/GIMP 预览
 - [x] 高 | 新增 Apple iWork 文档与演示查看器（`.pages` / `.key`） | Windows/Linux 原生完全打不开 Mac 发来的 `.pages`/`.key`（当前仅 `excel` 支持 `.numbers`），搜索需求极大；需解析 IWA（Snappy+Protobuf）或自建 `libetonyek` WASM 渲染版式；新插件 `iwork` 自解析 IWA 提取文本/缩略图/备注（不渲染版式），兼容嵌套 Index.zip 与 iWork '09 XML 2026-11-22 7fd9310
 - [x] 高 | 新增统计软件数据查看器（`.sav` / `.dta` / `.sas7bdat`） | 科研/医疗/金融高频搜 `open sav without spss` 与 `sas7bdat/dta viewer`，数据严格保密不愿上传；需按 `tools/` 配方将 C 库 `ReadStat` 编为 WASM，支持变量/值标签与大表分页；新插件 `stat-data` 自建 ReadStat 1.1.9 WASM 按需读文件，另含 `.zsav`/`.por`/`.xpt` 2026-11-22 fc48693
