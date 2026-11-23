@@ -1,0 +1,31 @@
+{
+  "runtimeSets": [
+    {
+      "id": "readstat",
+      "version": "1.1.9-anyfile.1",
+      "assetPatterns": [
+        "public/vendor/readstat/1.1.9-anyfile.1/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "parser",
+          "assetPatterns": [
+            "public/vendor/readstat/1.1.9-anyfile.1/readstat.mjs",
+            "public/vendor/readstat/1.1.9-anyfile.1/readstat.wasm"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ],
+      "implementationFiles": [
+        "viewer/plugins/stat-data/src/types.ts",
+        "viewer/plugins/stat-data/src/kernel.worker.ts"
+      ],
+      "requiredMarkers": [
+        "1.1.9-anyfile.1",
+        "readstat.mjs"
+      ]
+    }
+  ]
+}

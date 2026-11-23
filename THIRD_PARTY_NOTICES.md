@@ -6,6 +6,10 @@ under their own licenses. The exact installed versions are locked by
 `pnpm-lock.yaml`; `pnpm licenses list --prod` provides the complete installed
 production dependency closure.
 
+The statistical data viewer uses a source-built ReadStat 1.1.9 (MIT) WebAssembly
+runtime with zlib 1.3.1 (Zlib). Hashes, build instructions, and license texts
+are published with `/vendor/readstat/1.1.9-anyfile.1/`.
+
 The optional EPS/PostScript viewer also uses a source-built `stet` 0.8.1
 WebAssembly runtime under Apache-2.0 OR MIT. Exact source, hashes, build
 instructions, and license texts are published with
