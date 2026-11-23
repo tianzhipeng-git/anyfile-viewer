@@ -1,3 +1,14 @@
+export {
+  createWorkerRpcClient,
+  type WorkerRpcClient,
+  type WorkerRpcClientOptions,
+  type WorkerRpcError,
+  type WorkerRpcRequest,
+  type WorkerRpcResponse,
+  type WorkerRpcSendOptions,
+  type WorkerRpcSuccess,
+} from "./worker-rpc";
+
 export interface RuntimeAttempt<T> {
   initialize(): Promise<T>;
   dispose(): void | Promise<void>;

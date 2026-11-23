@@ -731,6 +731,9 @@ importers:
 
   viewer/plugins/general-raster:
     dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
@@ -1002,6 +1005,9 @@ importers:
 
   viewer/plugins/photoshop:
     dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol

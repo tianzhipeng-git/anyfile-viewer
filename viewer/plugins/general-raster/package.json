@@ -10,6 +10,7 @@
     "./tiff": "./src/decode-tiff.ts"
   },
   "dependencies": {
+    "@anyfile/runtime-assets": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",
     "geotiff": "3.0.5"
