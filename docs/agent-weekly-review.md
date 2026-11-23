@@ -44,28 +44,39 @@ git diff $R --stat -- third_party/ tools/ THIRD_PARTY_NOTICES.md licenses/
 - 共享包改动是否覆盖了所有调用方。
 - 接近 1000 行的文件：`git ls-files 'src/*' 'viewer/*' | xargs wc -l | sort -rn | head`，提前安排拆分。
 
-## 5. 文档
+## 5. 审查页面与内容
+
+```bash
+git diff $R --stat -- src/content/ src/app/
+pnpm audit:content  # 依赖第 1 节 pnpm build 产物，输出 docs/tasks/seo-content-audit/latest/report.md
+```
+
+本周新增插件、格式或功能涉及内容页时，按 `docs/seo/content-pages.md` 与 `docs/seo/i18n.md` 审查：
+- 看 `report.md`：新增或改动页面有无高相似、核心正文过少、公共模板占比过高或元数据/canonical 异常。
+- 读新增页面的 `en`/`zh-CN` 文案：确认无模板套壳、关键词堆砌与机翻味，事实（支持等级、限制、上游开源信息）与实现一致，类别页/格式页/插件页互链与 sitemap 完整。
+
+## 6. 文档
 
 - 是否出现日期化验证流水、实施过程记录、`docs/<plugin>.md` 之类本应写进插件 README 的文件。
-- 支持矩阵和站点格式页的等级是否与实际能力一致。
+- 领域文档中的支持矩阵是否与实际能力一致。
 - `AGENTS.md` 和本目录规范是否需要因本周暴露的问题而更新——反复出现的问题应变成规则或门禁。
 - 处理需求池文件- `ROADMAP.md`：本周完成了哪些、新增了哪些。
     - 已完成条目确实达到描述的范围；`[!]` 受阻条目决定重新拆分、降级或删除。
     - 调研 Agent 新增条目的证据是否可信、难度是否合理；调整优先级顺序。
     - 合并前在 `dev` 上删除本周已发布的 `[x]` 条目。
 
-## 6. 架构升级契机
+## 7. 架构升级契机
 及时的甄别和发现, 现有的架构设计、抽象和契约是否已经过时、落后, 阻碍到项目继续扩展, 提出架构升级方案供用户选择. 
 这是我们每周review工作的重点.
 
-## 7. 真实浏览器验收
+## 8. 真实浏览器验收
 从本周提交说明里收集“需人工浏览器验收”的条目：
 
 用 `pnpm build && pnpm start` 在 Chrome 打开 `/en/view` 和 `/zh-CN/view`，用插件 `examples/` 中的样例逐项检查：打开、缩放/翻页/播放、窄窗口、切换文件、损坏文件的错误状态、DevTools 网络面板中无 `POST`/`PUT` 上传且无意外同源 404。未通过的条目修复或回退后再合并。
 
 使用 Chrome DevTools MCP 时，可通过临时本地只读 CORS 静态服务配合 `fetch` + `DataTransfer` 将 `viewer/plugins/*/examples/` 样例注入 `<input type="file">`（禁止把二进制样例转 base64 读入上下文）。如果可以自行用浏览器验收的直接验收, 无法验收的留待用户人工确认.
 
-## 8. 用户协商
+## 9. 用户协商
 - review 过程中发现的明确小问题（无需产品或架构决策，如确定性 bug、文档/配置不一致、笔误、脚本过滤遗漏等），直接修复并通过检查验证，不要就此向用户请求确认。
 - 能通过本地 CLI、skill 或 MCP 直接核查与执行的事项（如用 `wrangler` 检查/上传 R2 资产、运行 Chrome 浏览器验收等），直接执行并验证，不要让用户代劳或反复确认。
 - 只将涉及产品/架构决策、架构升级方案选择以及真正的阻塞点留待与用户协商。
@@ -73,9 +84,9 @@ git diff $R --stat -- third_party/ tools/ THIRD_PARTY_NOTICES.md licenses/
 在提出待确认问题前, 使用如下命令通知用户: 
 `lark-cli im +messages-send --user-id ou_a943cca571fcd87db12f30a8289a3e6b --text "你好" --as bot --json`
 
-## 9. 合并与上线
+## 10. 合并与上线
 
-1. 用 `gh pr create --base main --head dev` 创建 PR，描述中附本周摘要与第 2–8 节结论。
+1. 用 `gh pr create --base main --head dev` 创建 PR，描述中附本周摘要与第 2–9 节结论。
 2. 用 `gh pr checks <pr> --watch` 等待 `check`、`build` 全部通过。
 3. 用 `gh api repos/{owner}/{repo}/pulls/<pr>/comments` 与 `.../reviews` 拉取自动/人工 PR 评论（如 `chatgpt-codex-connector[bot]`），逐条批判性评估；有效问题直接在 `dev` 修复、验证并推送，直至 CI 全绿且无未处理的有效建议。
 4. 用 `gh pr merge <pr> --merge` 合并（`Create a merge commit`，不要 Squash merge，也不要删除 `dev` 分支，以保持 `dev` 与 `main` 历史对齐且可干净 revert）。

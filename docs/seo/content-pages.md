@@ -26,7 +26,10 @@
 - 普通介绍页不加 COOP/COEP；进入/离开 `/view` 通过 `IsolationBoundaryLink` 完整导航跨越隔离边界。
 - 自动化测试校验：每个 published 格式映射真实非 hex 插件且主扩展名与 Manifest 一致；alias 无冲突、308 重定向且不进 sitemap；分类与插件双向引用完整；同 locale 下 title/description/URL 唯一；SEO 内容不带入运行时代码。
 
-## 4. 内容相似度审计
+## 4. 内容质量与相似度审计
+
+- **反模板套壳与低质页**：同插件拆出多个格式页时，须写清各格式的真实差异、典型来源软件/使用场景、具体限制与排错说明，禁止仅替换扩展名或同义词改写；等价扩展名一律走 `aliases` 308 重定向，不得拆成重复落地页。
+- **文案与 FAQ 质量**：FAQ 须回答真实用户痛点（打不开原因、版本/编码限制、格式差异、本地隐私处理），禁止注水凑字数、关键词堆砌或复读首段；`en` 与 `zh-CN` 均须自然准确，无生硬机翻味或英文回退残留。
 
 运行 `pnpm audit:content` 扫描已有生产构建（`.next/server/app`）中 sitemap 覆盖的 formats/categories/plugins/viewers 页面，输出至 `docs/tasks/seo-content-audit/latest/{report.md,audit.json}`（Git 忽略）：
 
