@@ -145,7 +145,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
   {
     kind: "database",
     icon: DatabaseIcon,
-    extensions: pluginExtensions("sqlite-database", "duckdb-data"),
+    extensions: pluginExtensions("sqlite-database", "duckdb-data", "statistical-data"),
   },
   {
     kind: "audio",

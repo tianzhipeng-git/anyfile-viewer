@@ -33,6 +33,8 @@ const eslintConfig = defineConfig([
     "third_party/mppgo/**",
     "third_party/libvisio/**",
     "third_party/djvulibre/**",
+    "third_party/readstat/**",
+    "public/vendor/readstat/**",
     "public/vendor/libvisio/**",
     "public/vendor/mppgo/**",
     "public/vendor/libredwg/**",

@@ -1,0 +1,60 @@
+{
+  "artifactVersion": "1.1.9-anyfile.1",
+  "image": "emscripten/emsdk@sha256:90b757eb11fa9a0e3ce4d2d9f76d932a56018e4accc37b5a28b2783751e60eb7",
+  "emscripten": "4.0.10",
+  "sources": {
+    "readstat": {
+      "version": "1.1.9",
+      "url": "https://github.com/WizardMac/ReadStat/releases/download/v1.1.9/readstat-1.1.9.tar.gz",
+      "sha256": "3a232b9e852d10173e2f25da9155afe2e129a30d1fc6c9aac142cdc5cbfe527e"
+    },
+    "zlib": {
+      "version": "1.3.1",
+      "url": "https://github.com/madler/zlib/archive/refs/tags/v1.3.1.tar.gz",
+      "sha256": "17e88863f3600672ab49182f217281b6fc4d3c762bde361935e436a95214d05c"
+    }
+  },
+  "adapterRevision": 1,
+  "recipeHashes": {
+    "CMakeLists.txt": "13577ff28eb8dc6227c7831334422f582439896e1e2b7fdb7f7dc2132a8f12a3",
+    "adapter.c": "ff7d20843250a88b8292184dd453612b503079494949d1dcdc2b74dc044ef92e",
+    "build-in-container.sh": "79083c09e064a7c77ad6da5ad046e986f7b0b0f0f216d6d959105b4ae13f2261"
+  },
+  "options": {
+    "optimization": "O2",
+    "zlib": true,
+    "memoryMaximum": 268435456,
+    "stackSize": 1048576,
+    "filesystem": false,
+    "networking": false,
+    "outputBytes": 50331648,
+    "cellText": 4096,
+    "labelEntries": 200000
+  },
+  "artifacts": {
+    "SOURCE.md": {
+      "bytes": 765,
+      "sha256": "ca27d23d503aab13c7b58c3c146a7e01a97dd3d977eb1f357d391a245004ce59"
+    },
+    "readstat.mjs": {
+      "bytes": 13056,
+      "sha256": "961fd6c76b35f6122741569e53038d0e0340163d55dae0a4b8e869cf6f7c3e5e"
+    },
+    "readstat.wasm": {
+      "bytes": 306120,
+      "sha256": "dd64eda2ea79dd830320924c9c5264c9c151fb2d1b82264097b8fe7e2f06c446"
+    },
+    "licenses/emscripten.txt": {
+      "bytes": 5093,
+      "sha256": "620a78084fc7ca97c0b5dea9abf891f3ffcadfdbf305276f099c9c4e12fc1d86"
+    },
+    "licenses/readstat-MIT.txt": {
+      "bytes": 1091,
+      "sha256": "416b611ef9448b3c7c71f584b1ebf78baff8f553b4b5368f2af732255ca19a3e"
+    },
+    "licenses/zlib.txt": {
+      "bytes": 1002,
+      "sha256": "845efc77857d485d91fb3e0b884aaa929368c717ae8186b66fe1ed2495753243"
+    }
+  }
+}

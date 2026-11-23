@@ -9,6 +9,7 @@ import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
 import { mlWeightsManifest } from "@anyfile/ml-weights-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
+import { statDataManifest } from "@anyfile/stat-data-viewer/manifest";
 import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
 import type { ViewerPluginRegistration } from "@anyfile/viewer-protocol";
 
@@ -40,6 +41,11 @@ export const developerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: sqliteManifest,
     async probe(context) { return (await import("@anyfile/sqlite-viewer/probe")).probeSQLite(context); },
     async load() { return (await import("@anyfile/sqlite-viewer")).sqliteViewer; },
+  },
+  {
+    manifest: statDataManifest,
+    async probe(context) { return (await import("@anyfile/stat-data-viewer/probe")).probeStatData(context); },
+    async load() { return (await import("@anyfile/stat-data-viewer")).statDataViewer; },
   },
   {
     manifest: devArrayManifest,

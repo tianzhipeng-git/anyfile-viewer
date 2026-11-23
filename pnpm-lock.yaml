@@ -175,6 +175,9 @@ importers:
       '@anyfile/sqlite-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/sqlite
+      '@anyfile/stat-data-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/stat-data
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:viewer/protocol
@@ -1148,6 +1151,22 @@ importers:
       '@types/sql.js':
         specifier: 1.4.11
         version: 1.4.11
+
+  viewer/plugins/stat-data:
+    dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
 
   viewer/plugins/svg:
     dependencies:

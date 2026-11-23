@@ -124,6 +124,7 @@ import { rw2Format } from "./rw2";
 import { slkFormat } from "./slk";
 import { snupkgFormat } from "./snupkg";
 import { sqliteFormat } from "./sqlite";
+import { dtaFormat, porFormat, sas7bdatFormat, savFormat, xptFormat } from "./stat-data";
 import { svgFormat } from "./svg";
 import { tarFormat } from "./tar";
 import { tgaFormat } from "./tga";
@@ -270,6 +271,11 @@ export const formatContents: readonly FormatContent[] = [
   slkFormat,
   snupkgFormat,
   sqliteFormat,
+  savFormat,
+  porFormat,
+  dtaFormat,
+  sas7bdatFormat,
+  xptFormat,
   svgFormat,
   tarFormat,
   tgaFormat,

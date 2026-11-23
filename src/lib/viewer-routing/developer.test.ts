@@ -22,6 +22,12 @@ describe("developer, data and archive routing", () => {
     expect(sqlite.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
       .toEqual([["sqlite-database", 5], ["hex-viewer", 1]]);
 
+    for (const name of ["iris.sav", "sample.por", "stata14_118.dta", "airline.sas7bdat", "paxraw_d_short.xpt"]) {
+      const bytes = readFileSync(join(process.cwd(), "viewer/plugins/stat-data/examples", name));
+      const stat = await resolveViewerRegistrations(new File([bytes], name), viewerRegistrations, { signal: new AbortController().signal });
+      expect(stat.map(({ registration }) => registration.manifest.id), name).toEqual(["statistical-data", "hex-viewer"]);
+    }
+
     const npyBytes = readFileSync(join(process.cwd(), "viewer/plugins/dev-array/examples/matrix.npy"));
     const npy = await resolveViewerRegistrations(
       new File([npyBytes], "matrix.npy"), viewerRegistrations,
