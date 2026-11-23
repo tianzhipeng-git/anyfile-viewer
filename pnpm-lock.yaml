@@ -606,6 +606,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -986,6 +989,9 @@ importers:
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
       pdfjs-dist:
         specifier: 6.2.108
         version: 6.2.108
@@ -1178,7 +1184,11 @@ importers:
         specifier: 1.6.0
         version: 1.6.0
 
-  viewer/rendering: {}
+  viewer/rendering:
+    dependencies:
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
 
   viewer/rendering-3d:
     dependencies:

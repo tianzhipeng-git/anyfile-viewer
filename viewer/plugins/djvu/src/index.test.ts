@@ -126,13 +126,13 @@ describe("djvuViewer", () => {
 
     const root = container.querySelector(".anyfile-djvu-viewer");
     expect(root).not.toBeNull();
-    expect(container.querySelectorAll(".anyfile-djvu-viewer__page").length).toBe(2);
+    expect(container.querySelectorAll(".anyfile-paged-viewer__page").length).toBe(2);
     expect(container.querySelector('a[href="/source/djvu.html"]')).not.toBeNull();
     expect(MockDjvuWorker.renderedPages).toContain(0);
-    expect(container.querySelector(".anyfile-djvu-viewer__text-word")?.textContent).toBe("DjVu ");
+    expect(container.querySelector(".anyfile-paged-viewer__text-word")?.textContent).toBe("DjVu ");
 
     // Click outline item to jump to page 2
-    const outlineBtn = container.querySelector(".anyfile-djvu-viewer__outline-btn") as HTMLButtonElement;
+    const outlineBtn = container.querySelector(".anyfile-paged-viewer__outline-btn") as HTMLButtonElement;
     outlineBtn.click();
     await new Promise((resolve) => setTimeout(resolve, 25));
     expect(MockDjvuWorker.renderedPages).toContain(1);
@@ -152,14 +152,14 @@ describe("djvuViewer", () => {
     const instance = await djvuViewer.open(context);
     await new Promise((resolve) => setTimeout(resolve, 20));
 
-    const pageInput = container.querySelector(".anyfile-djvu-viewer__page-input") as HTMLInputElement;
+    const pageInput = container.querySelector(".anyfile-paged-viewer__page-input") as HTMLInputElement;
     for (let p = 2; p <= 8; p += 1) {
       pageInput.value = String(p);
       pageInput.dispatchEvent(new Event("change"));
       await new Promise((resolve) => setTimeout(resolve, 15));
     }
 
-    const activeCanvases = Array.from(container.querySelectorAll(".anyfile-djvu-viewer__page canvas"))
+    const activeCanvases = Array.from(container.querySelectorAll(".anyfile-paged-viewer__page canvas"))
       .filter((c) => (c as HTMLCanvasElement).width > 0);
     expect(activeCanvases.length).toBeLessThanOrEqual(DJVU_LIMITS.maxActiveCanvasPages);
 

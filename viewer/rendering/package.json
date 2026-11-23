@@ -5,6 +5,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./audio": "./src/audio-visualizer.ts"
+    "./audio": "./src/audio-visualizer.ts",
+    "./paged": "./src/paged/index.ts"
+  },
+  "dependencies": {
+    "@anyfile/viewer-protocol": "workspace:*"
   }
 }

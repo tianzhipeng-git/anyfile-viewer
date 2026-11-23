@@ -9,9 +9,9 @@
 ## 实现原理
 
 - 专用可终止 Worker 按需加载自建 `DjVuLibre 3.5.29-anyfile.1` WebAssembly（`djvu.js` + `djvu.wasm`）。
-- 打开时仅解析 `DIRM`、`NAVM` 目录与每页 `INFO` 头部尺寸，不解码全书像素；主线程按可视区域虚拟化渲染 Canvas，并在超出活跃窗口（5 页）时回收离屏 Canvas。
-- 侧边栏提供书签目录（`NAVM`）与虚拟化缩略图（最多缓存 24 张）。
-- 当页内存在 `DjVuTXT` 隐藏文本层且词框坐标校验通过时，叠加透明可选文本层。
+- 打开时仅解析 `DIRM`、`NAVM` 目录与每页 `INFO` 头部尺寸，不解码全书像素；通过 `@anyfile/viewer-rendering/paged` 的 `PagedDocumentSource` 驱动主线程可视区域虚拟化渲染 Canvas，并在超出活跃窗口（5 页）时回收离屏 Canvas。
+- 侧边栏复用共享分页视口提供书签目录（`NAVM`）与按需挂载的虚拟化缩略图（最多缓存 24 张）。
+- 当页内存在 `DjVuTXT` 隐藏文本层且词框坐标校验通过时，通过共享文本层叠加透明可选文本。
 
 ## 运行时与预算
 

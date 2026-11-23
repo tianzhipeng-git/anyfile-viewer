@@ -9,6 +9,7 @@
 | [@anyfile/viewer-ui](../viewer/ui/src/index.ts) | Inspector UI Kit（`createInspectorShell`、`createKeyValueList`、`createDataTable`、`createFilterInput`/`createTabBar`/`createPager`/`createNotice`/`createBadge`/`createSection`、`el()`、`formatBytes()`、`viewerTheme` 主题变量契约）与 `createPagedTableViewer` | Data、SQLite、Excel 及结构/元数据检查类插件（Torrent、ML Weights、HAR、Archive、Certificate、WASM、Source Map、Native Binary 等）；零依赖原生 DOM 原语，不是通用组件框架 |
 | [@anyfile/viewer-rendering](../viewer/rendering/src/index.ts) | `InteractiveViewport`、`CanvasSurface`、`ResourceScope` | 图片及扁平合成图的视图交互、Canvas 2D 与资源登记；部分全景插件也复用资源登记 |
 | [@anyfile/viewer-rendering/audio](../viewer/rendering/src/audio-visualizer.ts) | `AudioVisualizer` | browser-audio、non-native-audio 的画布可视化；不承担解码或统一播放器 UI |
+| [@anyfile/viewer-rendering/paged](../viewer/rendering/src/paged/index.ts) | `PagedDocumentSource`、`createPagedDocumentViewport`、分页工具栏/缩放/适应、画布淘汰、目录与缩略图侧栏、可选文本层 | DjVu、PDF（及后续 TIFF/XPS/PostScript 等固定分页格式）；不承担格式解码或 Worker 管理 |
 | [@anyfile/rendering-3d](../viewer/rendering-3d/src/index.ts) | Three.js 场景显示、相机/视图控件、按需绘制、对象可见性、动画和资源释放 | CAD 2D、CAD exchange、网格、3D 打印、点云；接收已转换的运行时文档，不解析格式 |
 | [@anyfile/rendering-publication](../viewer/rendering-publication/src/index.ts) | 章节窗口、目录/内部链接、阅读样式、安全 iframe 与清理 | EPUB、FB2、MOBI；另有 markup / safe-content 子入口复用章节解析与清理 |
 
@@ -50,6 +51,12 @@
 
 当前使用 Three.js WebGL renderer 与 OrbitControls，不把领域显示层扩成通用文件模型。支持范围和候选能力见 [3D 与 CAD 架构及支持矩阵](domains/3d.md)，不能以 Three.js 理论能力代替实际格式支持。
 
+### 分页文档
+
+`@anyfile/viewer-rendering/paged` 通过 `PagedDocumentSource` 统一固定分页文档的垂直滚动视口、工具栏（页码跳转、缩放、适应宽度/适应页面、键盘导航）、有界 Canvas 回收（`maxActiveCanvasPages` + `onEvictPage` 回调）、惰性缩略图与目录侧栏以及可选隐藏文本层；同时支持延迟挂载文档源（`setSource` / `setOutline` / `showStatus`），便于 PDF 密码解锁等打开后异步交互。格式解码、页面尺寸规范化、单线程渲染排队和自定义浮层仍归各插件负责。
+
+分页视口使用独立 `./paged` 子入口，根入口不得反向引入它，避免图片与音频插件带入分页视口代码。
+
 ### 章节阅读
 
 `rendering-publication` 通过 `PublicationSource` 加载安全章节，管理有界章节窗口和无脚本 iframe。包还提供实际复用的 markup 与内容清理工具；格式解码、容器读取和源数据适配仍由插件负责。
@@ -63,7 +70,7 @@
 - 原生 DOM 出现可验证的复杂嵌套状态或增量更新问题时，再比较局部修正与 Lit。Lit、Web Components 和 Shadow DOM 分别决策，不触发全站迁移。
 - 图片以外的格式若有共同坐标与输入语义，先定义内容模型、坐标空间、缩放锚点、滚动和边界，再决定是否共用 viewport。
 - 触屏 pinch 纳入需求后再实现或选择手势库，并验证多 pointer、取消、缩放中心和页面滚动冲突。
-- 两个页面型插件出现相同可见性与回收需求后，再提取页面虚拟化；现有 PDF 调度可继续保持专用。
+- 固定分页文档通过 `@anyfile/viewer-rendering/paged` 共享页面视口与画布回收；各格式仍保留独立解析器、Worker 调度与格式专属状态（如 PDF 密码解锁）。
 - 场景图、GPU 2D 或 deep zoom 的新依赖由实际格式需求与测量触发，不预建万能 scene model 或 renderer adapter。
 
 音视频保留各自 manifest、probe、UI 和支持矩阵；可复用底层解码运行时。已采用的 FFmpeg 共享边界见[视频与 FFmpeg 架构](domains/videos.md#2-共享-anyfileffmpeg-playback-运行时)。未来规划不能写成已实现能力。
@@ -76,6 +83,7 @@
 
 - 表格：异步竞态、取消、empty/error/ready、分页、键盘与重复销毁。
 - 图片/Canvas：缩放与旋转、resize/DPR、帧合并、尺寸上限和事件释放。
+- 分页文档：页码跳转、适应宽度/页面与缩放竞态、离屏 Canvas 回收与 `onEvictPage`、大纲/惰性缩略图侧栏、可选文本层与重复销毁。
 - 音频：上下文所有权、循环与 reduced-motion、效果切换及销毁后停画。
 - 3D：几何预算、相机与对象交互、context lost/restored、场景和 GPU 释放。
 - 章节阅读：章节窗口、内部链接、内容安全、快速切换和 iframe 生命周期。

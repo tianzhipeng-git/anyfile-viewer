@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@anyfile/runtime-assets": "workspace:*",
-    "@anyfile/viewer-protocol": "workspace:*"
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-rendering": "workspace:*"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*"

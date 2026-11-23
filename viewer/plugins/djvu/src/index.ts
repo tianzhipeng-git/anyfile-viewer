@@ -60,7 +60,7 @@ export const djvuViewer: FileViewerPlugin = {
         throw new DOMException("Viewer operation aborted.", "AbortError");
       }
 
-      view = createDjvuView(context.file.name, document, copy, {
+      view = createDjvuView(context.file.name, context.locale, document, copy, {
         renderPage: (pageIndex, width, height, options) => client!.renderPage(pageIndex, width, height, options),
         getPageText: (pageIndex, callSignal) => client!.getPageText(pageIndex, callSignal),
       });
