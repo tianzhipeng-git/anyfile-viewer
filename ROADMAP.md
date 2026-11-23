@@ -33,6 +33,7 @@
 - [ ] 低 | 校准开发者与数据类格式页的 `typicalLevel` 支持等级 | 核对并统一 `torrent`、`safetensors`、`gguf`、`wasm`、`map`、`npy`/`npz`、`duckdb`、`har` 等格式页的 `typicalLevel`，使其与实际 `probe()` 返回值及 `docs/domains/` 支持矩阵一致
 - [ ] 低 | 为缺少真实样例的插件补 `examples/`，逐个移出 check-repo 的 PLUGINS_WITHOUT_SAMPLES | 先做 code、sqlite、hex、dev-wasm 等易获得样例的
 - [ ] 低 | 为 `ffmpeg-video` / `ffmpeg-audio` 补齐站点插件页与格式页，并移出 `scripts/check-repo.mjs` 的 UNPUBLISHED_PLUGINS | 两个回退插件当前仅注册未发布站点页面，补齐后完善插件目录与格式覆盖统计
+- [ ] 高 | 重新设计samples管理和展示. 现在有一些格式页自带sample, /en/view页面左栏上还有个samples按钮里面只有几个图片samples, 用合理的方式重新设计吧.
 - [ ] 高 | 新增 GPU 纹理查看器（`.dds` / `.ktx` / `.ktx2`） | `docs/domains/images.md` 未实施项；游戏与 3D 资产开发高频痛点，需引入 Khronos/Basis WASM 转码并支持 mipmap、cubemap 与通道检查
 - [ ] 高 | 新增医学/科学体数据查看器（`.nii` / `.nii.gz` / `.nrrd`） | `docs/domains/images.md` 未实施项；科研/医疗影像高度敏感不愿上传，需三视图切片与窗宽窗位，替代 3D Slicer 等大型桌面软件
 - [ ] 高 | 实现 ZIP 归档内文件按需点击预览（跨插件复用） | 在 `archive-metadata-viewer` 中点击未加密 ZIP 内图片/PDF/代码/表格时按需流式解压并复用对应查看器，涉及工作区协议与跨插件协作
