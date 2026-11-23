@@ -8,7 +8,9 @@ export function PwaLifecycle() {
     if (typeof window === "undefined" || !window.isSecureContext) return;
     if (!("serviceWorker" in navigator)) return;
 
-    void navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => undefined);
+    const buildId = process.env.NEXT_PUBLIC_ANYFILE_BUILD_ID;
+    const swUrl = buildId ? `/sw.js?v=${encodeURIComponent(buildId)}` : "/sw.js";
+    void navigator.serviceWorker.register(swUrl, { scope: "/" }).catch(() => undefined);
   }, []);
 
   return null;

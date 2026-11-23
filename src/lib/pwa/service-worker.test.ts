@@ -87,6 +87,14 @@ class FakeCache {
   async put(input: string | FakeRequest, response: FakeResponse) {
     this.store.set(this.key(input), response);
   }
+
+  async keys() {
+    return [...this.store.keys()].map((href) => new FakeRequest(href));
+  }
+
+  async delete(input: string | FakeRequest) {
+    return this.store.delete(this.key(input));
+  }
 }
 
 class FakeCacheStorage {
@@ -112,6 +120,7 @@ class FakeCacheStorage {
 
 function createServiceWorkerHarness(
   fetchImpl: (input: string | FakeRequest, init?: RequestInit) => Promise<FakeResponse>,
+  swUrl = `${ORIGIN}/sw.js`,
 ) {
   const caches = new FakeCacheStorage();
   const listeners = new Map<string, (event: unknown) => void>();
@@ -120,7 +129,7 @@ function createServiceWorkerHarness(
   const fetchSpy = vi.fn(fetchImpl);
 
   const selfObj = {
-    location: new URL(`${ORIGIN}/sw.js`),
+    location: new URL(swUrl),
     addEventListener(type: string, listener: (event: unknown) => void) {
       listeners.set(type, listener);
     },
@@ -206,14 +215,35 @@ describe("service worker offline caching and isolation", () => {
 
     expect(harness.skipWaiting).toHaveBeenCalledTimes(1);
     const shell = await harness.caches.open("anyfile-shell-v1");
-    const runtime = await harness.caches.open("anyfile-runtime-v1");
+    const statics = await harness.caches.open("anyfile-next-static-dev");
 
     expect(shell.store.has(`${ORIGIN}/en/view`)).toBe(true);
     expect(shell.store.has(`${ORIGIN}/zh-CN/view`)).toBe(true);
     expect(shell.store.has(`${ORIGIN}/brand/anyfile-192.png`)).toBe(true);
     expect(shell.store.has(`${ORIGIN}/en/manifest.webmanifest`)).toBe(true);
-    expect(runtime.store.has(`${ORIGIN}/_next/static/css/app.css?dpl=1`)).toBe(true);
-    expect(runtime.store.has(`${ORIGIN}/_next/static/chunks/main-abc.js`)).toBe(true);
+    expect(statics.store.has(`${ORIGIN}/_next/static/css/app.css?dpl=1`)).toBe(true);
+    expect(statics.store.has(`${ORIGIN}/_next/static/chunks/main-abc.js`)).toBe(true);
+  });
+
+  it("names the static cache after the build id from the registration URL and purges older builds on activate", async () => {
+    const harness = createServiceWorkerHarness(
+      async () => new FakeResponse({ headers: { "content-type": "application/javascript" }, body: "ok" }),
+      `${ORIGIN}/sw.js?v=build-42`,
+    );
+    await harness.caches.open("anyfile-next-static-build-41");
+    await harness.caches.open("anyfile-next-static-build-40");
+    await harness.caches.open("anyfile-shell-v1");
+
+    await harness.dispatchFetch(new FakeRequest(`${ORIGIN}/_next/static/chunks/app.js`));
+    expect((await harness.caches.open("anyfile-next-static-build-42")).store.has(`${ORIGIN}/_next/static/chunks/app.js`)).toBe(true);
+
+    await harness.dispatchLifecycle("activate");
+
+    expect(await harness.caches.keys()).toEqual(
+      expect.arrayContaining(["anyfile-next-static-build-42", "anyfile-shell-v1"]),
+    );
+    expect(await harness.caches.keys()).not.toContain("anyfile-next-static-build-41");
+    expect(await harness.caches.keys()).not.toContain("anyfile-next-static-build-40");
   });
 
   it("refuses to cache viewer shells that lack COOP/COEP headers or are redirected", async () => {
@@ -348,6 +378,27 @@ describe("service worker offline caching and isolation", () => {
     expect((await harness.dispatchFetch(new FakeRequest(`${ORIGIN}/en/formats/pdf`, { mode: "navigate" }))).handled).toBe(false);
     expect((await harness.dispatchFetch(new FakeRequest(`${ORIGIN}/zh-CN/privacy`, { mode: "navigate" }))).handled).toBe(false);
     expect(harness.fetchSpy).not.toHaveBeenCalled();
+  });
+
+  it("bounds the runtime cache with LRU eviction so the oldest entries are dropped past the cap", async () => {
+    const harness = createServiceWorkerHarness(async (input) => {
+      const url = typeof input === "string" ? input : input.url;
+      return new FakeResponse({ type: "cors", headers: { "cross-origin-resource-policy": "cross-origin" }, body: url });
+    });
+
+    const urls = Array.from({ length: 90 }, (_, i) =>
+      `https://assets.anyfile.top/vendor/pkg/1.0.0/chunk-${i}.wasm`);
+
+    for (const url of urls) {
+      await harness.dispatchFetch(new FakeRequest(url, { mode: "cors" }));
+    }
+
+    const runtime = await harness.caches.open("anyfile-runtime-v1");
+    expect(runtime.store.size).toBe(80);
+    expect(runtime.store.has(urls[0])).toBe(false);
+    expect(runtime.store.has(urls[9])).toBe(false);
+    expect(runtime.store.has(urls[10])).toBe(true);
+    expect(runtime.store.has(urls[89])).toBe(true);
   });
 
   it("returns live network responses even when cache writes throw QuotaExceededError", async () => {

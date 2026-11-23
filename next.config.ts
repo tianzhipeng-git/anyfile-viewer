@@ -1,6 +1,24 @@
 import type { NextConfig } from "next";
 
+// One build id per build, shared by Next (`generateBuildId`) and the Service
+// Worker, which learns it from the `/sw.js?v=<id>` registration URL. Prefer the
+// deploy commit so redeploying the same commit keeps its offline caches.
+function resolveBuildId(): string {
+  const fromEnv = process.env.ANYFILE_BUILD_ID
+    || process.env.VERCEL_GIT_COMMIT_SHA
+    || process.env.GIT_COMMIT_SHA
+    || process.env.GIT_SHA;
+  if (fromEnv) return String(fromEnv).replace(/[^\w.-]/g, "").slice(0, 64) || "dev";
+  return Date.now().toString(36);
+}
+
+const BUILD_ID = resolveBuildId();
+
 const nextConfig: NextConfig = {
+  generateBuildId: () => BUILD_ID,
+  env: {
+    NEXT_PUBLIC_ANYFILE_BUILD_ID: BUILD_ID,
+  },
   async redirects() {
     return [
       { source: "/", destination: "/en", permanent: true },

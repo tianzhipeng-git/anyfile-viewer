@@ -26,12 +26,13 @@
 
 Service Worker 位于 [public/sw.js](../public/sw.js)，由 [PwaLifecycle](../src/components/pwa-lifecycle.tsx) 在生产安全上下文注册（作用域 `/`），[next.config.ts](../next.config.ts) 为 `/sw.js` 配置 `Cache-Control: no-cache, no-store, must-revalidate` 与 `Service-Worker-Allowed: /`。
 
-当前全量运行时资产约 150 MiB，采用两层缓存策略：
+当前全量运行时资产约 150 MiB，采用按构建版本划分的多层缓存策略：
 
-- **安装时预缓存（`anyfile-shell-v1` + 初始壳层块）**：预缓存 `/en/view`、`/zh-CN/view`、图标与 Manifest，并自动提取页面引用的初始 `/_next/static/*` JS/CSS/字体块写入缓存，确保安装后断网即可启动工作区并使用轻量本地查看能力。
-- **运行时按需缓存（`anyfile-runtime-v1`）**：
-  - 同源不可变资产（`/_next/static/*`、`/vendor/*`）：Cache-First，仅缓存 HTTP 200 的 `basic` 响应（不缓存 206 分段响应）。
-  - 受信任跨源版本化运行时（`https://assets.anyfile.top/vendor/*`、`https://cdn.jsdelivr.net/npm/*`）：Cache-First，首次在线打开对应格式后自动缓存，断网可直接复用；未缓存格式在离线状态下由 [ViewerHost](../src/components/viewer-host.tsx) 给出明确的离线提示。
+- **构建版本标识**：每次构建由 [next.config.ts](../next.config.ts) 的 `generateBuildId` 生成一个构建 ID（优先取部署 commit），并同时通过 `env` 注入 `NEXT_PUBLIC_ANYFILE_BUILD_ID`。客户端 [PwaLifecycle](../src/components/pwa-lifecycle.tsx) 以 `/sw.js?v=<buildId>` 注册 Service Worker，SW 从 `self.location` 读取该 ID 命名当前构建的静态块缓存；构建 ID 变化会触发新 SW 接管并在 `activate` 时清理上一构建的缓存。
+- **安装时预缓存（`anyfile-shell-v1`）**：预缓存 `/en/view`、`/zh-CN/view`、图标与 Manifest，并自动提取页面引用的初始 `/_next/static/*` JS/CSS/字体块，确保安装后断网即可启动工作区并使用轻量本地查看能力。
+- **构建版本化的静态块缓存（`anyfile-next-static-<buildId>`）**：同源 `/_next/static/*`（内容哈希、随构建变化）单独存放于按构建 ID 命名的缓存。发版激活新 SW 时删除所有其它 `anyfile-next-static-*` 缓存，避免旧构建的 chunk 无限堆积。
+- **运行时按需缓存（`anyfile-runtime-v1`，有界 LRU）**：
+  - 同源 `/vendor/*` 与受信任跨源版本化运行时（`https://assets.anyfile.top/vendor/*`、`https://cdn.jsdelivr.net/npm/*`）：Cache-First，仅缓存 HTTP 200 且满足隔离/CORP 约束的响应（不缓存 206 分段响应）。缓存按条目数上限（80）做 LRU 淘汰：命中即刷新为最近使用，写入超限时从最久未用的一端淘汰；命中存储配额上限时淘汰最旧的一半并重试一次（满额恢复），保证缓存持续增长且不会因单次写入失败而放弃缓存。
   - 同源导航（`/{locale}/view`）：Network-First 并后台刷新壳层块，断网回退到规范化路径缓存（去除 `?entry=...` 查询参数）。
   - 非 GET 请求、`Range` 请求、统计脚本与用户打开的任意公开文件链接（`#file=`）完全绕过 Service Worker，不拦截、不缓存。
 
