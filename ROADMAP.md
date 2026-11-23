@@ -17,7 +17,7 @@
 - [ ] 中 | 右上角中英文切换时，会丢失已经打开的文件和工作区状态.
 - [ ] 低 | 抽取共享插件 IO / Abort / Lifecycle 工具并补齐协议 `runtime-unavailable` 与 `reportPreview` 约束 | 收敛 14 份 `read-blob` / 48 处 `abortError` 重复实现并支持渐进读头，在 `@anyfile/viewer-protocol` 新增 `runtime-unavailable` 区分运行时拉取失败与环境不支持，补齐新插件 `reportPreview` 约束
 - [ ] 中 | 基于单点声明派生插件接线投影 | 收敛新增插件时的多点手工同步面（`src/content/manifests.ts`、`file-type-icon.tsx`、`src/lib/pwa/file-handlers.ts`、`docs/domains/*.md` 等），保持 `manifest.ts` 纯净与首包隔离边界
-- [ ] 高 | 抽取共享分页文档视口适配器（`PagedDocumentSource`） | `djvu` 与 `pdf` 各自实现 ~500–1000 行分页画布工具栏、缩放/适应、画布淘汰与大纲侧栏；抽到共享包（先从 `djvu` 抽起，再视情况迁 `pdf`）以复用至后续分页格式（TIFF/XPS/PostScript 等）
+- [x] 高 | 抽取共享分页文档视口适配器（`PagedDocumentSource`） | `djvu` 与 `pdf` 各自实现 ~500–1000 行分页画布工具栏、缩放/适应、画布淘汰与大纲侧栏；抽到共享包（先从 `djvu` 抽起，再视情况迁 `pdf`）以复用至后续分页格式（TIFF/XPS/PostScript 等）；2026-11-23 2f8dc80
 - [ ] 中 | 新增邮件查看器（`.eml` / `.msg`） | 解析 RFC 5322 MIME 与 Outlook CFBF `.msg`，展示安全清理正文与附件清单；无 Outlook 打开 `.msg` 搜索痛点极强，邮件高度隐私敏感不愿上传
 - [ ] 中 | 新增 Microsoft Access 数据库查看器（`.mdb` / `.accdb`） | `open mdb/accdb online` 与 macOS 查看 Access 搜索痛点极强（Mac/Linux 无原生软件，数据库高度机密）；基于纯 JS `mdb-reader` 读取表结构与分页数据
 - [ ] 中 | `archive-metadata-viewer` 补齐 `.7z` 归档目录查看 | 复用或抽取 `comic-book` 已有的 `comic-archive` libarchive WASM，无需新构建；macOS 与浏览器原生打不开 `.7z`，搜索需求高
