@@ -39,6 +39,7 @@ import {
   createMemoryWorkspaceReader,
   createWorkspaceReader,
 } from "@/lib/workspace-reader";
+import { readWorkspaceSession, writeWorkspaceSession } from "@/lib/workspace-session";
 import type { PublishedLocale } from "@/i18n/config";
 import type { AppDictionary } from "@/i18n/types";
 
@@ -61,15 +62,23 @@ export function FileWorkspace({ locale, dictionary, embedded = false }: { locale
   const remoteFiles = useRef(new WeakSet<File>());
   const downloadRequest = useRef<AbortController | null>(null);
   useEffect(() => () => downloadRequest.current?.abort(), []);
-  const [entries, setEntries] = useState<WorkspaceTreeEntry[]>([]);
-  const [rootDirectory, setRootDirectory] = useState<FileSystemDirectoryHandle>();
-  const [selectedEntry, setSelectedEntry] = useState<WorkspaceTreeEntry>();
-  const [selectedFile, setSelectedFile] = useState<File>();
-  const [fileSource, setFileSource] = useState<FileSource>("user");
+  const restored = embedded ? undefined : readWorkspaceSession();
+  const [entries, setEntries] = useState<WorkspaceTreeEntry[]>(restored?.entries ?? []);
+  const [rootDirectory, setRootDirectory] = useState<FileSystemDirectoryHandle | undefined>(restored?.rootDirectory);
+  const [selectedEntry, setSelectedEntry] = useState<WorkspaceTreeEntry | undefined>(restored?.selectedEntry);
+  const [selectedFile, setSelectedFile] = useState<File | undefined>(restored?.selectedFile);
+  const [fileSource, setFileSource] = useState<FileSource>(restored?.fileSource ?? "user");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(!embedded);
-  const [sidebarWidth, setSidebarWidth] = useState(300);
+  const [sidebarWidth, setSidebarWidth] = useState(restored?.sidebarWidth ?? 300);
+  // Keep the in-memory handoff current so a client-side language switch (which
+  // remounts this component) restores the same file and tree. Embedded embeds
+  // are isolated and never participate.
+  useEffect(() => {
+    if (embedded) return;
+    writeWorkspaceSession({ entries, rootDirectory, selectedEntry, selectedFile, fileSource, sidebarWidth });
+  }, [embedded, entries, rootDirectory, selectedEntry, selectedFile, fileSource, sidebarWidth]);
   const [linkControlsOpen, setLinkControlsOpen] = useState(false);
   const linkControlsId = useId();
   const directoryWorkspace = useMemo(
