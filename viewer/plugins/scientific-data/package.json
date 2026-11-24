@@ -1,0 +1,21 @@
+{
+  "name": "@anyfile/scientific-data-viewer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./manifest": "./src/manifest.ts",
+    "./probe": "./src/probe.ts"
+  },
+  "dependencies": {
+    "@anyfile/runtime-assets": "workspace:*",
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-ui": "workspace:*",
+    "fflate": "0.8.3",
+    "h5wasm": "0.10.3"
+  },
+  "devDependencies": {
+    "@anyfile/viewer-test": "workspace:*"
+  }
+}

@@ -9,6 +9,7 @@ import { duckdbManifest } from "@anyfile/duckdb-viewer/manifest";
 import { harManifest } from "@anyfile/har-viewer/manifest";
 import { mlWeightsManifest } from "@anyfile/ml-weights-viewer/manifest";
 import { plistManifest } from "@anyfile/plist-viewer/manifest";
+import { scientificDataManifest } from "@anyfile/scientific-data-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import { statDataManifest } from "@anyfile/stat-data-viewer/manifest";
 import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
@@ -52,6 +53,11 @@ export const developerRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: statDataManifest,
     async probe(context) { return (await import("@anyfile/stat-data-viewer/probe")).probeStatData(context); },
     async load() { return (await import("@anyfile/stat-data-viewer")).statDataViewer; },
+  },
+  {
+    manifest: scientificDataManifest,
+    async probe(context) { return (await import("@anyfile/scientific-data-viewer/probe")).probeScientificData(context); },
+    async load() { return (await import("@anyfile/scientific-data-viewer")).scientificDataPlugin; },
   },
   {
     manifest: devArrayManifest,

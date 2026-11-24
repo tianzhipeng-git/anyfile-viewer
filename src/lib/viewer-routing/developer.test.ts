@@ -116,6 +116,10 @@ describe("developer, data and archive routing", () => {
       .toEqual(["duckdb-data", "hex-viewer"]);
     expect(findViewerRegistrations("backup.tar.gz", viewerRegistrations).map(({ manifest }) => manifest.id))
       .toEqual(["archive-metadata-viewer", "hex-viewer"]);
+    for (const extension of ["h5", "hdf5", "nc", "nc4", "mat"]) {
+      expect(findViewerRegistrations(`dataset.${extension}`, viewerRegistrations).map(({ manifest }) => manifest.id))
+        .toEqual(["scientific-data", "hex-viewer"]);
+    }
     expect(findViewerRegistrations("backup.rar", viewerRegistrations).map(({ manifest }) => manifest.id))
       .toEqual(["archive-metadata-viewer", "hex-viewer"]);
   });

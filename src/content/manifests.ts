@@ -53,6 +53,7 @@ import { powerpointManifest } from "@anyfile/powerpoint-viewer/manifest";
 import { legacyOfficeManifest } from "@anyfile/legacy-office-viewer/manifest";
 import { fontManifest } from "@anyfile/font-viewer/manifest";
 import { safeSvgManifest } from "@anyfile/safe-svg-viewer/manifest";
+import { scientificDataManifest } from "@anyfile/scientific-data-viewer/manifest";
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import { statDataManifest } from "@anyfile/stat-data-viewer/manifest";
 import { wordManifest } from "@anyfile/word-viewer/manifest";
@@ -65,7 +66,7 @@ export const viewerManifests: readonly ViewerPluginManifest[] = [
   visioManifest, djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, pixelmatorPxdManifest,
   dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, fontManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, xpsManifest, ofdManifest, wordManifest, excelManifest, powerpointManifest, iworkManifest, legacyOfficeManifest, mppManifest, harManifest, bittorrentManifest, mlWeightsManifest, certificateManifest, calendarContactsManifest, pstManifest, plistManifest,
-  codeManifest, sqliteManifest, statDataManifest, devArrayManifest, devWasmManifest, devSourceMapManifest, devNativeBinaryManifest,
+  codeManifest, sqliteManifest, statDataManifest, scientificDataManifest, devArrayManifest, devWasmManifest, devSourceMapManifest, devNativeBinaryManifest,
   comicBookManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, djvuManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
 ];
 

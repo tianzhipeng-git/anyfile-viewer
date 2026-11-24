@@ -30,6 +30,7 @@ instructions, and license texts are published with
 | clsx | 2.1.1 | MIT | <https://github.com/lukeed/clsx> |
 | docx-preview | 0.4.0 | Apache-2.0 | <https://github.com/VolodymyrBaydalka/docxjs> |
 | GeoTIFF.js | 3.0.5 | MIT | <https://github.com/geotiffjs/geotiff.js> |
+| h5wasm | 0.10.3 | NIST Public Service / HDF5 BSD-3-Clause | <https://github.com/usnistgov/h5wasm> |
 | jxl-oxide-wasm | 0.12.6 | MIT OR Apache-2.0 | <https://github.com/tirr-c/jxl-oxide> |
 | Lucide | 1.34.0 | ISC | <https://github.com/lucide-icons/lucide> |
 | Mediabunny | 1.55.3 | MPL-2.0 | <https://github.com/Vanilagy/mediabunny/tree/v1.55.3> |

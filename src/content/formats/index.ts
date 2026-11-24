@@ -1,4 +1,5 @@
 import { mindMapFormats } from "./mind-map";
+import { h5Format, matFormat, ncFormat } from "./scientific-data";
 import { nativeBinaryFormats } from "./native-binary";
 import { sceneExchangeFormats } from "./scene-exchange";
 import { ifcFormat } from "./ifc";
@@ -207,6 +208,9 @@ export const formatContents: readonly FormatContent[] = [
   gifFormat,
   gzFormat,
   harFormat,
+  h5Format,
+  ncFormat,
+  matFormat,
   torrentFormat,
   plistFormat,
   safetensorsFormat,
