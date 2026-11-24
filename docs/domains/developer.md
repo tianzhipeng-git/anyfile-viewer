@@ -21,6 +21,7 @@
 | Source Map (`.map`) | `dev-source-map-viewer` | 3 | verified | ECMA-426 普通与 indexed map、内嵌源码、ignore list 与位置查询；禁止加载外部 URL |
 | ELF / PE-COFF / Mach-O & Fat / Unix Archive (`.elf` `.so` `.o` `.out` `.exe` `.dll` `.obj` `.dylib` `.bundle` `.node` `.a` `.lib` `.rlib`) | `dev-native-binary-viewer` | 1 | verified | 头部、节/段表、动态依赖、导入导出、Universal Fat 切片、UUID/Build-ID/CodeView PDB、符号摘要与 `.a`/`.rlib` 成员嗅探 |
 | SPSS / Stata / SAS 数据集（`.sav` `.zsav` `.por` `.dta` `.sas7bdat` `.xpt`） | `statistical-data` | 3–4 | verified | 自建 ReadStat WASM 于 Worker 按需读文件；变量/值标签/缺失值/日期格式化、行与列窗口分页；不读 `.sas7bcat` |
+| 科学多维数据容器（`.h5` `.hdf5` `.nc` `.nc4` `.mat`） | `scientific-data` | 3–4 | implemented | HDF5/NetCDF-4/MATLAB v7.3 经 `h5wasm` Worker + `WORKERFS` 按需读取，NetCDF Classic/64-bit/CDF-5 与 MATLAB Level 4/5 纯 TS 按需切片；分组树、属性元数据、N 维切片分页表与 2D 热力图预览 |
 | DuckDB (`.duckdb` `.ddb`) | `duckdb-data` | 3 | verified | 只读表结构与分页查询，有界 probe |
 | Safetensors / GGUF 模型权重 (`.safetensors` `.gguf`) | `ml-weights` | 3 | implemented | 仅读文件头展示架构、参数量、量化类型、元数据与张量表（GGUF v2–v3 上限 200 MiB，safetensors 头部上限 100 MiB），不加载张量本体 |
 | Apple 属性列表 (`.plist`) | `apple-plist` | 3 | verified | 自研二进制 `bplist00`（trailer+对象表）与 XML 分词器解码为可展开树；字典/数组/字符串/整数/实数/布尔/日期/data/UID；深度 2048、对象 50 万、文件 64 MiB 上限，只读不写回 |

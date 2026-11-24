@@ -1,0 +1,32 @@
+{
+  "runtimeSets": [
+    {
+      "id": "h5wasm",
+      "version": "0.10.3",
+      "versionPackageJson": "viewer/plugins/scientific-data/node_modules/h5wasm/package.json",
+      "assetPatterns": [
+        "public/vendor/h5wasm/0.10.3/**"
+      ],
+      "coldStartGroups": [
+        {
+          "id": "hdf5-worker",
+          "assetPatterns": [
+            "public/vendor/h5wasm/0.10.3/hdf5_hl.js",
+            "public/vendor/h5wasm/0.10.3/hdf5_util.js"
+          ]
+        }
+      ],
+      "sources": [
+        "same-origin"
+      ],
+      "implementationFiles": [
+        "viewer/plugins/scientific-data/src/types.ts",
+        "viewer/plugins/scientific-data/src/hdf5.worker.ts"
+      ],
+      "requiredMarkers": [
+        "0.10.3",
+        "hdf5_hl.js"
+      ]
+    }
+  ]
+}

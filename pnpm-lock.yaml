@@ -181,6 +181,9 @@ importers:
       '@anyfile/safe-svg-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/svg
+      '@anyfile/scientific-data-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/scientific-data
       '@anyfile/sqlite-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/sqlite
@@ -1188,6 +1191,28 @@ importers:
       '@anyfile/viewer-ui':
         specifier: workspace:*
         version: link:../../ui
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+
+  viewer/plugins/scientific-data:
+    dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-ui':
+        specifier: workspace:*
+        version: link:../../ui
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
+      h5wasm:
+        specifier: 0.10.3
+        version: 0.10.3
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*
@@ -3842,6 +3867,9 @@ packages:
 
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
+
+  h5wasm@0.10.3:
+    resolution: {integrity: sha512-W4Jy5ExtX/VNbyD8GdOBckDuj6AL16TemppVNxZsV3rJZEWCv2sxlCzOttZLer3zkMttbDYsWHl0qt1z3Bln+Q==}
 
   happy-dom@20.11.6:
     resolution: {integrity: sha512-Hldbg8AdAa5a5oDcZpjqnGitp7JB0hqWmfv/8qr+kft4vzSD8BHsbdRfzYvL/0QcbKcURC/yyoygbeDQarPvYg==}
@@ -7934,6 +7962,8 @@ snapshots:
   gopd@1.2.0: {}
 
   graceful-fs@4.2.11: {}
+
+  h5wasm@0.10.3: {}
 
   happy-dom@20.11.6:
     dependencies:
