@@ -1,11 +1,8 @@
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
+import { abortError } from "@anyfile/viewer-protocol";
 
 const PROBE_BYTES = 64 * 1024;
 const MAX_CONTROL_RATIO = 0.05;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function isUnexpectedControl(character: string) {
   const code = character.charCodeAt(0);

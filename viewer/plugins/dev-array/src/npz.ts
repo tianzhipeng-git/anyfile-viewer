@@ -1,4 +1,4 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 
 import { FileByteSource, type ArrayByteSource } from "./source";
 
@@ -95,10 +95,6 @@ export async function readNpzEntries(file: File, signal: AbortSignal): Promise<r
   }
   if (offset !== directory.length) invalid("中央目录长度与条目不一致");
   return entries;
-}
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
 }
 
 class CompressedEntrySource implements ArrayByteSource {

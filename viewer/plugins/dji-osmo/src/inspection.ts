@@ -1,8 +1,9 @@
 import type { ProbeViewerContext } from "@anyfile/viewer-protocol";
 
 import { inspectDjiOsmoPhoto, type DjiOsmoPhotoInspection } from "./photo-inspection";
-import { readBlob } from "./read-blob";
+
 import { inspectDjiOsmoVideo, type DjiOsmoVideoInspection } from "./video-inspection";
+import { readBlob } from "@anyfile/viewer-protocol";
 
 const JPEG_PROBE_BYTES = 256 * 1024;
 

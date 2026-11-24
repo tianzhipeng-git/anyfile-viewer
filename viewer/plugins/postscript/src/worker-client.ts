@@ -84,7 +84,7 @@ export async function createPostscriptWorkerClient(signal: AbortSignal) {
   } catch (error) {
     if (error instanceof DOMException && error.name === "AbortError") throw error;
     throw new ViewerError(
-      "open-failed",
+      "runtime-unavailable",
       "Unable to initialize PostScript from R2 or local assets.",
       { cause: error },
     );

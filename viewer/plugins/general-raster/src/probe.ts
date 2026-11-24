@@ -2,7 +2,7 @@ import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-pro
 
 import { PROBE_BYTES } from "./limits";
 import { inspectRasterHeader } from "./probe-format";
-import { readBlob } from "./read-blob";
+import { readBlob } from "@anyfile/viewer-protocol";
 
 export async function probeGeneralRaster(
   { file, signal }: ProbeViewerContext,

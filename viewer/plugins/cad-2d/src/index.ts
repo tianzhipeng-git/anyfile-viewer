@@ -4,10 +4,11 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { cad2dManifest } from "./manifest";
-import { abortError, CAD_INPUT_LIMIT, readDxfText } from "./read";
+import { CAD_INPUT_LIMIT, readDxfText } from "./read";
 import { readCadScene } from "./parse";
 import { create3dViewer } from "@anyfile/rendering-3d";
 import { cadDocument } from "./adapter-3d";

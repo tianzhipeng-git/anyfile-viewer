@@ -14,6 +14,8 @@ describe("resolveViewerErrorMessage", () => {
       .toBe(OFFLINE);
     expect(resolveViewerErrorMessage(new ViewerError("unsupported-environment", "Runtime failed"), FALLBACK, OFFLINE, true).message)
       .toBe(OFFLINE);
+    expect(resolveViewerErrorMessage(new ViewerError("runtime-unavailable", "Runtime fetch failed"), FALLBACK, OFFLINE, true).message)
+      .toBe(OFFLINE);
   });
 
   it("preserves file-specific ViewerErrors even when offline", () => {

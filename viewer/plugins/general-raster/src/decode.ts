@@ -1,11 +1,11 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, readBlob } from "@anyfile/viewer-protocol";
 
 import { decodePnm } from "./decode-pnm";
 import { decodeTga } from "./decode-tga";
 import { decodeTiff } from "./decode-tiff";
 import { MAX_SOURCE_BYTES, PROBE_BYTES } from "./limits";
 import { inspectRasterHeader } from "./probe-format";
-import { readBlob } from "./read-blob";
+
 import type { DecodedRaster } from "./types";
 
 export async function decodeRaster(file: File, pageIndex: number, signal: AbortSignal): Promise<DecodedRaster> {

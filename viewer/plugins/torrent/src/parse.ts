@@ -1,13 +1,15 @@
-import { selectMessages, ViewerError, type Locale, type ViewerOpenProgress } from "@anyfile/viewer-protocol";
+import {
+  selectMessages,
+  ViewerError,
+  type Locale,
+  type ViewerOpenProgress,
+  abortError,
+} from "@anyfile/viewer-protocol";
 
 import { BencodeError, decodeBencodeWithSpan, type BencodeValue } from "./bencode";
 import type { TorrentDocument, TorrentFile, TorrentTracker } from "./types";
 
 export const MAX_TORRENT_BYTES = 32 * 1024 * 1024;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function isDictionary(value: BencodeValue | undefined): value is { readonly [key: string]: BencodeValue } {
   return typeof value === "object" && value !== null && !(value instanceof Uint8Array) && !Array.isArray(value);

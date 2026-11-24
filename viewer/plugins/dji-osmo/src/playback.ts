@@ -1,4 +1,4 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 import {
   AudioBufferSink,
   BlobSource,
@@ -12,7 +12,7 @@ import {
 } from "mediabunny";
 
 import type { DjiOsmoPanoramaRenderer } from "./panorama-renderer";
-import { abortError } from "./read-blob";
+
 import { formatTime, type DjiOsmoViewerElements, type djiOsmoUiCopy } from "./ui";
 import type { DjiOsmoVideoInspection } from "./video-inspection";
 

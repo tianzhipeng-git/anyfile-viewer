@@ -1,5 +1,6 @@
-import { readBlob } from "./read";
+
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
+import { readBlob } from "@anyfile/viewer-protocol";
 export function hasOleHeader(bytes: Uint8Array) {
   return [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1].every((value, index) => bytes[index] === value);
 }

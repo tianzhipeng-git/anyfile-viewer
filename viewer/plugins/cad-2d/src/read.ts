@@ -1,9 +1,6 @@
+import { abortError } from "@anyfile/viewer-protocol";
 export const CAD_INPUT_LIMIT = 128 * 1024 * 1024;
 export const CAD_PROBE_BYTES = 64 * 1024;
-
-export function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 export function decodeDxfBytes(bytes: Uint8Array) {
   const decoder = new TextDecoder("utf-8", { fatal: true });

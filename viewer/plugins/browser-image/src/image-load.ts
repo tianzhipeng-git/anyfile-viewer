@@ -1,4 +1,4 @@
-import { abortError } from "./read-blob";
+import { abortError } from "@anyfile/viewer-protocol";
 
 export async function decodeImage(
   image: HTMLImageElement,

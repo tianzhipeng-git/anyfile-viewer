@@ -4,10 +4,10 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 import { AudioVisualizer } from "@anyfile/viewer-rendering/audio";
 
-import { abortError } from "./abort-error";
 import { inspectBrowserAudioFile } from "./inspect";
 import { browserAudioManifest } from "./manifest";
 import { MediaLoadError, waitForAudioData } from "./media-load";

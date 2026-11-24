@@ -3,9 +3,9 @@ import {
   selectMessages,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
-import { abortError } from "./abort-error";
 import { inspectMedia } from "./media-inspection";
 import { PlaybackSession } from "./playback-session";
 import { createPlayerElements, playerCopy } from "./ui";

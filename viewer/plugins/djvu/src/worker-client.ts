@@ -1,6 +1,6 @@
 import { initializeRuntimeFromSources } from "@anyfile/runtime-assets";
 import { createWorkerRpcClient, type WorkerRpcClient } from "@anyfile/runtime-assets";
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 import { DJVU_LIMITS } from "./limits";
 import { DJVU_ASSET_SOURCES } from "./runtime";
 import type {
@@ -9,10 +9,6 @@ import type {
   DjvuWorkerRequest,
   DjvuWorkerResponse,
 } from "./types";
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function resolveAssetUrl(path: string): string {
   if (typeof location !== "undefined" && location.origin && location.origin !== "null") {
@@ -121,6 +117,6 @@ export async function createDjvuWorkerClient(signal: AbortSignal, unsupportedMes
     if (signal.aborted || (error instanceof DOMException && error.name === "AbortError")) {
       throw abortError();
     }
-    throw new ViewerError("unsupported-environment", unsupportedMessage, { cause: error });
+    throw new ViewerError("runtime-unavailable", unsupportedMessage, { cause: error });
   }
 }

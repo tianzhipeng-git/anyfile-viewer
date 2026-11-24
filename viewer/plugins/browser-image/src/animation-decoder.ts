@@ -1,6 +1,5 @@
-import { ViewerError, type Locale } from "@anyfile/viewer-protocol";
+import { ViewerError, type Locale, abortError, readBlob } from "@anyfile/viewer-protocol";
 import { inspectImageFile, type ImageFileInfo } from "./format";
-import { abortError, readBlob } from "./read-blob";
 import { animationCopy } from "./animation-ui";
 
 // ImageDecoder is not yet included in TypeScript's DOM library.

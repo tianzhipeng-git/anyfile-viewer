@@ -1,6 +1,4 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
-
-import { abortError } from "./read-blob";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 
 function createBitmapAbortably(factory: () => Promise<ImageBitmap>, signal: AbortSignal) {
   if (signal.aborted) return Promise.reject(abortError());

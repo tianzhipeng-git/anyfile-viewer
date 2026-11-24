@@ -1,10 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { validateManifest } from "@anyfile/viewer-protocol";
+import { readBlob, validateManifest } from "@anyfile/viewer-protocol";
 import { createViewerTestContext } from "@anyfile/viewer-test";
 import { mppViewer } from "./index";
 import { mppManifest } from "./manifest";
 import { probeMpp } from "./probe";
-import { readBlob } from "./read";
 import type { Request, Response } from "./types";
 
 class TestWorker {

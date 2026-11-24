@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { hexManifest } from "./manifest";
@@ -14,10 +15,6 @@ const HEADER_HEIGHT = 32;
 const OVERSCAN_ROWS = 5;
 const DEFAULT_VIEWPORT_HEIGHT = 480;
 const MAX_VIRTUAL_HEIGHT = 8_000_000;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 async function readRange(file: File, start: number, end: number, signal: AbortSignal) {
   if (signal.aborted) throw abortError();

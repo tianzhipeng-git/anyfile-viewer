@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   assertReadsWithin,
   createTrackedFile,
+  createViewerTestContext,
+  expectPreviewReported,
   integerBytes,
   signedVarint,
   truncated,
@@ -27,5 +29,16 @@ describe("binary fixture helpers", () => {
   it("creates strict truncated copies", () => {
     expect(truncated(Uint8Array.of(1, 2, 3), 2)).toEqual(Uint8Array.of(1, 2));
     expect(() => truncated(Uint8Array.of(1), 1)).toThrow(RangeError);
+  });
+
+  it("records preview signals and validates the expected kind", () => {
+    const test = createViewerTestContext(new File([], "sample.bin"));
+    test.context.reportPreview?.({ outcome: "success", kind: "structure" });
+    expect(() => expectPreviewReported(test, ["structure"])).not.toThrow();
+    expect(() => expectPreviewReported(test, ["static"])).toThrow(/structure/);
+    test.context.reportPreview?.({ outcome: "success", kind: "static" });
+    expect(() => expectPreviewReported(test, ["structure"])).toThrow(/exactly one/);
+    test.cleanup();
+    expect(test.previews).toHaveLength(2);
   });
 });

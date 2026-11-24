@@ -1,39 +1,5 @@
 import { PROBE_HEAD_BYTES, PROBE_TAIL_BYTES, PROBE_TOTAL_BYTES } from "./probe-limits";
-
-export function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
-
-async function readBlob(blob: Blob, signal: AbortSignal) {
-  if (signal.aborted) throw abortError();
-  const reader = blob.stream().getReader();
-  const chunks: Uint8Array[] = [];
-  let length = 0;
-  const cancel = () => void reader.cancel();
-  signal.addEventListener("abort", cancel, { once: true });
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      length += value.byteLength;
-    }
-  } catch (error) {
-    if (signal.aborted) throw abortError();
-    throw error;
-  } finally {
-    signal.removeEventListener("abort", cancel);
-    reader.releaseLock();
-  }
-  if (signal.aborted) throw abortError();
-  const result = new Uint8Array(length);
-  let offset = 0;
-  for (const chunk of chunks) {
-    result.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return result;
-}
+import { readBlob } from "@anyfile/viewer-protocol";
 
 export interface ProbeSlices {
   readonly head: Uint8Array;

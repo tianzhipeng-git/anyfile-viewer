@@ -1,5 +1,6 @@
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
-import { readBlob } from "./read";
+import { readBlob } from "@anyfile/viewer-protocol";
+
 export function matchesHeader(bytes: Uint8Array, extension: string) {
   const magic = extension === "vsd" ? [0xd0, 0xcf, 0x11, 0xe0, 0xa1, 0xb1, 0x1a, 0xe1]
     : extension === "vsdx" ? [0x50, 0x4b, 0x03, 0x04] : [];

@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { decodeInsta360Dng } from "./dng-source";
@@ -15,7 +16,7 @@ import { MediaLoadError, waitForFirstFrame } from "./media-source";
 import { findInsvPair } from "./pairing";
 import { PanoramaRenderer } from "./panorama-renderer";
 import { ONE_RS_VIDEO_PROJECTION, X3_VIDEO_PROJECTION, X4_INSV_PROJECTION, X4_VIDEO_PROJECTION, X5_VIDEO_PROJECTION, X6_PROJECTION } from "./projection";
-import { abortError } from "./read-blob";
+
 import { inspectInsta360Video } from "./video-inspection";
 import {
   bindVideoControls,

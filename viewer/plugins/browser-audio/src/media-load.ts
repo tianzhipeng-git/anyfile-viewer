@@ -1,4 +1,4 @@
-import { abortError } from "./abort-error";
+import { abortError } from "@anyfile/viewer-protocol";
 
 export class MediaLoadError extends Error {
   constructor(readonly mediaCode: number) {

@@ -1,7 +1,11 @@
-import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
+import {
+  readBlob,
+  type ProbeViewerContext,
+  type ViewerSupportLevel,
+} from "@anyfile/viewer-protocol";
 
 import { inspectImageFile } from "./format";
-import { IMAGE_HEADER_BYTES, readBlob } from "./read-blob";
+import { IMAGE_HEADER_BYTES } from "./read-blob";
 
 export async function probeBrowserImage(
   { file, signal }: ProbeViewerContext,

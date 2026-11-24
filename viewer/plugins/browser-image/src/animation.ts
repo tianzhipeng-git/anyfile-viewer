@@ -1,11 +1,15 @@
-import { ViewerError, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
+import {
+  ViewerError,
+  type OpenViewerContext,
+  type ViewerController,
+  abortError,
+} from "@anyfile/viewer-protocol";
 import { ResourceScope } from "@anyfile/viewer-rendering";
 import { openAnimationDecoder } from "./animation-decoder";
 import { AnimationPlayer } from "./animation-player";
 import { createAnimationControls } from "./animation-ui";
 import { createImageViewerElements } from "./ui";
 import { ImageViewport } from "./viewport";
-import { abortError } from "./read-blob";
 
 export async function openAnimation(context: OpenViewerContext, type: string): Promise<ViewerController | null> {
   const resources = new ResourceScope();

@@ -94,7 +94,8 @@ export function resolveViewerErrorMessage(
   const likelyUncachedOffline =
     !(error instanceof ViewerError)
     || viewerError.code === "open-failed"
-    || viewerError.code === "unsupported-environment";
+    || viewerError.code === "unsupported-environment"
+    || viewerError.code === "runtime-unavailable";
   return {
     viewerError,
     message: offline && likelyUncachedOffline ? offlineMessage : viewerError.message,

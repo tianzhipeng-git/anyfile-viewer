@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 import { PasswordResponses, type PDFDocumentLoadingTask } from "pdfjs-dist";
 
@@ -11,7 +12,6 @@ import { loadPdfDocument } from "./pdf-engine";
 import { createPdfView, destroyPdfTask } from "./pdf-view";
 import { pdfManifest } from "./manifest";
 import { probePdf } from "./probe";
-import { abortError } from "./read-blob";
 
 function getCopy(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, { "zh-CN": {

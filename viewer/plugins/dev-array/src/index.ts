@@ -4,16 +4,13 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { devArrayManifest } from "./manifest";
 import { openNpzEntry, readNpzEntries } from "./npz";
 import { FileByteSource } from "./source";
 import { createArrayView, type ArrayChoice } from "./ui";
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 async function choicesFor(context: OpenViewerContext): Promise<readonly ArrayChoice[]> {
   const { file, signal } = context;

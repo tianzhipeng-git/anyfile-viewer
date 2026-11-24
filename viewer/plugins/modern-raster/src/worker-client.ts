@@ -1,5 +1,5 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
-import { abortError } from "./read-blob";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
+
 import type { JxlWorkerRequest, JxlWorkerResponse } from "./types";
 
 export class JxlDecoderWorker {

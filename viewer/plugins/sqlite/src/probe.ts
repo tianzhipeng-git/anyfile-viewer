@@ -1,10 +1,7 @@
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
+import { abortError } from "@anyfile/viewer-protocol";
 
 const SQLITE_HEADER = new TextEncoder().encode("SQLite format 3\0");
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 async function readHeader(file: File, signal: AbortSignal) {
   if (signal.aborted) throw abortError();

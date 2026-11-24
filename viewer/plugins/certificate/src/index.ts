@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { Asn1Error } from "./asn1";
@@ -15,10 +16,6 @@ import { createCertificateView, type ViewCertificate } from "./ui";
 /** Certificates are tiny; bundles and chains stay far below this cap. */
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
 const MAX_CERTIFICATES = 40;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function isAbortError(error: unknown) {
   return typeof error === "object" && error !== null && "name" in error && error.name === "AbortError";

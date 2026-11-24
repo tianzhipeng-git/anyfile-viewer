@@ -111,6 +111,7 @@ export type ViewerErrorCode =
   | "invalid-file"
   | "missing-related-file"
   | "unsupported-environment"
+  | "runtime-unavailable"
   | "resource-limit"
   | "open-failed";
 
@@ -319,6 +320,49 @@ export function validateLoadedPlugin(
 
 export function isViewerAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
+}
+
+/** Standard cancellation error for probes and plugins that settle on `signal`. */
+export function abortError(): DOMException {
+  return new DOMException("Viewer operation aborted.", "AbortError");
+}
+
+/**
+ * Reads the whole `blob` into memory, streaming chunks and stopping as soon as
+ * `signal` aborts. Use it for bounded inputs (headers/probes or files already
+ * limited by the caller); callers that own an input budget enforce that budget.
+ */
+export async function readBlob(blob: Blob, signal: AbortSignal): Promise<Uint8Array<ArrayBuffer>> {
+  if (signal.aborted) throw abortError();
+  const reader = blob.stream().getReader();
+  const chunks: Uint8Array[] = [];
+  let byteLength = 0;
+  const cancel = () => void reader.cancel().catch(() => undefined);
+  signal.addEventListener("abort", cancel, { once: true });
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      byteLength += value.byteLength;
+    }
+  } catch (error) {
+    if (signal.aborted) throw abortError();
+    throw error;
+  } finally {
+    signal.removeEventListener("abort", cancel);
+    reader.releaseLock();
+  }
+
+  if (signal.aborted) throw abortError();
+  const bytes = new Uint8Array(byteLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
 }
 
 export function normalizeViewerError(error: unknown, message = "Unable to open this file."): ViewerError {

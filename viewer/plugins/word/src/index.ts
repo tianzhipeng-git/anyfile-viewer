@@ -5,48 +5,13 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
+  readBlob,
 } from "@anyfile/viewer-protocol";
 
 import { wordManifest } from "./manifest";
 
 const MAX_FILE_BYTES = 128 * 1024 * 1024;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
-
-async function readBlob(blob: Blob, signal: AbortSignal): Promise<ArrayBuffer> {
-  if (signal.aborted) throw abortError();
-  const reader = blob.stream().getReader();
-  const chunks: Uint8Array[] = [];
-  let byteLength = 0;
-  const cancel = () => void reader.cancel();
-  signal.addEventListener("abort", cancel, { once: true });
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      byteLength += value.byteLength;
-    }
-  } catch (error) {
-    if (signal.aborted) throw abortError();
-    throw error;
-  } finally {
-    signal.removeEventListener("abort", cancel);
-    reader.releaseLock();
-  }
-
-  if (signal.aborted) throw abortError();
-  const bytes = new Uint8Array(byteLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return bytes.buffer;
-}
 
 function getCopy(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, { "zh-CN": {
@@ -123,7 +88,7 @@ async function openWord(context: OpenViewerContext): Promise<ViewerController> {
       throw new ViewerError("resource-limit", copy.tooLarge);
     }
     reportProgress({ stage: "reading", message: copy.reading, loaded: 0, total: file.size });
-    const bytes = await readBlob(file.slice(0, file.size), signal);
+    const bytes = (await readBlob(file.slice(0, file.size), signal)).buffer;
     const signature = new Uint8Array(bytes, 0, Math.min(4, bytes.byteLength));
     if (signature[0] !== 0x50 || signature[1] !== 0x4b || signature[2] !== 0x03 || signature[3] !== 0x04) {
       throw new ViewerError("invalid-file", copy.invalid);

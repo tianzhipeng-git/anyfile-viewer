@@ -2,7 +2,9 @@ import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-pro
 
 import { inspectPhotoshopHeader, PHOTOSHOP_HEADER_BYTES } from "./format";
 
-function abortError() {
+// Tagged abort message: also serves as the build-time marker that locates this
+// deferred probe chunk (see scripts/check-view-bundle.mjs).
+function abortError(): DOMException {
   return new DOMException("__anyfile_photoshop_probe_v1__: operation aborted.", "AbortError");
 }
 

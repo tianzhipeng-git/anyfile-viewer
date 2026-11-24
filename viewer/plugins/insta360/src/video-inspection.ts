@@ -3,10 +3,10 @@ import {
   type VideoFileInspection,
 } from "@anyfile/browser-video-viewer/container-inspection";
 
-import { readBlob } from "./read-blob";
 import { parseInsvName, type InsvRole } from "./pairing";
 import { inspectInsvMetadata, INSV_METADATA_PROBE_BUDGET, type InsvEmbeddedPreview } from "./insv-metadata";
 import { projectionFromInsvCalibration, type PanoramaProjectionProfile } from "./projection";
+import { readBlob } from "@anyfile/viewer-protocol";
 
 const HEADER_BYTES = 64 * 1024;
 const BOX_HEADER_BYTES = 16;

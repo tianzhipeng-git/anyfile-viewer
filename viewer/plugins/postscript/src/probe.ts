@@ -1,6 +1,5 @@
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
-
-import { readBlob } from "./read-blob";
+import { readBlob } from "@anyfile/viewer-protocol";
 
 const PROBE_BYTES = 4_096;
 const DOS_EPS_MAGIC = [0xc5, 0xd0, 0xd3, 0xc6] as const;

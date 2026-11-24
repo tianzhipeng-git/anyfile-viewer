@@ -1,3 +1,4 @@
+import { abortError } from "@anyfile/viewer-protocol";
 const EOCD_SIGNATURE = 0x06054b50;
 const CENTRAL_FILE_SIGNATURE = 0x02014b50;
 const MAX_COMMENT_LENGTH = 0xffff;
@@ -18,10 +19,6 @@ export type PxdInspection = {
   readonly previewName?: string;
   readonly zip64: boolean;
 };
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 async function read(file: File, start: number, end: number, signal: AbortSignal) {
   if (signal.aborted) throw abortError();

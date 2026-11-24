@@ -1,6 +1,7 @@
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
 
-import { abortError, CAD_PROBE_BYTES, decodeDxfBytes } from "./read";
+import { CAD_PROBE_BYTES, decodeDxfBytes } from "./read";
+import { abortError } from "@anyfile/viewer-protocol";
 
 const BINARY_DXF_PREFIX = "AutoCAD Binary DXF";
 

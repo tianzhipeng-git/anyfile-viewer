@@ -1,5 +1,12 @@
-import { ViewerError, selectMessages, type FileViewerPlugin, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
-import { abortError } from "./abort-error";
+import {
+  ViewerError,
+  selectMessages,
+  type FileViewerPlugin,
+  type OpenViewerContext,
+  type ViewerController,
+  abortError,
+} from "@anyfile/viewer-protocol";
+
 import { inspectAudio } from "./media-inspection";
 import { nonNativeAudioManifest } from "./manifest";
 import { AudioPlaybackSession } from "./playback-session";

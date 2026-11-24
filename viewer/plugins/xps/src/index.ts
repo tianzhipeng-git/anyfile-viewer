@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { loadXpsDocument } from "./document";
@@ -13,10 +14,6 @@ import { XpsFormatError, XpsLimitError, XpsPackage } from "./package";
 import { XpsResources } from "./resources";
 import { xpsCopy } from "./ui";
 import { createXpsView, loadXpsPage } from "./view";
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 async function openXps(context: OpenViewerContext): Promise<ViewerController> {
   const { file, signal, reportProgress } = context;

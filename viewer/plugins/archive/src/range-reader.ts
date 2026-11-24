@@ -1,12 +1,8 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 
 import type { ReadAuditRecord, ReadPurpose } from "./types";
 
 export const MAX_METADATA_BYTES = 64 * 1024 * 1024;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 export class RangeReader {
   readonly size: number;

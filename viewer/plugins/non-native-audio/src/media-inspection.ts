@@ -1,4 +1,4 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 import {
   AudioBufferSink,
   BlobSource,
@@ -22,7 +22,6 @@ import {
   SOFTWARE_PCM_CODECS,
   WAVE_CODECS,
 } from "./limits";
-import { abortError } from "./abort-error";
 
 export type AudioContainer = "Matroska" | "WAVE";
 

@@ -1,6 +1,5 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 
-import { abortError } from "./read-blob";
 import type { X6DngWorkerRequest, X6DngWorkerResponse } from "./x6-dng-types";
 
 export function decodeX6DeflateDng(file: File, signal: AbortSignal, failedMessage: string) {

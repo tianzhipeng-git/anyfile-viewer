@@ -1,10 +1,9 @@
 import { initializeRuntimeFromSources } from "@anyfile/runtime-assets";
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 import { IFC_ASSET_SOURCES } from "./runtime";
 import type { IfcData, IfcWorkerRequest, IfcWorkerResponse } from "./types";
 
 interface Messages { invalid: string; limit: string; unsupported: string }
-const abortError = () => new DOMException("Aborted", "AbortError");
 
 class IfcWorkerClient {
   private readonly worker = new Worker(new URL("./ifc.worker.ts", import.meta.url), { type: "module" });
@@ -77,6 +76,6 @@ export async function createIfcWorkerClient(signal: AbortSignal, copy: Messages)
     });
   } catch (error) {
     if (signal.aborted || (error instanceof DOMException && error.name === "AbortError")) throw abortError();
-    throw new ViewerError("unsupported-environment", copy.unsupported, { cause: error });
+    throw new ViewerError("runtime-unavailable", copy.unsupported, { cause: error });
   }
 }

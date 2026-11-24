@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 import type { InspectorShell } from "@anyfile/viewer-ui";
 
@@ -45,10 +46,6 @@ const messages = {
     limitation: "仅显示文本与保存时的缩略图：不还原版式、字体、表格、图表和嵌入媒体。",
   },
 };
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function imageType(path: string) {
   return path.toLowerCase().endsWith(".png") ? "image/png" : "image/jpeg";

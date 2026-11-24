@@ -1,8 +1,16 @@
-import { ViewerError, selectMessages, type FileViewerPlugin, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
+import {
+  ViewerError,
+  selectMessages,
+  type FileViewerPlugin,
+  type OpenViewerContext,
+  type ViewerController,
+  abortError,
+  readBlob,
+} from "@anyfile/viewer-protocol";
 import { MAX_RAW_SOURCE_BYTES, RawDecoder } from "@anyfile/raw-decoder";
 import { cameraRawManifest } from "./manifest";
 import { inspectRawHeader } from "./probe-format";
-import { abortError, readBlob } from "./read-blob";
+
 import { createCameraRawElements, updateRawMetadata, type CameraRawElements } from "./ui";
 import { RawBitmapViewport } from "./viewport";
 

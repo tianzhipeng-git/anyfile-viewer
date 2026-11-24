@@ -156,6 +156,7 @@ type ViewerPreviewResult =
 - 静态/动画信号在内容解码并挂载后报告；`video_frame` 表示已显示首帧，不能代表开始播放；`video_playback` 在实际播放启动后报告。
 - active 整体失败可报告稳定错误码，不传消息、文件名、路径、内容或堆栈。初始化 reject 由宿主统一记录失败。
 - 这是可选的测量能力，未提供回调不影响查看；未实现结果信号的插件只计初始化，不推断成功。宿主负责去重，取消后忽略旧实例信号。
+- **约束**：插件一旦读取 `reportPreview`，成功路径必须在内容就绪后恰好报告一次 `success`；同一实例的成功信号只报告一次，`video_playback` 只能在 `success` 的 `video_frame`/`static` 之后追加，不能替代首个成功信号。未实现内容结果的插件不读取该回调（`OpenViewerContext.reportPreview` 可选），宿主视为“只计初始化”。
 - Hex 初始化完成单列兜底，不计目标预览成功；样例来源由宿主显式指定，不能通过文件名判断。
 - 当前覆盖与统计口径见[产品测量](product-measurement.md)。
 
@@ -208,7 +209,8 @@ interface WorkspaceEntry {
 |---|---|
 | `invalid-file` | 内容损坏或不是所声明的格式 |
 | `missing-related-file` | 缺少必要关联资源 |
-| `unsupported-environment` | 浏览器缺少必要能力 |
+| `unsupported-environment` | 浏览器缺少必要能力（如无 Canvas、无 `DecompressionStream`） |
+| `runtime-unavailable` | 运行时资产（Worker / WASM / 在线脚本）拉取或初始化失败，与浏览器能力无关 |
 | `resource-limit` | 超出可安全处理的资源上限 |
 | `open-failed` | 其他初始化失败；未知错误归入此类 |
 
@@ -220,6 +222,7 @@ interface WorkspaceEntry {
 - 关联内容只读取 `file` 和工作区允许的资源；主动内容处理见[渲染规范](viewer-rendering-guidelines.md)。
 - 公共脚本、WASM、字体等可以按[加载部署约定](viewer-loading-and-deployment.md)从锁定的受控来源加载；这些请求不得依赖用户文件内容。
 - `@anyfile/viewer-protocol` 只维护协议、校验、错误及 i18n 辅助导出，不引入 UI 或 renderer 依赖。
+- 共享 IO/取消辅助也在 `@anyfile/viewer-protocol`：`abortError()` 生成标准 `AbortError`，`readBlob(blob, signal)` 流式拼合并响应取消，供 probe 与插件读取有界输入（头、小文件）复用；调用方负责输入预算。插件不要再各自实现这两者。
 - 当前只维护 v2，不预建多版本兼容层。接口改变时同步修改宿主、所有调用方和测试；不兼容版本必须拒绝加载。
 
 ## 10. 验证入口

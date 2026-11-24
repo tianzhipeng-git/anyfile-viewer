@@ -2,8 +2,9 @@ import type { ProbeViewerContext } from "@anyfile/viewer-protocol";
 
 import { inspectInsta360DngDirectory, locateTiffDirectory, type Insta360DngInspection } from "./dng-inspection";
 import { inspectInsta360Photo, type Insta360PhotoInspection } from "./jpeg-inspection";
-import { readBlob } from "./read-blob";
+
 import { inspectInsta360Video, type Insta360VideoInspection } from "./video-inspection";
+import { readBlob } from "@anyfile/viewer-protocol";
 
 const JPEG_INSPECTION_BYTES = 1024 * 1024;
 const DNG_DIRECTORY_WINDOW_BYTES = 64 * 1024;
