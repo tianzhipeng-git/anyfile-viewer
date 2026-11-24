@@ -2,6 +2,7 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { FileWorkspace } from "./file-workspace";
+import { clearWorkspaceSession } from "../lib/workspace-session";
 import english from "../i18n/dictionaries/en";
 import chinese from "../i18n/dictionaries/zh-CN";
 
@@ -14,6 +15,7 @@ let container: HTMLDivElement;
 let root: Root;
 
 beforeEach(() => {
+  clearWorkspaceSession();
   vi.stubGlobal("IS_REACT_ACT_ENVIRONMENT", true);
   window.history.replaceState(null, "", "/en/view");
   container = document.createElement("div");
@@ -98,4 +100,69 @@ it("does not register a launchQueue consumer in compact embeds", async () => {
   await act(async () => root.render(createElement(FileWorkspace, { locale: "en", dictionary: english, embedded: true })));
   expect(setConsumer).not.toHaveBeenCalled();
   delete window.launchQueue;
+});
+
+it("keeps the opened file when the workspace remounts for a client-side language switch", async () => {
+  let consumer: LaunchConsumer | undefined;
+  window.launchQueue = {
+    setConsumer(next) {
+      consumer = next;
+    },
+  };
+  await act(async () => root.render(createElement(FileWorkspace, { locale: "en", dictionary: english })));
+
+  const file = new File(["hello"], "soft-nav.txt", { type: "text/plain" });
+  const handle = {
+    kind: "file" as const,
+    name: "soft-nav.txt",
+    getFile: vi.fn(async () => file),
+  } as unknown as FileSystemFileHandle;
+  await act(async () => {
+    consumer?.({ files: [handle] });
+    await Promise.resolve();
+  });
+  expect(container.textContent).toContain("soft-nav.txt");
+  delete window.launchQueue;
+
+  // Simulate the soft navigation remount for the other locale.
+  await act(async () => root.unmount());
+  container.remove();
+  window.history.replaceState(null, "", "/zh-CN/view");
+  container = document.createElement("div");
+  document.body.append(container);
+  root = createRoot(container);
+  await act(async () => root.render(createElement(FileWorkspace, { locale: "zh-CN", dictionary: chinese })));
+
+  expect(container.textContent).toContain("soft-nav.txt");
+});
+
+it("does not leak the standalone workspace into compact embeds", async () => {
+  let consumer: LaunchConsumer | undefined;
+  window.launchQueue = {
+    setConsumer(next) {
+      consumer = next;
+    },
+  };
+  await act(async () => root.render(createElement(FileWorkspace, { locale: "en", dictionary: english })));
+  const file = new File(["hello"], "standalone-only.txt", { type: "text/plain" });
+  const handle = {
+    kind: "file" as const,
+    name: "standalone-only.txt",
+    getFile: vi.fn(async () => file),
+  } as unknown as FileSystemFileHandle;
+  await act(async () => {
+    consumer?.({ files: [handle] });
+    await Promise.resolve();
+  });
+  delete window.launchQueue;
+
+  await act(async () => root.unmount());
+  container.remove();
+  window.history.replaceState(null, "", "/en/embed");
+  container = document.createElement("div");
+  document.body.append(container);
+  root = createRoot(container);
+  await act(async () => root.render(createElement(FileWorkspace, { locale: "en", dictionary: english, embedded: true })));
+
+  expect(container.textContent).not.toContain("standalone-only.txt");
 });
