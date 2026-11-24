@@ -1,10 +1,18 @@
-import { ViewerError, selectMessages, type FileViewerPlugin, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
+import {
+  ViewerError,
+  selectMessages,
+  type FileViewerPlugin,
+  type OpenViewerContext,
+  type ViewerController,
+  abortError,
+  readBlob,
+} from "@anyfile/viewer-protocol";
 import { HeifDecoderWorker } from "./heif-worker-client";
 import { checkDimensions, MAX_JXL_FRAMES, MAX_MODERN_RASTER_SOURCE_BYTES } from "./limits";
 import { modernRasterManifest } from "./manifest";
 import { NativeImageSequence } from "./native";
 import { inspectModernHeader } from "./probe-format";
-import { abortError, readBlob } from "./read-blob";
+
 import type { ModernRasterInfo } from "./types";
 import { createModernRasterElements, updateModernMetadata, type ModernRasterElements } from "./ui";
 import { ModernBitmapViewport } from "./viewport";

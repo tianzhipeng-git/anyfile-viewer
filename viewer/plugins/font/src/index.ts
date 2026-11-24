@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { fontManifest } from "./manifest";
@@ -14,10 +15,6 @@ import { createFontView, type FontView } from "./ui";
 /** FontFace needs the whole file in memory, so large CJK or emoji collections stay out. */
 const MAX_FILE_BYTES = 32 * 1024 * 1024;
 let sequence = 0;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function isAbortError(error: unknown) {
   return typeof error === "object" && error !== null && "name" in error && error.name === "AbortError";

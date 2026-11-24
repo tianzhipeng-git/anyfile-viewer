@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { decodeGoProMaxPhoto } from "./image-source";
@@ -11,7 +12,7 @@ import { inspectGoProMaxFile } from "./inspection";
 import { goProMaxManifest } from "./manifest";
 import { GoProPanoramaRenderer } from "./panorama-renderer";
 import { GoProMaxPlayback } from "./playback";
-import { abortError } from "./read-blob";
+
 import { createGoProMaxViewerElements, goProMaxUiCopy, showFatalError, type GoProMaxViewerElements } from "./ui";
 
 function copyFor(locale: OpenViewerContext["locale"]) {

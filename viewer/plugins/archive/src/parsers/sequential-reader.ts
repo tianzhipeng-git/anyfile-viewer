@@ -1,8 +1,4 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 
 export class SequentialReader {
   readonly size = Number.MAX_SAFE_INTEGER;

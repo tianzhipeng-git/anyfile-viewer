@@ -1,4 +1,4 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 import {
   BlobSource,
   Input,
@@ -19,7 +19,6 @@ import {
   SUPPORTED_MOV_VIDEO_CODECS,
   SUPPORTED_VIDEO_CODECS,
 } from "./playback-limits";
-import { abortError } from "./abort-error";
 
 export interface MediaDescription {
   readonly input: Input<BlobSource>;

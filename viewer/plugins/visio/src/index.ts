@@ -1,8 +1,13 @@
-import { ViewerError, type FileViewerPlugin, type OpenViewerContext } from "@anyfile/viewer-protocol";
+import {
+  ViewerError,
+  type FileViewerPlugin,
+  type OpenViewerContext,
+  readBlob,
+} from "@anyfile/viewer-protocol";
 import { visioManifest } from "./manifest";
 import { messages } from "./messages";
 import { probeVisio } from "./probe";
-import { readBlob } from "./read";
+
 import { INPUT_LIMIT } from "./types";
 import { VisioView } from "./view";
 import { VisioWorkerClient } from "./worker-client";
@@ -21,7 +26,7 @@ async function open(context: OpenViewerContext) {
     if (typeof Worker === "undefined" || typeof WebAssembly === "undefined") throw new ViewerError("unsupported-environment", copy.unsupported);
     reportProgress({ stage: "reading", message: copy.reading });
     if (!(await probeVisio({ file, signal }))) throw new ViewerError("invalid-file", copy.invalid);
-    const bytes = await readBlob(file, signal);
+    const bytes = (await readBlob(file, signal)).buffer;
     signal.throwIfAborted();
     client = new VisioWorkerClient(signal, copy);
     reportProgress({ stage: "engine", message: copy.engine });

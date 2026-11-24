@@ -1,7 +1,7 @@
-import { ViewerError, type FileViewerPlugin } from "@anyfile/viewer-protocol";
+import { ViewerError, type FileViewerPlugin, readBlob } from "@anyfile/viewer-protocol";
 import { mppManifest } from "./manifest";
 import { copyFor } from "./messages";
-import { readBlob } from "./read";
+
 import { hasOleHeader } from "./probe";
 import { INPUT_LIMIT } from "./types";
 import { createProjectView } from "./ui";
@@ -32,7 +32,7 @@ export const mppViewer: FileViewerPlugin = {
       client = new MppWorkerClient(signal, copy);
       await client.initialize();
       signal.throwIfAborted();
-      const bytes = await readBlob(file, signal);
+      const bytes = (await readBlob(file, signal)).buffer;
       signal.throwIfAborted();
       const project = await client.open(bytes);
       signal.throwIfAborted();

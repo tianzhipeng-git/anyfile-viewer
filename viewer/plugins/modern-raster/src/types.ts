@@ -31,4 +31,4 @@ export type JxlWorkerRequest =
 export type JxlWorkerResponse =
   | { readonly type: "opened"; readonly id: number; readonly width: number; readonly height: number; readonly frameCount: number; readonly loops: number; readonly png: Uint8Array; readonly durationMs: number }
   | { readonly type: "frame"; readonly id: number; readonly frameIndex: number; readonly png: Uint8Array; readonly durationMs: number }
-  | { readonly type: "error"; readonly id: number; readonly code: "invalid-file" | "resource-limit" | "open-failed"; readonly message: string };
+  | { readonly type: "error"; readonly id: number; readonly code: "invalid-file" | "resource-limit" | "runtime-unavailable" | "open-failed"; readonly message: string };

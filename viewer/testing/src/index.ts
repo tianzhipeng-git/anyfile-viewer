@@ -1,11 +1,11 @@
-import type { OpenViewerContext, ViewerOpenProgress } from "@anyfile/viewer-protocol";
-
+import type { OpenViewerContext, ViewerOpenProgress, ViewerPreviewResult } from "@anyfile/viewer-protocol";
 export interface ViewerTestContext {
   readonly abortController: AbortController;
   readonly container: HTMLDivElement;
   readonly context: OpenViewerContext;
   readonly outside: HTMLDivElement;
   readonly progress: ViewerOpenProgress[];
+  readonly previews: ViewerPreviewResult[];
   cleanup(): void;
 }
 
@@ -16,12 +16,14 @@ export function createViewerTestContext(file: File): ViewerTestContext {
   document.body.append(outside, container);
   const abortController = new AbortController();
   const progress: ViewerOpenProgress[] = [];
+  const previews: ViewerPreviewResult[] = [];
 
   return {
     abortController,
     container,
     outside,
     progress,
+    previews,
     context: {
       file,
       container,
@@ -29,6 +31,9 @@ export function createViewerTestContext(file: File): ViewerTestContext {
       locale: "zh-CN",
       reportProgress(value) {
         progress.push(value);
+      },
+      reportPreview(result) {
+        previews.push(result);
       },
     },
     cleanup() {
@@ -147,3 +152,29 @@ export function assertReadsWithin(
     if (!contained) throw new Error(`Unexpected fixture read [${read.start}, ${read.end}).`);
   }
 }
+
+/**
+ * Asserts a plugin reported a `success` preview signal of one of `kinds`.
+ * Plugins that opt into `reportPreview` must report exactly one success after
+ * their content is decoded and mounted.
+ */
+export function expectPreviewReported(
+  test: Pick<ViewerTestContext, "previews">,
+  kinds: readonly ViewerPreviewSuccessKind[],
+): void {
+  const success = test.previews.filter((result) => result.outcome === "success");
+  if (success.length !== 1) {
+    throw new Error(`Expected exactly one preview signal, received ${success.length}.`);
+  }
+  const [result] = success;
+  if (result.outcome !== "success" || !kinds.includes(result.kind)) {
+    throw new Error(`Expected a preview of ${kinds.join(" | ")}, received ${JSON.stringify(result)}.`);
+  }
+}
+
+export type ViewerPreviewSuccessKind =
+  | "static"
+  | "animation"
+  | "video_frame"
+  | "video_playback"
+  | "structure";

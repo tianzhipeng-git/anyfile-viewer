@@ -4,6 +4,8 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
+  readBlob,
 } from "@anyfile/viewer-protocol";
 
 import { CfbfError, parseCfbf } from "./cfbf";
@@ -14,46 +16,6 @@ import { PptParseError, parsePpt } from "./ppt";
 import { isCfbfHeader, isRtfHeader } from "./probe";
 import { renderLegacyOffice, type RenderedViewer } from "./renderer";
 import { parseRtf, RtfParseError } from "./rtf";
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
-
-async function readBlob(blob: Blob, signal: AbortSignal): Promise<Uint8Array> {
-  if (signal.aborted) throw abortError();
-  const reader = blob.stream().getReader();
-  const chunks: Uint8Array[] = [];
-  let total = 0;
-  const onAbort = () => void reader.cancel();
-  signal.addEventListener("abort", onAbort, { once: true });
-
-  try {
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (total + value.byteLength > MAX_FILE_BYTES) {
-        throw new ViewerError("resource-limit", "File exceeds browser safety limit.");
-      }
-      chunks.push(value);
-      total += value.byteLength;
-    }
-  } catch (error) {
-    if (signal.aborted) throw abortError();
-    throw error;
-  } finally {
-    signal.removeEventListener("abort", onAbort);
-    reader.releaseLock();
-  }
-
-  if (signal.aborted) throw abortError();
-  const bytes = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.byteLength;
-  }
-  return bytes;
-}
 
 function getCopy(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, {

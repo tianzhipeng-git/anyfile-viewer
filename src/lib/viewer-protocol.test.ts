@@ -2,8 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   VIEWER_PROTOCOL_VERSION,
   ViewerError,
+  abortError,
   findViewerRegistrations,
+  isViewerAbortError,
   normalizeViewerError,
+  readBlob,
   resolveViewerRegistrations,
   validateLoadedPlugin,
   validateManifest,
@@ -173,5 +176,19 @@ describe("viewer protocol", () => {
     const normalized = normalizeViewerError(new Error("internal path leaked"));
     expect(normalized).toMatchObject({ code: "open-failed", message: "Unable to open this file." });
     expect(normalized.cause).toBeInstanceOf(Error);
+  });
+
+  it("abortError is a standard AbortError and recognized as cancellation", () => {
+    const error = abortError();
+    expect(error).toBeInstanceOf(DOMException);
+    expect(error.name).toBe("AbortError");
+    expect(isViewerAbortError(error)).toBe(true);
+  });
+
+  it("readBlob concatenates the blob and rejects on an already-aborted signal", async () => {
+    const blob = new Blob([new Uint8Array([1, 2, 3]), new Uint8Array([4, 5])]);
+    expect([...await readBlob(blob, new AbortController().signal)]).toEqual([1, 2, 3, 4, 5]);
+
+    await expect(readBlob(blob, AbortSignal.abort())).rejects.toSatisfy(isViewerAbortError);
   });
 });

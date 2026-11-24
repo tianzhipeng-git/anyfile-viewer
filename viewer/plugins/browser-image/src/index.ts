@@ -4,6 +4,8 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
+  readBlob,
 } from "@anyfile/viewer-protocol";
 
 import { animationMime, imageDecoder } from "./animation-decoder";
@@ -11,7 +13,7 @@ import { animationCopy } from "./animation-ui";
 import { inspectImageFile } from "./format";
 import { decodeImage } from "./image-load";
 import { browserImageManifest } from "./manifest";
-import { abortError, IMAGE_HEADER_BYTES, readBlob } from "./read-blob";
+import { IMAGE_HEADER_BYTES } from "./read-blob";
 import { createImageViewerElements } from "./ui";
 import { ImageViewport } from "./viewport";
 

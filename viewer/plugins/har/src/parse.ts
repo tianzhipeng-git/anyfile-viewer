@@ -1,12 +1,8 @@
-import { ViewerError, type ViewerOpenProgress } from "@anyfile/viewer-protocol";
+import { ViewerError, type ViewerOpenProgress, abortError } from "@anyfile/viewer-protocol";
 
 import type { HarDocument, HarEntry, HarNameValue, HarPostData } from "./types";
 
 export const MAX_HAR_BYTES = 128 * 1024 * 1024;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function record(value: unknown): Record<string, unknown> | undefined {
   return typeof value === "object" && value !== null && !Array.isArray(value)

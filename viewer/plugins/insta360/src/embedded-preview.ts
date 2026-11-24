@@ -1,7 +1,6 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError, readBlob } from "@anyfile/viewer-protocol";
 
 import type { InsvEmbeddedPreview } from "./insv-metadata";
-import { abortError, readBlob } from "./read-blob";
 
 const HEADER_BYTES = 40;
 

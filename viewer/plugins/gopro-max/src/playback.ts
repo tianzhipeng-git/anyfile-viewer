@@ -1,4 +1,4 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 import {
   AudioBufferSink,
   BlobSource,
@@ -12,7 +12,7 @@ import {
 } from "mediabunny";
 
 import type { GoProPanoramaRenderer } from "./panorama-renderer";
-import { abortError } from "./read-blob";
+
 import { formatTime, type GoProMaxViewerElements, type goProMaxUiCopy } from "./ui";
 import type { GoProMaxVideoInspection } from "./video-inspection";
 

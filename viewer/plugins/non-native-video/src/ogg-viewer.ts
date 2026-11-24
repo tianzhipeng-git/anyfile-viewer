@@ -1,6 +1,11 @@
-import { ViewerError, selectMessages, type OpenViewerContext, type ViewerController } from "@anyfile/viewer-protocol";
+import {
+  ViewerError,
+  selectMessages,
+  type OpenViewerContext,
+  type ViewerController,
+  abortError,
+} from "@anyfile/viewer-protocol";
 
-import { abortError } from "./abort-error";
 import { inspectOgg } from "./ogg-probe";
 import ogvRuntime from "../ogv-runtime.json";
 

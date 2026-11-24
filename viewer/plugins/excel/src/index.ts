@@ -5,11 +5,12 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
+  readBlob,
 } from "@anyfile/viewer-protocol";
 import { createPagedTableViewer, type TableViewerPage } from "@anyfile/viewer-ui";
 
 import { excelManifest } from "./manifest";
-import { abortError, readBlob } from "./read-blob";
 
 const MAX_FILE_BYTES = 128 * 1024 * 1024;
 const MAX_PARSED_CELLS = 1_000_000;
@@ -232,7 +233,7 @@ async function openExcel(context: OpenViewerContext): Promise<ViewerController> 
       throw new ViewerError("resource-limit", copy.tooLarge);
     }
     reportProgress({ stage: "reading", message: copy.reading, loaded: 0, total: file.size });
-    const bytes = await readBlob(file.slice(0, file.size), signal);
+    const bytes = (await readBlob(file.slice(0, file.size), signal)).buffer;
     if (signal.aborted) throw abortError();
     if (requiresZipContainer(file.name) && !hasZipSignature(bytes)) {
       throw new ViewerError("invalid-file", copy.invalid);

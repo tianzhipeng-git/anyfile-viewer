@@ -4,11 +4,12 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  readBlob,
 } from "@anyfile/viewer-protocol";
 
 import { postscriptManifest } from "./manifest";
 import { probePostscript } from "./probe";
-import { readBlob } from "./read-blob";
+
 import { PostscriptView } from "./view";
 import { createPostscriptWorkerClient, type PostscriptWorkerClient } from "./worker-client";
 
@@ -78,7 +79,7 @@ async function openPostscript(context: OpenViewerContext): Promise<ViewerControl
     if (file.size > MAX_FILE_BYTES) throw new ViewerError("resource-limit", copy.limit);
     reportProgress({ stage: "checking", message: copy.checking });
     if (await probePostscript({ file, signal }) === 0) throw new ViewerError("invalid-file", copy.invalid);
-    const buffer = await readBlob(file, signal);
+    const buffer = (await readBlob(file, signal)).buffer;
     reportProgress({ stage: "engine", message: copy.engine });
     client = await createPostscriptWorkerClient(signal);
     reportProgress({ stage: "interpreting", message: copy.interpreting });

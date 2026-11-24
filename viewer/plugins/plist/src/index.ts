@@ -4,16 +4,13 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { plistManifest } from "./manifest";
 import { readPlist } from "./parse";
 import { PlistError } from "./types";
 import { createPlistView } from "./ui";
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function isAbortError(error: unknown) {
   return typeof error === "object" && error !== null && "name" in error && error.name === "AbortError";

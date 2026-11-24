@@ -1,6 +1,6 @@
 import type { ProbeViewerContext, ViewerSupportLevel } from "@anyfile/viewer-protocol";
 import { inspectRawHeader } from "./probe-format";
-import { readBlob } from "./read-blob";
+import { readBlob } from "@anyfile/viewer-protocol";
 
 const PROBE_BYTES = 1024 * 1024;
 

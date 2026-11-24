@@ -1,4 +1,4 @@
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError } from "@anyfile/viewer-protocol";
 import {
   AudioBufferSink,
   BlobSource,
@@ -11,7 +11,6 @@ import {
   type WrappedCanvas,
 } from "mediabunny";
 
-import { abortError } from "./read-blob";
 import type { PanoramaRenderer } from "./panorama-renderer";
 import type { PanoramaProjectionProfile } from "./projection";
 import { formatTime, type Insta360UiCopy, type Insta360ViewerElements } from "./ui";

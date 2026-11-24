@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { inspectPhotoshopHeader, PHOTOSHOP_HEADER_BYTES } from "./format";
@@ -14,10 +15,6 @@ import { PhotoshopDecoderWorker } from "./worker-client";
 
 const MAX_FILE_BYTES = 256 * 1024 * 1024;
 const MAX_PIXELS = 64 * 1024 * 1024;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 async function openPhotoshop(context: OpenViewerContext): Promise<ViewerController> {
   const { container, file, locale, reportProgress, signal } = context;

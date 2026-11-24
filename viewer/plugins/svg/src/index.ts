@@ -4,10 +4,11 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { safeSvgManifest } from "./manifest";
-import { abortError, readSvgBytes, SVG_INPUT_LIMIT } from "./read";
+import { readSvgBytes, SVG_INPUT_LIMIT } from "./read";
 import { sanitizeSvg } from "./sanitize";
 import { createSvgUi } from "./ui";
 

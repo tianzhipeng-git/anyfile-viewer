@@ -52,7 +52,7 @@ it.each(["initialization", "worker"])("disposes failed R2 %s before trying same-
 
 it("reports failure only after both sources fail and cleans both workers", async () => {
   const { opening } = start();
-  const rejected = expect(opening).rejects.toMatchObject({ code: "unsupported-environment", message: copy.unsupported });
+  const rejected = expect(opening).rejects.toMatchObject({ code: "runtime-unavailable", message: copy.unsupported });
   (await worker()).reply({ type: "error", code: "unsupported-environment" });
   (await worker(1)).reply({ type: "error", code: "unsupported-environment" });
   await rejected;

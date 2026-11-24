@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { loadOfdDocument } from "./document";
@@ -13,10 +14,6 @@ import { loadOfdPage } from "./model";
 import { OfdLimitError, OfdPackage } from "./package";
 import { ofdCopy } from "./ui";
 import { createOfdView } from "./view";
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 async function openOfd(context: OpenViewerContext): Promise<ViewerController> {
   const { file, signal, reportProgress } = context;

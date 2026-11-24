@@ -5,7 +5,9 @@ import { expectedFormat } from "./format-registry";
 const PROBE_PREFIX_BYTES = 512;
 const MAX_COMPRESSED_PROBE_BYTES = 1024 * 1024;
 
-function abortError() {
+// Tagged abort message: also serves as the build-time marker that locates this
+// deferred probe chunk (see scripts/check-view-bundle.mjs).
+function abortError(): DOMException {
   return new DOMException("__anyfile_archive_probe_v1__: aborted", "AbortError");
 }
 

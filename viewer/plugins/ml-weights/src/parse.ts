@@ -1,4 +1,10 @@
-import { selectMessages, ViewerError, type Locale, type ViewerOpenProgress } from "@anyfile/viewer-protocol";
+import {
+  selectMessages,
+  ViewerError,
+  type Locale,
+  type ViewerOpenProgress,
+  abortError,
+} from "@anyfile/viewer-protocol";
 
 import { detectEndianness, GgufBoundsError, MAX_GGUF_STRUCT_BYTES, parseGgufStruct } from "./gguf";
 import { MAX_SAFETENSORS_HEADER_BYTES, parseSafetensorsHeader, readSafetensorsHeaderLength } from "./safetensors";
@@ -32,10 +38,6 @@ function parseCopy(locale: Locale) {
       ggufStructLimit: "GGUF 元数据与张量描述区超过 200 MiB 浏览器安全上限。",
     },
   });
-}
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
 }
 
 async function readHead(file: File, signal: AbortSignal, length: number): Promise<Uint8Array> {

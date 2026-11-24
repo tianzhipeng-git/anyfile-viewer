@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { createCalendarView } from "./calendar-view";
@@ -17,10 +18,6 @@ import type { MailDocument } from "./types";
 
 /** Large shared calendars stay well below this cap; the whole text is parsed in memory. */
 const MAX_FILE_BYTES = 32 * 1024 * 1024;
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function isAbortError(error: unknown) {
   return typeof error === "object" && error !== null && "name" in error && error.name === "AbortError";

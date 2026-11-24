@@ -4,12 +4,13 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { inspectVideoFile } from "./inspect";
 import { browserVideoManifest } from "./manifest";
 import { MediaLoadError, waitForFirstFrame } from "./media-load";
-import { abortError } from "./read-blob";
+
 import { createVideoViewerElements, updateVideoMetadata } from "./ui";
 
 function copyFor(locale: OpenViewerContext["locale"]) {

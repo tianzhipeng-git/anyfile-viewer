@@ -1,4 +1,4 @@
-import { readBlob } from "./read-blob";
+import { readBlob } from "@anyfile/viewer-protocol";
 
 const MAGIC = "8db42d694ccc418790edff439fe026bf";
 const TRAILER_BYTES = 78;

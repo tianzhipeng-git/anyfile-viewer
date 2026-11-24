@@ -1,7 +1,6 @@
 import { MAX_RAW_SOURCE_BYTES, RawDecoder } from "@anyfile/raw-decoder";
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, abortError, readBlob } from "@anyfile/viewer-protocol";
 
-import { abortError, readBlob } from "./read-blob";
 import type { Insta360DngInspection } from "./dng-inspection";
 import { decodeX6DeflateDng } from "./x6-dng-source";
 

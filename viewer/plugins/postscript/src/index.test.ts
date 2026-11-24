@@ -124,7 +124,7 @@ describe("postscript viewer protocol compliance", () => {
     const file = new File(["%!PS-Adobe-3.0\nshowpage\n"], "sample.ps");
     const test = createViewerTestContext(file);
 
-    await expect(postscriptViewer.open(test.context)).rejects.toMatchObject({ code: "open-failed" });
+    await expect(postscriptViewer.open(test.context)).rejects.toMatchObject({ code: "runtime-unavailable" });
     expect(MockWorker.instances).toHaveLength(STET_ASSET_SOURCES.length);
     expect(MockWorker.instances.every((worker) => worker.terminated)).toBe(true);
     test.cleanup();

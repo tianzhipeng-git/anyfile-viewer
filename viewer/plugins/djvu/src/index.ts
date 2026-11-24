@@ -75,7 +75,7 @@ export const djvuViewer: FileViewerPlugin = {
             ? copy.limit
             : error.code === "missing-related-file"
               ? copy.indirect
-              : error.code === "unsupported-environment"
+              : error.code === "unsupported-environment" || error.code === "runtime-unavailable"
                 ? copy.unsupported
                 : copy.invalid;
         throw new ViewerError(error.code, message, { cause: error });

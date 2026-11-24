@@ -4,15 +4,12 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { harManifest } from "./manifest";
 import { readHar } from "./parse";
 import { createHarView } from "./ui";
-
-function abortError() {
-  return new DOMException("Viewer operation aborted.", "AbortError");
-}
 
 function isAbortError(error: unknown) {
   return typeof error === "object" && error !== null && "name" in error && error.name === "AbortError";

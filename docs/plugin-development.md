@@ -54,6 +54,7 @@ viewer/plugins/<dir>/
 - **上限**：超过输入/解码预算时返回 `resource-limit`；probe 只读有界范围（`assertReadsWithin`）。
 - **生命周期**：opening 中 abort、active 后 abort、`dispose()` 重复调用；之后不再更新 DOM、不报告进度，Worker/Object URL/监听器已释放。
 - 依赖浏览器能力（WebGL、WebCodecs、Canvas 像素）的部分可以 mock 渲染器，但解析层仍需用真实样例测试。
+- 读取有界输入使用 `@anyfile/viewer-protocol` 的 `readBlob` / `abortError`，不要在插件内复制；implement `reportPreview` 的插件用 `@anyfile/viewer-test` 的 `expectPreviewReported(test, kinds)` 断言恰好一次成功信号。
 
 不写快照测试、不测第三方库自身行为、不为一次性排查留下测试。
 

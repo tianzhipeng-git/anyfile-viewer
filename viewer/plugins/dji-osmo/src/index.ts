@@ -4,6 +4,7 @@ import {
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
+  abortError,
 } from "@anyfile/viewer-protocol";
 
 import { decodeDjiOsmoPhoto } from "./image-source";
@@ -11,7 +12,7 @@ import { inspectDjiOsmoFile } from "./inspection";
 import { djiOsmoManifest } from "./manifest";
 import { DjiOsmoPanoramaRenderer } from "./panorama-renderer";
 import { DjiOsmoPlayback } from "./playback";
-import { abortError } from "./read-blob";
+
 import { createDjiOsmoViewerElements, djiOsmoUiCopy, showFatalError, type DjiOsmoViewerElements } from "./ui";
 
 function copyFor(locale: OpenViewerContext["locale"]) {

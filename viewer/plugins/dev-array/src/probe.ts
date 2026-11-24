@@ -6,7 +6,9 @@ const EOCD_MAGIC = 0x06054b50;
 const MAX_HEADER_BYTES = 1024 * 1024;
 const MAX_ZIP_TAIL_BYTES = 22 + 0xffff;
 
-function abortError() {
+// Tagged abort message: also serves as the build-time marker that locates this
+// deferred probe chunk (see scripts/check-view-bundle.mjs).
+function abortError(): DOMException {
   return new DOMException("__anyfile_dev_array_probe_v1__: aborted", "AbortError");
 }
 

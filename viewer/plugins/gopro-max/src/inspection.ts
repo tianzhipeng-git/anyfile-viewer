@@ -1,6 +1,7 @@
 import { inspectGoProMaxPhoto, type GoProMaxPhotoInspection } from "./photo-inspection";
-import { readBlob } from "./read-blob";
+
 import { inspectGoProMaxVideo, type GoProMaxVideoInspection } from "./video-inspection";
+import { readBlob } from "@anyfile/viewer-protocol";
 
 const JPEG_PROBE_BYTES = 256 * 1024;
 

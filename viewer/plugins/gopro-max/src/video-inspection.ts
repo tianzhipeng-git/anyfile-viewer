@@ -1,6 +1,5 @@
 import { inspectIsoBmff, type VideoFileInspection } from "@anyfile/browser-video-viewer/container-inspection";
-
-import { readBlob } from "./read-blob";
+import { readBlob } from "@anyfile/viewer-protocol";
 
 const HEADER_BYTES = 64 * 1024;
 const BOX_HEADER_BYTES = 16;

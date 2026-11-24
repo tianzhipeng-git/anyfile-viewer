@@ -1,4 +1,4 @@
-import { abortError } from "./read-blob";
+import { abortError } from "@anyfile/viewer-protocol";
 
 export class MediaLoadError extends Error {
   readonly mediaCode: number;
