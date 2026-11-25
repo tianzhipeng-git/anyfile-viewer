@@ -3,6 +3,7 @@ import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
 import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
 import { fontManifest } from "@anyfile/font-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
+import { hdrImageManifest } from "@anyfile/hdr-image-viewer/manifest";
 import { modernRasterManifest } from "@anyfile/modern-raster-viewer/manifest";
 import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
 import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
@@ -39,6 +40,11 @@ export const imageRegistrations: readonly ViewerPluginRegistration[] = [
     manifest: generalRasterManifest,
     async probe(context) { return (await import("@anyfile/general-raster-viewer/probe")).probeGeneralRaster(context); },
     async load() { return (await import("@anyfile/general-raster-viewer")).generalRasterViewer; },
+  },
+  {
+    manifest: hdrImageManifest,
+    async probe(context) { return (await import("@anyfile/hdr-image-viewer/probe")).probeHdrImage(context); },
+    async load() { return (await import("@anyfile/hdr-image-viewer")).hdrImageViewer; },
   },
   {
     manifest: pixelmatorPxdManifest,

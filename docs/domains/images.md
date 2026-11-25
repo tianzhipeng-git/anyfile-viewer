@@ -4,7 +4,7 @@
 
 ## 1. 架构与渲染约定
 
-- **插件分族**：`browser-image`（原生栅格与可控动画）、`safe-svg`（安全清理 SVG/SVGZ）、`general-raster`（TGA/Netpbm/TIFF/BigTIFF/OME-TIFF）、`modern-raster`（JPEG XL/HEIC）、`camera-raw`（LibRaw RAW）、`photoshop`（PSD/PSB 合成图）、`pixelmator-pxd`、`dicom`（医学影像）、全景照片（`dji-osmo`、`gopro-max`、`insta360`）。
+- **插件分族**：`browser-image`（原生栅格与可控动画）、`safe-svg`（安全清理 SVG/SVGZ）、`general-raster`（TGA/Netpbm/TIFF/BigTIFF/OME-TIFF）、`hdr-image`（OpenEXR/Radiance HDR 高动态范围与 360° HDRI）、`modern-raster`（JPEG XL/HEIC）、`camera-raw`（LibRaw RAW）、`photoshop`（PSD/PSB 合成图）、`pixelmator-pxd`、`dicom`（医学影像）、全景照片（`dji-osmo`、`gopro-max`、`insta360`）。
 - **像素契约**：不建设统一 `ImageDocument`；所有自解码路径必须明确位深、通道排列、alpha 预乘状态、方向与色彩空间，严禁重复应用 EXIF orientation、ICC 转换、alpha 预乘或 tone mapping。
 - **渲染器选型**：原生格式直接用 `<img>` + Object URL（避免 JS 复制整文件与额外 RGBA 缓冲，支持 ImageDecoder 的动画按需启用帧控制）；自解码栅格用 Worker 解码 + `Transferable` RGBA8 交给 `@anyfile/viewer-rendering`（`InteractiveViewport` / `CanvasSurface`）；全景与科学影像使用专用 WebGL/Canvas 渲染。
 - **安全与隐私**：`safe-svg` 拒绝 DOCTYPE 并移除脚本、`foreignObject`、SMIL 动画、事件属性、`<style>` 与非本地 URL 后以新 `image/svg+xml` Blob 交给 `<img>`；所有图片插件不请求文件内远程 URL。
@@ -20,6 +20,7 @@
 | TGA / Netpbm | `.tga` `.icb` `.vda` `.vst` `.pnm` `.pbm` `.pgm` `.ppm` `.pam` | `general-raster` | 4 | verified | Worker 解码；输入 ≤256 MiB、单页 ≤64 Mi 像素、Canvas 单边 ≤8192 px |
 | TIFF / BigTIFF / Pyramidal / OME-TIFF | `.tif` `.tiff` `.tf8` `.btf` `.btiff` `.ptif` `.ome.tif` 等 | `general-raster` | 3–4 | verified / implemented | `geotiff@3.0.5` 分片读取，≤1024 页 / 64 Mi 像素；带 ICC 标注未应用（等级 3）；BigTIFF 完整大文件回归与 OME Z/C/T 维度待补 |
 | GeoTIFF / COG | `.gtif` `.gtiff` `.geotif` `.geotiff` | `general-raster` | 3 | implemented | 按普通 TIFF 查看像素/页面，检测到空间标签时提示未解释 CRS/坐标/波段 |
+| OpenEXR / Radiance HDR | `.exr` `.hdr` `.rgbe` | `hdr-image` | 4 | implemented | 纯 TS Worker 解码线性 Float32；OpenEXR 支持扫描线/分块/多 Part、多通道 AOV、None/RLE/ZIPS/ZIP/PIZ/PXR24/B44(A)；支持实时曝光/Gamma/ACES 等色调映射、悬停线性像素读数与 360° WebGL 环境球预览；≤256 MiB / ≤32 Mi 像素；不含 DWAA/DWAB 与 Deep Data |
 | JPEG XL | `.jxl` | `modern-raster` | 4 | verified | 原生 ImageDecoder 优先，`jxl-oxide-wasm@0.12.6` Worker 回退；256 MiB / 64 Mi 像素 / 4096 关键帧 |
 | HEVC HEIF / HEIC | `.heic` `.heif` `.heifs` `.hif` | `modern-raster` | 3 | implemented | 原生优先，失败回退自建 `libheif 1.23.2-anyfile.1` Worker（见第 3 节）；仅主图，无辅助项/序列导航 |
 | 相机 RAW | `.dng` `.cr2` `.cr3` `.nef` `.arw` `.raf` `.orf` `.pef` `.rw2` 等 | `camera-raw` | 2 | verified | `libraw-wasm@1.6.0`（需 COOP/COEP），内嵌缩略图与基础显影；256 MiB / 64 Mi 像素；型号级自动回归待补 |
@@ -38,4 +39,4 @@
 
 - **分层设计图**：OpenRaster (`.ora`)、Krita (`.kra`)、GIMP (`.xcf`)；大 PSB 分块读取与 PSD 图层树展示。
 - **GPU 纹理**：`.dds`、`.ktx` / `.ktx2`（Basis/Khronos WASM，mipmap/cubemap/通道检查）。
-- **科学/体数据与专业格式**：专用 GeoTIFF/COG（等级 5 空间交互）、NIfTI (`.nii`/`.nii.gz`)、NRRD (`.nrrd`)、FITS (`.fits`)、OpenEXR / Radiance HDR / PFM、JPEG 2000 (`.jp2`/`.j2k`)、WMF/EMF、ICNS/ANI、PCX/DCX。
+- **科学/体数据与专业格式**：专用 GeoTIFF/COG（等级 5 空间交互）、NIfTI (`.nii`/`.nii.gz`)、NRRD (`.nrrd`)、FITS (`.fits`)、PFM、JPEG 2000 (`.jp2`/`.j2k`)、WMF/EMF、ICNS/ANI、PCX/DCX。

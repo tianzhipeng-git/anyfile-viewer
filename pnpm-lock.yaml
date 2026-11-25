@@ -106,6 +106,9 @@ importers:
       '@anyfile/har-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/har
+      '@anyfile/hdr-image-viewer':
+        specifier: workspace:*
+        version: link:viewer/plugins/hdr-image
       '@anyfile/hex-viewer':
         specifier: workspace:*
         version: link:viewer/plugins/hex
@@ -796,6 +799,25 @@ importers:
       '@anyfile/viewer-ui':
         specifier: workspace:*
         version: link:../../ui
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../../testing
+
+  viewer/plugins/hdr-image:
+    dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../../runtime-assets
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../../protocol
+      '@anyfile/viewer-rendering':
+        specifier: workspace:*
+        version: link:../../rendering
+      fflate:
+        specifier: 0.8.3
+        version: 0.8.3
     devDependencies:
       '@anyfile/viewer-test':
         specifier: workspace:*

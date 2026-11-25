@@ -53,5 +53,26 @@ describe("image and font routing", () => {
       .toEqual(["safe-svg", "ace-code-text", "hex-viewer"]);
     expect(findViewerRegistrations("vector.svgz", viewerRegistrations).map(({ manifest }) => manifest.id))
       .toEqual(["safe-svg", "hex-viewer"]);
+    expect(findViewerRegistrations("render.exr", viewerRegistrations).map(({ manifest }) => manifest.id))
+      .toEqual(["hdr-image", "hex-viewer"]);
+    expect(findViewerRegistrations("studio.hdr", viewerRegistrations).map(({ manifest }) => manifest.id))
+      .toEqual(["hdr-image", "hex-viewer"]);
+    expect(findViewerRegistrations("sky.rgbe", viewerRegistrations).map(({ manifest }) => manifest.id))
+      .toEqual(["hdr-image", "hex-viewer"]);
+  });
+
+  it("routes valid OpenEXR and Radiance HDR files to hdr-image and falls back to hex when disguised", async () => {
+    const exr = new File([readFileSync(join(process.cwd(), "viewer/plugins/hdr-image/examples/all-half-values.exr"))], "scene.exr");
+    const exrResolved = await resolveViewerRegistrations(exr, viewerRegistrations, { signal: new AbortController().signal });
+    expect(exrResolved.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["hdr-image", 4], ["hex-viewer", 1]]);
+
+    const hdr = new File([readFileSync(join(process.cwd(), "viewer/plugins/hdr-image/examples/studio-gradient.hdr"))], "env.hdr");
+    const hdrResolved = await resolveViewerRegistrations(hdr, viewerRegistrations, { signal: new AbortController().signal });
+    expect(hdrResolved.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["hdr-image", 4], ["hex-viewer", 1]]);
+
+    const bad = await resolveViewerRegistrations(new File(["not an exr"], "disguised.exr"), viewerRegistrations, { signal: new AbortController().signal });
+    expect(bad.map(({ registration }) => registration.manifest.id)).toEqual(["hex-viewer"]);
   });
 });

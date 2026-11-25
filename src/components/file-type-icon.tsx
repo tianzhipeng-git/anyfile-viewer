@@ -82,7 +82,7 @@ const FILE_TYPE_RULES: readonly FileTypeRule[] = [
     extensions: [
       ...pluginExtensions("dji-osmo", "gopro-max").filter((extension) => extension === ".jpg" || extension === ".jpeg"),
       ...pluginExtensions("insta360").filter((extension) => extension === ".insp" || extension === ".dng"),
-      ...pluginExtensions("browser-image", "modern-raster", "camera-raw", "general-raster", "dicom", "safe-svg"),
+      ...pluginExtensions("browser-image", "modern-raster", "camera-raw", "general-raster", "hdr-image", "dicom", "safe-svg"),
     ],
   },
   {

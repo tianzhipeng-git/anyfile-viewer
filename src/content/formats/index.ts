@@ -58,6 +58,7 @@ import { geotiffFormat } from "./geotiff";
 import { gifFormat } from "./gif";
 import { gzFormat } from "./gz";
 import { harFormat } from "./har";
+import { exrFormat, hdrFormat } from "./hdr-image";
 import { torrentFormat } from "./torrent";
 import { plistFormat } from "./plist";
 import { safetensorsFormat } from "./safetensors";
@@ -208,6 +209,8 @@ export const formatContents: readonly FormatContent[] = [
   gifFormat,
   gzFormat,
   harFormat,
+  exrFormat,
+  hdrFormat,
   h5Format,
   ncFormat,
   matFormat,
