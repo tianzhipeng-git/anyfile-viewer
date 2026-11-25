@@ -1,3 +1,4 @@
+import { PLUGIN_FILE_KINDS, type FileTypeKind } from "@/lib/plugin-taxonomy";
 import { viewerRegistrations } from "@/lib/viewer-registrations";
 import {
   BinaryIcon,
@@ -18,22 +19,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-export type FileTypeKind =
-  | "archive"
-  | "audio"
-  | "binary"
-  | "code"
-  | "database"
-  | "design"
-  | "developer"
-  | "document"
-  | "font"
-  | "image"
-  | "model"
-  | "presentation"
-  | "spreadsheet"
-  | "unknown"
-  | "video";
+export type { FileTypeKind };
 
 type FileTypeRule = {
   kind: FileTypeKind;
@@ -44,151 +30,86 @@ type FileTypeRule = {
 
 const manifestsById = new Map(viewerRegistrations.map(({ manifest }) => [manifest.id, manifest]));
 
-function pluginManifest(id: string) {
-  const manifest = manifestsById.get(id);
-  if (!manifest) throw new Error(`Unknown viewer manifest id in file-type-icon: ${id}`);
-  return manifest;
-}
+// Icons per kind; every kind emitted by the taxonomy must be listed here.
+const KIND_ICONS: Record<Exclude<FileTypeKind, "unknown">, LucideIcon> = {
+  spreadsheet: SheetIcon,
+  image: FileImageIcon,
+  video: FileVideoIcon,
+  presentation: PresentationIcon,
+  document: FileTextIcon,
+  design: PaletteIcon,
+  code: FileCodeIcon,
+  developer: BracesIcon,
+  database: DatabaseIcon,
+  audio: FileAudioIcon,
+  model: BoxIcon,
+  font: TypeIcon,
+  archive: FileArchiveIcon,
+  binary: BinaryIcon,
+};
 
-function pluginExtensions(...ids: readonly string[]) {
-  return ids.flatMap((id) =>
-    pluginManifest(id).formats.flatMap((format) => format.extensions.filter((extension) => extension !== "*"))
-  );
-}
+// Extensions shown in the tree for anticipated formats that have no plugin yet,
+// appended to their kind's derived list.
+const EXTRA_KIND_EXTENSIONS: Partial<Record<FileTypeKind, readonly string[]>> = {
+  spreadsheet: [".csv.gz", ".csv.zst", ".tsv.gz", ".tsv.zst", ".tab.gz", ".tab.zst"],
+  code: [".json.gz", ".json.zst", ".jsonl.gz", ".jsonl.zst", ".ndjson.gz", ".ndjson.zst"],
+  model: [".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz"],
+  design: [".ai", ".psb", ".fig", ".sketch", ".xd", ".indd"],
+  font: [".ttf", ".otf", ".woff", ".woff2", ".eot"],
+  binary: [".bin", ".dmg", ".iso"],
+};
 
-function pluginFileNames(...ids: readonly string[]) {
-  return ids.flatMap((id) =>
-    pluginManifest(id).formats.flatMap((format) => format.fileNames ?? [])
-  );
-}
+// Extensions owned by another rule despite appearing in a plugin's manifest.
+const KIND_EXCLUDED_EXTENSIONS: Partial<Record<FileTypeKind, ReadonlySet<string>>> = {
+  spreadsheet: new Set([".txt", ".xml"]),
+  document: new Set([".ai", ".zip"]),
+  video: new Set([".ts"]),
+  audio: new Set([".mp4", ".webm", ".ogg"]),
+};
 
-const SPREADSHEET_EXTENSIONS = pluginExtensions("excel-workbook")
-  .filter((extension) => extension !== ".txt" && extension !== ".xml");
+// Derive one rule per kind in taxonomy order, gathering each manifest-backed
+// plugin's extensions (honouring per-entry only/exclude) plus the extra hints.
+const FILE_TYPE_RULES: readonly FileTypeRule[] = (() => {
+  const byKind = new Map<FileTypeKind, { extensions: string[]; fileNames: string[] }>();
+  // `font` has no plugin (literal extensions only) but needs its own rule.
+  const order: FileTypeKind[] = ["font"];
+  byKind.set("font", { extensions: [], fileNames: [] });
 
-// Rules are ordered by semantic specificity. This keeps files such as .docx
-// and .csv.gz from being represented only by their outer ZIP/gzip container.
-const FILE_TYPE_RULES: readonly FileTypeRule[] = [
-  {
-    kind: "spreadsheet",
-    icon: SheetIcon,
-    extensions: [
-      ".csv.gz", ".csv.zst", ".tsv.gz", ".tsv.zst", ".tab.gz", ".tab.zst",
-      ...SPREADSHEET_EXTENSIONS,
-    ],
-  },
-  {
-    kind: "image",
-    icon: FileImageIcon,
-    extensions: [
-      ...pluginExtensions("dji-osmo", "gopro-max").filter((extension) => extension === ".jpg" || extension === ".jpeg"),
-      ...pluginExtensions("insta360").filter((extension) => extension === ".insp" || extension === ".dng"),
-      ...pluginExtensions("browser-image", "modern-raster", "camera-raw", "general-raster", "hdr-image", "dicom", "safe-svg"),
-    ],
-  },
-  {
-    kind: "video",
-    icon: FileVideoIcon,
-    // `.ts` is far more commonly a TypeScript source file; the content probe still
-    // routes real MPEG-TS files to the video viewer.
-    extensions: [
-      ...pluginExtensions("dji-osmo").filter((extension) => extension === ".osv"),
-      ...pluginExtensions("gopro-max").filter((extension) => extension === ".360"),
-      ...pluginExtensions("insta360").filter((extension) => extension === ".lrv" || extension === ".insv"),
-      ...pluginExtensions("browser-video", "non-native-video", "ffmpeg-video")
-        .filter((extension) => extension !== ".ts"),
-    ],
-  },
-  {
-    kind: "presentation",
-    icon: PresentationIcon,
-    extensions: [
-      ...pluginExtensions("powerpoint-presentation"),
-      ...pluginExtensions("legacy-office").filter((extension) => extension === ".ppt"),
-      ...pluginExtensions("iwork").filter((extension) => extension === ".key"),
-    ],
-  },
-  {
-    kind: "document",
-    icon: FileTextIcon,
-    extensions: [
-      ...pluginExtensions(
-        "pdfjs-pdf", "postscript-document", "xps-reader", "ofd-reader", "word-document", "microsoft-project",
-        "mobi-reader", "fictionbook-reader", "epub-reader", "chm-reader",
-        "djvu-reader", "comic-book-reader", "calendar-contacts", "outlook-pst",
-      ),
-      ...pluginExtensions("legacy-office").filter((extension) => extension !== ".ppt"),
-      ...pluginExtensions("iwork").filter((extension) => extension === ".pages"),
-    ].filter((extension) => extension !== ".ai" && extension !== ".zip"),
-  },
-  {
-    kind: "design",
-    icon: PaletteIcon,
-    extensions: pluginExtensions("mind-map"),
-  },
-  {
-    kind: "code",
-    icon: FileCodeIcon,
-    extensions: [
-      ".json.gz", ".json.zst", ".jsonl.gz", ".jsonl.zst", ".ndjson.gz", ".ndjson.zst",
-      ...pluginExtensions("ace-code-text", "http-archive"),
-    ],
-    fileNames: pluginFileNames("ace-code-text"),
-  },
-  {
-    kind: "developer",
-    icon: BracesIcon,
-    extensions: pluginExtensions(
-      "dev-array-viewer", "dev-source-map-viewer", "dev-wasm-viewer",
-      "x509-certificate", "bittorrent-metadata", "ml-weights", "apple-plist",
-    ),
-  },
-  {
-    kind: "database",
-    icon: DatabaseIcon,
-    extensions: pluginExtensions("sqlite-database", "duckdb-data", "statistical-data", "scientific-data"),
-  },
-  {
-    kind: "audio",
-    icon: FileAudioIcon,
-    extensions: pluginExtensions("browser-audio", "non-native-audio", "ffmpeg-audio")
-      .filter((extension) => ![".mp4", ".webm", ".ogg"].includes(extension)),
-  },
-  {
-    kind: "model",
-    icon: BoxIcon,
-    extensions: [
-      ...pluginExtensions("ifc", "cad-exchange", "mesh-3d", "print-3d", "point-cloud"),
-      ".obj", ".gltf", ".glb", ".stl", ".fbx", ".dae", ".3ds", ".usdz",
-    ],
-  },
-  {
-    kind: "design",
-    icon: PaletteIcon,
-    extensions: [
-      ...pluginExtensions("visio", "pixelmator-pxd", "photoshop-document", "cad-2d", "cad-dwg"),
-      ...pluginExtensions("pdfjs-pdf").filter((extension) => extension === ".ai"),
-      ".psb", ".fig", ".sketch", ".xd", ".indd",
-    ],
-  },
-  {
-    kind: "font",
-    icon: TypeIcon,
-    extensions: [".ttf", ".otf", ".woff", ".woff2", ".eot"],
-  },
-  {
-    kind: "archive",
-    icon: FileArchiveIcon,
-    extensions: pluginExtensions("archive-metadata-viewer"),
-  },
-  {
-    kind: "binary",
-    icon: BinaryIcon,
-    extensions: [
-      ".bin", ".dmg", ".iso",
-      ...pluginExtensions("dev-native-binary-viewer").filter((extension) => extension !== ".obj"),
-    ],
-  },
-];
+  for (const { id, kind, only, exclude } of PLUGIN_FILE_KINDS) {
+    let bucket = byKind.get(kind);
+    if (!bucket) {
+      bucket = { extensions: [], fileNames: [] };
+      byKind.set(kind, bucket);
+      order.push(kind);
+    }
+    const manifest = manifestsById.get(id);
+    if (!manifest) throw new Error(`Unknown viewer manifest id in file-type-icon: ${id}`);
+    for (const format of manifest.formats) {
+      for (const extension of format.extensions) {
+        if (extension === "*") continue;
+        if (only && !only.includes(extension)) continue;
+        if (exclude?.includes(extension)) continue;
+        if (KIND_EXCLUDED_EXTENSIONS[kind]?.has(extension)) continue;
+        if (!bucket.extensions.includes(extension)) bucket.extensions.push(extension);
+      }
+      if (kind === "code") bucket.fileNames.push(...(format.fileNames ?? []));
+    }
+  }
+
+  return order.map((kind) => {
+    const bucket = byKind.get(kind)!;
+    const extensions = [...bucket.extensions];
+    for (const extra of EXTRA_KIND_EXTENSIONS[kind] ?? []) {
+      if (!extensions.includes(extra)) extensions.push(extra);
+    }
+    return {
+      kind,
+      icon: KIND_ICONS[kind as Exclude<FileTypeKind, "unknown">],
+      extensions,
+      fileNames: bucket.fileNames.length > 0 ? bucket.fileNames : undefined,
+    };
+  });
+})();
 
 function findFileTypeRule(fileName: string) {
   const normalizedName = fileName.toLowerCase();

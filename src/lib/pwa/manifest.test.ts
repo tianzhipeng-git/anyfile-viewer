@@ -7,6 +7,8 @@ import {
   DANGEROUS_FILE_HANDLER_EXTENSIONS,
   MAX_FILE_HANDLER_EXTENSIONS,
   MAX_FILE_HANDLER_EXTENSION_LENGTH,
+  PWA_UNHANDLED_PLUGINS,
+  buildPwaFileHandlers,
 } from "./file-handlers";
 import { buildWebAppManifest, webAppManifestResponse } from "./manifest";
 
@@ -61,6 +63,29 @@ describe("PWA web app manifest", () => {
 
     expect(seen.size).toBeGreaterThan(100);
     expect(seen.size).toBeLessThan(MAX_FILE_HANDLER_EXTENSIONS);
+  });
+
+  it("registers every published plugin as an OS file handler or lists it as intentionally unhandled", () => {
+    const handledExtensions = new Set<string>();
+    for (const handler of buildPwaFileHandlers("en")) {
+      for (const extensions of Object.values(handler.accept)) {
+        for (const extension of extensions) handledExtensions.add(extension);
+      }
+    }
+
+    const unrepresented = viewerRegistrations
+      .map((registration) => registration.manifest)
+      .filter((manifest) => {
+        const extensions = manifest.formats
+          .flatMap((format) => format.extensions)
+          .filter((extension) => extension !== "*")
+          .map((extension) => extension.toLowerCase());
+        return !extensions.some((extension) => handledExtensions.has(extension));
+      })
+      .map((manifest) => manifest.id)
+      .filter((id) => !PWA_UNHANDLED_PLUGINS.has(id));
+
+    expect(unrepresented).toEqual([]);
   });
 
   it("serves application/manifest+json with same-origin CORP and revalidation", async () => {

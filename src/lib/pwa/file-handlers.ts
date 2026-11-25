@@ -14,6 +14,17 @@ export const DANGEROUS_FILE_HANDLER_EXTENSIONS: ReadonlySet<string> = new Set([
   ".html", ".htm", ".xhtml", ".mhtml",
 ]);
 
+// Registered plugins intentionally not exposed as desktop OS file handlers:
+// their formats are dangerous-blocked (.chm/.wasm), code artifacts (.map) with
+// no useful OS association, or, for the hex viewer, extensionless by design.
+// The gate in manifest.test.ts requires every other plugin to be represented.
+export const PWA_UNHANDLED_PLUGINS: ReadonlySet<string> = new Set([
+  "chm-reader",
+  "dev-source-map-viewer",
+  "dev-wasm-viewer",
+  "hex-viewer",
+]);
+
 export type PwaFileHandlerGroup = {
   readonly name: string;
   readonly accept: Readonly<Record<string, readonly string[]>>;
@@ -58,6 +69,8 @@ export const PWA_FILE_HANDLER_GROUPS: readonly PwaFileHandlerGroup[] = [
       "application/vnd.ms-excel": [".xls"],
       "application/vnd.oasis.opendocument.spreadsheet": [".ods", ".fods"],
       "application/vnd.apple.numbers": [".numbers"],
+      "application/vnd.apple.pages": [".pages"],
+      "application/vnd.apple.keynote": [".key"],
       "application/vnd.wps-office.et": [".et"],
       "text/csv": [".csv"],
       "text/tab-separated-values": [".tsv"],
@@ -101,6 +114,8 @@ export const PWA_FILE_HANDLER_GROUPS: readonly PwaFileHandlerGroup[] = [
       "image/svg+xml": [".svg", ".svgz"],
       "image/tiff": [".tif", ".tiff", ".gtiff", ".geotiff"],
       "image/x-tga": [".tga"],
+      "image/x-exr": [".exr"],
+      "image/vnd.radiance": [".hdr", ".rgbe"],
       "image/x-portable-anymap": [".pnm", ".pbm", ".pgm", ".ppm", ".pam"],
       "image/vnd.adobe.photoshop": [".psd", ".psb"],
       "application/x-pixelmator": [".pxd"],
@@ -197,6 +212,9 @@ export const PWA_FILE_HANDLER_GROUPS: readonly PwaFileHandlerGroup[] = [
     accept: {
       "application/dicom": [".dcm", ".dicom"],
       "application/x-bittorrent": [".torrent"],
+      "application/x-hdf": [".h5", ".hdf5"],
+      "application/x-netcdf": [".nc", ".nc4"],
+      "application/x-matlab-data": [".mat"],
       "application/x-safetensors": [".safetensors"],
       "application/x-gguf": [".gguf"],
       "application/x-plist": [".plist"],
