@@ -26,6 +26,16 @@ describe("binary fixture helpers", () => {
     expect(() => assertReadsWithin(reads, [{ start: 0, end: 1 }])).toThrow(/Unexpected fixture read/);
   });
 
+  it("copies only the visible bytes of a pooled Buffer view into the file", async () => {
+    const slab = Buffer.allocUnsafe(64);
+    slab.fill(0xff);
+    const view = slab.subarray(8, 11);
+    view.set([1, 2, 3]);
+    const { file } = createTrackedFile(view, "sample.bin");
+    expect(file.size).toBe(3);
+    expect(new Uint8Array(await file.arrayBuffer())).toEqual(Uint8Array.of(1, 2, 3));
+  });
+
   it("creates strict truncated copies", () => {
     expect(truncated(Uint8Array.of(1, 2, 3), 2)).toEqual(Uint8Array.of(1, 2));
     expect(() => truncated(Uint8Array.of(1), 1)).toThrow(RangeError);

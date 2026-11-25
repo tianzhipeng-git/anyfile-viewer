@@ -128,7 +128,10 @@ export function truncated(bytes: Uint8Array, length = bytes.length - 1): Uint8Ar
 export type TrackedRead = { readonly start: number; readonly end: number };
 
 export function createTrackedFile(bytes: Uint8Array, name: string) {
-  const file = new File([bytes.slice().buffer as ArrayBuffer], name);
+  // Copy into a tight ArrayBuffer. `bytes.slice()` on a Node Buffer returns a
+  // shared view, so `.buffer` would expose the whole pooled slab; an explicit
+  // copy respects the view's byteOffset/byteLength regardless of the input type.
+  const file = new File([new Uint8Array(bytes)], name);
   const slice = file.slice.bind(file);
   const reads: TrackedRead[] = [];
   Object.defineProperty(file, "slice", {
