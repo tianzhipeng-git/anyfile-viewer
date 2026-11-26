@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import { inspectMobi, MOBI_LIMITS } from "./probe";
 interface MobiModule {
   HEAPU8: Uint8Array; UTF8ToString(pointer: number): string;
@@ -13,7 +14,7 @@ async function open(file: File, runtime: string) {
   if (!info) fail("invalid-file");
   if (info!.protected) fail("protected");
   let mod: MobiModule;
-  try { mod = await (await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ runtime)).default(); }
+  try { mod = await (await importRuntime<{ default(): Promise<MobiModule> }>(runtime)).default(); }
   catch { return fail("unsupported-environment"); }
   const bytes = new Uint8Array(await file.arrayBuffer());
   const pointer = mod._malloc(bytes.length);

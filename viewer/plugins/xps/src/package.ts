@@ -1,3 +1,4 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { BlobReader, BlobWriter, Uint8ArrayWriter, ZipReader, type Entry, type FileEntry } from "@zip.js/zip.js/lib/zip-core-custom.js";
 
 import { XPS_LIMITS } from "./limits";
@@ -150,7 +151,7 @@ export class XpsPackage {
 
   private async readRelationships(source: string, relsPart: string) {
     if (!this.has(relsPart)) return [];
-    const doc = new DOMParser().parseFromString(await this.text(relsPart), "application/xml");
+    const doc = parseXmlDocument(await this.text(relsPart), "application/xml");
     const result: Relationship[] = [];
     for (const node of descendantsNamed(doc.documentElement, "Relationship")) {
       if (node.getAttribute("TargetMode") === "External") continue;

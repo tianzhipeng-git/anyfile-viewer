@@ -1,3 +1,4 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { ViewerError } from "@anyfile/viewer-protocol";
 import type { BookSource } from "@anyfile/archive-metadata-viewer/book-source";
 export interface ComicPage {
@@ -42,7 +43,7 @@ export async function parseComic(zip: BookSource, signal: AbortSignal) {
     );
     if (/<!DOCTYPE|<!ENTITY/i.test(xml))
       throw new ViewerError("invalid-file", "Invalid ComicInfo XML.");
-    const doc = new DOMParser().parseFromString(xml, "application/xml");
+    const doc = parseXmlDocument(xml, "application/xml");
     if (
       doc.documentElement.localName !== "ComicInfo" ||
       doc.querySelector("parsererror") ||

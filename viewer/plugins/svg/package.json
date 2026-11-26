@@ -10,8 +10,9 @@
     "./sanitize": "./src/sanitize.ts"
   },
   "dependencies": {
-    "@anyfile/viewer-rendering": "workspace:*",
-    "@anyfile/viewer-protocol": "workspace:*"
+    "@anyfile/runtime-assets": "workspace:*",
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-rendering": "workspace:*"
   },
   "devDependencies": {
     "@anyfile/viewer-test": "workspace:*"

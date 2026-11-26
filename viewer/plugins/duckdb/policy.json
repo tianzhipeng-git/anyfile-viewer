@@ -5,22 +5,22 @@
       "version": "1.32.0",
       "versionPackageJson": "viewer/plugins/duckdb/node_modules/@duckdb/duckdb-wasm/package.json",
       "assetPatterns": [
-        ".next/static/media/duckdb-*.wasm",
-        ".next/static/media/duckdb-*.worker.*.js"
+        "public/vendor/duckdb/1.32.0/duckdb-*.wasm",
+        "public/vendor/duckdb/1.32.0/duckdb-*.worker.js"
       ],
       "coldStartGroups": [
         {
           "id": "mvp",
           "assetPatterns": [
-            ".next/static/media/duckdb-mvp.*.wasm",
-            ".next/static/media/duckdb-browser-mvp.worker.*.js"
+            "public/vendor/duckdb/1.32.0/duckdb-mvp.wasm",
+            "public/vendor/duckdb/1.32.0/duckdb-browser-mvp.worker.js"
           ]
         },
         {
           "id": "eh",
           "assetPatterns": [
-            ".next/static/media/duckdb-eh.*.wasm",
-            ".next/static/media/duckdb-browser-eh.worker.*.js"
+            "public/vendor/duckdb/1.32.0/duckdb-eh.wasm",
+            "public/vendor/duckdb/1.32.0/duckdb-browser-eh.worker.js"
           ]
         }
       ],

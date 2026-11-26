@@ -10,9 +10,10 @@
   },
   "dependencies": {
     "@anyfile/rendering-3d": "workspace:*",
+    "@anyfile/runtime-assets": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
-    "three": "0.185.1",
-    "@zip.js/zip.js": "2.8.60"
+    "@zip.js/zip.js": "2.8.60",
+    "three": "0.185.1"
   },
   "devDependencies": {
     "@types/three": "0.185.4"

@@ -1,3 +1,4 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { ViewerError } from "@anyfile/viewer-protocol";
 import { openBookZip } from "@anyfile/archive-metadata-viewer/zip-source";
 
@@ -25,7 +26,7 @@ const string = (value: unknown) => typeof value === "string" ? value : "";
 function xml(source: string): Element {
   // No DTD/entities, external resources or active content is ever inserted into DOM.
   if (/<!DOCTYPE|<!ENTITY/i.test(source)) throw invalid();
-  const doc = new DOMParser().parseFromString(source, "application/xml");
+  const doc = parseXmlDocument(source, "application/xml");
   if (doc.getElementsByTagName("parsererror").length || !doc.documentElement) throw invalid();
   return doc.documentElement;
 }

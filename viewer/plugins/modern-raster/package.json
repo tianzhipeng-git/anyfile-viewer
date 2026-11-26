@@ -12,6 +12,7 @@
     "generate:examples": "node scripts/generate-examples.mjs"
   },
   "dependencies": {
+    "@anyfile/runtime-assets": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",
     "jxl-oxide-wasm": "0.12.6"

@@ -1,3 +1,4 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { splitParagraphs, type IworkApp, type IworkModel, type IworkSection } from "./model";
 
 /** iWork '09 XML (`index.xml` for Pages, `index.apxl` for Keynote). */
@@ -50,7 +51,7 @@ function insideNotes(element: Element, slide: Element) {
 }
 
 function parse(xml: string) {
-  const document = new DOMParser().parseFromString(xml, "application/xml");
+  const document = parseXmlDocument(xml, "application/xml");
   if (document.getElementsByTagName("parsererror").length) throw new LegacyFormatError("Malformed iWork XML.");
   return document;
 }

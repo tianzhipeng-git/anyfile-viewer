@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import type { DwgDatabase } from "@mlightcad/libredwg-web";
 import { convertDrawing } from "./geometry";
 import { dwgSignatures } from "./probe";
@@ -11,7 +12,7 @@ const send = (message: Response, transfer: Transferable[] = []) => self.postMess
 self.onmessage = async ({ data }: MessageEvent<Request>) => {
   try {
     if (data.type === "init") {
-      const api = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ data.runtimeUrl);
+      const api = await importRuntime<{ createModule(): Promise<Runtime>; LibreDwg: { createByWasmInstance(r: Runtime): Library } }>(data.runtimeUrl);
       runtime = await api.createModule();
       library = api.LibreDwg.createByWasmInstance(runtime);
       send({ type: "ready" }); return;

@@ -1,3 +1,4 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { color, finite, type Topic, type TopicKind, type Relationship } from "./model";
 const obj = (v: unknown): Record<string, unknown> => v && typeof v === "object" && !Array.isArray(v) ? v as Record<string, unknown> : {};
 const str = (v: unknown) => typeof v === "string" ? v : "";
@@ -112,7 +113,7 @@ export function kind(value: string): TopicKind {
   return ["detached", "summary", "callout"].includes(value) ? value as TopicKind : "attached";
 }
 export function applyLegacyStyles(sheets: {root: Topic}[], source: string) {
-  const doc = new DOMParser().parseFromString(source, "application/xml");
+  const doc = parseXmlDocument(source, "application/xml");
   const styles = new Map(Array.from(doc.getElementsByTagNameNS("*", "style")).map(e => [attr(e, "id"), first(e, "topic-properties")]));
   function visit(t: Topic) {
     const p = styles.get(t.metadata.styleId);

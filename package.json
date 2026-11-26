@@ -24,7 +24,7 @@
     "prepare:stet": "node scripts/prepare-stet-assets.mjs",
     "prepare:ogv": "node scripts/prepare-ogv-assets.mjs",
     "prepare:licenses": "node scripts/prepare-license-assets.mjs",
-    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif && pnpm prepare:stet && pnpm prepare:ogv && pnpm prepare:laz && pnpm prepare:occt && pnpm prepare:dwg && pnpm prepare:djvu && pnpm prepare:ebooks && pnpm prepare:licenses && pnpm prepare:ffmpeg && pnpm prepare:mpp && pnpm prepare:visio && pnpm prepare:ifc && pnpm prepare:readstat && pnpm prepare:h5wasm",
+    "prepare:assets": "pnpm prepare:pdfjs && pnpm prepare:heif && pnpm prepare:stet && pnpm prepare:ogv && pnpm prepare:laz && pnpm prepare:occt && pnpm prepare:dwg && pnpm prepare:djvu && pnpm prepare:ebooks && pnpm prepare:licenses && pnpm prepare:ffmpeg && pnpm prepare:mpp && pnpm prepare:visio && pnpm prepare:ifc && pnpm prepare:readstat && pnpm prepare:h5wasm && pnpm prepare:duckdb && pnpm prepare:sqljs",
     "dev": "pnpm prepare:assets && next dev",
     "build": "pnpm prepare:assets && next build --webpack && pnpm check:bundle",
     "check:bundle": "node scripts/check-view-bundle.mjs && node scripts/check-plugin-bundles.mjs && node scripts/check-plugin-assets.mjs && node scripts/check-ffmpeg-bundles.mjs",
@@ -49,7 +49,9 @@
     "prepare:visio": "node scripts/prepare-visio-assets.mjs",
     "prepare:ifc": "node scripts/prepare-ifc-assets.mjs",
     "prepare:readstat": "node scripts/prepare-readstat-assets.mjs",
-    "prepare:h5wasm": "node scripts/prepare-h5wasm-assets.mjs"
+    "prepare:h5wasm": "node scripts/prepare-h5wasm-assets.mjs",
+    "prepare:duckdb": "node scripts/prepare-duckdb-assets.mjs",
+    "prepare:sqljs": "node scripts/prepare-sqljs-assets.mjs"
   },
   "dependencies": {
     "@anyfile/i18n": "workspace:*",
@@ -89,6 +91,7 @@
     "@anyfile/sqlite-viewer": "workspace:*",
     "@anyfile/stat-data-viewer": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-registry": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",
     "@anyfile/word-viewer": "workspace:*",
     "@base-ui/react": "^1.7.0",
@@ -133,7 +136,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",

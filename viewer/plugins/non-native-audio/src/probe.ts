@@ -10,10 +10,6 @@ function extensionOf(name: string) {
   return index < 0 ? "" : name.slice(index).toLowerCase();
 }
 
-function hasEnvironment() {
-  return typeof AudioContext !== "undefined" && typeof AudioDecoder !== "undefined";
-}
-
 async function probeMatroska(file: File, signal: AbortSignal): Promise<ViewerSupportLevel> {
   const { head, tail } = await readProbeSlices(file, signal);
   const inspection = inspectMatroskaTracks(head, tail, file.size);
@@ -31,7 +27,7 @@ async function probeWave(file: File, signal: AbortSignal): Promise<ViewerSupport
 export async function probeNonNativeAudio(
   { file, signal }: ProbeViewerContext,
 ): Promise<ViewerSupportLevel> {
-  if (!file.size || !hasEnvironment()) return 0;
+  if (!file.size) return 0;
   const extension = extensionOf(file.name);
   if (extension === ".mka") return probeMatroska(file, signal);
   if (extension === ".wav" || extension === ".wave") return probeWave(file, signal);

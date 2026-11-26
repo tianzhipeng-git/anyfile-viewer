@@ -65,11 +65,12 @@ describe("non-native video Matroska probe", () => {
     expect(await probeNonNativeVideo(context(file))).toBe(0);
   });
 
-  it("checks only the capabilities required by the file", async () => {
+  it("probes Matroska containers purely from bytes without browser globals", async () => {
+    vi.stubGlobal("VideoDecoder", undefined);
     vi.stubGlobal("AudioDecoder", undefined);
     vi.stubGlobal("AudioContext", undefined);
     expect(await probeNonNativeVideo(context(fixture("mkv-avc-video-only.mkv")))).toBe(3);
-    expect(await probeNonNativeVideo(context(fixture("mkv-avc-aac.mkv")))).toBe(0);
+    expect(await probeNonNativeVideo(context(fixture("mkv-avc-aac.mkv")))).toBe(3);
   });
 
   it("accepts the same Matroska evidence through the mk3d route", async () => {
@@ -121,11 +122,11 @@ describe("non-native video MPEG-TS probe", () => {
     expect(await probeNonNativeVideo(context(fixture(name)))).toBe(0);
   });
 
-  it("does not require audio capabilities for a video-only stream", async () => {
+  it("probes MPEG-TS streams purely from bytes without browser globals", async () => {
     vi.stubGlobal("AudioDecoder", undefined);
     vi.stubGlobal("AudioContext", undefined);
     expect(await probeNonNativeVideo(context(fixture("ts-avc-video-only.m2ts")))).toBe(3);
-    expect(await probeNonNativeVideo(context(fixture("ts-avc-aac.ts.fixture")))).toBe(0);
+    expect(await probeNonNativeVideo(context(fixture("ts-avc-aac.ts.fixture")))).toBe(3);
   });
 
   it("recognizes the 204-byte transport packet layout without reading beyond the head budget", async () => {
@@ -163,11 +164,11 @@ describe("non-native video QuickTime probe", () => {
       expect(await probeNonNativeVideo(context(fixture(name)))).toBe(0);
     });
 
-  it("does not require audio APIs for video-only MOV", async () => {
+  it("probes MOV streams purely from bytes without browser globals", async () => {
     vi.stubGlobal("AudioDecoder", undefined);
     vi.stubGlobal("AudioContext", undefined);
     expect(await probeNonNativeVideo(context(fixture("mov-hevc-video-only.qt")))).toBe(3);
-    expect(await probeNonNativeVideo(context(fixture("mov-avc-pcm.mov")))).toBe(0);
+    expect(await probeNonNativeVideo(context(fixture("mov-avc-pcm.mov")))).toBe(3);
   });
 });
 
@@ -185,11 +186,12 @@ describe("non-native video Ogg Theora probe", () => {
       expect(await probeNonNativeVideo(context(fixture(name)))).toBe(0);
     });
 
-  it("uses software video decoding but still requires Web Audio for an audio stream", async () => {
+  it("probes Ogg Theora streams purely from bytes without browser globals", async () => {
     vi.stubGlobal("VideoDecoder", undefined);
     vi.stubGlobal("AudioDecoder", undefined);
-    expect(await probeNonNativeVideo(context(fixture("ogv-theora-video-only.ogg")))).toBe(3);
     vi.stubGlobal("AudioContext", undefined);
-    expect(await probeNonNativeVideo(context(fixture("ogv-theora-vorbis.ogv")))).toBe(0);
+    vi.stubGlobal("Worker", undefined);
+    expect(await probeNonNativeVideo(context(fixture("ogv-theora-video-only.ogg")))).toBe(3);
+    expect(await probeNonNativeVideo(context(fixture("ogv-theora-vorbis.ogv")))).toBe(3);
   });
 });

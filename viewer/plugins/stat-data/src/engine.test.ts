@@ -2,6 +2,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import { importRuntime } from "@anyfile/runtime-assets";
 import { truncated } from "@anyfile/viewer-test";
 import { beforeAll, describe, expect, it } from "vitest";
 import { createStatEngine, EngineError, type ReadStatModule } from "./engine";
@@ -13,7 +14,9 @@ const runtime = resolve(process.cwd(), "../../../third_party/readstat/1.1.9-anyf
 let readstat: ReadStatModule;
 let bytes: Uint8Array = new Uint8Array();
 beforeAll(async () => {
-  const { default: create } = await import(/* @vite-ignore */ pathToFileURL(resolve(runtime, "readstat.mjs")).href);
+  const { default: create } = await importRuntime<{ default(opts: Record<string, unknown>): Promise<ReadStatModule> }>(
+    pathToFileURL(resolve(runtime, "readstat.mjs")).href,
+  );
   readstat = await create({
     wasmBinary: readFileSync(resolve(runtime, "readstat.wasm")),
     readAt(position: number, target: Uint8Array) { const chunk = bytes.subarray(position, position + target.length); target.set(chunk); return chunk.length; },

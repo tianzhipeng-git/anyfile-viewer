@@ -1,3 +1,4 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { OfdFormatError } from "./package";
 
 const ESCAPES: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;" };
@@ -11,7 +12,7 @@ export function parseXml(text: string): Element {
   const normalized = text
     .replace(/^﻿/, "")
     .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, (_, data: string) => data.replace(/[&<>]/g, (char) => ESCAPES[char]!));
-  const doc = new DOMParser().parseFromString(normalized, "application/xml");
+  const doc = parseXmlDocument(normalized, "application/xml");
   const root = doc.documentElement;
   if (!root || root.localName === "parsererror" || doc.getElementsByTagName("parsererror").length > 0) {
     throw new OfdFormatError("Malformed XML part.");

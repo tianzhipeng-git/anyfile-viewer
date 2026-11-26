@@ -20,6 +20,24 @@ export {
   type LocalizedText,
 } from "@anyfile/i18n";
 
+export type {
+  AgentCapability,
+  AgentErrorCode,
+  AgentFileError,
+  BinarySource,
+  EmscriptenFS,
+  ExtractContext,
+  InspectPayload,
+  InspectResult,
+  JsonValue,
+  QueryParams,
+  ReadParams,
+  ReadResult,
+  RgbaImage,
+  StructuredExtractor,
+  TargetEntry,
+} from "./agent";
+
 export const VIEWER_PROTOCOL_VERSION = 2 as const;
 
 export interface SupportedFormat {
@@ -80,8 +98,15 @@ export interface OpenViewerContext {
   readonly reportInteraction?: (interaction: ViewerInteraction) => void;
 }
 
+export interface CaptureImageOptions {
+  readonly target?: string;
+  readonly maxDimension: number;
+  readonly signal?: AbortSignal;
+}
+
 export interface ViewerController {
   dispose(): void | Promise<void>;
+  captureImage?(options: CaptureImageOptions): Promise<Blob>;
 }
 
 export interface FileViewerPlugin {
@@ -96,14 +121,19 @@ export interface ProbeViewerContext {
   readonly signal: AbortSignal;
 }
 
-export interface ViewerPluginRegistration {
+export interface ViewerRegistryEntry {
   readonly manifest: ViewerPluginManifest;
   probe?(context: ProbeViewerContext): Promise<ViewerSupportLevel>;
+}
+
+export interface ViewerPluginRegistration extends ViewerRegistryEntry {
   load(): Promise<FileViewerPlugin>;
 }
 
-export interface ResolvedViewerRegistration {
-  readonly registration: ViewerPluginRegistration;
+export interface ResolvedViewerRegistration<
+  T extends ViewerRegistryEntry = ViewerPluginRegistration,
+> {
+  readonly registration: T;
   readonly supportLevel: Exclude<ViewerSupportLevel, 0>;
 }
 
@@ -168,7 +198,7 @@ export function validateManifest(manifest: ViewerPluginManifest): void {
   }
 }
 
-export function validateRegistrations(registrations: readonly ViewerPluginRegistration[]): void {
+export function validateRegistrations(registrations: readonly ViewerRegistryEntry[]): void {
   const ids = new Set<string>();
   for (const registration of registrations) {
     validateManifest(registration.manifest);
@@ -186,7 +216,7 @@ type ViewerRegistrationIndex = {
 };
 
 const registrationIndexes = new WeakMap<
-  readonly ViewerPluginRegistration[],
+  readonly ViewerRegistryEntry[],
   ViewerRegistrationIndex
 >();
 
@@ -200,7 +230,7 @@ function addToIndex(index: Map<string, number[]>, key: string, registrationIndex
 }
 
 function getRegistrationIndex(
-  registrations: readonly ViewerPluginRegistration[],
+  registrations: readonly ViewerRegistryEntry[],
 ): ViewerRegistrationIndex {
   const cached = registrationIndexes.get(registrations);
   if (cached) return cached;
@@ -230,10 +260,10 @@ function getRegistrationIndex(
   return index;
 }
 
-export function findViewerRegistrations(
+export function findViewerRegistrations<T extends ViewerRegistryEntry>(
   fileName: string,
-  registrations: readonly ViewerPluginRegistration[],
-): ViewerPluginRegistration[] {
+  registrations: readonly T[],
+): T[] {
   const normalizedName = fileName.toLowerCase();
   const index = getRegistrationIndex(registrations);
   const matches = new Set(index.wildcards);
@@ -261,14 +291,14 @@ function isViewerSupportLevel(value: unknown): value is ViewerSupportLevel {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 5;
 }
 
-export async function resolveViewerRegistrations(
+export async function resolveViewerRegistrations<T extends ViewerRegistryEntry>(
   file: File,
-  registrations: readonly ViewerPluginRegistration[],
+  registrations: readonly T[],
   options: {
     readonly signal: AbortSignal;
     readonly workspace?: WorkspaceReader;
   },
-): Promise<ResolvedViewerRegistration[]> {
+): Promise<ResolvedViewerRegistration<T>[]> {
   const { signal, workspace } = options;
   if (signal.aborted) throw new DOMException("The operation was aborted.", "AbortError");
 

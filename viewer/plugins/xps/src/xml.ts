@@ -1,8 +1,9 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { XpsFormatError } from "./package";
 
 /** Parses an XML part. XPS and OpenXPS differ only in namespaces, so callers match on `localName`. */
 export function parseXml(text: string): Element {
-  const doc = new DOMParser().parseFromString(text.replace(/^﻿/, ""), "application/xml");
+  const doc = parseXmlDocument(text.replace(/^﻿/, ""), "application/xml");
   const root = doc.documentElement;
   if (!root || root.localName === "parsererror" || doc.getElementsByTagName("parsererror").length > 0) {
     throw new XpsFormatError("Malformed XML part.");

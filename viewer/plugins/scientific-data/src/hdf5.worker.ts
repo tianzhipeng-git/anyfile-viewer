@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import { Hdf5Engine, type H5FileLike } from "./hdf5-engine";
 import type { WorkerRequest, WorkerResponse } from "./types";
 
@@ -42,9 +43,7 @@ function cleanupMount() {
 self.onmessage = async ({ data }: MessageEvent<WorkerRequest>) => {
   try {
     if (data.type === "init") {
-      const mod = (await import(
-        /* webpackIgnore: true */ /* turbopackIgnore: true */ `${data.baseUrl}hdf5_hl.js`
-      )) as { default?: H5WasmModule } & H5WasmModule;
+      const mod = await importRuntime<{ default?: H5WasmModule } & H5WasmModule>(`${data.baseUrl}hdf5_hl.js`);
       const api = mod.default ?? mod;
       const runtime = await api.ready;
       h5wasmMod = api;

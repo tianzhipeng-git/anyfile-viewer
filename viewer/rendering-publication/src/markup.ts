@@ -1,3 +1,4 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { ViewerError } from "@anyfile/viewer-protocol";
 export const MARKUP_LIMITS = {
   xml: 2 * 1024 * 1024,
@@ -15,7 +16,7 @@ export function parseXml(bytes: Uint8Array): XMLDocument {
   if (/<!ENTITY|<!DOCTYPE[^>]*\[/i.test(source))
     throw new ViewerError("invalid-file", "XML entities are not supported.");
   source = source.replace(/<!DOCTYPE[^>]*>/gi, "");
-  const doc = new DOMParser().parseFromString(source, "application/xml");
+  const doc = parseXmlDocument(source, "application/xml") as XMLDocument;
   if (doc.getElementsByTagName("parsererror").length)
     throw new ViewerError("invalid-file", "Invalid XML.");
   const stack: [Element, number][] = [[doc.documentElement, 1]];

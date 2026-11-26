@@ -4,6 +4,7 @@ packages:
   - viewer/dev-binary-core
   - viewer/i18n
   - viewer/protocol
+  - viewer/registry
   - viewer/rendering
   - viewer/rendering-publication
   - viewer/rendering-3d

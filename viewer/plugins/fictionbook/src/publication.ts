@@ -1,3 +1,4 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { ViewerError } from "@anyfile/viewer-protocol";
 import type { PublicationSource } from "@anyfile/rendering-publication";
 import { decodeFb2, FB2_NAMESPACE } from "./encoding";
@@ -16,7 +17,7 @@ export function parseFictionBook(bytes: Uint8Array, signal: AbortSignal): Fb2Boo
   if (bytes.length > FB2_LIMITS.file) throw new ViewerError("resource-limit", "FB2 file limit exceeded.");
   const source = decodeFb2(bytes);
   if (/<!DOCTYPE|<!ENTITY/i.test(source)) throw new ViewerError("invalid-file", "FB2 DTD and entities are disabled.");
-  const doc = new DOMParser().parseFromString(source, "application/xml");
+  const doc = parseXmlDocument(source, "application/xml");
   const root = doc.documentElement;
   if (doc.querySelector("parsererror") || root.localName !== "FictionBook" || root.namespaceURI !== FB2_NAMESPACE)
     throw new ViewerError("invalid-file", "Invalid FictionBook XML.");

@@ -5,13 +5,13 @@
       "version": "1.14.2",
       "versionPackageJson": "viewer/plugins/sqlite/node_modules/sql.js/package.json",
       "assetPatterns": [
-        ".next/static/media/sql-wasm.*.wasm"
+        "public/vendor/sqljs/1.14.2/sql-wasm.wasm"
       ],
       "coldStartGroups": [
         {
           "id": "sqlite",
           "assetPatterns": [
-            ".next/static/media/sql-wasm.*.wasm"
+            "public/vendor/sqljs/1.14.2/sql-wasm.wasm"
           ]
         }
       ],

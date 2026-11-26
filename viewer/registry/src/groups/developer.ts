@@ -13,80 +13,61 @@ import { scientificDataManifest } from "@anyfile/scientific-data-viewer/manifest
 import { sqliteManifest } from "@anyfile/sqlite-viewer/manifest";
 import { statDataManifest } from "@anyfile/stat-data-viewer/manifest";
 import { certificateManifest } from "@anyfile/x509-certificate-viewer/manifest";
-import type { ViewerPluginRegistration } from "@anyfile/viewer-protocol";
+import type { ViewerRegistryEntry } from "@anyfile/viewer-protocol";
 
-export const developerRegistrations: readonly ViewerPluginRegistration[] = [
-  {
-    manifest: harManifest,
-    async load() { return (await import("@anyfile/har-viewer")).harViewer; },
-  },
-  {
-    manifest: bittorrentManifest,
-    async load() { return (await import("@anyfile/bittorrent-viewer")).bittorrentViewer; },
-  },
+export const developerRegistryEntries: readonly ViewerRegistryEntry[] = [
+  { manifest: harManifest },
+  { manifest: bittorrentManifest },
   {
     manifest: mlWeightsManifest,
     async probe(context) { return (await import("@anyfile/ml-weights-viewer/probe")).probeMlWeights(context); },
-    async load() { return (await import("@anyfile/ml-weights-viewer")).mlWeightsViewer; },
   },
   {
     manifest: plistManifest,
     async probe(context) { return (await import("@anyfile/plist-viewer/probe")).probePlistFile(context); },
-    async load() { return (await import("@anyfile/plist-viewer")).plistViewer; },
   },
   {
     manifest: certificateManifest,
     async probe(context) { return (await import("@anyfile/x509-certificate-viewer/probe")).inspectCertificate(context); },
-    async load() { return (await import("@anyfile/x509-certificate-viewer")).certificateViewer; },
   },
   {
     manifest: codeManifest,
     async probe(context) { return (await import("@anyfile/code-viewer/probe")).probeCode(context); },
-    async load() { return (await import("@anyfile/code-viewer")).codeViewer; },
   },
   {
     manifest: sqliteManifest,
     async probe(context) { return (await import("@anyfile/sqlite-viewer/probe")).probeSQLite(context); },
-    async load() { return (await import("@anyfile/sqlite-viewer")).sqliteViewer; },
   },
   {
     manifest: statDataManifest,
     async probe(context) { return (await import("@anyfile/stat-data-viewer/probe")).probeStatData(context); },
-    async load() { return (await import("@anyfile/stat-data-viewer")).statDataViewer; },
   },
   {
     manifest: scientificDataManifest,
     async probe(context) { return (await import("@anyfile/scientific-data-viewer/probe")).probeScientificData(context); },
-    async load() { return (await import("@anyfile/scientific-data-viewer")).scientificDataPlugin; },
   },
   {
     manifest: devArrayManifest,
     async probe(context) { return (await import("@anyfile/dev-array-viewer/probe")).probeDevArray(context); },
-    async load() { return (await import("@anyfile/dev-array-viewer")).devArrayViewer; },
   },
   {
     manifest: devWasmManifest,
     async probe(context) { return (await import("@anyfile/dev-wasm-viewer/probe")).probeDevWasm(context); },
-    async load() { return (await import("@anyfile/dev-wasm-viewer")).devWasmViewer; },
   },
   {
     manifest: devSourceMapManifest,
     async probe(context) { return (await import("@anyfile/dev-source-map-viewer/probe")).probeDevSourceMap(context); },
-    async load() { return (await import("@anyfile/dev-source-map-viewer")).devSourceMapViewer; },
   },
   {
     manifest: devNativeBinaryManifest,
     async probe(context) { return (await import("@anyfile/dev-native-binary-viewer/probe")).probeDevNativeBinary(context); },
-    async load() { return (await import("@anyfile/dev-native-binary-viewer")).devNativeBinaryViewer; },
   },
   {
     manifest: duckdbManifest,
     async probe(context) { return (await import("@anyfile/duckdb-viewer/probe")).probeDuckDB(context); },
-    async load() { return (await import("@anyfile/duckdb-viewer")).duckdbViewer; },
   },
   {
     manifest: archiveMetadataManifest,
     async probe(context) { return (await import("@anyfile/archive-metadata-viewer/probe")).probeArchive(context); },
-    async load() { return (await import("@anyfile/archive-metadata-viewer")).archiveMetadataViewer; },
   },
 ];

@@ -4,6 +4,15 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./node": "./src/node-vendor.ts",
+    "./xml": {
+      "browser": "./src/xml.browser.ts",
+      "node": "./src/xml.node.ts",
+      "default": "./src/xml.browser.ts"
+    }
+  },
+  "dependencies": {
+    "linkedom": "0.18.13"
   }
 }

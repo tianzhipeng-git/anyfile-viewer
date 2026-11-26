@@ -1,4 +1,5 @@
 // @vitest-environment node
+import { importRuntime } from "@anyfile/runtime-assets";
 import { expect, it } from "vitest";
 import { readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
@@ -7,7 +8,8 @@ import { convertDrawing } from "./geometry";
 const files: string[] = JSON.parse(process.env.DWG_TEST_FILES || "[]");
 it.skipIf(!files.length)("decodes real DWGs with the production 64 MiB runtime and geometry adapter", async () => {
   const url = pathToFileURL(resolve("../../../third_party/libredwg/0.14-anyfile.1/dist/libredwg-web.js")).href;
-  const api = await import(/* @vite-ignore */ url);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const api = await importRuntime<any>(url);
   const runtime = await api.createModule();
   expect(runtime.HEAPU8.byteLength).toBe(64*1024*1024);
   const library = api.LibreDwg.createByWasmInstance(runtime);

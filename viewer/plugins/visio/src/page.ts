@@ -1,10 +1,11 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
 import { ViewerError } from "@anyfile/viewer-protocol";
 import type { Copy } from "./messages";
 
 // libvisio/librevenge emits physical page dimensions in inches.
 export function pageSize(svg: string, copy: Copy) {
   if (svg.length > 16 * 1024 * 1024) throw new ViewerError("resource-limit", copy.limit);
-  const document = new DOMParser().parseFromString(svg, "image/svg+xml");
+  const document = parseXmlDocument(svg, "image/svg+xml");
   const root = document.documentElement;
   if (root.localName !== "svg" || root.namespaceURI !== "http://www.w3.org/2000/svg" || document.querySelector("parsererror")) throw new ViewerError("invalid-file", copy.invalid);
   const dimension = (name: string) => {

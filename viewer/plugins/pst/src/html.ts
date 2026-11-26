@@ -1,3 +1,5 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
+
 /**
  * Email HTML sanitizer. Message bodies are rendered in a script-less sandboxed
  * iframe under a CSP that only allows inline styles and local blob/data images;
@@ -29,7 +31,7 @@ export interface SanitizedEmail {
  * @param resolveCid maps `cid:` references of inline attachments to local blob URLs.
  */
 export function sanitizeEmailHtml(source: string, resolveCid: (cid: string) => string | undefined): SanitizedEmail {
-  const doc = new DOMParser().parseFromString(source, "text/html");
+  const doc = parseXmlDocument(source, "text/html");
   let blockedRemote = 0;
   const walk = (parent: Element) => {
     for (const child of Array.from(parent.children)) {

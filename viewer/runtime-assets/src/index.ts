@@ -9,6 +9,14 @@ export {
   type WorkerRpcSuccess,
 } from "./worker-rpc";
 
+/**
+ * Dynamically imports a runtime JS/MJS glue module by URL without bundling it.
+ * Centralizes bundler ignore annotations so plugins never repeat them.
+ */
+export function importRuntime<T = Record<string, unknown>>(url: string): Promise<T> {
+  return import(/* webpackIgnore: true */ /* turbopackIgnore: true */ /* @vite-ignore */ url) as Promise<T>;
+}
+
 export interface RuntimeAttempt<T> {
   initialize(): Promise<T>;
   dispose(): void | Promise<void>;

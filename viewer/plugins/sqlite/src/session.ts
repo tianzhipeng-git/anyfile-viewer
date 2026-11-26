@@ -54,9 +54,11 @@ async function readFileBytes(file: File, signal: AbortSignal) {
   }
 }
 
+const SQLJS_ASSET_ROOT = "/vendor/sqljs/1.14.2";
+
 export async function createSQLiteSession(file: File, signal: AbortSignal): Promise<SQLiteSession> {
   const SQL = await initSqlJs({
-    locateFile: () => new URL("sql.js/dist/sql-wasm.wasm", import.meta.url).toString(),
+    locateFile: () => `${SQLJS_ASSET_ROOT}/sql-wasm.wasm`,
   });
   if (signal.aborted) throw new DOMException("Viewer operation aborted.", "AbortError");
   const database = new SQL.Database(await readFileBytes(file, signal));

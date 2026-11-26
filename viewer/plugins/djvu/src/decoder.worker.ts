@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 
+import { importRuntime } from "@anyfile/runtime-assets";
 import { DJVU_LIMITS } from "./limits";
 import { inspectDjvuHeader } from "./probe";
 import type {
@@ -133,9 +134,7 @@ workerScope.onmessage = async (event: MessageEvent<DjvuWorkerRequest>) => {
   const request = event.data;
   try {
     if (request.type === "init") {
-      const loaded = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ request.runtimeUrl) as {
-        default: DjvuModuleFactory;
-      };
+      const loaded = await importRuntime<{ default: DjvuModuleFactory }>(request.runtimeUrl);
       mod = await loaded.default({
         locateFile(path: string) {
           return path.endsWith(".wasm") ? request.wasmUrl : path;

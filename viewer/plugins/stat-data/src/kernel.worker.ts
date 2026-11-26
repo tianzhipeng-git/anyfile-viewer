@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import { createStatEngine, EngineError, type ReadAt, type ReadStatModule } from "./engine";
 import type { Request, Response } from "./types";
 
@@ -27,7 +28,7 @@ const send = (response: Response) => self.postMessage(response);
 self.onmessage = async ({ data }: MessageEvent<Request>) => {
   try {
     if (data.type === "init") {
-      const { default: create } = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ `${data.baseUrl}readstat.mjs`);
+      const { default: create } = await importRuntime<{ default(opts: Record<string, unknown>): Promise<ReadStatModule> }>(`${data.baseUrl}readstat.mjs`);
       readstat = await create({ locateFile: (name: string) => `${data.baseUrl}${name}`, readAt: (position: number, target: Uint8Array) => readAt(position, target), print: () => {}, printErr: () => {} });
       send({ id: data.id, type: "ready" });
     } else if (data.type === "open") {

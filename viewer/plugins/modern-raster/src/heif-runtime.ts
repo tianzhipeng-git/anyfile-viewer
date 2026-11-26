@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import type { HeifDecodeInfo } from "./types";
 
 export const HEIF_ARTIFACT_VERSION = "1.23.2-anyfile.1";
@@ -12,8 +13,8 @@ type DecoderFactory = (options: { locateFile(path: string): string }) => Promise
 let runtime: Promise<DecoderModule> | undefined;
 
 export function loadHeifRuntime() {
-  return runtime ??= import(/* webpackIgnore: true */ `${ASSET_ROOT}/heif-decoder.js`)
-    .then((module) => (module.default as DecoderFactory)({ locateFile: () => `${ASSET_ROOT}/heif-decoder.wasm` }))
+  return runtime ??= importRuntime<{ default: DecoderFactory }>(`${ASSET_ROOT}/heif-decoder.js`)
+    .then((module) => module.default({ locateFile: () => `${ASSET_ROOT}/heif-decoder.wasm` }))
     .catch((error) => {
       runtime = undefined;
       throw error;

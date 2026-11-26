@@ -1,7 +1,9 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
+
 export function parseXml(source: string) {
   if (source.length > 128 * 1024 * 1024) throw new RangeError();
   if (/<!DOCTYPE|<!ENTITY/i.test(source)) throw new Error("XML entities forbidden");
-  const document = new DOMParser().parseFromString(source, "application/xml");
+  const document = parseXmlDocument(source, "application/xml");
   if (document.querySelector("parsererror")) throw new Error("Invalid XML");
   let count = 0;
   const walk = (node: Element, depth: number) => { if (++count > 1_000_000 || depth > 64) throw new RangeError(); for (const child of node.children) walk(child, depth + 1); };

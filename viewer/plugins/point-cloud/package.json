@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@anyfile/rendering-3d": "workspace:*",
+    "@anyfile/runtime-assets": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "three": "0.185.1"
   },

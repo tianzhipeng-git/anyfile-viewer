@@ -2,13 +2,14 @@ interface LazRuntime {
   HEAPU8: Uint8Array; _malloc(size: number): number; _free(pointer: number): void;
   LASZip: new () => { open(pointer: number, length: number): void; getCount(): number; getPointLength(): number; getPointFormat(): number; getPoint(pointer: number): void; delete(): void };
 }
+import { importRuntime } from "@anyfile/runtime-assets";
 import { lasHeader } from "./las";
 import { PointSampler } from "./sampler";
 export async function readLaz(file: File, emit: (sampler: PointSampler, done: boolean) => void) {
   if (file.size > 128 * 1024 * 1024) throw new RangeError("LAZ whole-buffer limit");
   const header = lasHeader(await file.slice(0,375).arrayBuffer(), file.size, true);
   const url = `${self.location.origin}/vendor/laz-perf/0.0.7-anyfile.1/laz-perf.js`;
-  const runtimeModule = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ url);
+  const runtimeModule = await importRuntime<{ default(opts: { print(): void; printErr(): void }): Promise<LazRuntime> }>(url);
   const runtime: LazRuntime = await runtimeModule.default({ print() {}, printErr() {} });
   let source = 0, point = 0;
   const reader = new runtime.LASZip();

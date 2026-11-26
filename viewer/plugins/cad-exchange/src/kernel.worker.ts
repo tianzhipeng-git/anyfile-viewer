@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import { convertCad } from "./convert";
 import type { CadWorkerRequest, KernelResult } from "./types";
 interface Kernel { ReadFile(format: string, bytes: Uint8Array, params: object): KernelResult; HEAPU8: Uint8Array }
@@ -5,7 +6,7 @@ let kernel: Kernel;
 self.onmessage = async ({ data }: MessageEvent<CadWorkerRequest>) => {
   if (data.type === "init") {
     try {
-      const runtimeModule = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ data.runtimeUrl);
+      const runtimeModule = await importRuntime<{ default(opts: { print(): void; printErr(): void }): Promise<Kernel> }>(data.runtimeUrl);
       kernel = await runtimeModule.default({ print() {}, printErr() {} });
       self.postMessage({ type: "ready" });
     } catch { self.postMessage({ type: "error", code: "unsupported-environment" }); }

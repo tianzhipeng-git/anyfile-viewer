@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import { hasOleHeader } from "./probe";
 import { INPUT_LIMIT, type ProjectDocument, type Request, type Response, type ParserError } from "./types";
 
@@ -8,7 +9,7 @@ const send = (message: Response) => self.postMessage(message);
 self.onmessage = async ({ data }: MessageEvent<Request>) => {
   try {
     if (data.type === "init") {
-      await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ `${data.baseUrl}wasm_exec.js`);
+      await importRuntime(`${data.baseUrl}wasm_exec.js`);
       const go = new globals.Go();
       const response = await fetch(`${data.baseUrl}mpp.wasm`);
       if (!response.ok) throw new Error("Runtime fetch failed");

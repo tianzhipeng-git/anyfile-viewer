@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import { INPUT_LIMIT, type Request, type Response } from "./types";
 type Engine = { setIcuData(bytes: Uint8Array): void; openVisio(bytes: Uint8Array): number; pageSvg(index: number): string };
 let engine: Engine;
@@ -5,7 +6,7 @@ const send = (response: Response) => self.postMessage(response);
 self.onmessage = async ({ data }: MessageEvent<Request>) => {
   try {
     if (data.type === "init") {
-      const { default: create } = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ `${data.baseUrl}visio.mjs`);
+      const { default: create } = await importRuntime<{ default(opts: Record<string, unknown>): Promise<Engine> }>(`${data.baseUrl}visio.mjs`);
       engine = await create({ locateFile: (name: string) => `${data.baseUrl}${name}`, print: () => {}, printErr: () => {} });
       const response = await fetch(`${data.baseUrl}converters.dat`);
       if (!response.ok) throw new Error("ICU data fetch failed");

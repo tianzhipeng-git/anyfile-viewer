@@ -10,7 +10,7 @@ const loadableManifest = JSON.parse(await readFile(
   join(projectRoot, ".next/react-loadable-manifest.json"),
   "utf8",
 ));
-const registrationEntryPattern = /(?:^|\/)(?:viewer-registrations|registrations\/[^/]+)\.ts -> /;
+const registrationEntryPattern = /(?:^|\/)(?:viewer-registrations|viewer\/registry\/src\/(?:index|groups\/[^/]+))\.ts -> /;
 
 async function entryGzipBytes(specifier) {
   const suffix = ` -> ${specifier}`;

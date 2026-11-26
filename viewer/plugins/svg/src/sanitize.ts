@@ -1,3 +1,5 @@
+import { parseXmlDocument } from "@anyfile/runtime-assets/xml";
+
 export interface SanitizedSvg {
   readonly source: string;
   readonly removedItems: number;
@@ -61,7 +63,7 @@ export function sanitizeSvg(bytes: Uint8Array): SanitizedSvg | undefined {
   }
   if (/<!doctype/i.test(source)) return undefined;
 
-  const document = new DOMParser().parseFromString(source, "image/svg+xml");
+  const document = parseXmlDocument(source, "image/svg+xml");
   const root = document.documentElement;
   if (
     root.localName.toLowerCase() !== "svg"

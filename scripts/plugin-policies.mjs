@@ -149,15 +149,18 @@ export function loadPluginPolicies(projectRoot) {
  */
 export function readRegistrationSource(projectRoot) {
   const sources = [readFileSync(join(projectRoot, "src/lib/viewer-registrations.ts"), "utf8")];
-  const registrationsDir = join(projectRoot, "src/lib/registrations");
-  if (existsSync(registrationsDir)) {
-    const files = readdirSync(registrationsDir, { withFileTypes: true })
-      .filter((entry) => entry.isFile() && entry.name.endsWith(".ts"))
-      .map((entry) => entry.name)
-      .sort();
-    for (const file of files) {
-      sources.push(readFileSync(join(registrationsDir, file), "utf8"));
-    }
+  const registryRoot = join(projectRoot, "viewer/registry/src");
+  if (existsSync(registryRoot)) {
+    const collect = (directory) => {
+      for (const entry of readdirSync(directory, { withFileTypes: true }).sort((a, b) => a.name.localeCompare(b.name))) {
+        const fullPath = join(directory, entry.name);
+        if (entry.isDirectory()) collect(fullPath);
+        else if (entry.isFile() && entry.name.endsWith(".ts") && !entry.name.endsWith(".test.ts")) {
+          sources.push(readFileSync(fullPath, "utf8"));
+        }
+      }
+    };
+    collect(registryRoot);
   }
   return sources.join("\n");
 }

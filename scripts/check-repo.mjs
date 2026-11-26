@@ -20,6 +20,16 @@ const PLUGINS_WITHOUT_SAMPLES = new Set([
 const UNPUBLISHED_PLUGINS = new Set(["ffmpeg-audio", "ffmpeg-video"]);
 const SAMPLE_DIRECTORIES = ["examples", "fixtures"];
 const NON_SAMPLE = /^(readme|license|notice|sources?)(\.|$)|\.(md|json|txt|py|mjs|ts)$/i;
+const PROBE_BROWSER_GLOBALS = /\b(VideoDecoder|AudioDecoder|AudioContext|Worker|window|document|navigator|DOMParser|createImageBitmap|OffscreenCanvas|HTMLElement)\b/;
+const INLINE_WASM_URL = /new\s+URL\s*\([^)]*\.wasm["'`][^)]*import\.meta\.url/;
+const BUNDLER_IGNORE_COMMENT = /webpackIgnore|turbopackIgnore|@vite-ignore/;
+const RAW_DOM_PARSER = /\bnew\s+DOMParser\s*\(/;
+
+function stripComments(source) {
+  return source
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:\\])\/\/[^\n]*/g, "$1");
+}
 
 const errors = [];
 const fail = (message) => errors.push(message);
@@ -61,6 +71,13 @@ for (const [index, line] of read("ROADMAP.md").split("\n").entries()) {
 try { loadGlobalPluginPolicy("."); } catch (error) { fail(error.message); }
 const rootDependencies = readJson("package.json").dependencies;
 const registrations = readRegistrationSource(".");
+const registryDir = "viewer/registry/src";
+const registrySource = existsSync(registryDir)
+  ? walk(registryDir).filter((path) => path.endsWith(".ts") && !path.endsWith(".test.ts")).map(read).join("\n")
+  : "";
+if (!existsSync(registryDir) || !read("src/lib/viewer-registrations.ts").includes("@anyfile/viewer-registry")) {
+  fail("shared routing registry missing: move manifest+probe registrations to @anyfile/viewer-registry and import it from src/lib/viewer-registrations.ts");
+}
 const contentManifests = read("src/content/manifests.ts");
 const pluginDirectories = readdirSync("viewer/plugins").filter((name) => statSync(join("viewer/plugins", name)).isDirectory());
 const pluginPackages = new Map(pluginDirectories.map((name) => [readJson(join("viewer/plugins", name, "package.json")).name, name]));
@@ -85,7 +102,9 @@ for (const name of pluginDirectories) {
   else seenManifestIds.set(manifestId, name);
   if (pkg.exports?.["./manifest"] !== "./src/manifest.ts") fail(`${where}: package.json must export ./manifest from ./src/manifest.ts`);
   if (rootDependencies[pkg.name] !== "workspace:*") fail(`${where}: root package.json must depend on ${pkg.name}`);
-  if (!registrations.includes(`"${pkg.name}/manifest"`)) fail(`${where}: not registered in src/lib/viewer-registrations.ts or src/lib/registrations/`);
+  if (!registrations.includes(`"${pkg.name}"`) && !registrations.includes(`"${pkg.name}/manifest"`)) fail(`${where}: not registered in src/lib/viewer-registrations.ts or src/lib/registrations/`);
+  if (!registrySource.includes(`"${pkg.name}/manifest"`)) fail(`${where}: not registered in @anyfile/viewer-registry (viewer/registry/src/)`);
+  if (pkg.exports?.["./probe"] && !registrySource.includes(`"${pkg.name}/probe"`)) fail(`${where}: probe not registered in @anyfile/viewer-registry`);
   if (contentManifests.includes(`"${pkg.name}/manifest"`) === UNPUBLISHED_PLUGINS.has(name)) fail(`${where}: add it to src/content/manifests.ts (site pages) or UNPUBLISHED_PLUGINS`);
   if (!existsSync(join(root, "README.md"))) fail(`${where}: missing README.md`);
 
@@ -104,11 +123,56 @@ for (const name of pluginDirectories) {
     }
   }
 
+  const probePath = join(root, "src/probe.ts");
+  if (existsSync(probePath)) {
+    const probeMatch = stripComments(read(probePath)).match(PROBE_BROWSER_GLOBALS);
+    if (probeMatch) {
+      fail(`${probePath}: probes must not access browser-only global "${probeMatch[1]}"`);
+    }
+  }
+
   for (const path of sources) {
-    for (const [, specifier] of read(path).matchAll(/(?:from|import\()\s*"(@anyfile\/[a-z0-9-]+)"/g)) {
+    const source = read(path);
+    const isTest = /\.test\.tsx?$/.test(path);
+    for (const [, specifier] of source.matchAll(/(?:from|import\()\s*"(@anyfile\/[a-z0-9-]+)"/g)) {
       if (pluginPackages.has(specifier) && specifier !== pkg.name) {
         fail(`${path}: imports the full ${specifier} viewer; share code through a declared subpath export or a viewer/* package`);
       }
+    }
+    if (BUNDLER_IGNORE_COMMENT.test(source)) {
+      fail(`${path}: do not write bundler ignore comments directly; use importRuntime() from @anyfile/runtime-assets`);
+    }
+    if (!isTest && INLINE_WASM_URL.test(source)) {
+      fail(`${path}: do not inline .wasm via new URL(..., import.meta.url); load from /vendor/<pkg>/<version>/`);
+    }
+    if (!isTest && RAW_DOM_PARSER.test(stripComments(source))) {
+      fail(`${path}: do not call new DOMParser() directly; use @anyfile/runtime-assets/xml`);
+    }
+  }
+}
+
+// Shared publication package must also use the shared XML interface.
+for (const path of walk("viewer/rendering-publication/src")) {
+  if (/\.test\.tsx?$/.test(path)) continue;
+  if (RAW_DOM_PARSER.test(stripComments(read(path)))) {
+    fail(`${path}: do not call new DOMParser() directly; use @anyfile/runtime-assets/xml`);
+  }
+}
+
+// Dual-host isolation: src/ must never import agent or plugin ./extract; viewer/agent/ must never import src/ or next.
+for (const path of walk("src")) {
+  if (!/\.[cm]?[jt]sx?$/.test(path)) continue;
+  const source = read(path);
+  if (/(?:from|import\()\s*["'](?:@anyfile\/agent|@anyfile\/[^"']+\/extract|[^"']*viewer\/agent|linkedom)/.test(source)) {
+    fail(`${path}: Web host (src/) must not import @anyfile/agent, plugin ./extract, or Node-only XML libraries`);
+  }
+}
+if (existsSync("viewer/agent/src")) {
+  for (const path of walk("viewer/agent/src")) {
+    if (!/\.[cm]?[jt]sx?$/.test(path)) continue;
+    const source = read(path);
+    if (/(?:from|import\()\s*["'](?:next(?:\/|$)|@\/|(?:\.\.\/)+src\/)/.test(source)) {
+      fail(`${path}: Agent host (viewer/agent/) must not import Next.js or Web host (src/)`);
     }
   }
 }

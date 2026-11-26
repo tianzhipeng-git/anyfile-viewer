@@ -14,14 +14,16 @@ const R2_BUNDLES: duckdb.DuckDBBundles = {
   },
 };
 
+const LOCAL_ASSET_ROOT = "/vendor/duckdb/1.32.0";
+
 const LOCAL_BUNDLES: duckdb.DuckDBBundles = {
   mvp: {
-    mainModule: new URL("@duckdb/duckdb-wasm/dist/duckdb-mvp.wasm", import.meta.url).toString(),
-    mainWorker: new URL("@duckdb/duckdb-wasm/dist/duckdb-browser-mvp.worker.js", import.meta.url).toString(),
+    mainModule: `${LOCAL_ASSET_ROOT}/duckdb-mvp.wasm`,
+    mainWorker: `${LOCAL_ASSET_ROOT}/duckdb-browser-mvp.worker.js`,
   },
   eh: {
-    mainModule: new URL("@duckdb/duckdb-wasm/dist/duckdb-eh.wasm", import.meta.url).toString(),
-    mainWorker: new URL("@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js", import.meta.url).toString(),
+    mainModule: `${LOCAL_ASSET_ROOT}/duckdb-eh.wasm`,
+    mainWorker: `${LOCAL_ASSET_ROOT}/duckdb-browser-eh.worker.js`,
   },
 };
 

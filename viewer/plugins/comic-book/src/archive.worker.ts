@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import { comicArchiveKind } from "./signature";
 import { safeBookPath } from "@anyfile/archive-metadata-viewer/zip-catalog";
 interface ArchiveModule {
@@ -17,7 +18,7 @@ async function open(file: File, runtime: string) {
   const kind = comicArchiveKind(bytes);
   if (!kind) fail("invalid-file");
   let mod: ArchiveModule;
-  try { mod = await (await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ runtime)).default(); }
+  try { mod = await (await importRuntime<{ default(): Promise<ArchiveModule> }>(runtime)).default(); }
   catch { return fail("unsupported-environment"); }
   const pointer = mod._malloc(bytes.length), buffer = mod._malloc(64 * 1024);
   if (!pointer || !buffer) fail("resource-limit");

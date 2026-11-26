@@ -1,5 +1,6 @@
 /// <reference lib="webworker" />
 
+import { importRuntime } from "@anyfile/runtime-assets";
 import type {
   PostscriptPageInfo,
   PostscriptWorkerRequest,
@@ -65,7 +66,7 @@ workerScope.onmessage = async (event: MessageEvent<PostscriptWorkerRequest>) => 
   const request = event.data;
   try {
     if (request.type === "init") {
-      runtime = await import(/* webpackIgnore: true */ request.runtimeUrl) as StetRuntime;
+      runtime = await importRuntime<StetRuntime>(request.runtimeUrl);
       await runtime.default({ module_or_path: request.wasmUrl });
       interpreter = runtime.create_interpreter();
       post({ type: "ready", id: request.id });

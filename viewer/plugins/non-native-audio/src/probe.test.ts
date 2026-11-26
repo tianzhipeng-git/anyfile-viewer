@@ -40,9 +40,10 @@ describe("non-native audio probe", () => {
   it("rejects native WAVE PCM that belongs to browser-audio", async () => {
     expect(await probeNonNativeAudio(context(browserAudioFixture("wave-s16le.wav")))).toBe(0);
   });
-  it("does not load without required browser capabilities", async () => {
+  it("recognizes audio formats purely from headers without browser globals", async () => {
     vi.stubGlobal("AudioDecoder", undefined);
-    expect(await probeNonNativeAudio(context(fixture("mka-opus.mka")))).toBe(0);
-    expect(await probeNonNativeAudio(context(fixture("wave-alaw.wav")))).toBe(0);
+    vi.stubGlobal("AudioContext", undefined);
+    expect(await probeNonNativeAudio(context(fixture("mka-opus.mka")))).toBe(3);
+    expect(await probeNonNativeAudio(context(fixture("wave-alaw.wav")))).toBe(3);
   });
 });
