@@ -1,10 +1,13 @@
-import { DOMParser as LinkedomDOMParser } from "linkedom";
+import { Window } from "happy-dom";
 
 export type XmlMimeType = "application/xml" | "image/svg+xml" | "text/html";
 
+let parser: DOMParser | undefined;
+
 /**
- * Node/Worker XML/HTML/SVG parser backed by linkedom.
- * Falls back to native DOMParser if present (e.g. happy-dom test environments).
+ * Node XML/HTML/SVG parser. happy-dom is the same DOM every plugin test already runs against,
+ * so namespaces, `parsererror` documents, `.children` and selectors match what the Web path sees.
+ * Uses the global `DOMParser` when one exists (e.g. a happy-dom test environment).
  */
 export function parseXmlDocument(
   source: string,
@@ -13,6 +16,13 @@ export function parseXmlDocument(
   if (typeof globalThis.DOMParser === "function") {
     return new globalThis.DOMParser().parseFromString(source, mimeType);
   }
-  const linkedomMime = mimeType === "application/xml" ? "text/xml" : mimeType;
-  return new LinkedomDOMParser().parseFromString(source, linkedomMime) as unknown as Document;
+  parser ??= new new Window({
+    settings: {
+      disableJavaScriptEvaluation: true,
+      disableJavaScriptFileLoading: true,
+      disableCSSFileLoading: true,
+      disableIframePageLoading: true,
+    },
+  }).DOMParser() as unknown as DOMParser;
+  return parser.parseFromString(source, mimeType);
 }

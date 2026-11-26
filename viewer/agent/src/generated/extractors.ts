@@ -5,6 +5,7 @@ export const extractorLoaders: Readonly<Record<string, () => Promise<StructuredE
   "apple-plist": async () => (await import("@anyfile/plist-viewer/extract")).default,
   "outlook-pst": async () => (await import("@anyfile/pst-viewer/extract")).default,
   "sqlite-database": async () => (await import("@anyfile/sqlite-viewer/extract")).default,
+  "statistical-data": async () => (await import("@anyfile/stat-data-viewer/extract")).default,
 };
 
 export function hasExtractor(pluginId: string): boolean {

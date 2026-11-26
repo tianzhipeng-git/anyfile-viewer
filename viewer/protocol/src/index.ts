@@ -27,6 +27,15 @@ export {
   DEFAULT_READ_MAX_BYTES,
   HARD_READ_MAX_BYTES,
 } from "./agent";
+export {
+  escapeMarkdownCell,
+  paginateLines,
+  paginateText,
+  parsePositionCursor,
+  renderMarkdownTablePage,
+  truncateUtf8,
+  type MarkdownTablePageOptions,
+} from "./agent-format";
 
 export type {
   AgentCapability,
@@ -44,6 +53,7 @@ export type {
   RgbaImage,
   StructuredExtractor,
   TargetEntry,
+  VendorAssets,
 } from "./agent";
 
 export const VIEWER_PROTOCOL_VERSION = 2 as const;
@@ -131,7 +141,10 @@ export interface ProbeViewerContext {
 
 export interface ViewerRegistryEntry {
   readonly manifest: ViewerPluginManifest;
+  /** Pure byte probe shared by Web and Agent hosts; must not touch browser-only globals. */
   probe?(context: ProbeViewerContext): Promise<ViewerSupportLevel>;
+  /** Web-host override of `probe` that may also check browser capabilities (WebCodecs, Web Audio…). */
+  browserProbe?(context: ProbeViewerContext): Promise<ViewerSupportLevel>;
 }
 
 export interface ViewerPluginRegistration extends ViewerRegistryEntry {
@@ -143,6 +156,8 @@ export interface ResolvedViewerRegistration<
 > {
   readonly registration: T;
   readonly supportLevel: Exclude<ViewerSupportLevel, 0>;
+  /** Set when the candidate was found by probing file bytes rather than its name. */
+  readonly matchedBy?: "magic";
 }
 
 export type ViewerErrorCode =
@@ -299,40 +314,50 @@ function isViewerSupportLevel(value: unknown): value is ViewerSupportLevel {
   return typeof value === "number" && Number.isInteger(value) && value >= 0 && value <= 5;
 }
 
-export async function resolveViewerRegistrations<T extends ViewerRegistryEntry>(
-  file: File,
-  registrations: readonly T[],
-  options: {
-    readonly signal: AbortSignal;
-    readonly workspace?: WorkspaceReader;
-  },
-): Promise<ResolvedViewerRegistration<T>[]> {
-  const { signal, workspace } = options;
-  if (signal.aborted) throw new DOMException("The operation was aborted.", "AbortError");
+/** Catch-all viewers (`*` only, no file names) such as the hex viewer. */
+function isCatchAll({ manifest }: ViewerRegistryEntry): boolean {
+  return manifest.formats.every((format) => format.extensions.every((ext) => ext === "*") && !format.fileNames?.length);
+}
 
-  const candidates = findViewerRegistrations(file.name, registrations)
-    .filter(({ manifest }) => manifest.workspaceAccess !== "required" || Boolean(workspace));
+/** Wraps `file` so a probe only counts as byte evidence if it actually touched the bytes. */
+function trackReads(file: File): { readonly file: File; readonly read: () => boolean } {
+  let touched = false;
+  const reads = new Set<PropertyKey>(["slice", "arrayBuffer", "bytes", "text", "stream"]);
+  const tracked = new Proxy(file, {
+    get(target, property) {
+      const value = Reflect.get(target, property, target);
+      if (typeof value !== "function") return value;
+      return (...args: unknown[]) => {
+        if (reads.has(property)) touched = true;
+        return (value as (...a: unknown[]) => unknown).apply(target, args);
+      };
+    },
+  });
+  return { file: tracked, read: () => touched };
+}
+
+async function probeCandidates<T extends ViewerRegistryEntry>(
+  file: File,
+  candidates: readonly T[],
+  signal: AbortSignal,
+  requireBytes: boolean,
+): Promise<ResolvedViewerRegistration<T>[]> {
   const resolved = await Promise.all(candidates.map(async (registration, registrationIndex) => {
     let supportLevel: ViewerSupportLevel = 1;
-
     if (registration.probe) {
+      const tracked = requireBytes ? trackReads(file) : undefined;
       try {
-        const result = await registration.probe({ file, signal });
-        if (signal.aborted) throw new DOMException("The operation was aborted.", "AbortError");
-        supportLevel = isViewerSupportLevel(result) ? result : 0;
+        const result = await registration.probe({ file: tracked?.file ?? file, signal });
+        if (signal.aborted) throw abortError();
+        supportLevel = isViewerSupportLevel(result) && (!tracked || tracked.read()) ? result : 0;
       } catch (error: unknown) {
-        if (signal.aborted || isViewerAbortError(error)) {
-          throw new DOMException("The operation was aborted.", "AbortError");
-        }
+        if (signal.aborted || isViewerAbortError(error)) throw abortError();
         supportLevel = 0;
       }
     }
-
     return { registration, registrationIndex, supportLevel };
   }));
-
-  if (signal.aborted) throw new DOMException("The operation was aborted.", "AbortError");
-
+  if (signal.aborted) throw abortError();
   return resolved
     .filter((candidate): candidate is typeof candidate & { supportLevel: Exclude<ViewerSupportLevel, 0> } => (
       candidate.supportLevel > 0
@@ -341,6 +366,36 @@ export async function resolveViewerRegistrations<T extends ViewerRegistryEntry>(
       right.supportLevel - left.supportLevel || left.registrationIndex - right.registrationIndex
     ))
     .map(({ registration, supportLevel }) => ({ registration, supportLevel }));
+}
+
+/**
+ * Probes the registrations matching `file`'s name, best first. With `magicFallback`, a file whose
+ * name matches nothing but catch-alls (missing or wrong extension) is also probed by every other
+ * probe-capable registration; those hits come first and carry `matchedBy: "magic"`.
+ */
+export async function resolveViewerRegistrations<T extends ViewerRegistryEntry>(
+  file: File,
+  registrations: readonly T[],
+  options: {
+    readonly signal: AbortSignal;
+    readonly workspace?: WorkspaceReader;
+    readonly magicFallback?: boolean;
+  },
+): Promise<ResolvedViewerRegistration<T>[]> {
+  const { signal, workspace } = options;
+  if (signal.aborted) throw abortError();
+  const usable = (registration: T) => registration.manifest.workspaceAccess !== "required" || Boolean(workspace);
+
+  const candidates = findViewerRegistrations(file.name, registrations).filter(usable);
+  const resolved = await probeCandidates(file, candidates, signal, false);
+  if (!options.magicFallback || resolved.some(({ registration }) => !isCatchAll(registration))) return resolved;
+
+  const tried = new Set<T>(candidates);
+  const others = registrations.filter((registration) => (
+    registration.probe && !tried.has(registration) && !isCatchAll(registration) && usable(registration)
+  ));
+  const magic = await probeCandidates(file, others, signal, true);
+  return [...magic.map((candidate) => ({ ...candidate, matchedBy: "magic" as const })), ...resolved];
 }
 
 export function validateLoadedPlugin(

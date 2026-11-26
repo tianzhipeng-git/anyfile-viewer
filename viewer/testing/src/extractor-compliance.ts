@@ -26,8 +26,11 @@ export interface ExtractorComplianceFixture {
   readonly targetId?: string;
   /** Optional maxBytes for testing truncation / pagination (defaults to 256). */
   readonly smallMaxBytes?: number;
+  /** Optional keyword for a filtered pagination walk over the target. */
+  readonly filter?: string;
 }
 
+const MAX_WALK_PAGES = 500;
 const VALID_ERROR_CODES = new Set<string>(AGENT_ERROR_CODES);
 const VALID_CONTENT_TYPES = new Set(["markdown", "json", "text"]);
 const utf8Length = (value: string) => new TextEncoder().encode(value).byteLength;
@@ -75,7 +78,8 @@ async function createContextFromFixture(
   }
   const source = createBufferBinarySource(bytes, fixture.name, filePath);
   const file = new File([new Uint8Array(bytes)], fixture.name);
-  return { source, file, signal };
+  const { createNodeVendorAssets } = await import("@anyfile/runtime-assets/node");
+  return { source, file, signal, vendor: createNodeVendorAssets() };
 }
 
 function assert(condition: unknown, message: string): asserts condition {
@@ -178,24 +182,21 @@ export async function assertExtractorCompliance(
         });
         assertReadResult(targeted, DEFAULT_READ_MAX_BYTES, `[${fixture.name}] target read (${targetId})`);
 
-        // 4. maxBytes trimming + cursor pagination
+        // 4. maxBytes trimming + full cursor walk (with and without filter) must terminate without repeats
         const smallBudget = fixture.smallMaxBytes ?? 256;
-        const page1 = await extractor.read(context, {
-          target: targetId,
-          maxBytes: smallBudget,
-        });
-        assertReadResult(page1, smallBudget, `[${fixture.name}] small maxBytes read`);
-        if (page1.nextCursor) {
-          const page2 = await extractor.read(context, {
-            target: targetId,
-            cursor: page1.nextCursor,
-            maxBytes: smallBudget,
-          });
-          assertReadResult(page2, smallBudget, `[${fixture.name}] cursor page 2`);
-          assert(
-            page2.nextCursor !== page1.nextCursor,
-            `[${fixture.name}] pagination cursor did not advance.`,
-          );
+        for (const filter of fixture.filter ? [undefined, fixture.filter] : [undefined]) {
+          const seenCursors = new Set<string>();
+          let cursor: string | undefined;
+          for (let page = 0; ; page += 1) {
+            assert(page < MAX_WALK_PAGES, `[${fixture.name}] pagination of ${targetId} did not finish in ${MAX_WALK_PAGES} pages.`);
+            const result = await extractor.read(context, { target: targetId, cursor, filter, maxBytes: smallBudget });
+            assertReadResult(result, smallBudget, `[${fixture.name}] ${filter ? `filter "${filter}" ` : ""}page ${page + 1}`);
+            if (filter) assert(result.filterApplied === true, `[${fixture.name}] filtered read must set filterApplied.`);
+            if (!result.nextCursor) break;
+            assert(!seenCursors.has(result.nextCursor), `[${fixture.name}] cursor "${result.nextCursor}" repeated.`);
+            seenCursors.add(result.nextCursor);
+            cursor = result.nextCursor;
+          }
         }
       }
 

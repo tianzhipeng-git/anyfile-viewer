@@ -159,6 +159,24 @@ describe("viewer protocol", () => {
     await expect(resolution).rejects.toMatchObject({ name: "AbortError" });
   });
 
+  it("falls back to byte probes for files whose name matches only catch-alls", async () => {
+    const sniffs: ViewerPluginRegistration = {
+      ...registration("sniffs", [".db"]),
+      async probe({ file }) { return new Uint8Array(await file.slice(0, 2).arrayBuffer())[0] === 0x53 ? 3 : 0; },
+    };
+    const guesses: ViewerPluginRegistration = { ...registration("guesses", [".x"]), async probe() { return 4; } };
+    const resolve = (name: string, magicFallback?: boolean) => resolveViewerRegistrations(
+      new File(["SQ"], name),
+      [sniffs, guesses, registration("catch-all", ["*"])],
+      { signal: new AbortController().signal, magicFallback },
+    );
+
+    expect((await resolve("blob")).map(({ registration: { manifest } }) => manifest.id)).toEqual(["catch-all"]);
+    expect((await resolve("blob", true)).map(({ registration: { manifest }, matchedBy }) => [manifest.id, matchedBy]))
+      .toEqual([["sniffs", "magic"], ["catch-all", undefined]]);
+    expect((await resolve("data.db", true)).map(({ matchedBy }) => matchedBy)).toEqual([undefined, undefined]);
+  });
+
   it("rejects a loaded plugin whose identity differs from its registration", () => {
     const registered = registration("registered", [".pdf"]);
     const loaded: FileViewerPlugin = {

@@ -77,7 +77,8 @@ export const viewerRegistrations: readonly ViewerPluginRegistration[] = viewerRe
   if (!load) {
     throw new Error(`Missing browser viewer loader for registered plugin "${entry.manifest.id}".`);
   }
-  return { ...entry, load };
+  const { browserProbe, probe, manifest } = entry;
+  return { manifest, probe: browserProbe ?? probe, load };
 });
 
 validateRegistrations(viewerRegistrations);

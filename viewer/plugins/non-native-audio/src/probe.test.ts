@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { probeNonNativeAudioInBrowser } from "./browser-probe";
 import { probeNonNativeAudio } from "./probe";
 
 function fixture(name: string) {
@@ -45,5 +46,10 @@ describe("non-native audio probe", () => {
     vi.stubGlobal("AudioContext", undefined);
     expect(await probeNonNativeAudio(context(fixture("mka-opus.mka")))).toBe(3);
     expect(await probeNonNativeAudio(context(fixture("wave-alaw.wav")))).toBe(3);
+  });
+  it("browser probe declines without WebCodecs audio", async () => {
+    expect(await probeNonNativeAudioInBrowser(context(fixture("mka-opus.mka")))).toBe(3);
+    vi.stubGlobal("AudioDecoder", undefined);
+    expect(await probeNonNativeAudioInBrowser(context(fixture("mka-opus.mka")))).toBe(0);
   });
 });

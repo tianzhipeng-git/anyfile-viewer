@@ -15,6 +15,8 @@ describe("sqlite ./extract compliance", () => {
         invalidBytes: new TextEncoder().encode("not a sqlite database"),
         sampleQuery: "SELECT id, name, role FROM users ORDER BY id",
         writeQuery: "DELETE FROM users",
+        targetId: "table:users",
+        filter: "a",
         smallMaxBytes: 160,
       },
     ]);

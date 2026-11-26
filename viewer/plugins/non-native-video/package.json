@@ -7,6 +7,7 @@
     ".": "./src/index.ts",
     "./container-inspection": "./src/container-inspection.ts",
     "./manifest": "./src/manifest.ts",
+    "./browser-probe": "./src/browser-probe.ts",
     "./probe": "./src/probe.ts"
   },
   "dependencies": {

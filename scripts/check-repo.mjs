@@ -102,7 +102,7 @@ for (const name of pluginDirectories) {
   else seenManifestIds.set(manifestId, name);
   if (pkg.exports?.["./manifest"] !== "./src/manifest.ts") fail(`${where}: package.json must export ./manifest from ./src/manifest.ts`);
   if (rootDependencies[pkg.name] !== "workspace:*") fail(`${where}: root package.json must depend on ${pkg.name}`);
-  if (!registrations.includes(`"${pkg.name}"`) && !registrations.includes(`"${pkg.name}/manifest"`)) fail(`${where}: not registered in src/lib/viewer-registrations.ts or src/lib/registrations/`);
+  if (!registrations.includes(`"${pkg.name}"`) && !registrations.includes(`"${pkg.name}/manifest"`)) fail(`${where}: no browser loader in src/lib/viewer-registrations.ts`);
   if (!registrySource.includes(`"${pkg.name}/manifest"`)) fail(`${where}: not registered in @anyfile/viewer-registry (viewer/registry/src/)`);
   if (pkg.exports?.["./probe"] && !registrySource.includes(`"${pkg.name}/probe"`)) fail(`${where}: probe not registered in @anyfile/viewer-registry`);
   if (contentManifests.includes(`"${pkg.name}/manifest"`) === UNPUBLISHED_PLUGINS.has(name)) fail(`${where}: add it to src/content/manifests.ts (site pages) or UNPUBLISHED_PLUGINS`);
@@ -180,8 +180,8 @@ for (const path of walk("viewer/rendering-publication/src")) {
 for (const path of walk("src")) {
   if (!/\.[cm]?[jt]sx?$/.test(path)) continue;
   const source = read(path);
-  if (/(?:from|import\()\s*["'](?:@anyfile\/agent|@anyfile\/[^"']+\/extract|[^"']*viewer\/agent|linkedom)/.test(source)) {
-    fail(`${path}: Web host (src/) must not import @anyfile/agent, plugin ./extract, or Node-only XML libraries`);
+  if (/(?:from|import\()\s*["'](?:@anyfile\/agent|@anyfile\/[^"']+\/extract|[^"']*viewer\/agent|@anyfile\/runtime-assets\/node)/.test(source)) {
+    fail(`${path}: Web host (src/) must not import @anyfile/agent, plugin ./extract, or Node-only runtime helpers`);
   }
 }
 if (existsSync("viewer/agent/src")) {

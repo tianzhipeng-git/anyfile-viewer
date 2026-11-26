@@ -59,7 +59,7 @@ pnpm check && pnpm build
    - 校验可选 `query` 只读保护（拒绝写语句）与 `renderImage` 尺寸边界；
    - 校验 `AbortSignal` 取消、标准 `AgentErrorCode` 映射与执行期间零网络请求。
 2. 在 `scripts/check-repo.mjs` 新增规则：凡在 `package.json` 导出 `./extract` 的插件，必须存在 `// @vitest-environment node` 测试文件并接入真实 `examples/` 样例。
-3. 为 3 个黄金样板（`plist`、`sqlite`、`pst` 或 `scientific-data`）编写 Node 合规测试，以及 `@anyfile/agent` 的 CLI 子进程 + MCP stdio 端到端测试。
+3. 为黄金样板（`plist`、`sqlite`、`pst`、`stat-data`）编写 Node 合规测试，以及 `@anyfile/agent` 的 CLI 子进程 + MCP stdio 端到端测试。
 
 ### Step B — 实现至全绿
 
@@ -73,7 +73,8 @@ pnpm check && pnpm build
 - 实现 3 个黄金样板插件的 `./extract`：
   - `plist`（纯 JS 结构化提取样板）；
   - `sqlite`（Node 24 `node:sqlite` 只读 + `query_file` 样板）；
-  - `pst` 或 `scientific-data`（大文件随机读 / WASM 样板）。
+  - `pst`（大文件随机读，纯 JS）；
+  - `stat-data`（WASM 样板：`context.vendor` 取 `/vendor/` 资产 + `BinarySource.readSync` 随机读）。
 
 ### 验收门禁
 ```bash
@@ -123,7 +124,7 @@ pnpm check && pnpm test viewer/agent
 
 | 桶 | 插件范围 | 重点能力 | 参照样板 |
 |---|---|---|---|
-| **桶 1（高价值专有数据与归档）** | `pst`、`scientific-data`、`stat-data`、`duckdb`、`iwork`、`ofd`、`xps`、`mpp`、`visio`、`ml-weights`、`archive`、`calendar-contacts`、`certificate`、`har`、`torrent` | `./extract`（`inspect`/`read`，`duckdb` 含 `query`） | `plist` / `sqlite` / `pst` |
+| **桶 1（高价值专有数据与归档）** | `scientific-data`、`duckdb`、`iwork`、`ofd`、`xps`、`mpp`、`visio`、`ml-weights`、`archive`、`calendar-contacts`、`certificate`、`har`、`torrent` | `./extract`（`inspect`/`read`，`duckdb` 含 `query`） | `plist` / `sqlite` / `pst` / `stat-data` |
 | **桶 2（电子书与 XML 结构化）** | `epub`、`fictionbook`、`chm`、`comic-book`、`mind-map`、`svg` | `./extract`（复用共享 XML 接口） | `plist` |
 | **桶 3（纯像素解码出图）** | `dicom`、`camera-raw`、`modern-raster`、`general-raster`、`pixelmator-pxd` | `./extract`（含 `renderImage` + 元数据） | `hdr-image` / `photoshop` |
 | **桶 4（重型文档/CAD/3D 视觉增强）** | `pdf`、`djvu`、`mobi`、`cad-dwg`、`cad-exchange`、`ifc`、`mesh-3d`、`print-3d`、`point-cloud`、`postscript`、`word`、`powerpoint`、`legacy-office` | `ViewerController.captureImage()`（其中 `pdf`/`djvu`/`mobi`/`cad-dwg`/`ifc` 按需补轻量 `./extract` 元数据/文本） | `ofd` / `cad-2d` |

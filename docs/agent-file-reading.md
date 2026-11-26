@@ -24,7 +24,7 @@
             │        @anyfile/agent（单一 npm 包）      │
             │ • realpath 权限校验、BinarySource 适配   │
             │ • 共享路由注册表 + Magic Bytes 兜底探测   │
-            │ • worker_threads 执行池与会话内存 LRU     │
+            │ • worker_threads 执行池（路由与提取均在内）│
             │ • 响应预算裁剪、不透明游标与错误码映射    │
             │ • /vendor/ 资产按需拉取与 SHA-256 校验    │
             └──────────┬───────────────────┬───────────┘
@@ -103,6 +103,7 @@ interface QueryParams {
 }
 
 type AgentErrorCode =
+  | "invalid-argument"        // 调用参数错误（缺路径、缺 SQL、SQL 语法错误、未知命令）
   | "invalid-file"            // 文件损坏或并非该格式
   | "encrypted-file"          // 受密码或加密保护，无法无交互读取
   | "missing-related-file"    // 缺少必需的关联工作区文件
@@ -122,6 +123,7 @@ interface AgentFileError {
 
 输出与安全约束：
 - 定位键语法由各插件私有定义，Agent 只从 `targets` 复制 `id`，不自行拼接；翻页只传递不透明 `cursor`。
+- 分页统一用 `@anyfile/viewer-protocol` 的 `renderMarkdownTablePage` / `paginateLines` / `paginateText`：表格 cursor 计数源行（被 `filter` 滤掉的行同样推进游标），超出预算的单行会被截断而不是卡住；合规套件会把整条 cursor 链走完，校验能终止且不重复。
 - 原始二进制字段统一折叠为 `<binary N bytes>`；大数组、长字符串先由插件按 `maxBytes` 预裁剪，再由 `agent-core` 做兜底字节与行数硬裁剪。
 - 默认预算：`inspect` ≤ 8 KiB；`read` / `query` 默认 48 KiB，支持参数调整，硬上限 256 KiB。CLI 指定 `--out <file>` 时将完整分块直接写入目标文件，终端仅打印摘要元数据。
 - `query_file` 强制只读：SQLite 以只读模式打开并拒绝写语句与扩展加载；DuckDB 以 `READ_ONLY` 打开并禁用外部文件/网络访问。
@@ -138,8 +140,8 @@ interface AgentFileError {
 ### 3.1 共享路由注册表与 Magic Bytes 兜底
 
 1. **下沉共享注册表（`@anyfile/viewer-registry`）**：将插件路由优先级顺序、`manifest` 与动态 `./probe` 引用从 `src/lib/registrations/` 抽离至独立共享包 `@anyfile/viewer-registry`（不含浏览器 `load()`）。Web 宿主在此基础上绑定浏览器 `load()`，Agent 宿主绑定 `./extract` 与渲染器，消除双宿主间的平行注册表。
-2. **Probe 纯净化**：所有插件的 `probe.ts` 仅做基于文件头/目录结构的格式识别与子格式判定，不检测 `VideoDecoder`、`AudioContext`、`Worker` 等浏览器专属全局对象。
-3. **无后缀与错后缀兜底**：Agent 路由先按文件名与扩展名匹配候选并执行 `probe()`；若无扩展名匹配或全部候选返回 `0`（常见于解包产物、`.bin`/`.dat`、Git blob、临时文件），自动对具备明确魔数签名的插件执行一轮 fallback `probe`，命中时在 `InspectResult.matchedBy` 中标记 `"magic"`。
+2. **Probe 纯净化**：所有插件的 `probe.ts` 仅做基于文件头/目录结构的格式识别与子格式判定，不检测 `VideoDecoder`、`AudioContext`、`Worker` 等浏览器专属全局对象。需要按浏览器能力让路的插件（如 `non-native-video/audio` 缺 WebCodecs 时让给 FFmpeg）额外导出 `./browser-probe`，在注册表条目上挂为 `browserProbe`；Web 宿主优先使用它，Agent 宿主只用 `probe`。
+3. **无后缀与错后缀兜底**：双端共用 `resolveViewerRegistrations()`；Agent 传 `magicFallback: true`。若文件名只匹配到兜底查看器（如 hex），再对其余带 `probe` 的插件探测一轮，且只认真正读取了字节的 probe，命中项排在前面并标记 `matchedBy: "magic"`（常见于解包产物、`.bin`/`.dat`、Git blob、临时文件）。
 
 ### 3.2 双端统一 I/O 与环境适配接口
 
@@ -171,7 +173,7 @@ export interface BinarySource {
 
 #### 统一 XML 解析与运行时动态导入
 
-- **XML 解析接口**：共享包通过 `package.json` 的 `"browser"` / `"node"` 条件导出提供统一只读 XML DOM 接口；浏览器侧封装原生 `DOMParser`，Node 侧封装锁定精确版本的纯 JS XML 解析库。插件解析层只依赖该接口，不直接访问全局 `DOMParser`。
+- **XML 解析接口**：共享包通过 `package.json` 的 `"browser"` / `"node"` 条件导出提供统一只读 XML DOM 接口；浏览器侧封装原生 `DOMParser`，Node 侧使用 happy-dom（与仓库测试环境同一实现、锁定精确版本），保证命名空间、`parsererror`、`.children` 与选择器行为一致。已知缺口：带前缀元素的 `getElementsByTagNameNS` 不可靠，应改按 `localName` + `namespaceURI` 遍历。插件解析层只依赖该接口，不直接访问全局 `DOMParser`。
 - **运行时加载辅助 `importRuntime(url)`**：在 `@anyfile/runtime-assets` 中统一封装动态 URL `import()`（集中处理 `webpackIgnore`、`turbopackIgnore` 与 `@vite-ignore`），插件源码内不再手写任何打包器专用注释。
 
 ### 3.3 插件四层入口与 `./extract` 契约
@@ -198,7 +200,8 @@ export interface StructuredExtractor {
 export interface ExtractContext {
   readonly source: BinarySource;
   readonly file: File;
-  readonly workspace?: WorkspaceReader;   // 与 OpenViewerContext 同一接口，按 workspaceAccess 提供
+  readonly vendor: VendorAssets;          // 按 `<pkg>/<version>/<file>` 取 /vendor/ 资产：url()（可 importRuntime）与 bytes()
+  readonly workspace?: WorkspaceReader;   // 与 OpenViewerContext 同一接口；主文件目录在允许根内时提供
   readonly relativePath?: string;
   readonly signal: AbortSignal;
 }
@@ -235,14 +238,14 @@ export interface ViewerController {
 
 ### 4.1 文件、工作区与资产加载
 
-- **文件与工作区**：主线程完成目标文件及关联目录的 `realpath` 校验后，在 worker 内基于只读文件描述符构造 `BinarySource` 与惰性 `DiskFile`（`slice()` 仅记录偏移区间，读取后显式释放句柄，确保跨平台无 fd 泄漏）。`WorkspaceReader` 以主文件所在目录为根，严格拦截路径穿越与越界符号链接，按插件 `workspaceAccess` 注入。
-- **Node 侧 `/vendor/` 资产加载**：`@anyfile/runtime-assets` 在 Node 环境下将资产源解析为本地缓存目录 `~/.cache/anyfile/vendor/<pkg>/<version>/`，经 SHA-256 校验后以本地字节加载 `.wasm` 及数据文件，不发起任何网络 `fetch`。
+- **文件与工作区**：主线程只做 `realpath` 白名单校验；路由（probe）与提取都在 worker 内执行，受同一内存上限与超时约束。worker 内用 `fs.openAsBlob()` 构造真正的惰性 `File`，并为每次请求打开只读 fd 构造 `BinarySource`，用完即关。`WorkspaceReader` 以主文件所在目录为根，且仅在该目录本身位于允许根内时提供，严格拦截路径穿越与越界符号链接。
+- **Node 侧 `/vendor/` 资产加载**：`@anyfile/runtime-assets/node` 的 `createNodeVendorAssets()` 依次在本地缓存 `~/.cache/anyfile/vendor/`（`ANYFILE_CACHE_DIR` 可覆盖）以及仓库内的 `public/vendor/`、`third_party/`（目录结构相同，仅开发态存在）中查找；清单中登记的资产先做 SHA-256 校验，全程不发起网络请求。插件 `./extract` 统一通过 `context.vendor` 取资产，`stat-data`（ReadStat）是 WASM 样板。
 
-### 4.2 Worker 执行池与内存会话缓存
+### 4.2 Worker 执行池
 
 所有 `./extract` 调用在受控 `worker_threads` 中执行，配置 `resourceLimits`（堆内存上限）与单次调用墙钟超时（`inspect`/`read`/`query` 默认 10s，`renderImage` 默认 20s）；超时直接 `worker.terminate()` 并返回 `timeout` 错误码，`AbortSignal` 仅作协作式提前取消。
 
-- **MCP 常驻模式**：维护小型插件 Worker 池，Worker 内部以 `(realpath, size, mtimeMs, pluginId)` 为键维护有界内存 LRU，缓存已实例化的 WASM 模块与已打开的只读解析会话/派生目录索引（如 PST 文件夹树、归档中央目录、HDF5 句柄、SQLite/DuckDB 只读连接）。Agent 连续调用 `inspect` → `read`（含 `cursor` 翻页）→ `query` 时直接命中热会话，空闲超时后自动回收关闭。
+- **MCP 常驻模式**：Worker 常驻复用（空闲超时回收），已加载的 extractor 模块与 WASM 实例（如 ReadStat）留在 Worker 内。每次请求重新打开文件，不缓存解析会话；需要缓存时，应由 extractor 在 Worker 内自行维护以 `(realpath, size, mtimeMs)` 为键的状态。超时只会杀掉对应的 Worker，不影响随后在新 Worker 上发起的请求。
 - **CLI 单次模式**：单次命令执行完毕即退出释放，不向磁盘写入任何文件索引缓存，彻底避免文件名、表名、邮件目录等敏感元数据落盘残留。
 
 ---

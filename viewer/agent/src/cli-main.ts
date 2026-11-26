@@ -55,7 +55,6 @@ function printUsage(): void {
       "  inspect <path>                                        Identify format, capabilities, and targets",
       "  read <path> [--target t] [--cursor c] [--filter kw] [--max-bytes n] [--out file]",
       "  query <path> --sql <sql> [--target t] [--cursor c] [--max-bytes n] [--out file]",
-      "  render <path> [--target t] [--max-dim px] [--out file]",
       "  cache <list|clear>                                    Inspect or clear local /vendor/ asset cache",
       "  mcp [--allow-dir <dir>...]                            Start MCP stdio server",
       "",
@@ -91,13 +90,13 @@ export async function runCli(argv: readonly string[]): Promise<number> {
       process.stdout.write(`${JSON.stringify(info, null, 2)}\n`);
       return 0;
     }
-    process.stderr.write(`${JSON.stringify(toAgentFileError(new AgentError("unsupported-capability", `Unsupported cache subcommand: ${sub}`)))}\n`);
+    process.stderr.write(`${JSON.stringify(toAgentFileError(new AgentError("invalid-argument", `Unsupported cache subcommand: ${sub}`)))}\n`);
     return 1;
   }
 
   const targetPath = positionals[0];
   if (!targetPath) {
-    process.stderr.write(`${JSON.stringify(toAgentFileError(new AgentError("access-denied", "Missing file path argument.")))}\n`);
+    process.stderr.write(`${JSON.stringify(toAgentFileError(new AgentError("invalid-argument", "Missing file path argument.")))}\n`);
     return 1;
   }
 
@@ -147,7 +146,7 @@ export async function runCli(argv: readonly string[]): Promise<number> {
     if (command === "query") {
       const sql = getFlag(flags, "sql");
       if (!sql) {
-        throw new AgentError("invalid-file", "Missing required --sql option.");
+        throw new AgentError("invalid-argument", "Missing required --sql option.");
       }
       const maxBytesRaw = getFlag(flags, "max-bytes");
       const maxBytes = maxBytesRaw ? Number(maxBytesRaw) : undefined;
@@ -178,12 +177,7 @@ export async function runCli(argv: readonly string[]): Promise<number> {
       return 0;
     }
 
-    if (command === "render") {
-      await service.renderFile(targetPath);
-      return 0;
-    }
-
-    throw new AgentError("unsupported-capability", `Unknown command: ${command}`);
+    throw new AgentError("invalid-argument", `Unknown command: ${command}`);
   } catch (error) {
     process.stderr.write(`${JSON.stringify(toAgentFileError(error))}\n`);
     return 1;

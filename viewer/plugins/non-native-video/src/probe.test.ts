@@ -3,6 +3,7 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PROBE_TOTAL_BYTES } from "./probe-limits";
+import { probeNonNativeVideoInBrowser } from "./browser-probe";
 import { probeNonNativeVideo } from "./probe";
 
 function fixture(name: string) {
@@ -193,5 +194,26 @@ describe("non-native video Ogg Theora probe", () => {
     vi.stubGlobal("Worker", undefined);
     expect(await probeNonNativeVideo(context(fixture("ogv-theora-video-only.ogg")))).toBe(3);
     expect(await probeNonNativeVideo(context(fixture("ogv-theora-vorbis.ogv")))).toBe(3);
+  });
+});
+
+describe("non-native video browser probe", () => {
+  it("requires WebCodecs video, plus audio APIs only when the file has an audio track", async () => {
+    vi.stubGlobal("AudioDecoder", undefined);
+    expect(await probeNonNativeVideoInBrowser(context(fixture("mkv-avc-video-only.mkv")))).toBe(3);
+    expect(await probeNonNativeVideoInBrowser(context(fixture("ts-avc-aac.ts.fixture")))).toBe(0);
+    expect(await probeNonNativeVideoInBrowser(context(fixture("mov-avc-pcm.mov")))).toBe(0);
+    vi.stubGlobal("VideoDecoder", undefined);
+    expect(await probeNonNativeVideoInBrowser(context(fixture("mkv-avc-video-only.mkv")))).toBe(0);
+  });
+
+  it("decodes Ogg Theora in software but still needs Web Audio for an audio stream", async () => {
+    vi.stubGlobal("Worker", class Worker {});
+    vi.stubGlobal("VideoDecoder", undefined);
+    vi.stubGlobal("AudioDecoder", undefined);
+    expect(await probeNonNativeVideoInBrowser(context(fixture("ogv-theora-vorbis.ogv")))).toBe(3);
+    vi.stubGlobal("AudioContext", undefined);
+    expect(await probeNonNativeVideoInBrowser(context(fixture("ogv-theora-video-only.ogg")))).toBe(3);
+    expect(await probeNonNativeVideoInBrowser(context(fixture("ogv-theora-vorbis.ogv")))).toBe(0);
   });
 });

@@ -13,6 +13,7 @@ describe("pst ./extract compliance", () => {
         name: "dist-list.pst",
         filePath: resolve(EXAMPLES, "dist-list.pst"),
         invalidBytes: new TextEncoder().encode("not a pst archive"),
+        filter: "e",
         smallMaxBytes: 256,
       },
     ]);

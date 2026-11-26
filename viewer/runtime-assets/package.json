@@ -13,6 +13,7 @@
     }
   },
   "dependencies": {
-    "linkedom": "0.18.13"
+    "@anyfile/viewer-protocol": "workspace:*",
+    "happy-dom": "20.11.6"
   }
 }

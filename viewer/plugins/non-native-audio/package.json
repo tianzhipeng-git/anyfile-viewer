@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.ts",
     "./manifest": "./src/manifest.ts",
+    "./browser-probe": "./src/browser-probe.ts",
     "./probe": "./src/probe.ts"
   },
   "dependencies": {

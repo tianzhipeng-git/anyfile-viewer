@@ -62,7 +62,7 @@ interface FileViewerPlugin {
 }
 ```
 
-宿主静态导入 `/manifest`，注册项在 `probe()` 中动态导入 `/probe`，在 `load()` 中动态导入完整插件。没有 probe 时不加载探测代码。加载后校验插件 Manifest，且 `id`、`protocolVersion` 必须与注册项一致。
+路由顺序、`manifest` 与 `probe()` 登记在双宿主共享的 `@anyfile/viewer-registry`（`viewer/registry/src/groups/*`）；Web 宿主在 `src/lib/viewer-registrations.ts` 中按 manifest `id` 绑定 `load()`。注册项在 `probe()` 中动态导入 `/probe`，在 `load()` 中动态导入完整插件；没有 probe 时不加载探测代码。`/probe` 不得访问浏览器专属全局（由 `check:repo` 检查）；需要按浏览器能力让路的插件另导出 `/browser-probe`，登记为 `browserProbe`，只由 Web 宿主使用。加载后校验插件 Manifest，且 `id`、`protocolVersion` 必须与注册项一致。
 
 完整插件只有 `open()` 入口；解析与渲染可以在内部拆分，不另建公共 `process()` / `render()` 协议。
 

@@ -9,7 +9,7 @@ When encountering an unfamiliar, binary, or proprietary local file (such as `.pl
 
 ## Recommended Workflow
 
-1. **Inspect first** to identify the format, capabilities (`read`, `query`, `render`), metadata, and target IDs:
+1. **Inspect first** to identify the format, capabilities (`read`, `query`), metadata, and target IDs:
    ```bash
    anyfile inspect <path>
    ```
@@ -27,8 +27,9 @@ When encountering an unfamiliar, binary, or proprietary local file (such as `.pl
 ## Error Handling
 
 Errors are returned as structured JSON with a stable `code`:
+- `invalid-argument`: Fix the command or parameters (missing path, missing `--sql`, SQL syntax error).
 - `access-denied`: Path does not exist or is outside allowed directories.
 - `invalid-file` / `encrypted-file`: File is corrupted, unsupported, or password-protected.
 - `target-not-found`: Pass a target `id` directly from `anyfile inspect`.
-- `unsupported-capability`: Check `capabilities` from `anyfile inspect` before calling `query` or `render`.
+- `unsupported-capability`: Check `capabilities` from `anyfile inspect` before calling `query`.
 - `timeout` / `resource-limit`: Narrow the target, lower `--max-bytes`, or add a `LIMIT` clause.

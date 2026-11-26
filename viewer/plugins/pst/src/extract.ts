@@ -1,6 +1,9 @@
 import {
   AgentError,
   abortError,
+  paginateText,
+  parsePositionCursor,
+  renderMarkdownTablePage,
   type ExtractContext,
   type InspectPayload,
   type ReadParams,
@@ -11,7 +14,8 @@ import {
 import { PstArchive, type FolderInfo } from "./messaging";
 import { PstError } from "./types";
 
-const encoder = new TextEncoder();
+const PLUGIN_ID = "outlook-pst";
+const FOLDER_PAGE_ROWS = 100;
 
 interface IndexedFolder {
   readonly folder: FolderInfo;
@@ -28,12 +32,12 @@ function mapPstError(error: unknown): never {
         : error.code === "unsupported"
           ? "encrypted-file"
           : "invalid-file";
-    throw new AgentError(code, error.message, { pluginId: "outlook-pst", cause: error });
+    throw new AgentError(code, error.message, { pluginId: PLUGIN_ID, cause: error });
   }
   throw new AgentError(
     "invalid-file",
     error instanceof Error ? error.message : "Failed to parse PST archive.",
-    { pluginId: "outlook-pst", cause: error },
+    { pluginId: PLUGIN_ID, cause: error },
   );
 }
 
@@ -64,10 +68,6 @@ async function collectFolders(archive: PstArchive, signal: AbortSignal): Promise
   return out;
 }
 
-function escapeCell(value: string): string {
-  return value.replaceAll("|", "\\|").replaceAll("\r\n", " ").replaceAll("\n", " ");
-}
-
 function stripHtmlTags(html: string): string {
   return html
     .replace(/<style[\s\S]*?<\/style>/gi, "")
@@ -77,35 +77,6 @@ function stripHtmlTags(html: string): string {
     .replace(/<[^>]+>/g, "")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
-}
-
-function parseOffsetCursor(cursor?: string): number {
-  if (!cursor) return 0;
-  const match = /^offset:(\d+)$/.exec(cursor);
-  if (!match) {
-    throw new AgentError("target-not-found", `Invalid pagination cursor: "${cursor}".`, { pluginId: "outlook-pst" });
-  }
-  return Number(match[1]);
-}
-
-function paginateText(text: string, offset: number, maxBytes: number): ReadResult {
-  const bytes = encoder.encode(text);
-  if (offset < 0 || offset > bytes.byteLength) {
-    throw new AgentError("target-not-found", `Cursor offset ${offset} out of range.`, { pluginId: "outlook-pst" });
-  }
-  const end = Math.min(offset + maxBytes, bytes.byteLength);
-  let cut = end;
-  if (cut < bytes.byteLength) {
-    while (cut > offset && (bytes[cut] & 0xc0) === 0x80) cut -= 1;
-  }
-  const content = new TextDecoder("utf-8").decode(bytes.subarray(offset, cut));
-  const truncated = cut < bytes.byteLength;
-  return {
-    content,
-    contentType: "markdown",
-    ...(truncated && cut > offset ? { nextCursor: `offset:${cut}` } : {}),
-    truncated,
-  };
 }
 
 const pstExtractor: StructuredExtractor = {
@@ -162,63 +133,38 @@ const pstExtractor: StructuredExtractor = {
     if (target.startsWith("folder:")) {
       const nidHex = target.slice(7);
       if (!/^[0-9a-f]+$/i.test(nidHex)) {
-        throw new AgentError("target-not-found", `Invalid PST folder target: "${target}".`, { pluginId: "outlook-pst" });
+        throw new AgentError("target-not-found", `Invalid PST folder target: "${target}".`, { pluginId: PLUGIN_ID });
       }
       const nid = Number.parseInt(nidHex, 16);
       const folderNode = await archive.ndb.node(nid);
       if (!folderNode) {
-        throw new AgentError("target-not-found", `PST folder not found: "${target}".`, { pluginId: "outlook-pst" });
+        throw new AgentError("target-not-found", `PST folder not found: "${target}".`, { pluginId: PLUGIN_ID });
       }
 
       const list = await archive.contents(nid);
-      const startRow = parseOffsetCursor(params.cursor);
-      const batch = await list.page(startRow, 100);
-      let messages = batch;
-      let filterApplied: boolean | undefined;
-      if (params.filter && params.filter.trim().length > 0) {
-        const needle = params.filter.toLowerCase();
-        messages = messages.filter(
-          (m) =>
-            m.subject.toLowerCase().includes(needle) ||
-            m.from.toLowerCase().includes(needle) ||
-            m.to.toLowerCase().includes(needle),
-        );
-        filterApplied = true;
-      }
-
-      const header = "| Target | Date | From | Subject | Attachments |\n| --- | --- | --- | --- | --- |";
-      const headerBytes = encoder.encode(header).byteLength;
-      if (headerBytes > params.maxBytes) {
-        return paginateText(header, 0, params.maxBytes);
-      }
-
-      const lines = [header];
-      let usedBytes = headerBytes;
-      let included = 0;
-      for (const msg of messages) {
-        const row = `| message:${msg.nid.toString(16)} | ${msg.date ? msg.date.toISOString() : ""} | ${escapeCell(msg.from)} | ${escapeCell(msg.subject || "(no subject)")} | ${msg.hasAttachments ? "yes" : "no"} |`;
-        const rowBytes = encoder.encode(`\n${row}`).byteLength;
-        if (usedBytes + rowBytes > params.maxBytes) break;
-        lines.push(row);
-        usedBytes += rowBytes;
-        included += 1;
-      }
-
-      const nextRow = startRow + included;
-      const hasMore = included < messages.length || startRow + batch.length < list.count;
-      return {
-        content: lines.join("\n"),
-        contentType: "markdown",
-        ...(hasMore && included > 0 ? { nextCursor: `offset:${nextRow}` } : {}),
-        truncated: hasMore,
-        ...(filterApplied !== undefined ? { filterApplied } : {}),
-      };
+      const start = parsePositionCursor(params.cursor, "offset:", PLUGIN_ID);
+      const batch = await list.page(start, FOLDER_PAGE_ROWS);
+      const needle = params.filter?.trim().toLowerCase();
+      const rows = batch.map((m) =>
+        !needle || [m.subject, m.from, m.to].some((field) => field.toLowerCase().includes(needle))
+          ? [`message:${m.nid.toString(16)}`, m.date ? m.date.toISOString() : "", m.from, m.subject || "(no subject)", m.hasAttachments ? "yes" : "no"]
+          : null,
+      );
+      const result = renderMarkdownTablePage({
+        columns: ["Target", "Date", "From", "Subject", "Attachments"],
+        rows,
+        start,
+        maxBytes: params.maxBytes,
+        cursorPrefix: "offset:",
+        hasMoreAfter: () => start + batch.length < list.count,
+      });
+      return needle ? { ...result, filterApplied: true } : result;
     }
 
     if (target.startsWith("message:")) {
       const nidHex = target.slice(8);
       if (!/^[0-9a-f]+$/i.test(nidHex)) {
-        throw new AgentError("target-not-found", `Invalid PST message target: "${target}".`, { pluginId: "outlook-pst" });
+        throw new AgentError("target-not-found", `Invalid PST message target: "${target}".`, { pluginId: PLUGIN_ID });
       }
       const nid = Number.parseInt(nidHex, 16);
       let detail;
@@ -226,7 +172,7 @@ const pstExtractor: StructuredExtractor = {
         detail = await archive.message(nid);
       } catch (error) {
         if (error instanceof PstError && error.code === "invalid-file") {
-          throw new AgentError("target-not-found", `PST message not found: "${target}".`, { pluginId: "outlook-pst" });
+          throw new AgentError("target-not-found", `PST message not found: "${target}".`, { pluginId: PLUGIN_ID });
         }
         mapPstError(error);
       }
@@ -252,12 +198,10 @@ const pstExtractor: StructuredExtractor = {
       const bodyText = detail.text.trim() || (detail.html ? stripHtmlTags(detail.html) : "");
       parts.push("", "## Body", "", bodyText || "(empty body)");
 
-      const full = parts.join("\n");
-      const offset = parseOffsetCursor(params.cursor);
-      return paginateText(full, offset, params.maxBytes);
+      return paginateText(parts.join("\n"), params.cursor, params.maxBytes, "markdown", PLUGIN_ID);
     }
 
-    throw new AgentError("target-not-found", `Unknown PST target: "${target}".`, { pluginId: "outlook-pst" });
+    throw new AgentError("target-not-found", `Unknown PST target: "${target}".`, { pluginId: PLUGIN_ID });
   },
 };
 

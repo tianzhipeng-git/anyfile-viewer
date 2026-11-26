@@ -1,30 +1,47 @@
 import { parentPort } from "node:worker_threads";
-import { basename, dirname } from "node:path";
+import { basename } from "node:path";
+import { viewerRegistryEntries } from "@anyfile/viewer-registry";
 import {
   AgentError,
+  localizeText,
+  resolveViewerRegistrations,
+  type AgentCapability,
   type AgentFileError,
   type ExtractContext,
   type InspectPayload,
+  type InspectResult,
   type QueryParams,
   type ReadParams,
   type ReadResult,
   type StructuredExtractor,
+  type WorkspaceReader,
 } from "@anyfile/viewer-protocol";
+import { createNodeVendorAssets } from "@anyfile/runtime-assets/node";
 import { normalizeMaxBytes, toAgentFileError, trimInspectPayload, trimReadResult } from "./budget";
-import { createDiskFile, DiskBinarySource } from "./disk-io";
+import { DiskBinarySource, openDiskFile } from "./disk-io";
 import { extractorLoaders } from "./generated/extractors";
 import { createDiskWorkspaceReader } from "./security";
 
 export interface WorkerRequest {
   readonly id: number;
-  readonly op: "inspect" | "read" | "query" | "capabilities" | "shutdown";
+  readonly op: "route" | "inspect" | "read" | "query";
   readonly pluginId?: string;
   readonly filePath?: string;
   readonly size?: number;
   readonly mtimeMs?: number;
-  readonly workspaceAccess?: "none" | "optional" | "required";
+  /** Directory sibling files may be read from; omitted when it lies outside the allowed roots. */
+  readonly workspaceRoot?: string;
   readonly readParams?: ReadParams;
   readonly queryParams?: QueryParams;
+}
+
+export interface RouteResult {
+  readonly pluginId: string;
+  readonly formatName: string;
+  readonly supportLevel: InspectResult["supportLevel"];
+  readonly matchedBy: InspectResult["matchedBy"];
+  readonly candidates: InspectResult["candidates"];
+  readonly capabilities: readonly AgentCapability[];
 }
 
 export interface WorkerResponse {
@@ -34,68 +51,8 @@ export interface WorkerResponse {
   readonly error?: AgentFileError;
 }
 
-interface SessionCacheEntry {
-  readonly key: string;
-  readonly source: DiskBinarySource;
-  readonly file: File;
-  lastUsedAt: number;
-}
-
-const MAX_SESSIONS = 16;
-const SESSION_IDLE_MS = 5 * 60 * 1000;
-
+const vendor = createNodeVendorAssets();
 const extractorCache = new Map<string, Promise<StructuredExtractor>>();
-const sessionCache = new Map<string, SessionCacheEntry>();
-
-function evictExpiredSessions(now = Date.now()): void {
-  for (const [key, entry] of sessionCache) {
-    if (now - entry.lastUsedAt > SESSION_IDLE_MS) {
-      entry.source.close();
-      sessionCache.delete(key);
-    }
-  }
-}
-
-function getOrCreateSession(
-  filePath: string,
-  size: number,
-  mtimeMs: number,
-  pluginId: string,
-): SessionCacheEntry {
-  const now = Date.now();
-  evictExpiredSessions(now);
-  const key = `${filePath}\0${size}\0${mtimeMs}\0${pluginId}`;
-  const existing = sessionCache.get(key);
-  if (existing) {
-    existing.lastUsedAt = now;
-    // Refresh LRU order
-    sessionCache.delete(key);
-    sessionCache.set(key, existing);
-    return existing;
-  }
-
-  if (sessionCache.size >= MAX_SESSIONS) {
-    const oldestKey = sessionCache.keys().next().value;
-    if (oldestKey !== undefined) {
-      sessionCache.get(oldestKey)?.source.close();
-      sessionCache.delete(oldestKey);
-    }
-  }
-
-  const name = basename(filePath);
-  const source = new DiskBinarySource(filePath, size, name);
-  const file = createDiskFile(filePath, name, size, mtimeMs);
-  const entry: SessionCacheEntry = { key, source, file, lastUsedAt: now };
-  sessionCache.set(key, entry);
-  return entry;
-}
-
-function closeAllSessions(): void {
-  for (const entry of sessionCache.values()) {
-    entry.source.close();
-  }
-  sessionCache.clear();
-}
 
 async function loadExtractor(pluginId: string): Promise<StructuredExtractor> {
   const loader = extractorLoaders[pluginId];
@@ -114,45 +71,65 @@ async function loadExtractor(pluginId: string): Promise<StructuredExtractor> {
   return cached;
 }
 
-function buildContext(req: WorkerRequest, session: SessionCacheEntry, signal: AbortSignal): ExtractContext {
-  const workspace =
-    req.workspaceAccess && req.workspaceAccess !== "none" && req.filePath
-      ? createDiskWorkspaceReader(dirname(req.filePath))
-      : undefined;
+function workspaceOf(req: WorkerRequest) {
+  return req.workspaceRoot ? createDiskWorkspaceReader(req.workspaceRoot) : undefined;
+}
+
+async function capabilitiesOf(pluginId: string): Promise<AgentCapability[]> {
+  if (!extractorLoaders[pluginId]) return [];
+  const extractor = await loadExtractor(pluginId);
+  return [
+    "read",
+    ...(extractor.query ? (["query"] as const) : []),
+    ...(extractor.renderImage ? (["render"] as const) : []),
+  ];
+}
+
+/** Routing runs here, not in the host process: probes parse untrusted bytes under the worker's limits. */
+async function route(file: File, workspace: WorkspaceReader | undefined, signal: AbortSignal): Promise<RouteResult> {
+  const resolved = await resolveViewerRegistrations(file, viewerRegistryEntries, { signal, workspace, magicFallback: true });
+  const primary = resolved[0];
+  if (!primary) throw new AgentError("invalid-file", "No viewer recognizes this file.");
+  const pluginId = primary.registration.manifest.id;
   return {
-    source: session.source,
-    file: session.file,
-    ...(workspace ? { workspace, relativePath: basename(req.filePath!) } : {}),
-    signal,
+    pluginId,
+    formatName: localizeText(primary.registration.manifest.name, "en"),
+    supportLevel: primary.supportLevel,
+    matchedBy: primary.matchedBy ?? "extension",
+    candidates: resolved.map(({ registration, supportLevel }) => ({ pluginId: registration.manifest.id, supportLevel })),
+    capabilities: await capabilitiesOf(pluginId),
   };
 }
 
 async function handleRequest(req: WorkerRequest): Promise<unknown> {
-  if (req.op === "shutdown") {
-    closeAllSessions();
-    return { ok: true };
-  }
-
   const pluginId = req.pluginId ?? "";
-  if (req.op === "capabilities") {
-    const loader = extractorLoaders[pluginId];
-    if (!loader) return [];
-    const extractor = await loadExtractor(pluginId);
-    const caps: ("read" | "query" | "render")[] = ["read"];
-    if (typeof extractor.query === "function") caps.push("query");
-    if (typeof extractor.renderImage === "function") caps.push("render");
-    return caps;
-  }
-
   if (!req.filePath || typeof req.size !== "number" || typeof req.mtimeMs !== "number") {
     throw new AgentError("invalid-file", "Missing file metadata for worker request.", { pluginId });
   }
 
-  const extractor = await loadExtractor(pluginId);
-  const session = getOrCreateSession(req.filePath, req.size, req.mtimeMs, pluginId);
   const controller = new AbortController();
-  const context = buildContext(req, session, controller.signal);
+  const name = basename(req.filePath);
+  const file = await openDiskFile(req.filePath, name, req.mtimeMs);
+  const workspace = workspaceOf(req);
+  if (req.op === "route") return route(file, workspace, controller.signal);
 
+  const extractor = await loadExtractor(pluginId);
+  const source = new DiskBinarySource(req.filePath, req.size, name);
+  try {
+    return await runExtractor(req, extractor, {
+      source,
+      file,
+      vendor,
+      ...(workspace ? { workspace, relativePath: name } : {}),
+      signal: controller.signal,
+    });
+  } finally {
+    source.close();
+  }
+}
+
+async function runExtractor(req: WorkerRequest, extractor: StructuredExtractor, context: ExtractContext): Promise<unknown> {
+  const pluginId = req.pluginId ?? "";
   if (req.op === "inspect") {
     const payload: InspectPayload = await extractor.inspect(context);
     return trimInspectPayload(payload);

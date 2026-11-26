@@ -1,6 +1,7 @@
 import {
   AgentError,
   abortError,
+  paginateLines,
   type ExtractContext,
   type InspectPayload,
   type JsonValue,
@@ -10,8 +11,6 @@ import {
   type TargetEntry,
 } from "@anyfile/viewer-protocol";
 import { PlistError, readPlist, type PlistValue } from "./parse";
-
-const encoder = new TextEncoder();
 
 function toJsonValue(value: PlistValue): JsonValue {
   switch (value.kind) {
@@ -58,57 +57,6 @@ function mapError(error: unknown): never {
     error instanceof Error ? error.message : "Failed to parse property list.",
     { pluginId: "apple-plist", cause: error },
   );
-}
-
-function parseCursor(cursor?: string): number {
-  if (!cursor) return 0;
-  const match = /^line:(\d+)$/.exec(cursor);
-  if (!match) {
-    throw new AgentError("target-not-found", `Invalid pagination cursor: "${cursor}".`, { pluginId: "apple-plist" });
-  }
-  return Number(match[1]);
-}
-
-function paginateLines(lines: readonly string[], startLine: number, maxBytes: number): {
-  readonly content: string;
-  readonly nextCursor?: string;
-  readonly truncated: boolean;
-} {
-  if (startLine < 0 || startLine > lines.length) {
-    throw new AgentError("target-not-found", `Cursor line offset ${startLine} out of range.`, { pluginId: "apple-plist" });
-  }
-  const selected: string[] = [];
-  let usedBytes = 0;
-  let idx = startLine;
-
-  while (idx < lines.length) {
-    const line = lines[idx];
-    const lineBytes = encoder.encode(selected.length === 0 ? line : `\n${line}`).byteLength;
-    if (selected.length > 0 && usedBytes + lineBytes > maxBytes) break;
-    if (selected.length === 0 && lineBytes > maxBytes) {
-      // Single line exceeds maxBytes: slice UTF-8 safely
-      const encoded = encoder.encode(line);
-      let cut = maxBytes;
-      while (cut > 0 && (encoded[cut] & 0xc0) === 0x80) cut -= 1;
-      selected.push(new TextDecoder("utf-8").decode(encoded.subarray(0, cut)));
-      idx += 1;
-      return {
-        content: selected.join("\n"),
-        ...(idx < lines.length ? { nextCursor: `line:${idx}` } : {}),
-        truncated: true,
-      };
-    }
-    selected.push(line);
-    usedBytes += lineBytes;
-    idx += 1;
-  }
-
-  const hasMore = idx < lines.length;
-  return {
-    content: selected.join("\n"),
-    ...(hasMore ? { nextCursor: `line:${idx}` } : {}),
-    truncated: hasMore,
-  };
 }
 
 const plistExtractor: StructuredExtractor = {
@@ -194,9 +142,8 @@ const plistExtractor: StructuredExtractor = {
       filterApplied = true;
     }
 
-    const startLine = parseCursor(params.cursor);
-    const page = paginateLines(lines, startLine, params.maxBytes);
-    const isWholeJson = !page.truncated && startLine === 0 && !filterApplied;
+    const page = paginateLines(lines, params.cursor, params.maxBytes, "apple-plist");
+    const isWholeJson = !page.truncated && !params.cursor && !filterApplied;
 
     return {
       content: page.content,

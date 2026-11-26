@@ -3,6 +3,13 @@ import { createRequire, registerHooks, stripTypeScriptTypes } from "node:module"
 import { dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+// Type stripping is experimental in Node 24; its warning would corrupt the CLI's stderr JSON errors.
+const emitWarning = process.emitWarning;
+process.emitWarning = (warning, ...args) => {
+  if (String(warning).includes("stripTypeScriptTypes")) return;
+  emitWarning.call(process, warning, ...args);
+};
+
 let registered = false;
 let tsModule = null;
 

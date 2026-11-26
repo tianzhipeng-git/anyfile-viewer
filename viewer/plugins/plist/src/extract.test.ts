@@ -13,6 +13,7 @@ describe("plist ./extract compliance", () => {
         name: "app-config.binary.plist",
         filePath: resolve(EXAMPLES, "app-config.binary.plist"),
         invalidBytes: new TextEncoder().encode("not a plist"),
+        filter: "a",
         smallMaxBytes: 120,
       },
       {

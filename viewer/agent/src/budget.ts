@@ -6,15 +6,14 @@ import {
   HARD_READ_MAX_BYTES,
   ViewerError,
   isViewerAbortError,
+  truncateUtf8,
   type AgentErrorCode,
   type AgentFileError,
   type InspectPayload,
   type ReadResult,
 } from "@anyfile/viewer-protocol";
 
-const MAX_OUTPUT_LINES = 2000;
 const encoder = new TextEncoder();
-const decoder = new TextDecoder("utf-8", { fatal: false });
 const VALID_CODES = new Set<string>(AGENT_ERROR_CODES);
 
 export function normalizeMaxBytes(requested?: number): number {
@@ -24,45 +23,10 @@ export function normalizeMaxBytes(requested?: number): number {
   return Math.min(Math.floor(requested), HARD_READ_MAX_BYTES);
 }
 
-/**
- * Truncates a UTF-8 string so its encoded byte length is at most `maxBytes`
- * without splitting multi-byte UTF-8 sequences.
- */
-export function truncateUtf8(text: string, maxBytes: number): { readonly text: string; readonly truncated: boolean } {
-  const bytes = encoder.encode(text);
-  if (bytes.byteLength <= maxBytes) return { text, truncated: false };
-  let cut = maxBytes;
-  while (cut > 0 && (bytes[cut] & 0xc0) === 0x80) {
-    cut -= 1;
-  }
-  return { text: decoder.decode(bytes.subarray(0, cut)), truncated: true };
-}
-
-/**
- * Safety-net trimmer applied by `agent-core` to every `ReadResult` (both `read` and `query`).
- */
 export function trimReadResult(result: ReadResult, maxBytes: number): ReadResult {
-  const bound = normalizeMaxBytes(maxBytes);
-  let content = result.content;
-  let truncated = result.truncated;
-
-  const lines = content.split("\n");
-  if (lines.length > MAX_OUTPUT_LINES) {
-    content = lines.slice(0, MAX_OUTPUT_LINES).join("\n");
-    truncated = true;
-  }
-
-  const byteTrimmed = truncateUtf8(content, bound);
-  if (byteTrimmed.truncated) {
-    content = byteTrimmed.text;
-    truncated = true;
-  }
-
-  return {
-    ...result,
-    content,
-    truncated,
-  };
+  // Extractors must honor maxBytes (enforced by the compliance suite); this only guards the wire.
+  const trimmed = truncateUtf8(result.content, normalizeMaxBytes(maxBytes));
+  return trimmed.truncated ? { ...result, content: trimmed.text, truncated: true } : result;
 }
 
 /**

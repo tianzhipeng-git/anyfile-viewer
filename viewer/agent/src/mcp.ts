@@ -55,20 +55,6 @@ const MCP_TOOLS = [
       required: ["path", "sql"],
     },
   },
-  {
-    name: "render_file",
-    description:
-      "Render a local visual file (or target page/view) to a bounded PNG image.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        path: { type: "string", description: "Path to the local file." },
-        target: { type: "string", description: "Optional target id from inspect_file." },
-        maxDimension: { type: "number", description: "Maximum image dimension in pixels (default 1600, max 4096)." },
-      },
-      required: ["path"],
-    },
-  },
 ] as const;
 
 export interface McpServerOptions {
@@ -93,7 +79,7 @@ export async function runMcpServer(options: McpServerOptions): Promise<void> {
     try {
       const path = typeof args.path === "string" ? args.path : "";
       if (!path) {
-        throw new AgentError("access-denied", "Missing required parameter: path.");
+        throw new AgentError("invalid-argument", "Missing required parameter: path.");
       }
 
       if (name === "inspect_file") {
@@ -145,11 +131,7 @@ export async function runMcpServer(options: McpServerOptions): Promise<void> {
         };
       }
 
-      if (name === "render_file") {
-        await service.renderFile(path);
-      }
-
-      throw new AgentError("unsupported-capability", `Unknown tool: ${name}`);
+      throw new AgentError("invalid-argument", `Unknown tool: ${name}`);
     } catch (error) {
       return {
         isError: true,

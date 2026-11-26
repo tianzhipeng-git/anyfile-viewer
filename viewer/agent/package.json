@@ -19,6 +19,7 @@
     "@anyfile/pst-viewer": "workspace:*",
     "@anyfile/runtime-assets": "workspace:*",
     "@anyfile/sqlite-viewer": "workspace:*",
+    "@anyfile/stat-data-viewer": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-registry": "workspace:*"
   },

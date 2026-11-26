@@ -1,8 +1,6 @@
-import { basename, dirname } from "node:path";
+import { dirname } from "node:path";
 import {
   AgentError,
-  localizeText,
-  type AgentCapability,
   type InspectPayload,
   type InspectResult,
   type QueryParams,
@@ -10,16 +8,16 @@ import {
   type ReadResult,
 } from "@anyfile/viewer-protocol";
 import { normalizeMaxBytes } from "./budget";
-import { createDiskFile } from "./disk-io";
-import { hasExtractor } from "./generated/extractors";
-import { routeFile } from "./router";
-import { createDiskWorkspaceReader, resolveAllowedFile } from "./security";
+import { isWithinAllowedRoots, resolveAllowedFile } from "./security";
+import type { RouteResult, WorkerRequest } from "./worker";
 import { ExtractWorkerPool, type WorkerPoolOptions } from "./worker-pool";
 
 export interface AgentServiceOptions extends WorkerPoolOptions {
   /** Whitelisted directories; all accessed paths must resolve inside one of these roots. */
   readonly allowedRoots: readonly string[];
 }
+
+type FileRequest = Pick<WorkerRequest, "filePath" | "size" | "mtimeMs" | "workspaceRoot">;
 
 export class AgentService {
   private readonly allowedRoots: readonly string[];
@@ -30,140 +28,51 @@ export class AgentService {
     this.pool = new ExtractWorkerPool(options);
   }
 
-  private async resolveAndRoute(inputPath: string, timeoutMs = 10_000) {
+  /** Checks the path against the allow-list, then routes it inside the worker. */
+  private async open(inputPath: string): Promise<{ readonly file: FileRequest; readonly route: RouteResult }> {
     const { realPath, size, mtimeMs } = await resolveAllowedFile(inputPath, this.allowedRoots);
-    const file = createDiskFile(realPath, basename(realPath), size, mtimeMs);
-    const workspace = createDiskWorkspaceReader(dirname(realPath));
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), timeoutMs);
-    try {
-      const routed = await routeFile(file, { signal: controller.signal, workspace });
-      return { realPath, size, mtimeMs, routed };
-    } finally {
-      clearTimeout(timer);
+    const parent = dirname(realPath);
+    const file: FileRequest = {
+      filePath: realPath,
+      size,
+      mtimeMs,
+      ...((await isWithinAllowedRoots(parent, this.allowedRoots)) ? { workspaceRoot: parent } : {}),
+    };
+    return { file, route: await this.pool.call<RouteResult>({ op: "route", ...file }) };
+  }
+
+  private async extractable(inputPath: string, capability: "read" | "query") {
+    const opened = await this.open(inputPath);
+    const { pluginId, capabilities } = opened.route;
+    if (!capabilities.includes(capability)) {
+      throw new AgentError("unsupported-capability", `Plugin "${pluginId}" does not support ${capability}.`, { pluginId });
     }
+    return opened;
   }
 
   async inspectFile(inputPath: string): Promise<InspectResult> {
-    const { realPath, size, mtimeMs, routed } = await this.resolveAndRoute(inputPath);
-    const { registration, supportLevel } = routed.primary;
-    const pluginId = registration.manifest.id;
-    const formatName = localizeText(registration.manifest.name, "en");
-    const candidates = routed.candidates.map((c) => ({
-      pluginId: c.registration.manifest.id,
-      supportLevel: c.supportLevel,
-    }));
-
-    if (!hasExtractor(pluginId)) {
-      return {
-        pluginId,
-        formatName,
-        supportLevel,
-        matchedBy: routed.matchedBy,
-        candidates,
-        capabilities: [],
-        metadata: { fileName: basename(realPath), sizeBytes: size },
-        targets: [],
-      };
-    }
-
-    const capabilities = await this.pool.call<AgentCapability[]>({
-      op: "capabilities",
-      pluginId,
-    });
-
-    const payload = await this.pool.call<InspectPayload>({
-      op: "inspect",
-      pluginId,
-      filePath: realPath,
-      size,
-      mtimeMs,
-      workspaceAccess: registration.manifest.workspaceAccess,
-    });
-
-    return {
-      pluginId,
-      formatName,
-      supportLevel,
-      matchedBy: routed.matchedBy,
-      candidates,
-      capabilities,
-      ...payload,
-    };
+    const { file, route } = await this.open(inputPath);
+    const payload: InspectPayload = route.capabilities.length
+      ? await this.pool.call<InspectPayload>({ op: "inspect", pluginId: route.pluginId, ...file })
+      : { metadata: { sizeBytes: file.size ?? 0 }, targets: [] };
+    return { ...route, ...payload };
   }
 
-  async readFile(
-    inputPath: string,
-    params: Partial<ReadParams> = {},
-  ): Promise<ReadResult & { readonly pluginId: string }> {
-    const { realPath, size, mtimeMs, routed } = await this.resolveAndRoute(inputPath);
-    const pluginId = routed.primary.registration.manifest.id;
-    if (!hasExtractor(pluginId)) {
-      throw new AgentError(
-        "unsupported-capability",
-        `Plugin "${pluginId}" does not support structured read.`,
-        { pluginId },
-      );
-    }
-
-    const result = await this.pool.call<ReadResult>({
-      op: "read",
-      pluginId,
-      filePath: realPath,
-      size,
-      mtimeMs,
-      workspaceAccess: routed.primary.registration.manifest.workspaceAccess,
-      readParams: {
-        target: params.target,
-        cursor: params.cursor,
-        filter: params.filter,
-        maxBytes: normalizeMaxBytes(params.maxBytes),
-      },
-    });
-    return { ...result, pluginId };
+  async readFile(inputPath: string, params: Partial<ReadParams> = {}): Promise<ReadResult & { readonly pluginId: string }> {
+    const { file, route } = await this.extractable(inputPath, "read");
+    const readParams: ReadParams = { ...params, maxBytes: normalizeMaxBytes(params.maxBytes) };
+    const result = await this.pool.call<ReadResult>({ op: "read", pluginId: route.pluginId, ...file, readParams });
+    return { ...result, pluginId: route.pluginId };
   }
 
   async queryFile(
     inputPath: string,
-    params: { readonly sql: string; readonly target?: string; readonly cursor?: string; readonly maxBytes?: number },
+    params: Omit<QueryParams, "maxBytes"> & { readonly maxBytes?: number },
   ): Promise<ReadResult & { readonly pluginId: string }> {
-    const { realPath, size, mtimeMs, routed } = await this.resolveAndRoute(inputPath);
-    const pluginId = routed.primary.registration.manifest.id;
-    if (!hasExtractor(pluginId)) {
-      throw new AgentError(
-        "unsupported-capability",
-        `Plugin "${pluginId}" does not support SQL query.`,
-        { pluginId },
-      );
-    }
-
-    const queryParams: QueryParams = {
-      sql: params.sql,
-      target: params.target,
-      cursor: params.cursor,
-      maxBytes: normalizeMaxBytes(params.maxBytes),
-    };
-
-    const result = await this.pool.call<ReadResult>({
-      op: "query",
-      pluginId,
-      filePath: realPath,
-      size,
-      mtimeMs,
-      workspaceAccess: routed.primary.registration.manifest.workspaceAccess,
-      queryParams,
-    });
-    return { ...result, pluginId };
-  }
-
-  async renderFile(inputPath: string): Promise<never> {
-    const { routed } = await this.resolveAndRoute(inputPath);
-    const pluginId = routed.primary.registration.manifest.id;
-    throw new AgentError(
-      "runtime-unavailable",
-      `Visual rendering for "${pluginId}" is not yet available in this build.`,
-      { pluginId },
-    );
+    const { file, route } = await this.extractable(inputPath, "query");
+    const queryParams: QueryParams = { ...params, maxBytes: normalizeMaxBytes(params.maxBytes) };
+    const result = await this.pool.call<ReadResult>({ op: "query", pluginId: route.pluginId, ...file, queryParams });
+    return { ...result, pluginId: route.pluginId };
   }
 
   async dispose(): Promise<void> {

@@ -88,6 +88,7 @@ export interface QueryParams {
 }
 
 export type AgentErrorCode =
+  | "invalid-argument"
   | "invalid-file"
   | "encrypted-file"
   | "missing-related-file"
@@ -123,6 +124,7 @@ export class AgentError extends Error implements AgentFileError {
 }
 
 export const AGENT_ERROR_CODES: readonly AgentErrorCode[] = [
+  "invalid-argument",
   "invalid-file",
   "encrypted-file",
   "missing-related-file",
@@ -144,8 +146,19 @@ export interface RgbaImage {
   readonly data: Uint8ClampedArray;
 }
 
+/**
+ * Resolves runtime assets by the same `<pkg>/<version>/<file>` path the Web host serves under
+ * `/vendor/`. Agent hosts read a local, integrity-checked cache and never fetch during extraction.
+ */
+export interface VendorAssets {
+  /** URL that `importRuntime()` can load on this host (a `file:` URL in Node). */
+  url(path: string): Promise<string>;
+  bytes(path: string): Promise<Uint8Array>;
+}
+
 export interface ExtractContext {
   readonly source: BinarySource;
+  readonly vendor: VendorAssets;
   readonly file: File;
   readonly workspace?: WorkspaceReader;
   readonly relativePath?: string;

@@ -20,6 +20,7 @@ interface PendingCall {
   readonly resolve: (value: unknown) => void;
   readonly reject: (reason: unknown) => void;
   readonly timer: ReturnType<typeof setTimeout>;
+  readonly worker: Worker;
   readonly pluginId?: string;
 }
 
@@ -86,33 +87,33 @@ export class ExtractWorkerPool {
     });
 
     worker.on("error", (error) => {
-      const code =
-        typeof (error as { code?: unknown }).code === "string" &&
-        (error as { code: string }).code === "ERR_WORKER_OUT_OF_MEMORY"
-          ? "resource-limit"
-          : "invalid-file";
-      const message = error.message || "Worker terminated unexpectedly.";
-      this.failAllPending(new AgentError(code, message));
-      this.worker = null;
+      const outOfMemory = (error as { code?: unknown }).code === "ERR_WORKER_OUT_OF_MEMORY";
+      if (this.worker === worker) this.worker = null;
+      this.failPending(
+        worker,
+        new AgentError(
+          outOfMemory ? "resource-limit" : "runtime-unavailable",
+          error.message || "Worker terminated unexpectedly.",
+        ),
+      );
     });
 
     worker.on("exit", (exitCode) => {
-      if (this.worker === worker) {
-        this.worker = null;
-      }
-      if (this.pending.size > 0) {
-        this.failAllPending(
-          new AgentError("timeout", `Worker exited unexpectedly (code ${exitCode}).`),
-        );
-      }
+      if (this.worker === worker) this.worker = null;
+      this.failPending(
+        worker,
+        new AgentError("runtime-unavailable", `Worker exited unexpectedly (code ${exitCode}).`),
+      );
     });
 
     this.worker = worker;
     return worker;
   }
 
-  private failAllPending(error: AgentError): void {
+  /** Rejects calls owned by `worker` (or every call when omitted); calls on a newer worker are untouched. */
+  private failPending(worker: Worker | null, error: AgentError): void {
     for (const [id, entry] of this.pending) {
+      if (worker && entry.worker !== worker) continue;
       clearTimeout(entry.timer);
       entry.reject(error);
       this.pending.delete(id);
@@ -131,11 +132,8 @@ export class ExtractWorkerPool {
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {
         this.pending.delete(id);
-        const current = this.worker;
-        this.worker = null;
-        if (current) {
-          void current.terminate();
-        }
+        if (this.worker === worker) this.worker = null;
+        void worker.terminate();
         reject(
           new AgentError("timeout", `Operation timed out after ${timeoutMs}ms.`, {
             pluginId: request.pluginId,
@@ -147,6 +145,7 @@ export class ExtractWorkerPool {
         resolve: resolve as (value: unknown) => void,
         reject,
         timer,
+        worker,
         pluginId: request.pluginId,
       });
 
@@ -158,7 +157,7 @@ export class ExtractWorkerPool {
     this.clearIdleTimer();
     const worker = this.worker;
     this.worker = null;
-    this.failAllPending(new AgentError("timeout", "Worker pool disposed."));
+    this.failPending(null, new AgentError("runtime-unavailable", "Worker pool disposed."));
     if (worker) {
       try {
         await worker.terminate();

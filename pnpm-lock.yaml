@@ -317,6 +317,9 @@ importers:
       '@anyfile/sqlite-viewer':
         specifier: workspace:*
         version: link:../plugins/sqlite
+      '@anyfile/stat-data-viewer':
+        specifier: workspace:*
+        version: link:../plugins/stat-data
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../protocol
@@ -1664,12 +1667,18 @@ importers:
 
   viewer/runtime-assets:
     dependencies:
-      linkedom:
-        specifier: 0.18.13
-        version: 0.18.13
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      happy-dom:
+        specifier: 20.11.6
+        version: 20.11.6
 
   viewer/testing:
     dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../runtime-assets
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../protocol

@@ -29,6 +29,7 @@ export const mediaRegistryEntries: readonly ViewerRegistryEntry[] = [
   {
     manifest: nonNativeVideoManifest,
     async probe(context) { return (await import("@anyfile/non-native-video-viewer/probe")).probeNonNativeVideo(context); },
+    async browserProbe(context) { return (await import("@anyfile/non-native-video-viewer/browser-probe")).probeNonNativeVideoInBrowser(context); },
   },
   {
     manifest: browserAudioManifest,
@@ -37,6 +38,7 @@ export const mediaRegistryEntries: readonly ViewerRegistryEntry[] = [
   {
     manifest: nonNativeAudioManifest,
     async probe(context) { return (await import("@anyfile/non-native-audio-viewer/probe")).probeNonNativeAudio(context); },
+    async browserProbe(context) { return (await import("@anyfile/non-native-audio-viewer/browser-probe")).probeNonNativeAudioInBrowser(context); },
   },
   {
     manifest: ffmpegVideoManifest,

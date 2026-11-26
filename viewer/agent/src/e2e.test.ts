@@ -34,7 +34,8 @@ async function runCli(args: readonly string[], env?: NodeJS.ProcessEnv) {
   }
 }
 
-describe("@anyfile/agent CLI & MCP end-to-end", () => {
+// Each case spawns several CLI processes and workers; the default 5 s is too tight under `pnpm check`.
+describe("@anyfile/agent CLI & MCP end-to-end", { timeout: 60_000 }, () => {
   let tempDir = "";
 
   beforeAll(async () => {
@@ -147,7 +148,7 @@ describe("@anyfile/agent CLI & MCP end-to-end", () => {
 
       const tools = await rpc("tools/list", {});
       const toolNames = ((tools.result as { tools: { name: string }[] }).tools).map((t) => t.name);
-      expect(toolNames).toEqual(expect.arrayContaining(["inspect_file", "read_file", "query_file", "render_file"]));
+      expect(toolNames).toEqual(["inspect_file", "read_file", "query_file"]);
 
       const inspected = await rpc("tools/call", {
         name: "inspect_file",

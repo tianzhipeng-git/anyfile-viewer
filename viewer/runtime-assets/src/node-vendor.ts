@@ -1,58 +1,35 @@
 import { createHash } from "node:crypto";
+import { existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
-import { join, normalize, resolve, sep } from "node:path";
-import { pathToFileURL } from "node:url";
-
-export interface VendorAssetSpec {
-  readonly pkg: string;
-  readonly version: string;
-  readonly file: string;
-  readonly sha256?: string;
-}
+import { join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import type { VendorAssets } from "@anyfile/viewer-protocol";
 
 const SEGMENT_PATTERN = /^[a-zA-Z0-9._-]+$/;
 
-function assertSafeSegment(value: string, label: string): void {
-  if (!value || value === "." || value === ".." || !SEGMENT_PATTERN.test(value)) {
-    throw new Error(`Invalid vendor asset ${label}: "${value}"`);
-  }
-}
-
-function assertSafeRelativeFile(file: string): string {
-  const normalized = normalize(file).replaceAll("\\", "/");
-  if (!normalized || normalized.startsWith("/") || normalized.startsWith("../") || normalized === ".." || normalized.includes("/../")) {
-    throw new Error(`Invalid vendor asset file path: "${file}"`);
-  }
-  return normalized;
-}
-
-/**
- * Returns the local vendor cache root: `$ANYFILE_CACHE_DIR/vendor` or `~/.cache/anyfile/vendor`.
- */
+/** Local vendor cache root: `$ANYFILE_CACHE_DIR/vendor` or `~/.cache/anyfile/vendor`. */
 export function getVendorCacheRoot(cacheDir = process.env.ANYFILE_CACHE_DIR): string {
-  const base = cacheDir?.trim()
-    ? resolve(cacheDir)
-    : join(homedir(), ".cache", "anyfile");
-  return join(base, "vendor");
+  return join(cacheDir?.trim() ? resolve(cacheDir) : join(homedir(), ".cache", "anyfile"), "vendor");
 }
 
 /**
- * Resolves a local cached `/vendor/<pkg>/<version>/<file>` path safely within the cache root.
+ * Vendor roots searched in order: the local cache, then — inside this monorepo only — the
+ * prepared `public/vendor/` and the audited `third_party/` builds, which share the
+ * `<pkg>/<version>/<file>` layout.
  */
-export function resolveVendorAssetPath(
-  spec: VendorAssetSpec,
-  options?: { readonly cacheDir?: string },
-): string {
-  assertSafeSegment(spec.pkg, "package");
-  assertSafeSegment(spec.version, "version");
-  const safeFile = assertSafeRelativeFile(spec.file);
-  const root = getVendorCacheRoot(options?.cacheDir);
-  const fullPath = resolve(root, spec.pkg, spec.version, safeFile);
-  if (fullPath !== root && !fullPath.startsWith(`${root}${sep}`)) {
-    throw new Error(`Vendor asset path escaped cache root: "${spec.file}"`);
+export function defaultVendorRoots(): string[] {
+  const repo = fileURLToPath(new URL("../../../", import.meta.url));
+  return [getVendorCacheRoot(), join(repo, "public/vendor"), join(repo, "third_party")];
+}
+
+/** Validates a `<pkg>/<version>/<file…>` vendor path; rejects traversal and odd characters. */
+export function assertVendorPath(path: string): string[] {
+  const segments = path.split("/");
+  if (segments.length < 3 || segments.some((segment) => segment === "." || segment === ".." || !SEGMENT_PATTERN.test(segment))) {
+    throw new Error(`Invalid vendor asset path: "${path}"`);
   }
-  return fullPath;
+  return segments;
 }
 
 export function sha256Hex(bytes: Uint8Array): string {
@@ -60,32 +37,34 @@ export function sha256Hex(bytes: Uint8Array): string {
 }
 
 /**
- * Reads a cached vendor asset from disk without network access and optionally verifies SHA-256.
+ * Node `VendorAssets`: resolves `/vendor/` paths against local roots, never the network.
+ * Assets listed in `manifest` (path → SHA-256) are verified before use.
  */
-export async function readLocalVendorAsset(
-  spec: VendorAssetSpec,
-  options?: { readonly cacheDir?: string },
-): Promise<Uint8Array> {
-  const filePath = resolveVendorAssetPath(spec, options);
-  const bytes = new Uint8Array(await readFile(filePath));
-  if (spec.sha256) {
-    const actual = sha256Hex(bytes);
-    if (actual !== spec.sha256.toLowerCase()) {
-      throw new Error(
-        `SHA-256 mismatch for vendor asset ${spec.pkg}/${spec.version}/${spec.file}: expected ${spec.sha256}, got ${actual}`,
-      );
+export function createNodeVendorAssets(
+  roots: readonly string[] = defaultVendorRoots(),
+  manifest: Readonly<Record<string, string>> = {},
+): VendorAssets {
+  const locate = (path: string) => {
+    const segments = assertVendorPath(path);
+    for (const root of roots) {
+      const candidate = join(root, ...segments);
+      if (existsSync(candidate)) return candidate;
     }
-  }
-  return bytes;
-}
-
-/**
- * Returns a `file://` URL for a verified local vendor asset so Node workers can `importRuntime()` it.
- */
-export async function resolveVerifiedVendorAssetUrl(
-  spec: VendorAssetSpec,
-  options?: { readonly cacheDir?: string },
-): Promise<string> {
-  await readLocalVendorAsset(spec, options);
-  return pathToFileURL(resolveVendorAssetPath(spec, options)).href;
+    throw Object.assign(new Error(`Runtime asset /vendor/${path} is not available locally.`), { code: "runtime-unavailable" });
+  };
+  const read = async (path: string) => {
+    const bytes = new Uint8Array(await readFile(locate(path)));
+    const expected = manifest[path];
+    if (expected && sha256Hex(bytes) !== expected.toLowerCase()) {
+      throw Object.assign(new Error(`SHA-256 mismatch for /vendor/${path}.`), { code: "runtime-unavailable" });
+    }
+    return bytes;
+  };
+  return {
+    bytes: read,
+    async url(path) {
+      await read(path);
+      return pathToFileURL(locate(path)).href;
+    },
+  };
 }

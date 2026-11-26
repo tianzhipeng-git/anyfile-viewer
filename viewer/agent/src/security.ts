@@ -1,7 +1,7 @@
 import { readdir, realpath, stat } from "node:fs/promises";
 import { basename, join, resolve, sep } from "node:path";
 import { AgentError, abortError, type WorkspaceEntry, type WorkspaceReader } from "@anyfile/viewer-protocol";
-import { createDiskFile } from "./disk-io";
+import { openDiskFile } from "./disk-io";
 
 function isWithinRoot(targetPath: string, rootPath: string): boolean {
   return targetPath === rootPath || targetPath.startsWith(`${rootPath}${sep}`);
@@ -17,6 +17,11 @@ export async function normalizeAllowedRoots(roots: readonly string[]): Promise<s
     }
   }
   return resolved;
+}
+
+/** Whether an already-resolved real path lies inside one of the allowed roots. */
+export async function isWithinAllowedRoots(realPath: string, allowedRoots: readonly string[]): Promise<boolean> {
+  return (await normalizeAllowedRoots(allowedRoots)).some((root) => isWithinRoot(realPath, root));
 }
 
 /**
@@ -38,8 +43,7 @@ export async function resolveAllowedFile(
     throw new AgentError("access-denied", `Path does not exist or is not accessible: ${inputPath}`);
   }
 
-  const normalizedRoots = await normalizeAllowedRoots(allowedRoots);
-  if (!normalizedRoots.some((root) => isWithinRoot(realPath, root))) {
+  if (!(await isWithinAllowedRoots(realPath, allowedRoots))) {
     throw new AgentError("access-denied", "Path is outside the allowed directories.");
   }
 
@@ -90,7 +94,7 @@ export function createDiskWorkspaceReader(rootDir: string): WorkspaceReader {
       try {
         const info = await stat(realCandidate);
         if (!info.isFile()) return null;
-        return createDiskFile(realCandidate, basename(realCandidate), info.size, info.mtimeMs);
+        return await openDiskFile(realCandidate, basename(realCandidate), info.mtimeMs);
       } catch {
         return null;
       }
