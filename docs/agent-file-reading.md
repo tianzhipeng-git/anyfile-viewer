@@ -38,8 +38,9 @@
 ```
 
 设计约束：
+- **共享引擎 + 双宿主架构**：仓库定位为“共享多格式引擎（`viewer/plugins/*`、`tools/`、`third_party/`、R2 资产）+ 双宿主消费端”。Web 宿主（`src/`）与 Agent 宿主（`viewer/agent/`）平级且互不依赖，单向复用底层插件与资产。
 - **协议原生扩展**：不建平行格式注册表，路由完全复用插件 Manifest、`probe()` 与注册顺序。
-- **主站零负担**：主站仍只静态导入 `/manifest`，按需加载 `/probe` 与完整插件；`./extract` 不进入任何主站 chunk。
+- **主站零负担**：主站仍只静态导入 `/manifest`，按需加载 `/probe` 与完整插件；`./extract` 与 Node 侧依赖不进入任何主站 chunk。
 - **本地只读**：文件内容不离开本机；提取过程禁止网络访问。
 
 ---
@@ -52,7 +53,7 @@
 |---|---|---|
 | `inspect_file` | `anyfile inspect <path>` | 识别格式，返回元数据与可读目标索引 |
 | `read_file` | `anyfile read <path> [--target t] [--cursor c] [--filter kw] [--max-bytes n]` | 按目标分块读取正文 |
-| `query_file` | `anyfile query <path> --sql <sql> [--target t]` | 仅数据类插件（sqlite、duckdb、stat-data、excel 等）声明支持 |
+| `query_file` | `anyfile query <path> --sql <sql> [--target t]` | 仅原生具备 SQL 引擎的插件（`sqlite`、`duckdb`）声明支持；其余表格/数组切片走 `read_file` |
 | `render_file` | `anyfile render <path> [--target t] [--max-dim px] [--out file]` | 输出有界 PNG |
 
 另有维护命令 `anyfile cache <list|add|clear>` 与 `anyfile mcp [--allow-dir <dir>...]`。
@@ -110,7 +111,7 @@ interface QueryParams { readonly sql: string; readonly target?: string; readonly
 
 ## 3. 插件协议扩展
 
-在 [viewer-plugin-protocol.md](viewer-plugin-protocol.md) 基础上新增一项可选子路径；未实现的插件在 Agent 入口只提供 `inspect`（Manifest + probe 结果）和容器截图渲染。
+在 [viewer-plugin-protocol.md](viewer-plugin-protocol.md) 基础上新增两项可选扩展；未实现的插件在 Agent 入口只提供 `inspect`（Manifest + probe 结果）和容器截图渲染。
 
 ### 3.1 `./extract` 子路径
 
@@ -142,9 +143,24 @@ interface RgbaImage { readonly width: number; readonly height: number; readonly 
 - 不发起网络请求；`renderImage` 仅限能在纯 JS/WASM 中解码像素的插件。
 - 测试以 `// @vitest-environment node` 运行，使用插件 `examples/` 真实样例，校验输出结构与字节上限。
 
-`captureImage` 不进入 `ViewerController`：浏览器渲染路径统一通过宿主截图（§5），不扩大宿主协议面。
+### 3.2 `ViewerController.captureImage`（可选）
 
-### 3.2 解析层拆分要求
+在现有 `ViewerController` 上增加可选方法 `captureImage`，用于浏览器渲染路径输出纯净内容图（不含工具栏与侧边栏），并支持单次 `open()` 后按 `target` 连续切页出图，无需修改主站 UI 布局分支：
+
+```ts
+export interface CaptureImageOptions {
+  readonly target?: string;
+  readonly maxDimension: number;
+  readonly signal?: AbortSignal;
+}
+
+export interface ViewerController {
+  dispose(): void | Promise<void>;
+  captureImage?(options: CaptureImageOptions): Promise<Blob>;
+}
+```
+
+### 3.3 解析层拆分要求
 
 `./extract` 要求解析逻辑可在主线程同步调用，现状需要分类改造：
 
@@ -162,13 +178,13 @@ interface RgbaImage { readonly width: number; readonly height: number; readonly 
 
 ### 4.1 File 与 Workspace 适配
 
-- 主文件基于 `fs.openAsBlob(path)` 包装为标准 `File`，`slice()` 惰性按区间从磁盘读取；实现时以测试确认包装为 `File` 后仍保持惰性。
+- 主文件基于 `fs.promises.FileHandle` 实现惰性 `DiskFile`（符合标准 `File` 接口，带显式 `close()`），`slice()` 仅记录区间偏移，真正读取时按区间 `read()`，确保大文件按需随机读且跨平台无文件描述符泄漏。
 - 单次整体读取沿用协议输入上限（默认 128 MiB）。
 - `WorkspaceReader` 以主文件所在目录为根实现，路径经 `realpath` 校验不得越出根目录与允许目录；按插件 `workspaceAccess` 决定是否提供（OBJ+MTL、DICOM 序列、分卷压缩等）。
 
 ### 4.2 浏览器 API 替代
 
-- **XML**：新增共享子路径导出 XML 解析接口；浏览器实现包装 `DOMParser`，Node 实现使用一个精确锁版本的纯 JS DOM 解析库。插件只依赖接口，禁止直接调用全局 `DOMParser`。
+- **XML**：新增共享子路径导出 XML 解析接口，在 `package.json` 中通过 `"browser"` / `"node"` 条件导出严格隔离；浏览器实现包装 `DOMParser`，Node 实现使用精确锁版本的纯 JS DOM 解析库，由 `check-view-bundle` 确保 Node 解析库不进入主站浏览器 bundle。插件只依赖接口，禁止直接调用全局 `DOMParser`。
 - **PNG 编码**：agent-core 内置 PNG 编码（`RgbaImage` → PNG），供 `renderImage` 使用。
 - 其余插件需要的浏览器 API 不做 polyfill，对应能力走浏览器渲染后端。
 
@@ -178,9 +194,9 @@ interface RgbaImage { readonly width: number; readonly height: number; readonly 
 
 ### 4.4 解析索引缓存
 
-PST、归档、HDF5、大型 SQLite 等格式建立索引成本高，CLI 每次调用又是新进程。`ExtractIndexCache` 提供按 `(realpath, size, mtimeMs, pluginId, pluginVersion)` 键控的缓存：
-- MCP 常驻进程：内存 LRU，按总字节上限淘汰。
-- CLI：可选落盘到 `~/.cache/anyfile/index/`，值为插件序列化的紧凑索引；文件变化后自动失效。
+PST、归档、HDF5、大型 SQLite 等格式建立索引成本高。`ExtractIndexCache` 提供按 `(realpath, size, mtimeMs, pluginId, pluginVersion)` 键控的缓存：
+- MCP 常驻进程：默认启用内存 LRU，按总字节上限淘汰。
+- CLI：默认不落盘（避免将邮件文件夹名、表名、变量名等敏感元数据残留至磁盘）；仅在显式开启磁盘缓存参数时写入 `~/.cache/anyfile/index/`，文件变化后自动失效。
 - 插件只存派生索引（偏移表、目录树），不缓存文件正文。
 
 ---
@@ -188,15 +204,15 @@ PST、归档、HDF5、大型 SQLite 等格式建立索引成本高，CLI 每次�
 ## 5. 视觉渲染（VisualRenderer）
 
 按优先级选择路径：
-1. 插件实现 `renderImage`：在 Node worker 内解码像素并编码 PNG，不启动浏览器。
-2. 其余插件：在本机 Chromium 中运行完整插件 `open()`，对宿主容器截图。
+1. 插件实现 `StructuredExtractor.renderImage`：在 Node worker 内解码像素并编码 PNG，不启动浏览器。
+2. 其余插件：在本机 Chromium 中运行完整插件 `open()`，优先调用 `controller.captureImage({ target, maxDimension })` 输出纯净内容图；未实现 `captureImage` 时对宿主容器截图兜底。
 
 浏览器路径设计：
 - **浏览器发现（不捆绑、不下载）**：`ANYFILE_BROWSER_PATH` → 自动探测本机 Chrome / Edge / Brave / Chromium；无可用浏览器时仅 `render` 返回明确提示。
 - **驱动**：Node 24 原生 `WebSocket` 直连 `--headless=new --remote-debugging-port=0`，只使用启动、导航、事件等待、元素截图等少量 CDP 命令，不引入 Playwright / Puppeteer。
-- **最小宿主页**：agent 包内置一个独立的轻量宿主页（不依赖 Next.js），加载插件浏览器 bundle、创建容器、调用 `open()`，并以"无工具栏 / 适应容器"的渲染模式请求插件隐藏交互控件。该模式作为可选宿主提示加入 `OpenViewerContext`，插件未支持时截图仍可用。
+- **最小宿主页**：agent 包内置独立的轻量宿主页（不依赖 Next.js），加载插件浏览器 bundle、创建容器并调用 `open()`。
 - **本地隔离服务**：仅监听 `127.0.0.1` 随机端口，带 `COOP: same-origin` / `COEP: require-corp`；插件 bundle 与 WASM 从本地缓存提供；被查看文件经一次性 Token 的 `Range` 端点提供。
-- **完成判定**：等待 `reportPreview({ outcome: "success" })` 后截图，失败时返回对应错误码；不使用固定延时。`target` 通过同一宿主提示传入（如页码），插件不支持时渲染默认视图并在结果中标注。
+- **完成判定**：等待 `reportPreview({ outcome: "success" })` 后出图，失败时返回对应错误码；不使用固定延时。未实现 `captureImage` 且传入 `target` 时渲染默认视图并在结果中标注。
 - **资源回收**：MCP 模式懒启动并复用浏览器进程，空闲超时退出；每次请求后 `dispose()` 并关闭 Tab。
 - **WebGL 风险**：无 GPU 环境依赖 SwiftShader，3D / CAD / 点云渲染可用性需按平台验证，不可用时返回明确错误。
 
@@ -216,7 +232,7 @@ PST、归档、HDF5、大型 SQLite 等格式建立索引成本高，CLI 每次�
 - **严格只读**：不写目标文件；缓存只写入缓存目录。
 - **路径控制**：`realpath` 校验，阻断穿越与符号链接逃逸。MCP 默认仅允许启动工作目录，`--allow-dir` 显式扩展；CLI 访问命令行给出的路径及其工作区根目录。
 - **执行隔离**：每次 extract / query / 像素渲染在 `worker_threads` 中运行，设置 `resourceLimits`（堆上限）与墙钟超时（提取默认 10s、渲染默认 20s），超时直接 `terminate()`；`AbortSignal` 仅用于协作式提前结束，不作为超时手段。
-- **最小权限**：worker 所在子进程以 Node 权限模型启动（`--permission`，仅 `--allow-fs-read` 目标文件、工作区根与插件缓存目录），禁止子进程、网络与写入。
+- **权限边界**：所有文件与工作区访问在主线程完成 `realpath` 白名单校验，仅通过受控的 `DiskFile` 与 `WorkspaceReader` 暴露给 worker，禁止解析阶段发起网络请求；如需进一步收紧 OS 级进程权限，可在 MCP 启动时按 `--allow-dir` 与缓存目录对常驻进程做一次性只读授权，不按单次请求动态拉起 `--permission` 子进程。
 - **浏览器路径**：独立临时 profile，禁用扩展与网络（仅放行本地服务）。
 - **上下文预算**：所有输出经统一裁剪器限制字节与行数（§2.1）。
 
@@ -230,7 +246,24 @@ viewer/plugins/<id>/src/extract.ts   # 可选，package.json "./extract" 暴露
 viewer/<shared>/               # 共享 XML 解析接口等以子路径导出加入现有共享包
 ```
 
-- `viewer/agent` 加入 `pnpm-workspace.yaml`，不注册为插件；`check-repo` 增加：插件声明 `./extract` 时必须有 node 环境的 extract 测试；主站代码不得导入 `./extract` 与 `viewer/agent`。
+### 8.1 插件内部四层边界
+
+新插件开发与存量插件演进统一遵循四层边界（落地时同步写入 [plugin-development.md](plugin-development.md)）：
+
+| 入口 | 运行环境 | 职责与红线 |
+|---|---|---|
+| `manifest.ts`（`./manifest`） | Web / Node 共用 | 纯数据声明，零运行时依赖 |
+| `probe.ts`（`./probe`） | Web / Node 共用 | 有界读头探测支持等级，严禁 DOM 与重型引擎初始化 |
+| `extract.ts`（`./extract`，可选） | Node | 纯 JS/WASM 结构化提取与纯像素出图；严禁 DOM，通过共享 XML 接口与 `initializeRuntimeFromSources` 隔离环境差异 |
+| `index.ts` / `ui.ts`（默认入口） | 浏览器 | DOM/Canvas/WebGL 渲染与 `open()`（可选实现 `captureImage()`），严禁导入 Node API |
+
+### 8.2 门禁约束
+
+- `viewer/agent` 加入 `pnpm-workspace.yaml`，不注册为插件。
+- `check-repo` 与 `check-view-bundle` 强制双宿主单向隔离：
+  - `src/`（Web 宿主）严禁导入 `viewer/agent`、任何插件的 `./extract` 以及 Node 侧纯 JS XML 解析库；
+  - `viewer/agent`（Agent 宿主）严禁依赖 `src/` 或 Next.js；
+  - 插件声明 `./extract` 时必须具备 `// @vitest-environment node` 的 extract 测试。
 - extract 测试使用 `examples/` 真实样例，校验结构、字节上限与无网络访问，纳入 `pnpm check`。
 - 浏览器渲染回归测试通过环境变量开启，不进入常规 `pnpm check`。
 - 产物清单生成与 SHA-256 校验并入 `pnpm build` 的资产准备流程。
