@@ -135,7 +135,7 @@ pnpm check && pnpm test viewer/agent
 
 ## M5：文档合流与真实 Agent 验收（单 Agent + 人工）
 
-1. **文档合流**：将最终协议、资产加载、插件开发边界分别并入 `docs/viewer-plugin-protocol.md`、`docs/viewer-loading-and-deployment.md`、`docs/plugin-development.md` 及各插件 `README.md`，删除过渡文档 `docs/agent-file-reading.md` 与本文档。
+1. **文档合流**：将最终协议、资产加载、插件开发边界分别并入 `docs/viewer-plugin-protocol.md`、`docs/viewer-loading-and-deployment.md`、`docs/plugin-development.md` 及各插件 `README.md`，删除过渡文档 `docs/agent-file-reading.md` 与本文档。修改主的README.md、README.zh-CN.md、AGENTS.md, 并在主站加入一个页面介绍Agent接入. 
 2. **双端最终回归**：
    - 运行全量 `pnpm check && pnpm build`；
    - 人工在浏览器对 Web 主站核心格式做一次集中抽检（确认无回归）；

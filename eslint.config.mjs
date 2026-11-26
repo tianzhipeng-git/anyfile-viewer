@@ -40,6 +40,8 @@ const eslintConfig = defineConfig([
     "public/vendor/mppgo/**",
     "public/vendor/libredwg/**",
     "public/vendor/djvulibre/**",
+    "public/vendor/duckdb/**",
+    "public/vendor/sqljs/**",
     "next-env.d.ts",
     "services/feedback/dist/**",
     "services/feedback/worker-configuration.d.ts",

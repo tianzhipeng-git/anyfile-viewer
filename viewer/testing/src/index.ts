@@ -175,6 +175,12 @@ export function expectPreviewReported(
   }
 }
 
+export {
+  assertExtractorCompliance,
+  createBufferBinarySource,
+  type ExtractorComplianceFixture,
+} from "./extractor-compliance";
+
 export type ViewerPreviewSuccessKind =
   | "static"
   | "animation"

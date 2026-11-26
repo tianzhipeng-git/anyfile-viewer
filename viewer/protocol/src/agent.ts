@@ -22,6 +22,8 @@ export interface EmscriptenFS {
 export interface BinarySource {
   readonly name: string;
   readonly size: number;
+  /** Optional real path on disk when running in Node; enables zero-copy read-only engines like node:sqlite. */
+  readonly filePath?: string;
 
   /** Async range read usable in any JS/TS parser on any thread. */
   read(offset: number, length: number, signal?: AbortSignal): Promise<Uint8Array>;
@@ -101,6 +103,40 @@ export interface AgentFileError {
   readonly message: string;
   readonly pluginId?: string;
 }
+
+export class AgentError extends Error implements AgentFileError {
+  readonly code: AgentErrorCode;
+  readonly pluginId?: string;
+  override readonly cause?: unknown;
+
+  constructor(
+    code: AgentErrorCode,
+    message: string,
+    options?: { readonly pluginId?: string; readonly cause?: unknown },
+  ) {
+    super(message);
+    this.name = "AgentError";
+    this.code = code;
+    this.pluginId = options?.pluginId;
+    this.cause = options?.cause;
+  }
+}
+
+export const AGENT_ERROR_CODES: readonly AgentErrorCode[] = [
+  "invalid-file",
+  "encrypted-file",
+  "missing-related-file",
+  "target-not-found",
+  "unsupported-capability",
+  "runtime-unavailable",
+  "resource-limit",
+  "timeout",
+  "access-denied",
+] as const;
+
+export const DEFAULT_READ_MAX_BYTES = 48 * 1024;
+export const HARD_READ_MAX_BYTES = 256 * 1024;
+export const DEFAULT_INSPECT_MAX_BYTES = 8 * 1024;
 
 export interface RgbaImage {
   readonly width: number;

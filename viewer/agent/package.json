@@ -1,0 +1,28 @@
+{
+  "name": "@anyfile/agent",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "anyfile": "./src/cli.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./cli": "./src/cli.ts",
+    "./mcp": "./src/mcp.ts"
+  },
+  "scripts": {
+    "generate:extractors": "node ./scripts/generate-extractors.mjs"
+  },
+  "dependencies": {
+    "@anyfile/plist-viewer": "workspace:*",
+    "@anyfile/pst-viewer": "workspace:*",
+    "@anyfile/runtime-assets": "workspace:*",
+    "@anyfile/sqlite-viewer": "workspace:*",
+    "@anyfile/viewer-protocol": "workspace:*",
+    "@anyfile/viewer-registry": "workspace:*"
+  },
+  "devDependencies": {
+    "@anyfile/viewer-test": "workspace:*"
+  }
+}

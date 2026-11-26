@@ -303,6 +303,31 @@ importers:
         specifier: 4.130.0
         version: 4.130.0(@cloudflare/workers-types@5.20260908.1)
 
+  viewer/agent:
+    dependencies:
+      '@anyfile/plist-viewer':
+        specifier: workspace:*
+        version: link:../plugins/plist
+      '@anyfile/pst-viewer':
+        specifier: workspace:*
+        version: link:../plugins/pst
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../runtime-assets
+      '@anyfile/sqlite-viewer':
+        specifier: workspace:*
+        version: link:../plugins/sqlite
+      '@anyfile/viewer-protocol':
+        specifier: workspace:*
+        version: link:../protocol
+      '@anyfile/viewer-registry':
+        specifier: workspace:*
+        version: link:../registry
+    devDependencies:
+      '@anyfile/viewer-test':
+        specifier: workspace:*
+        version: link:../testing
+
   viewer/dev-binary-core: {}
 
   viewer/ffmpeg-playback:

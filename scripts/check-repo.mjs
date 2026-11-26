@@ -13,7 +13,7 @@ const LARGE_FILE_ALLOWLIST = new Set(["docs/ebooks/fixtures/huge-binary.fb2"]);
 // Plugins that predate the real-sample rule. Remove an entry once the plugin gains examples/.
 const PLUGINS_WITHOUT_SAMPLES = new Set([
   "cad-dwg", "cad-exchange", "camera-raw", "code", "comic-book", "dev-wasm", "dji-osmo", "epub", "ffmpeg-video",
-  "fictionbook", "gopro-max", "hex", "insta360", "mobi", "pixelmator-pxd", "powerpoint", "sqlite",
+  "fictionbook", "gopro-max", "hex", "insta360", "mobi", "pixelmator-pxd", "powerpoint",
 ]);
 // Registered plugins without a site page in src/content/manifests.ts.
 // The FFmpeg viewers are fallbacks behind an unpublished extension set.
@@ -110,6 +110,23 @@ for (const name of pluginDirectories) {
 
   const sources = walk(join(root, "src"));
   if (!sources.some((path) => /\.test\.ts$/.test(path))) fail(`${where}: has no *.test.ts`);
+
+  if (pkg.exports?.["./extract"]) {
+    if (pkg.exports["./extract"] !== "./src/extract.ts") {
+      fail(`${where}: package.json must export ./extract from ./src/extract.ts`);
+    }
+    if (!existsSync(join(root, "src/extract.ts"))) {
+      fail(`${where}: package.json exports ./extract but src/extract.ts is missing`);
+    }
+    const nodeExtractTests = sources.filter((path) => {
+      if (!/\.test\.ts$/.test(path)) return false;
+      const content = read(path);
+      return /@vitest-environment\s+node\b/.test(content) && /examples\b/.test(content);
+    });
+    if (nodeExtractTests.length === 0) {
+      fail(`${where}: exports ./extract and must include a // @vitest-environment node test using real examples/ fixtures`);
+    }
+  }
 
   const hasSamples = SAMPLE_DIRECTORIES.some((sub) => existsSync(join(root, sub))
     && walk(join(root, sub)).some((path) => !NON_SAMPLE.test(path.split("/").pop())));

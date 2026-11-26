@@ -20,6 +20,14 @@ export {
   type LocalizedText,
 } from "@anyfile/i18n";
 
+export {
+  AGENT_ERROR_CODES,
+  AgentError,
+  DEFAULT_INSPECT_MAX_BYTES,
+  DEFAULT_READ_MAX_BYTES,
+  HARD_READ_MAX_BYTES,
+} from "./agent";
+
 export type {
   AgentCapability,
   AgentErrorCode,
