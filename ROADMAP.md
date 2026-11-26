@@ -7,9 +7,9 @@
 - 备注：可选，一句话。来源证据、受阻原因、完成提交写在这里，不另建文档。
 
 流程规则见：
-- 每日开发：`docs/agent-daily-dev.md`
-- 每周需求评估：`docs/agent-weekly-demand.md`
-- 每周 review：`docs/agent-weekly-review.md`
+- 每日开发：`docs/dev-loop/agent-daily-dev.md`
+- 每周需求评估：`docs/dev-loop/agent-weekly-demand.md`
+- 每周 review：`docs/dev-loop/agent-weekly-review.md`
 
 ## 需求
 - [x] 低 | 在 `@anyfile/runtime-assets` 中抽取共享 Worker RPC 客户端 | 20+ Worker+WASM 插件重复编写请求 ID 关联、超时、`AbortSignal` 终止、transferable 与运行时回退逻辑（如 `djvu/src/worker-client.ts` 近 200 行）；抽为轻量类型化 `createWorkerRpcClient` 减少泄漏与取消竞态。2026-11-23 迁移 djvu/postscript/general-raster/photoshop，工厂与单测见 `viewer/runtime-assets/src/worker-rpc.ts` 2026-11-23 7c38d60

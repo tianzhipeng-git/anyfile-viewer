@@ -1,16 +1,16 @@
-# Agent 冷门文件读取方案
+# Agent 冷门文件读取方案 & V0.2.0版本规划
 
-> 状态：架构方案，尚未实现。落地时，协议相关部分并入 [viewer-plugin-protocol.md](viewer-plugin-protocol.md)，插件级细节写入各插件 README。
+> 状态：架构方案，尚未实现。落地时，协议部分并入 [viewer-plugin-protocol.md](viewer-plugin-protocol.md)，加载与资产约定并入 [viewer-loading-and-deployment.md](viewer-loading-and-deployment.md)，插件开发边界并入 [plugin-development.md](plugin-development.md)，插件级细节写入各插件 README。
 
-本文定义将 `anyfile-viewer` 的多格式解析与渲染能力开放给 AI Agent 的整体架构，涵盖统一能力契约、插件协议扩展、Node 运行时适配、隔离模型、视觉渲染、分发缓存与仓库边界。
+本文定义将 `anyfile-viewer` 的多格式解析与渲染能力开放给 AI Agent 的整体架构，涵盖能力契约、双端统一插件边界、统一文件 I/O、Node 执行池、视觉渲染宿主、共享资产分发与仓库门禁。
 
 ## 1. 目标与架构总览
 
-目标：让各类 AI Agent（终端 Coding Agent、桌面聊天客户端、IDE Agent）快速、安全、低上下文消耗地**读懂**本地冷门与专有二进制文件（`.pst`、`.ofd`、`.h5`、`.sav`、`.dwg`、`.psd`、`.pages`、`.exr`、`.gguf` 等）。Agent 已能原生读取的 PDF、常见图片、纯文本不是重点，但仍可经同一路由处理。
+目标：让各类 AI Agent（终端 Coding Agent、桌面聊天客户端、IDE Agent）快速、安全、低上下文消耗地**读懂**本地冷门与专有二进制文件。Agent 已能原生读取的常见文本、图片和常规文档仍可经同一路由处理。
 
-产品范围变化：主站保持"只查看、不上传"；Agent 入口新增"本地只读提取为文本 / 图像"能力。落地时需同步修订协议 §1 中"不转换或导出"的表述。
+产品范围变化：Web 主站保持“只查看、不上传”；Agent 宿主新增“本地只读提取为结构化文本 / 有界 PNG”能力。落地时同步修订协议 §1 中“不转换或导出”的表述。
 
-整体为 **1 个 npm 包、2 个入口、2 种执行后端**：
+整体为 **1 个公开 npm 包、2 个入口、2 种执行后端**：
 
 ```text
   Coding Agent (带终端)                 桌面 / IDE / 受限 Agent (无终端)
@@ -20,70 +20,71 @@
    + 内置 SKILL.md                                   │
           └────────────────────┬─────────────────────┘
                                ▼
-            ┌─────────────────────────────────────┐
-            │      @anyfile/agent（单一 npm 包）   │
-            │ • 路径校验、Node File / Workspace 适配│
-            │ • 复用 manifest + probe() 路由       │
-            │ • 隔离执行池（worker_threads）       │
-            │ • 解析索引缓存、响应裁剪与游标分页   │
-            │ • 插件产物分发与校验                 │
-            └──────────┬────────────────┬─────────┘
-          结构化提取   │                │  视觉出图
-                       ▼                ▼
-         ┌──────────────────────┐ ┌──────────────────────────────┐
-         │ 插件 ./extract        │ │ VisualRenderer               │
-         │ Node worker 内运行    │ │ 纯像素插件：Node 直接编码 PNG │
-         │ 纯 JS / WASM          │ │ 其余：本机 Chromium + CDP     │
-         └──────────────────────┘ └──────────────────────────────┘
+            ┌──────────────────────────────────────────┐
+            │        @anyfile/agent（单一 npm 包）      │
+            │ • realpath 权限校验、BinarySource 适配   │
+            │ • 共享路由注册表 + Magic Bytes 兜底探测   │
+            │ • worker_threads 执行池与会话内存 LRU     │
+            │ • 响应预算裁剪、不透明游标与错误码映射    │
+            │ • /vendor/ 资产按需拉取与 SHA-256 校验    │
+            └──────────┬───────────────────┬───────────┘
+          结构化提取   │                   │  视觉出图
+                       ▼                   ▼
+         ┌──────────────────────┐ ┌─────────────────────────────────┐
+         │ 插件 ./extract        │ │ VisualRenderer                  │
+         │ Node worker 内运行    │ │ 纯像素插件：Node 直接编码 PNG    │
+         │ 纯 JS / WASM / 内置库 │ │ 其余：本机 Chromium + CDP        │
+         └──────────────────────┘ │   + 单一 Vite renderer-host     │
+                                  └─────────────────────────────────┘
 ```
 
-设计约束：
-- **共享引擎 + 双宿主架构**：仓库定位为“共享多格式引擎（`viewer/plugins/*`、`tools/`、`third_party/`、R2 资产）+ 双宿主消费端”。Web 宿主（`src/`）与 Agent 宿主（`viewer/agent/`）平级且互不依赖，单向复用底层插件与资产。
-- **协议原生扩展**：不建平行格式注册表，路由完全复用插件 Manifest、`probe()` 与注册顺序。
-- **主站零负担**：主站仍只静态导入 `/manifest`，按需加载 `/probe` 与完整插件；`./extract` 与 Node 侧依赖不进入任何主站 chunk。
-- **本地只读**：文件内容不离开本机；提取过程禁止网络访问。
+核心架构约束：
+- **共享引擎 + 双宿主平级消费**：仓库由“共享多格式引擎（`@anyfile/viewer-registry`、`viewer/plugins/*`、`viewer/*`、`tools/`、`third_party/`、R2 `/vendor/` 资产）”与两个互不依赖的宿主组成——Web 宿主（`src/`）与 Agent 宿主（`viewer/agent/`）。
+- **主站零负担**：Web 主站仍只静态导入 `/manifest`，按需动态加载 `/probe` 与浏览器入口；`./extract` 与 Node 侧实现不进入任何主站 chunk。
+- **本地只读**：用户文件内容不离开本机；解析与浏览器渲染过程禁止访问公网。
 
 ---
 
 ## 2. 统一能力契约
 
-对外收敛为 4 个工具，不按格式拆分；CLI 子命令与 MCP 工具一一对应。
+对外收敛为 4 个业务工具，不按文件格式拆分；CLI 子命令与 MCP 工具一一对应，共享同一套核心实现。
 
 | MCP 工具 | CLI | 用途 |
 |---|---|---|
-| `inspect_file` | `anyfile inspect <path>` | 识别格式，返回元数据与可读目标索引 |
-| `read_file` | `anyfile read <path> [--target t] [--cursor c] [--filter kw] [--max-bytes n]` | 按目标分块读取正文 |
-| `query_file` | `anyfile query <path> --sql <sql> [--target t]` | 仅原生具备 SQL 引擎的插件（`sqlite`、`duckdb`）声明支持；其余表格/数组切片走 `read_file` |
+| `inspect_file` | `anyfile inspect <path>` | 识别格式，返回元数据、支持能力与可读目标索引 |
+| `read_file` | `anyfile read <path> [--target t] [--cursor c] [--filter kw] [--max-bytes n] [--out file]` | 按目标分块读取结构化正文 |
+| `query_file` | `anyfile query <path> --sql <sql> [--target t] [--cursor c] [--max-bytes n] [--out file]` | 仅具备 SQL 引擎的插件（`sqlite`、`duckdb`）声明支持；其余表格/数组切片走 `read_file` |
 | `render_file` | `anyfile render <path> [--target t] [--max-dim px] [--out file]` | 输出有界 PNG |
 
-另有维护命令 `anyfile cache <list|add|clear>` 与 `anyfile mcp [--allow-dir <dir>...]`。
+另有维护与服务子命令：`anyfile cache <list|add|clear>` 与 `anyfile mcp [--allow-dir <dir>...]`。
 
-### 2.1 核心类型
+### 2.1 数据结构与错误契约
 
 ```ts
 interface InspectResult {
   readonly pluginId: string;
   readonly formatName: string;
-  readonly supportLevel: ViewerSupportLevel;          // 来自 probe()
+  readonly supportLevel: ViewerSupportLevel;
+  readonly matchedBy: "extension" | "magic";
   readonly candidates: readonly { pluginId: string; supportLevel: ViewerSupportLevel }[];
   readonly capabilities: readonly ("read" | "query" | "render")[];
   readonly metadata: Readonly<Record<string, JsonValue>>; // 页数、尺寸、表清单、数据集树、文件夹树、归档统计…
-  readonly targets: readonly TargetEntry[];             // 截断时附 targetsTruncated
+  readonly targets: readonly TargetEntry[];
   readonly targetsTruncated?: boolean;
 }
 
 interface TargetEntry {
-  readonly id: string;      // 插件自定义的不透明定位键，如 "page:3"、"table:users"、"folder:Inbox/12"
+  readonly id: string;      // 插件定义的不透明定位键，如 "page:3"、"table:users"、"folder:Inbox/12"
   readonly title: string;
   readonly kind?: string;   // "page" | "sheet" | "table" | "dataset" | "message" | "entry" …
-  readonly size?: number;   // 条目数、行数或字节数，帮助 Agent 判断读取成本
+  readonly size?: number;   // 条目数、行数或字节数，供 Agent 评估读取成本
 }
 
 interface ReadParams {
   readonly target?: string;  // 省略时读取默认目标（首页、首表、摘要）
   readonly cursor?: string;  // 上次 ReadResult.nextCursor，不透明
-  readonly filter?: string;  // 关键字过滤，插件不支持时忽略并在结果中标注
-  readonly maxBytes: number; // 由 agent-core 传入
+  readonly filter?: string;  // 关键字过滤；插件不支持时忽略并在结果中置 filterApplied: false
+  readonly maxBytes: number;
 }
 
 interface ReadResult {
@@ -94,58 +95,126 @@ interface ReadResult {
   readonly filterApplied?: boolean;
 }
 
-interface QueryParams { readonly sql: string; readonly target?: string; readonly maxBytes: number; readonly cursor?: string }
+interface QueryParams {
+  readonly sql: string;
+  readonly target?: string;
+  readonly cursor?: string;
+  readonly maxBytes: number;
+}
+
+type AgentErrorCode =
+  | "invalid-file"            // 文件损坏或并非该格式
+  | "encrypted-file"          // 受密码或加密保护，无法无交互读取
+  | "missing-related-file"    // 缺少必需的关联工作区文件
+  | "target-not-found"        // 指定的 target 或 cursor 无效
+  | "unsupported-capability"  // 当前插件不支持 read / query / render 该操作
+  | "runtime-unavailable"     // WASM 资产缺失/校验失败，或 render 缺少可用浏览器/WebGL
+  | "resource-limit"          // 超出文件、内存或解压安全上限
+  | "timeout"                 // 超出单次执行墙钟时间上限
+  | "access-denied";          // 路径不存在或越出允许目录
+
+interface AgentFileError {
+  readonly code: AgentErrorCode;
+  readonly message: string;   // 稳定英文诊断，不含敏感正文或解析器堆栈
+  readonly pluginId?: string;
+}
 ```
 
-- 定位键语法由插件定义，Agent 只从 `targets` 复制，不自行拼接；分页只用不透明 `cursor`。
-- 原始二进制字段折叠为 `<binary N bytes>`；大数组、长字符串由插件按 `maxBytes` 预裁剪，agent-core 再做兜底硬裁剪。
-- 预算默认值：`inspect` ≤ 8 KiB；`read` / `query` 默认 48 KiB，可通过 `--max-bytes` / 参数调整，硬上限 256 KiB。CLI 可用 `--out` 将完整分块写到文件，避免进入上下文。
-- `query_file` 只执行只读语句：SQLite 以只读方式打开，DuckDB 禁用外部访问与写入扩展；非数据插件不声明 `query` 能力。
+输出与安全约束：
+- 定位键语法由各插件私有定义，Agent 只从 `targets` 复制 `id`，不自行拼接；翻页只传递不透明 `cursor`。
+- 原始二进制字段统一折叠为 `<binary N bytes>`；大数组、长字符串先由插件按 `maxBytes` 预裁剪，再由 `agent-core` 做兜底字节与行数硬裁剪。
+- 默认预算：`inspect` ≤ 8 KiB；`read` / `query` 默认 48 KiB，支持参数调整，硬上限 256 KiB。CLI 指定 `--out <file>` 时将完整分块直接写入目标文件，终端仅打印摘要元数据。
+- `query_file` 强制只读：SQLite 以只读模式打开并拒绝写语句与扩展加载；DuckDB 以 `READ_ONLY` 打开并禁用外部文件/网络访问。
 
-### 2.2 Skill 与 MCP
+### 2.2 Skill 与 MCP 分工
 
-- 包内附带 `SKILL.md`：遇到陌生或二进制文件时先 `anyfile inspect`，再按 `capabilities` 与 `targets` 调用 `read` / `query` / `render`。终端 Agent 优先走 CLI + Skill。
-- MCP 面向没有终端的客户端与只允许白名单工具的环境：`render_file` 直接返回 `image` content block（`image/png`），其余工具返回文本。MCP 与 CLI 共享同一实现，不维护两套逻辑。
+- 包内附带 `SKILL.md`：指导终端 Coding Agent 遇到陌生或专有二进制文件时先执行 `anyfile inspect`，再按 `capabilities` 与 `targets` 调用 `read` / `query` / `render`。
+- MCP 服务面向无终端客户端：`render_file` 直接返回 MCP `image` content block（`image/png`），其余工具返回文本；失败时统一返回带 `AgentErrorCode` 的结构化错误，防止 Agent 盲目重试。
 
 ---
 
-## 3. 插件协议扩展
+## 3. 共享路由与双端统一插件边界
 
-在 [viewer-plugin-protocol.md](viewer-plugin-protocol.md) 基础上新增两项可选扩展；未实现的插件在 Agent 入口只提供 `inspect`（Manifest + probe 结果）和容器截图渲染。
+### 3.1 共享路由注册表与 Magic Bytes 兜底
 
-### 3.1 `./extract` 子路径
+1. **下沉共享注册表（`@anyfile/viewer-registry`）**：将插件路由优先级顺序、`manifest` 与动态 `./probe` 引用从 `src/lib/registrations/` 抽离至独立共享包 `@anyfile/viewer-registry`（不含浏览器 `load()`）。Web 宿主在此基础上绑定浏览器 `load()`，Agent 宿主绑定 `./extract` 与渲染器，消除双宿主间的平行注册表。
+2. **Probe 纯净化**：所有插件的 `probe.ts` 仅做基于文件头/目录结构的格式识别与子格式判定，不检测 `VideoDecoder`、`AudioContext`、`Worker` 等浏览器专属全局对象。
+3. **无后缀与错后缀兜底**：Agent 路由先按文件名与扩展名匹配候选并执行 `probe()`；若无扩展名匹配或全部候选返回 `0`（常见于解包产物、`.bin`/`.dat`、Git blob、临时文件），自动对具备明确魔数签名的插件执行一轮 fallback `probe`，命中时在 `InspectResult.matchedBy` 中标记 `"magic"`。
 
-插件在 `package.json` 的 `exports` 中声明 `./extract`，Manifest 不新增字段，agent 构建时按 exports 生成能力表。
+### 3.2 双端统一 I/O 与环境适配接口
+
+为让插件作者**核心解析逻辑只写一遍即可同时对接 Web 与 Agent**，在共享包中提供以下标准基础设施：
+
+#### 统一随机读数据源 `BinarySource`
+
+浏览器主线程与 Node 都支持异步切片读取，而 C/C++/Rust 编译的 WASM 引擎在底层 POSIX `pread` 中需要后台线程内的**同步随机读**（Web Worker 内基于 `FileReaderSync`，Node `worker_threads` 内基于 `fs.readSync`）。通过 `@anyfile/viewer-protocol` 统一暴露 `BinarySource`，屏蔽双端底层差异：
+
+```ts
+export interface BinarySource {
+  readonly name: string;
+  readonly size: number;
+
+  /** 异步区间读取：供纯 JS/TS 解析器在任意线程使用 */
+  read(offset: number, length: number, signal?: AbortSignal): Promise<Uint8Array>;
+
+  /** 同步区间读取：在 Web Worker 与 Node worker_threads 内可用，直接对接 C/WASM 同步读取回调 */
+  readSync(offset: number, target: Uint8Array): number;
+
+  /** Emscripten FS 只读挂载：Web Worker 内挂载 WORKERFS，Node worker 内挂载只读节点/设备 */
+  mountEmscripten?(FS: EmscriptenFS, mountDir: string): { readonly filePath: string; unmount(): void };
+}
+```
+
+- 纯 JS/TS 插件：解析模块接收 `BinarySource`，仅调用 `await source.read(offset, length, signal)`，Web `open()` 与 Agent `./extract` 直接复用同一解析模块。
+- C/WASM 插件：核心引擎模块只依赖 `source.readSync` 或 `source.mountEmscripten`；Agent `./extract` 在 `worker_threads` 内直接调用核心引擎，Web 侧仅保留极薄的 Web Worker 消息转发壳。
+- SDK 内部自管 Worker 与协议的少量例外（如 `@duckdb/duckdb-wasm`）：通过子模块 `"browser"` / `"node"` 条件导出隔离约二十行的会话创建逻辑，上层 Schema 发现、查询与值格式化完全共用；`sqlite` 的 `./extract` 直接使用 Node 24 内置 `node:sqlite`（`readOnly: true`）按页随机读取，无需整库载入内存。
+
+#### 统一 XML 解析与运行时动态导入
+
+- **XML 解析接口**：共享包通过 `package.json` 的 `"browser"` / `"node"` 条件导出提供统一只读 XML DOM 接口；浏览器侧封装原生 `DOMParser`，Node 侧封装锁定精确版本的纯 JS XML 解析库。插件解析层只依赖该接口，不直接访问全局 `DOMParser`。
+- **运行时加载辅助 `importRuntime(url)`**：在 `@anyfile/runtime-assets` 中统一封装动态 URL `import()`（集中处理 `webpackIgnore`、`turbopackIgnore` 与 `@vite-ignore`），插件源码内不再手写任何打包器专用注释。
+
+### 3.3 插件四层入口与 `./extract` 契约
+
+每个插件遵循四层入口边界：
+
+| 入口 | 运行环境 | 职责与红线 |
+|---|---|---|
+| `manifest.ts`（`./manifest`） | Web / Node 共用 | 纯静态元数据声明，零运行时依赖 |
+| `probe.ts`（`./probe`） | Web / Node 共用 | 有界读头识别格式支持等级，严禁访问浏览器专属全局或初始化重型引擎 |
+| `extract.ts`（`./extract`，可选） | Node（`worker_threads`） | 结构化提取与纯像素解码；严禁 DOM/Web Worker，统一经 `BinarySource`、共享 XML 接口与本地 `/vendor/` 资产运行 |
+| `index.ts`（默认入口 `.`） | 浏览器 | DOM/Canvas/WebGL 交互查看与 `open()`（可选实现 `captureImage()`），严禁导入 Node API |
+
+`./extract` 在插件 `package.json` 的 `exports` 中声明，类型契约如下：
 
 ```ts
 export interface StructuredExtractor {
-  inspect(context: ExtractContext): Promise<InspectPayload>; // InspectResult 中插件负责的部分
+  inspect(context: ExtractContext): Promise<InspectPayload>;
   read(context: ExtractContext, params: ReadParams): Promise<ReadResult>;
   query?(context: ExtractContext, params: QueryParams): Promise<ReadResult>;
   renderImage?(context: ExtractContext, params: { target?: string; maxDimension: number }): Promise<RgbaImage>;
 }
 
 export interface ExtractContext {
+  readonly source: BinarySource;
   readonly file: File;
   readonly workspace?: WorkspaceReader;   // 与 OpenViewerContext 同一接口，按 workspaceAccess 提供
   readonly relativePath?: string;
   readonly signal: AbortSignal;
-  readonly cache: ExtractIndexCache;      // 见 §4.4
 }
 
-interface RgbaImage { readonly width: number; readonly height: number; readonly data: Uint8ClampedArray }
+export interface RgbaImage {
+  readonly width: number;
+  readonly height: number;
+  readonly data: Uint8ClampedArray;
+}
 ```
 
-约束：
-- **无 DOM、无浏览器专属 API**：不得使用 `document`、`DOMParser`、`createImageBitmap`、`OffscreenCanvas`、`ImageDecoder`、`Worker`。XML 解析统一使用共享包提供的纯 JS 解析器（§4.2）。
-- **有界随机读**：`read` 只读取目标所需字节，不得在每次调用时全量扫描文件；必须全量扫描才能建立的索引交给 `cache`。
-- **运行时资产**：WASM 等资产经现有 `initializeRuntimeFromSources` 加载，Node 侧新增"本地文件"来源（§4.3），不另建加载机制。
-- 不发起网络请求；`renderImage` 仅限能在纯 JS/WASM 中解码像素的插件。
-- 测试以 `// @vitest-environment node` 运行，使用插件 `examples/` 真实样例，校验输出结构与字节上限。
+覆盖原则：除常规复杂流式/重排版 Office 文档（`word`、`powerpoint`、`legacy-office`，此类格式生态已有成熟工具且重写完整版式结构提取性价比极低，在 Agent 侧仅提供基础 probe 与浏览器 `render_file` 截图兜底）及纯音视频播放外，其余具备有意义文本、表格、树形结构、元数据或可解码像素的插件均提供 `./extract`。
 
-### 3.2 `ViewerController.captureImage`（可选）
+### 3.4 `ViewerController.captureImage`（可选）
 
-在现有 `ViewerController` 上增加可选方法 `captureImage`，用于浏览器渲染路径输出纯净内容图（不含工具栏与侧边栏），并支持单次 `open()` 后按 `target` 连续切页出图，无需修改主站 UI 布局分支：
+在浏览器 `ViewerController` 上新增可选方法 `captureImage`，供视觉渲染宿主输出不含外围工具栏/侧边栏的纯净内容图，并支持单次 `open()` 后按 `target` 切页或切换视图连续出图：
 
 ```ts
 export interface CaptureImageOptions {
@@ -160,110 +229,88 @@ export interface ViewerController {
 }
 ```
 
-### 3.3 解析层拆分要求
-
-`./extract` 要求解析逻辑可在主线程同步调用，现状需要分类改造：
-
-| 现状 | 涉及插件 | 改造 |
-|---|---|---|
-| 纯 JS / WASM，无浏览器 API | sqlite、excel、ml-weights、archive、plist、har、torrent、certificate、dev-*、code、hex、duckdb、calendar-contacts | 直接新增 extract |
-| 依赖 `DOMParser` | chm、epub、fictionbook、iwork、mind-map、ofd、pst、visio、xps、svg、comic-book、`rendering-publication` | 解析层改用共享 XML 解析接口（浏览器注入 `DOMParser`，Node 注入纯 JS 实现） |
-| 解析位于 Worker / WORKERFS 之后 | scientific-data、stat-data、mpp、mobi、dicom、visio、photoshop、djvu、postscript 等 | 把 worker 内的解析模块拆成可直接调用的函数，worker 文件只做消息转发 |
-| 依赖浏览器图像解码 | browser-image、general-raster、modern-raster、photoshop、pixelmator-pxd、ofd、xps、gopro/insta360/dji 等 | 元数据走 extract；像素走 `renderImage`（有 WASM 解码器时）或浏览器渲染 |
-| 主要内容依赖 DOM 渲染库 | word（docx-preview）、powerpoint、legacy-office 等 | extract 使用独立的结构解析（OOXML 本身为 ZIP + XML），不复用渲染库 |
-
 ---
 
-## 4. Node 运行时
+## 4. Node 运行时与执行池
 
-### 4.1 File 与 Workspace 适配
+### 4.1 文件、工作区与资产加载
 
-- 主文件基于 `fs.promises.FileHandle` 实现惰性 `DiskFile`（符合标准 `File` 接口，带显式 `close()`），`slice()` 仅记录区间偏移，真正读取时按区间 `read()`，确保大文件按需随机读且跨平台无文件描述符泄漏。
-- 单次整体读取沿用协议输入上限（默认 128 MiB）。
-- `WorkspaceReader` 以主文件所在目录为根实现，路径经 `realpath` 校验不得越出根目录与允许目录；按插件 `workspaceAccess` 决定是否提供（OBJ+MTL、DICOM 序列、分卷压缩等）。
+- **文件与工作区**：主线程完成目标文件及关联目录的 `realpath` 校验后，在 worker 内基于只读文件描述符构造 `BinarySource` 与惰性 `DiskFile`（`slice()` 仅记录偏移区间，读取后显式释放句柄，确保跨平台无 fd 泄漏）。`WorkspaceReader` 以主文件所在目录为根，严格拦截路径穿越与越界符号链接，按插件 `workspaceAccess` 注入。
+- **Node 侧 `/vendor/` 资产加载**：`@anyfile/runtime-assets` 在 Node 环境下将资产源解析为本地缓存目录 `~/.cache/anyfile/vendor/<pkg>/<version>/`，经 SHA-256 校验后以本地字节加载 `.wasm` 及数据文件，不发起任何网络 `fetch`。
 
-### 4.2 浏览器 API 替代
+### 4.2 Worker 执行池与内存会话缓存
 
-- **XML**：新增共享子路径导出 XML 解析接口，在 `package.json` 中通过 `"browser"` / `"node"` 条件导出严格隔离；浏览器实现包装 `DOMParser`，Node 实现使用精确锁版本的纯 JS DOM 解析库，由 `check-view-bundle` 确保 Node 解析库不进入主站浏览器 bundle。插件只依赖接口，禁止直接调用全局 `DOMParser`。
-- **PNG 编码**：agent-core 内置 PNG 编码（`RgbaImage` → PNG），供 `renderImage` 使用。
-- 其余插件需要的浏览器 API 不做 polyfill，对应能力走浏览器渲染后端。
+所有 `./extract` 调用在受控 `worker_threads` 中执行，配置 `resourceLimits`（堆内存上限）与单次调用墙钟超时（`inspect`/`read`/`query` 默认 10s，`renderImage` 默认 20s）；超时直接 `worker.terminate()` 并返回 `timeout` 错误码，`AbortSignal` 仅作协作式提前取消。
 
-### 4.3 运行时资产加载
-
-`initializeRuntimeFromSources` 的来源列表在 Node 环境下替换为单一本地来源：从插件产物缓存目录（§6）以 `fs.readFile` 读取 `.wasm` 与数据文件，按清单中的 SHA-256 校验后传入引擎初始化，不经过 `fetch` / `WORKERFS`。
-
-### 4.4 解析索引缓存
-
-PST、归档、HDF5、大型 SQLite 等格式建立索引成本高。`ExtractIndexCache` 提供按 `(realpath, size, mtimeMs, pluginId, pluginVersion)` 键控的缓存：
-- MCP 常驻进程：默认启用内存 LRU，按总字节上限淘汰。
-- CLI：默认不落盘（避免将邮件文件夹名、表名、变量名等敏感元数据残留至磁盘）；仅在显式开启磁盘缓存参数时写入 `~/.cache/anyfile/index/`，文件变化后自动失效。
-- 插件只存派生索引（偏移表、目录树），不缓存文件正文。
+- **MCP 常驻模式**：维护小型插件 Worker 池，Worker 内部以 `(realpath, size, mtimeMs, pluginId)` 为键维护有界内存 LRU，缓存已实例化的 WASM 模块与已打开的只读解析会话/派生目录索引（如 PST 文件夹树、归档中央目录、HDF5 句柄、SQLite/DuckDB 只读连接）。Agent 连续调用 `inspect` → `read`（含 `cursor` 翻页）→ `query` 时直接命中热会话，空闲超时后自动回收关闭。
+- **CLI 单次模式**：单次命令执行完毕即退出释放，不向磁盘写入任何文件索引缓存，彻底避免文件名、表名、邮件目录等敏感元数据落盘残留。
 
 ---
 
 ## 5. 视觉渲染（VisualRenderer）
 
-按优先级选择路径：
-1. 插件实现 `StructuredExtractor.renderImage`：在 Node worker 内解码像素并编码 PNG，不启动浏览器。
-2. 其余插件：在本机 Chromium 中运行完整插件 `open()`，优先调用 `controller.captureImage({ target, maxDimension })` 输出纯净内容图；未实现 `captureImage` 时对宿主容器截图兜底。
+`render_file` 按以下优先级生成有界 PNG（最大边长默认 `1600px`，硬上限 `4096px`）：
 
-浏览器路径设计：
-- **浏览器发现（不捆绑、不下载）**：`ANYFILE_BROWSER_PATH` → 自动探测本机 Chrome / Edge / Brave / Chromium；无可用浏览器时仅 `render` 返回明确提示。
-- **驱动**：Node 24 原生 `WebSocket` 直连 `--headless=new --remote-debugging-port=0`，只使用启动、导航、事件等待、元素截图等少量 CDP 命令，不引入 Playwright / Puppeteer。
-- **最小宿主页**：agent 包内置独立的轻量宿主页（不依赖 Next.js），加载插件浏览器 bundle、创建容器并调用 `open()`。
-- **本地隔离服务**：仅监听 `127.0.0.1` 随机端口，带 `COOP: same-origin` / `COEP: require-corp`；插件 bundle 与 WASM 从本地缓存提供；被查看文件经一次性 Token 的 `Range` 端点提供。
-- **完成判定**：等待 `reportPreview({ outcome: "success" })` 后出图，失败时返回对应错误码；不使用固定延时。未实现 `captureImage` 且传入 `target` 时渲染默认视图并在结果中标注。
-- **资源回收**：MCP 模式懒启动并复用浏览器进程，空闲超时退出；每次请求后 `dispose()` 并关闭 Tab。
-- **WebGL 风险**：无 GPU 环境依赖 SwiftShader，3D / CAD / 点云渲染可用性需按平台验证，不可用时返回明确错误。
+1. **Node 纯像素路径（优先）**：若插件在 `./extract` 中实现了 `renderImage`（如 PSD、HDR/EXR、DICOM、HEIC、相机 RAW 等具备 JS/WASM 像素解码器的插件），直接在 Node worker 内解码 `RgbaImage` 并编码为 PNG，不启动浏览器。
+2. **本机 Chromium + 单一 Vite 渲染宿主路径**：其余视觉格式（如 CAD/DWG、3D/STEP/IFC、OFD、XPS、PostScript、DjVu、复杂排版文档等）通过本机 Chromium 运行完整浏览器插件出图。
+
+### 5.1 单一极简 Vite 渲染宿主（`viewer/agent/renderer-host/`）
+
+不为每个插件单独维护浏览器打包器，而是在 `viewer/agent/renderer-host/` 下维护一个约百行的纯静态 Vite 应用：
+- 构建阶段根据 `@anyfile/viewer-registry` 自动生成静态懒加载映射表 `Record<pluginId, () => Promise<FileViewerPlugin>>`，仅执行一次标准 `vite build` 即可利用 Vite 原生代码分割产出全部插件与业务 Web Worker 的按需 chunk。
+- 宿主页提供与主站查看容器一致的基础尺寸约束与 CSS 变量，接收渲染参数后动态加载目标插件并调用 `open()`。
+
+### 5.2 CDP 驱动与本地离线服务
+
+- **浏览器发现（不捆绑、不自动下载浏览器）**：优先读取 `ANYFILE_BROWSER_PATH`，否则自动探测本机已安装的 Chrome / Edge / Brave / Chromium；未找到时仅 `render_file` 返回 `runtime-unavailable` 及明确指引，不影响其余工具。
+- **零重型依赖驱动**：使用 Node 24 原生 `WebSocket` 直连 `--headless=new --remote-debugging-port=0`，仅调用页面导航、生命周期等待与截图等少量 CDP 命令，不引入 Playwright 或 Puppeteer 运行时依赖。
+- **本地 `127.0.0.1` 隔离服务与 `/vendor/` 透明缓存映射**：
+  - 仅绑定 `127.0.0.1` 随机端口，响应头附带 `Cross-Origin-Opener-Policy: same-origin` 与 `Cross-Origin-Embedder-Policy: require-corp`。
+  - 提供 `renderer-host` 静态资源，并通过一次性随机 Token 的只读 `Range` 端点暴露目标文件与授权工作区关联文件。
+  - 宿主页注入本地同源优先标记，使 `@anyfile/runtime-assets` 直接请求同源 `/vendor/<pkg>/<version>/*`（跳过公网 CDN 源）；本地服务拦截 `/vendor/*` 请求并透明映射至 `~/.cache/anyfile/vendor/`——未命中缓存时由 Node 主进程按清单从 `https://assets.anyfile.top/vendor/` 下载并校验 SHA-256 后落盘返回，Chromium 进程本身完全禁网（仅放行 `127.0.0.1`）。
+- **完成判定与出图**：等待插件触发 `reportPreview({ outcome: "success" })`（或 `failure` 映射为对应错误码），优先调用 `controller.captureImage({ target, maxDimension })`；未实现时对挂载容器执行 CDP 节点截图（若传入了非默认 `target` 则在返回元数据中标注未支持目标切页）。
+- **进程复用与 WebGL 兜底**：MCP 模式下懒启动并复用单个无头浏览器进程，每次请求创建独立上下文/Tab 并在 `dispose()` 后关闭，空闲超时退出整个浏览器；无硬件 GPU 环境依赖 SwiftShader，WebGL 不可用时返回明确的 `runtime-unavailable`。
 
 ---
 
-## 6. 分发与缓存
+## 6. 构建、分发与共享资产缓存
 
-1. **npm 包 `@anyfile/agent`**：包含 CLI、MCP、agent-core、全量 Manifest 路由表、PNG 编码、CDP 驱动、最小宿主页，以及**全部插件产物的版本清单（含 SHA-256）**。清单随 npm 包发布，是唯一可信来源。
-2. **插件产物**：构建时为每个插件产出 `extract.mjs`（可选）、`render.mjs`（浏览器 bundle）及 `policy.json` 声明的运行时资产。体积小的 extract 产物直接打入 npm 包；超过包体预算的产物（大型 WASM、渲染 bundle）发布到 `assets.anyfile.top/agent/<pluginId>/<version>/`，对象发布后不可覆盖。
-3. **按需缓存**：首次使用某插件时下载其所需产物至 `~/.cache/anyfile/plugins/<pluginId>@<version>/`（`ANYFILE_CACHE_DIR` 可覆盖），以 npm 包内清单校验 SHA-256，不匹配即拒绝执行；之后离线运行。`anyfile cache add <pluginIds...>` 用于内网预拉取。
-4. 下载只请求插件产物，不携带任何文件信息。
+1. **单一 npm 包 `@anyfile/agent`**：
+   - 仓库内 `@anyfile/*` 均为未独立发布的 `workspace:*` TypeScript 源码包。构建 `@anyfile/agent` 时，将 CLI、MCP、`agent-core`、共享包、全部插件的 `./manifest` + `./probe` + `./extract`（编译为按插件切分的自包含 ESM chunk）、`renderer-host` 静态构建产物（纯 JS/CSS chunk）、`SKILL.md` 以及**全量 `/vendor/` 资产 SHA-256 清单**一并打包发布。
+   - 严禁插件通过 `new URL("*.wasm", import.meta.url)` 让 bundler 将大型 WASM 静态内联进 JS 构建产物；所有重型 WASM/glue 统一走 `/vendor/<pkg>/<version>/...`。
+2. **Web 与 Agent 共用 R2 `/vendor/` 制品库**：
+   - 不建立平行的 Agent 专属远端资产目录，双端统一复用 `https://assets.anyfile.top/vendor/<pkg>/<version>/<file>`（Web 侧原本仅同源分发的少量中小型自建/第三方 WASM 如 `h5wasm`、`readstat`、`mppgo` 等同步补传至同一 `vendor/` 命名空间，保持不可变版本路径）。
+3. **按需本地缓存与离线预热**：
+   - 首次调用依赖某 `/vendor/` 资产的插件时，Node 主进程按内置清单从 `https://assets.anyfile.top/vendor/` 下载对应文件至 `~/.cache/anyfile/vendor/<pkg>/<version>/`（可通过 `ANYFILE_CACHE_DIR` 覆盖），严格校验 SHA-256 通过后方可使用，此后完全离线运行。
+   - 下载请求仅拉取固定版本的公共运行时资产，不携带任何用户文件名、扩展名或内容特征。
+   - 内网或纯离线环境可通过 `anyfile cache add <pluginIds...|all>` 预先拉取并校验所需资产。
 
 ---
 
-## 7. 安全边界与隔离
+## 7. 安全边界
 
-- **严格只读**：不写目标文件；缓存只写入缓存目录。
-- **路径控制**：`realpath` 校验，阻断穿越与符号链接逃逸。MCP 默认仅允许启动工作目录，`--allow-dir` 显式扩展；CLI 访问命令行给出的路径及其工作区根目录。
-- **执行隔离**：每次 extract / query / 像素渲染在 `worker_threads` 中运行，设置 `resourceLimits`（堆上限）与墙钟超时（提取默认 10s、渲染默认 20s），超时直接 `terminate()`；`AbortSignal` 仅用于协作式提前结束，不作为超时手段。
-- **权限边界**：所有文件与工作区访问在主线程完成 `realpath` 白名单校验，仅通过受控的 `DiskFile` 与 `WorkspaceReader` 暴露给 worker，禁止解析阶段发起网络请求；如需进一步收紧 OS 级进程权限，可在 MCP 启动时按 `--allow-dir` 与缓存目录对常驻进程做一次性只读授权，不按单次请求动态拉起 `--permission` 子进程。
-- **浏览器路径**：独立临时 profile，禁用扩展与网络（仅放行本地服务）。
-- **上下文预算**：所有输出经统一裁剪器限制字节与行数（§2.1）。
+- **严格只读**：所有文件描述符均以只读标志打开；除用户显式指定的 CLI `--out` 输出路径与 `~/.cache/anyfile/vendor/` 资产缓存目录外，不写入任何本地文件。
+- **路径边界控制**：所有路径在主线程先经 `realpath` 规范化并校验白名单，阻断 `..` 穿越与符号链接逃逸。MCP 默认仅允许访问启动时的工作目录（通过 `--allow-dir` 显式追加）；CLI 仅允许访问命令行显式传入的文件路径及其所属工作区根目录。
+- **资源与超时隔离**：Node 提取与纯像素渲染运行于带堆上限与强超时的 `worker_threads`；Chromium 运行于独立临时 Profile，禁用浏览器扩展、后台联网与外部域名请求（仅允许连接本机 `127.0.0.1` 隔离服务）。
+- **上下文防爆**：所有文本与 JSON 响应强制经过统一字节与行数裁剪器后再返回给 Agent。
 
 ---
 
 ## 8. 仓库目录与门禁
 
 ```text
-viewer/agent/                 # @anyfile/agent：CLI、MCP、agent-core、CDP 驱动、宿主页、SKILL.md
-viewer/plugins/<id>/src/extract.ts   # 可选，package.json "./extract" 暴露
-viewer/<shared>/               # 共享 XML 解析接口等以子路径导出加入现有共享包
+viewer/registry/                      # @anyfile/viewer-registry：双端共享的纯路由顺序与 manifest + probe 表
+viewer/agent/                         # @anyfile/agent：CLI、MCP、agent-core、CDP 驱动、SKILL.md
+viewer/agent/renderer-host/           # 单一极简 Vite 视觉渲染宿主页
+viewer/plugins/<id>/src/extract.ts    # 可选结构化提取入口，由 package.json "./extract" 暴露
 ```
 
-### 8.1 插件内部四层边界
-
-新插件开发与存量插件演进统一遵循四层边界（落地时同步写入 [plugin-development.md](plugin-development.md)）：
-
-| 入口 | 运行环境 | 职责与红线 |
-|---|---|---|
-| `manifest.ts`（`./manifest`） | Web / Node 共用 | 纯数据声明，零运行时依赖 |
-| `probe.ts`（`./probe`） | Web / Node 共用 | 有界读头探测支持等级，严禁 DOM 与重型引擎初始化 |
-| `extract.ts`（`./extract`，可选） | Node | 纯 JS/WASM 结构化提取与纯像素出图；严禁 DOM，通过共享 XML 接口与 `initializeRuntimeFromSources` 隔离环境差异 |
-| `index.ts` / `ui.ts`（默认入口） | 浏览器 | DOM/Canvas/WebGL 渲染与 `open()`（可选实现 `captureImage()`），严禁导入 Node API |
-
-### 8.2 门禁约束
-
-- `viewer/agent` 加入 `pnpm-workspace.yaml`，不注册为插件。
-- `check-repo` 与 `check-view-bundle` 强制双宿主单向隔离：
-  - `src/`（Web 宿主）严禁导入 `viewer/agent`、任何插件的 `./extract` 以及 Node 侧纯 JS XML 解析库；
-  - `viewer/agent`（Agent 宿主）严禁依赖 `src/` 或 Next.js；
-  - 插件声明 `./extract` 时必须具备 `// @vitest-environment node` 的 extract 测试。
-- extract 测试使用 `examples/` 真实样例，校验结构、字节上限与无网络访问，纳入 `pnpm check`。
-- 浏览器渲染回归测试通过环境变量开启，不进入常规 `pnpm check`。
-- 产物清单生成与 SHA-256 校验并入 `pnpm build` 的资产准备流程。
+门禁与测试约束：
+- `viewer/registry` 与 `viewer/agent` 加入 `pnpm-workspace.yaml`，不作为查看器插件注册。
+- `scripts/check-repo.mjs` 与 `scripts/check-view-bundle.mjs` 强制执行边界检查：
+  - **双宿主隔离**：`src/` 严禁导入 `viewer/agent`、任何插件的 `./extract` 及 Node 侧 XML 解析实现；`viewer/agent` 严禁依赖 `src/` 或 Next.js；双端路由一致性由共享 `@anyfile/viewer-registry` 保证。
+  - **Probe 纯净度**：`viewer/plugins/*/src/probe.ts` 严禁引用浏览器专属全局 API。
+  - **打包整洁度**：禁止在 `@anyfile/runtime-assets` 之外手写 bundler ignore 魔法注释；禁止在插件源码中通过 `new URL("*.wasm", import.meta.url)` 将大型二进制静态打包进 chunk。
+  - **Extract 测试覆盖**：凡在 `package.json` 导出 `./extract` 的插件，必须包含 `// @vitest-environment node` 测试文件，基于插件 `examples/` 真实样例验证 `inspect` / `read`（及可选 `query` / `renderImage`）输出结构、字节裁剪上限与零网络请求，纳入 `pnpm check`。
+- 真实 Chromium 视觉渲染集成测试通过环境变量显式开启，不阻塞常规无头 `pnpm check`。
+- `/vendor/` 资产 SHA-256 清单生成与完整性校验并入 `pnpm build` 的资产准备与检查流程。

@@ -47,8 +47,8 @@
 | 任务场景 | 必读文档 |
 |---|---|
 | 新增格式或插件、补充样例与测试、判断完成标准 | `docs/plugin-development.md` |
-| Agent执行每日自动开发 | `docs/agent-daily-dev.md` |
-| Agent执行或协助每周 dev → main review | `docs/agent-weekly-review.md` |
+| Agent执行每日自动开发 | `docs/dev-loop/agent-daily-dev.md` |
+| Agent执行或协助每周 dev → main review | `docs/dev-loop/agent-weekly-review.md` |
 | 领取每日任务或调研补充需求池 | `ROADMAP.md` |
 | 新增或修改查看器插件、Manifest、插件注册与选择、`open()` 上下文、工作区读取、生命周期、错误码、协议版本或协议合规测试 | `docs/viewer-plugin-protocol.md` |
 | 修改插件内的 DOM、布局、滚动、第三方渲染器、异步渲染、加载与错误 UI、样式、主题、无障碍、内容安全或渲染性能 | `docs/viewer-rendering-guidelines.md` |
