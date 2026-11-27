@@ -57,6 +57,16 @@
 - Arrow 流式导入全量加载到内存表，大文件内存压力高
 - 不支持 Excel（`.xlsx`）、SQLite（`.db`）——分别由 excel / sqlite 插件负责
 
+## Agent extract
+
+`src/extract.ts`（引擎封装在 `src/extract-engine.ts`）在 Node 中加载 `@duckdb/duckdb-wasm/blocking` 与 `/vendor/duckdb/1.32.0/duckdb-eh.wasm`，实现 `inspect` / `read` / `query`：
+
+- **目标**：DuckDB 库为 `schema`（DDL）与每个表/视图 `table:<name>`（非 `main` schema 为 `table:<schema>.<name>`）；CSV/TSV、Arrow IPC 为单一目标 `table:data`，`query` 中以表名 `data` 引用。
+- **读取**：行以 DuckDB 文本形式（`::VARCHAR`）输出 Markdown 表格，`row:<n>` 游标，表目标支持 `filter`。
+- **查询**：仅接受单条 `SELECT` / `WITH` / `FROM` / `VALUES` / `DESCRIBE` / `SHOW` / `SUMMARIZE` / `EXPLAIN`；库以 `READ_ONLY` 挂载，加载后执行 `enable_external_access=false` 并 `lock_configuration`，扩展自动安装/加载关闭。
+- **沙箱方式**：文件整体复制进引擎（BUFFER 协议，上限 128 MiB）；DuckDB-Wasm 的 `NODE_FS` 以读写方式打开文件，因此不使用。单文件格式在锁定前物化为内存表。
+- **不支持**：Parquet、JSON 需要 DuckDB 扩展，Node 端只能联网下载并写入 `~/.duckdb`，故返回 `runtime-unavailable`；`.zst` 压缩同理。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
