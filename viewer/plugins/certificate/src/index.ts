@@ -7,37 +7,13 @@ import {
   abortError,
 } from "@anyfile/viewer-protocol";
 
-import { Asn1Error } from "./asn1";
-import { fingerprints, parseCertificate, readPemBlocks, type CertificateReport } from "./certificate";
+import { MAX_CERTIFICATE_FILE_BYTES as MAX_FILE_BYTES, decodeCertificates, fingerprints } from "./certificate";
 import { certificateManifest } from "./manifest";
 import { inspectCertificate } from "./probe";
 import { createCertificateView, type ViewCertificate } from "./ui";
 
-/** Certificates are tiny; bundles and chains stay far below this cap. */
-const MAX_FILE_BYTES = 8 * 1024 * 1024;
-const MAX_CERTIFICATES = 40;
-
 function isAbortError(error: unknown) {
   return typeof error === "object" && error !== null && "name" in error && error.name === "AbortError";
-}
-
-function decodeCertificates(bytes: Uint8Array): CertificateReport[] {
-  const reports: CertificateReport[] = [];
-  if (bytes[0] === 0x30) {
-    reports.push(parseCertificate(bytes));
-  } else {
-    const text = new TextDecoder("utf-8").decode(bytes);
-    const blocks = readPemBlocks(text).filter(({ label }) => label.endsWith("CERTIFICATE")).slice(0, MAX_CERTIFICATES);
-    for (const block of blocks) {
-      try {
-        reports.push(parseCertificate(block.der));
-      } catch (error) {
-        if (!(error instanceof Asn1Error)) throw error;
-      }
-    }
-  }
-  if (reports.length === 0) throw new Asn1Error("No readable X.509 certificate in the file.");
-  return reports;
 }
 
 async function openCertificate(context: OpenViewerContext): Promise<ViewerController> {

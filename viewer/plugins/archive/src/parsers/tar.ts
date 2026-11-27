@@ -171,6 +171,7 @@ export async function parseTar(reader: TarReader, format: IdentifiedFormat): Pro
       permissions: `0${parseNumber(header.subarray(100, 108), "权限").toString(8).padStart(3, "0")}`,
       linkTarget,
       dangerousPath: dangerousPath(path),
+      dataOffset,
     });
     localPax = {};
     longName = undefined;

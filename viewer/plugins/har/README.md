@@ -20,6 +20,13 @@
 
 没有第三方解析器、Worker、WASM 或网络请求，使用浏览器 JSON 与 DOM API。
 
+## Agent extract
+
+[src/extract.ts](src/extract.ts) 在 Node worker 内复用 `parse.ts` 的 `readHar()`：
+
+- `inspect`：HAR 版本、生成工具、页面数、请求数、主机分布（前 20）、方法与状态分类计数、首个请求开始/最后完成时间与跨度、响应总字节；最多列出 50 个 `entry:<n>` 目标。
+- `read` 目标：`entries`（序号、开始时间、方法、状态、URL、MIME、大小、耗时的 Markdown 表格，`row:` 游标）；`entry:<n>`（timing、请求/响应头、查询参数、表单参数与正文，正文最多 16 KiB；Base64 正文仅在解码为 UTF-8 文本时展示，二进制只报告长度），`line:` 游标。两类目标都支持 `filter`。不支持 `render`。
+
 ## 已知限制
 
 - 文件最大 128 MiB；读取后会拼接完整文本并整体解析，超大 HAR 不支持流式 JSON 解析或虚拟列表。

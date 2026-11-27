@@ -17,6 +17,8 @@ import {
 } from "./asn1";
 
 const MAX_PEM_BLOCKS = 40;
+/** Certificates are tiny; bundles and chains stay far below this cap. */
+export const MAX_CERTIFICATE_FILE_BYTES = 8 * 1024 * 1024;
 const NAME_ATTRIBUTES: Readonly<Record<string, string>> = {
   "2.5.4.3": "CN", "2.5.4.4": "SN", "2.5.4.5": "serialNumber", "2.5.4.6": "C", "2.5.4.7": "L",
   "2.5.4.8": "ST", "2.5.4.9": "street", "2.5.4.10": "O", "2.5.4.11": "OU", "2.5.4.12": "title",
@@ -384,6 +386,66 @@ export function parseCertificate(der: Uint8Array): CertificateReport {
     extensions,
     der,
   };
+}
+
+/** Parses a DER certificate or every PEM `CERTIFICATE` block; unreadable PEM blocks are skipped. */
+export function decodeCertificates(bytes: Uint8Array): CertificateReport[] {
+  const reports: CertificateReport[] = [];
+  if (bytes[0] === 0x30) {
+    reports.push(parseCertificate(bytes));
+  } else {
+    const text = new TextDecoder("utf-8").decode(bytes);
+    for (const block of readPemBlocks(text).filter(({ label }) => label.endsWith("CERTIFICATE"))) {
+      try {
+        reports.push(parseCertificate(block.der));
+      } catch (error) {
+        if (!(error instanceof Asn1Error)) throw error;
+      }
+    }
+  }
+  if (reports.length === 0) throw new Asn1Error("No readable X.509 certificate in the file.");
+  return reports;
+}
+
+export interface KeyBlockReport {
+  readonly label: string;
+  readonly kind: "private-key" | "public-key" | "other";
+  readonly algorithm?: string;
+  readonly bits?: number;
+  readonly curve?: string;
+  readonly encrypted: boolean;
+}
+
+const LEGACY_PRIVATE_KEYS: Readonly<Record<string, string>> = {
+  "RSA PRIVATE KEY": "RSA", "EC PRIVATE KEY": "EC", "DSA PRIVATE KEY": "DSA", "OPENSSH PRIVATE KEY": "OpenSSH",
+};
+
+/** Describes a non-certificate PEM block by type and algorithm only; key material is never decoded further. */
+export function describePemBlock({ label, der }: PemBlock): KeyBlockReport {
+  const budget = createBudget();
+  if (label.endsWith("PUBLIC KEY")) {
+    try {
+      const info = publicKeyInfo(der, readNode(der, 0, der.byteLength, budget), budget);
+      return { label, kind: "public-key", algorithm: info.algorithm, bits: info.bits, curve: info.curve, encrypted: false };
+    } catch (error) {
+      if (!(error instanceof Asn1Error)) throw error;
+      return { label, kind: "public-key", encrypted: false };
+    }
+  }
+  if (!label.endsWith("PRIVATE KEY")) return { label, kind: "other", encrypted: false };
+  const encrypted = label === "ENCRYPTED PRIVATE KEY";
+  if (LEGACY_PRIVATE_KEYS[label]) return { label, kind: "private-key", algorithm: LEGACY_PRIVATE_KEYS[label], encrypted };
+  if (label !== "PRIVATE KEY") return { label, kind: "private-key", encrypted };
+  try {
+    // PKCS#8 PrivateKeyInfo: SEQUENCE { version, AlgorithmIdentifier, privateKey } — only the identifier is read.
+    const root = readNode(der, 0, der.byteLength, budget);
+    const { oid, params } = readAlgorithm(der, child(der, root, 1, budget), budget);
+    const curve = params && params.tag === 0x06 ? CURVE_NAMES[readOid(der, params)] : undefined;
+    return { label, kind: "private-key", algorithm: oidName(oid, PUBLIC_KEY_ALGORITHMS), curve, encrypted };
+  } catch (error) {
+    if (!(error instanceof Asn1Error)) throw error;
+    return { label, kind: "private-key", encrypted };
+  }
 }
 
 export async function fingerprints(der: Uint8Array, signal: AbortSignal): Promise<{ sha256: string; sha1: string }> {
