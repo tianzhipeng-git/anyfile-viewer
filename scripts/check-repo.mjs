@@ -12,7 +12,7 @@ const UNCHECKED_PATHS = /^(third_party|licenses|\.agents|public)\/|\/(examples|f
 const LARGE_FILE_ALLOWLIST = new Set(["docs/ebooks/fixtures/huge-binary.fb2"]);
 // Plugins that predate the real-sample rule. Remove an entry once the plugin gains examples/.
 const PLUGINS_WITHOUT_SAMPLES = new Set([
-  "cad-dwg", "cad-exchange", "camera-raw", "code", "dev-wasm", "dji-osmo", "ffmpeg-video",
+  "cad-dwg", "cad-exchange", "code", "dev-wasm", "dji-osmo", "ffmpeg-video",
   "gopro-max", "hex", "insta360", "mobi", "pixelmator-pxd", "powerpoint",
 ]);
 // Registered plugins without a site page in src/content/manifests.ts.

@@ -1,5 +1,5 @@
 import { importRuntime } from "@anyfile/runtime-assets";
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { ViewerError, type VendorAssets } from "@anyfile/viewer-protocol";
 import type LibRaw from "libraw-wasm";
 import type { Metadata } from "libraw-wasm";
 
@@ -30,11 +30,43 @@ export function summarizeRawMetadata(metadata: RawMetadataSource): RawMetadataSu
   };
 }
 
-const LIBRAW_MODULE_URL = "/vendor/libraw/1.6.0/index.js";
+/** `<pkg>/<version>` under `/vendor/`; Node hosts load `libraw.js` + `libraw.wasm` from the same directory. */
+export const LIBRAW_VENDOR_DIR = "libraw/1.6.0";
+const LIBRAW_MODULE_URL = `/vendor/${LIBRAW_VENDOR_DIR}/index.js`;
+
+/** 8-bit sRGB development with camera white balance, camera matrix and file orientation. */
+export const LIBRAW_DEVELOP_SETTINGS = {
+  useCameraWb: true,
+  useAutoWb: false,
+  useCameraMatrix: 1,
+  outputColor: 1,
+  outputBps: 8,
+  userFlip: -1,
+} as const;
 const RAW_OPEN_TIMEOUT_MS = 60_000;
 
 function abortError() {
   return new DOMException("Viewer operation aborted.", "AbortError");
+}
+
+/** Embind `LibRaw` class exported by `libraw.js` (the build the browser `worker.js` wraps), used directly in Node. */
+export interface LibRawNodeInstance {
+  open(bytes: Uint8Array, settings: Record<string, unknown>): void;
+  metadata(full: boolean): Record<string, unknown> | undefined;
+  imageData(): { width: number; height: number; colors: number; bits: number; data: Uint8Array } | undefined;
+  delete?(): void;
+}
+
+export interface LibRawNodeModule {
+  readonly LibRaw: new () => LibRawNodeInstance;
+}
+
+/** Node (Agent) loader: same vendored artifact, without the browser Worker wrapper. */
+export async function loadLibRawFromVendor(vendor: VendorAssets): Promise<LibRawNodeModule> {
+  const { default: create } = await importRuntime<{ default(options: Record<string, unknown>): Promise<LibRawNodeModule> }>(
+    await vendor.url(`${LIBRAW_VENDOR_DIR}/libraw.js`),
+  );
+  return create({ wasmBinary: await vendor.bytes(`${LIBRAW_VENDOR_DIR}/libraw.wasm`), print: () => {}, printErr: () => {} });
 }
 
 export function checkRawDimensions(width: number, height: number) {
@@ -64,15 +96,7 @@ export class RawDecoder {
     let timeout: ReturnType<typeof setTimeout> | undefined;
     try {
       await Promise.race([
-        this.decoder.open(bytes, {
-          useCameraWb: true,
-          useAutoWb: false,
-          useCameraMatrix: 1,
-          outputColor: 1,
-          outputBps: 8,
-          userFlip: -1,
-          halfSize: options.halfSize,
-        }),
+        this.decoder.open(bytes, { ...LIBRAW_DEVELOP_SETTINGS, halfSize: options.halfSize }),
         new Promise<never>((_, reject) => {
           timeout = setTimeout(() => {
             this.decoder?.dispose();
