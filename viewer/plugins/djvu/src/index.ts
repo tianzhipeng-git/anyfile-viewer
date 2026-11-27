@@ -1,5 +1,6 @@
 import { ViewerError, isViewerAbortError, type FileViewerPlugin } from "@anyfile/viewer-protocol";
-import { createDjvuView } from "./djvu-view";
+import { captureDjvuPage } from "./capture";
+import { createDjvuView, type DjvuRenderer } from "./djvu-view";
 import { DJVU_LIMITS } from "./limits";
 import { djvuManifest } from "./manifest";
 import { inspectDjvuHeader } from "./probe";
@@ -60,12 +61,20 @@ export const djvuViewer: FileViewerPlugin = {
         throw new DOMException("Viewer operation aborted.", "AbortError");
       }
 
-      view = createDjvuView(context.file.name, context.locale, document, copy, {
+      const renderer: DjvuRenderer = {
         renderPage: (pageIndex, width, height, options) => client!.renderPage(pageIndex, width, height, options),
         getPageText: (pageIndex, callSignal) => client!.getPageText(pageIndex, callSignal),
-      });
+      };
+      view = createDjvuView(context.file.name, context.locale, document, copy, renderer);
       context.container.append(view.root);
-      return { dispose };
+      return {
+        dispose,
+        captureImage(options) {
+          if (disposed) return Promise.reject(new ViewerError("open-failed", "DjVu viewer has been disposed."));
+          const signal = options.signal ? AbortSignal.any([lifetime.signal, options.signal]) : lifetime.signal;
+          return captureDjvuPage(document, renderer, options, signal);
+        },
+      };
     } catch (error) {
       dispose();
       if (isViewerAbortError(error)) throw error;

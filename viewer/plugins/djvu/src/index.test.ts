@@ -1,4 +1,5 @@
 import { createViewerTestContext } from "@anyfile/viewer-test";
+import { AgentError } from "@anyfile/viewer-protocol";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { djvuViewer } from "./index";
 import { DJVU_LIMITS } from "./limits";
@@ -195,5 +196,43 @@ describe("djvuViewer", () => {
     vi.stubGlobal("Worker", undefined);
     const noEnv = createViewerTestContext(new File([makeDjvuHeader()], "noworker.djvu"));
     await expect(djvuViewer.open(noEnv.context)).rejects.toMatchObject({ code: "unsupported-environment" });
+  });
+
+  it("captures a bounded PNG of the requested page without viewer chrome", async () => {
+    installEnvironmentMocks();
+    MockDjvuWorker.nextOpenResult = {
+      docType: "bundled",
+      pageCount: 2,
+      pages: [
+        { width: 1000, height: 1400, dpi: 300, rotation: 0 },
+        { width: 2000, height: 1000, dpi: 300, rotation: 0 },
+      ],
+      outline: [],
+    };
+    const captures: { width: number; height: number }[] = [];
+    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation(function (this: HTMLCanvasElement, cb: BlobCallback, type?: string) {
+      captures.push({ width: this.width, height: this.height });
+      cb(new Blob([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], { type: type ?? "image/png" }));
+    });
+    const { context } = createViewerTestContext(new File([makeDjvuHeader()], "capture.djvu"));
+    const instance = await djvuViewer.open(context);
+    expect(typeof instance.captureImage).toBe("function");
+
+    const blob = await instance.captureImage!({ target: "page:2", maxDimension: 600 });
+    expect(blob.type).toBe("image/png");
+    expect(captures.at(-1)).toEqual({ width: 600, height: 300 });
+    expect(MockDjvuWorker.renderedPages.at(-1)).toBe(1);
+
+    // Never upscales beyond the source resolution.
+    await instance.captureImage!({ target: "1", maxDimension: 4096 });
+    expect(captures.at(-1)).toEqual({ width: 1000, height: 1400 });
+
+    for (const target of ["page:0", "page:3", "sheet:1"]) {
+      const error = await instance.captureImage!({ target, maxDimension: 400 }).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(AgentError);
+      expect((error as AgentError).code).toBe("target-not-found");
+    }
+    instance.dispose();
+    await expect(instance.captureImage!({ maxDimension: 400 })).rejects.toMatchObject({ code: "open-failed" });
   });
 });

@@ -1,6 +1,8 @@
 import {
+  AgentError,
   ViewerError,
   selectMessages,
+  type CaptureImageOptions,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -8,6 +10,7 @@ import {
 } from "@anyfile/viewer-protocol";
 import { PasswordResponses, type PDFDocumentLoadingTask } from "pdfjs-dist";
 
+import { capturePdfPage, parseCaptureTarget } from "./capture";
 import { loadPdfDocument } from "./pdf-engine";
 import { createPdfView, destroyPdfTask } from "./pdf-view";
 import { pdfManifest } from "./manifest";
@@ -53,6 +56,9 @@ async function openPdf(context: OpenViewerContext): Promise<ViewerController> {
   let loadingTask: PDFDocumentLoadingTask | undefined;
   let disposed = false;
   let disposePromise: Promise<void> | undefined;
+  // Settles with an encrypted-file error once pdf.js asks for a password, so captures never hang on the prompt.
+  const passwordGate = Promise.withResolvers<never>();
+  passwordGate.promise.catch(() => undefined);
 
   const dispose = () => {
     if (disposePromise) return disposePromise;
@@ -81,6 +87,7 @@ async function openPdf(context: OpenViewerContext): Promise<ViewerController> {
     loadingTask = loadPdfDocument(objectUrl);
     loadingTask.onPassword = (updatePassword: (password: string) => void, reason: number) => {
       if (disposed) return;
+      passwordGate.reject(new AgentError("encrypted-file", "The PDF is password protected."));
       view.requestPassword((password) => {
         if (disposed) return;
         updatePassword(password);
@@ -93,7 +100,20 @@ async function openPdf(context: OpenViewerContext): Promise<ViewerController> {
       if (signal.aborted || disposed) return;
       view.showOpenError(isInvalidPdfError(error) ? copy.invalid : copy.openFailed);
     });
-    return { dispose };
+    const task = loadingTask;
+    const captureImage = async (options: CaptureImageOptions): Promise<Blob> => {
+      if (options.signal?.aborted) throw abortError();
+      if (disposed) throw new ViewerError("open-failed", "PDF viewer has been disposed.");
+      if (!Number.isFinite(options.maxDimension) || options.maxDimension < 1) {
+        throw new AgentError("invalid-argument", "maxDimension must be a positive number.");
+      }
+      // A document unlocked through the prompt wins: `task.promise` is listed first.
+      const document = await Promise.race([task.promise, passwordGate.promise]);
+      if (disposed) throw new ViewerError("open-failed", "PDF viewer has been disposed.");
+      const captureSignal = options.signal ? AbortSignal.any([signal, options.signal]) : signal;
+      return capturePdfPage(document, parseCaptureTarget(options.target, document.numPages), Math.round(options.maxDimension), captureSignal);
+    };
+    return { dispose, captureImage };
   } catch (error) {
     await dispose();
     if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) {

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { validateManifest } from "@anyfile/viewer-protocol";
+import { AgentError, validateManifest } from "@anyfile/viewer-protocol";
 import {
   createDeferredFile,
   createViewerTestContext,
@@ -258,6 +258,52 @@ describe("PDF viewer protocol compliance", () => {
     }
     await vi.waitFor(() => expect(cleanups.length).toBeGreaterThan(0));
 
+    await controller.dispose();
+  });
+
+  it("captures a bounded PNG of the requested page without viewer chrome", async () => {
+    const pdf = mockPdfDocument();
+    pdf.document.numPages = 2;
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("about:blank#capture-pdf");
+    vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({} as CanvasRenderingContext2D);
+    const captures: { width: number; height: number }[] = [];
+    vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation(function (this: HTMLCanvasElement, cb: BlobCallback, type?: string) {
+      captures.push({ width: this.width, height: this.height });
+      cb(new Blob([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], { type: type ?? "image/png" }));
+    });
+    const context = testContext(validPdf());
+    const controller = await pdfViewer.open(context.context);
+    expect(typeof controller.captureImage).toBe("function");
+
+    const blob = await controller.captureImage!({ target: "page:2", maxDimension: 400 });
+    expect(blob.type).toBe("image/png");
+    expect(pdf.document.getPage).toHaveBeenCalledWith(2);
+    expect(captures.at(-1)).toEqual({ width: 300, height: 400 });
+
+    await controller.captureImage!({ target: "1", maxDimension: 10_000 });
+    expect(captures.at(-1)).toEqual({ width: 1600, height: 2133 });
+
+    for (const target of ["page:0", "page:3", "sheet:1"]) {
+      const error = await controller.captureImage!({ target, maxDimension: 400 }).catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(AgentError);
+      expect((error as AgentError).code).toBe("target-not-found");
+    }
+    await controller.dispose();
+  });
+
+  it("rejects captures of a locked PDF with encrypted-file", async () => {
+    const pdf = mockPdfDocument();
+    pdf.task.promise = new Promise(() => undefined);
+    const task = pdf.task as typeof pdf.task & { onPassword?: (update: (password: string) => void, reason: number) => void };
+    vi.spyOn(URL, "createObjectURL").mockReturnValue("about:blank#locked-pdf");
+    vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined);
+    const context = testContext(validPdf());
+    const controller = await pdfViewer.open(context.context);
+    await vi.waitFor(() => expect(task.onPassword).toBeTypeOf("function"));
+    task.onPassword?.(() => undefined, 1);
+
+    await expect(controller.captureImage!({ maxDimension: 400 })).rejects.toMatchObject({ code: "encrypted-file" });
     await controller.dispose();
   });
 });
