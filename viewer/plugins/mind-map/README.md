@@ -21,6 +21,14 @@ Automatic layout uses the stored hierarchy and supported structure/direction set
 - No remote images, fonts or file subresources are fetched. HTTP(S) hyperlinks open only on user activation. Workspace access is optional and restricted to safe relative paths.
 - Abort/dispose cleans DOM, listeners, resize observation and image object URLs. Manifest/probe remain independent of the deferred renderer and sanitizer.
 
+## Agent extract (`./extract`)
+
+[src/extract.ts](src/extract.ts) reuses `readMindMap()` in Node with `assets: false` (no images or attachments are read):
+
+- `inspect`: format (XMind, XMind legacy XML, MindManager, FreeMind / Freeplane), sheet count, total topic count and per-sheet root topic; targets are `sheet:<n>`.
+- `read`: Markdown; each sheet is an indented outline of topic titles with floating/summary/callout kind, labels, markers, links and attachment names, notes quoted under their topic, then relationships. Without `target` the whole map is paged by byte offset; `filter` keeps matching lines.
+- Styles, layout, positions and embedded images are not exported.
+
 ## Verification
 
 ```sh

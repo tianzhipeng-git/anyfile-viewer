@@ -13,7 +13,7 @@ const BLOCKED_ELEMENTS = new Set([
 const SAFE_DATA_IMAGE = /^data:image\/(?:png|jpeg|gif|webp|avif);/i;
 const URL_REFERENCE = /url\(\s*(['"]?)(.*?)\1\s*\)/gi;
 
-function decodeXml(bytes: Uint8Array) {
+export function decodeXml(bytes: Uint8Array) {
   if (bytes[0] === 0xff && bytes[1] === 0xfe) {
     return new TextDecoder("utf-16le", { fatal: true }).decode(bytes.subarray(2));
   }
