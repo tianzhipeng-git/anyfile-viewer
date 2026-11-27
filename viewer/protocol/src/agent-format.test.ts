@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { paginateLines, paginateText, parsePositionCursor, renderMarkdownTablePage } from "./agent-format";
+import { paginateLines, paginateText, parsePositionCursor, readPagedTextDocument, renderMarkdownTablePage } from "./agent-format";
 
 const ids = (content: string) => content.split("\n").slice(2).map((line) => Number(line.split("|")[1]));
 
@@ -59,5 +59,33 @@ describe("agent pagination helpers", () => {
     expect(parsePositionCursor("row.+42", "row.+")).toBe(42);
     expect(() => parsePositionCursor("rowX42", "row.")).toThrow(/Invalid pagination cursor/);
     expect(() => parsePositionCursor("line:99999999999999999999", "line:")).toThrow(/Invalid pagination cursor/);
+  });
+});
+
+describe("readPagedTextDocument", () => {
+  const document = (rendered: number[]) => ({
+    pageCount: 50,
+    header: () => "# Doc",
+    page: async (index: number) => {
+      rendered.push(index);
+      return `## Page ${index + 1}\n\n${"x".repeat(100)}${index === 7 ? " needle" : ""}`;
+    },
+  });
+
+  it("renders only the pages needed for the requested window", async () => {
+    const rendered: number[] = [];
+    const first = await readPagedTextDocument(document(rendered), { maxBytes: 300 });
+    expect(first.truncated).toBe(true);
+    expect(rendered.length).toBeLessThan(5);
+    const next = await readPagedTextDocument(document([]), { maxBytes: 300, cursor: first.nextCursor });
+    expect(next.content.startsWith(first.content)).toBe(false);
+  });
+
+  it("reads a page target and filters lines across the document", async () => {
+    expect((await readPagedTextDocument(document([]), { target: "page:3", maxBytes: 1000 })).content).toContain("## Page 3");
+    await expect(readPagedTextDocument(document([]), { target: "page:51", maxBytes: 1000 })).rejects.toMatchObject({ code: "target-not-found" });
+    const filtered = await readPagedTextDocument(document([]), { filter: "NEEDLE", maxBytes: 1000 });
+    expect(filtered).toMatchObject({ filterApplied: true, truncated: false });
+    expect(filtered.content.split("\n")).toHaveLength(1);
   });
 });

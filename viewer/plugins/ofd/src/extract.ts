@@ -1,11 +1,9 @@
 import {
   AgentError,
-  HARD_READ_MAX_BYTES,
   abortError,
   isViewerAbortError,
-  paginateLines,
-  paginateText,
-  parsePositionCursor,
+  markdownDocumentHeader,
+  readPagedTextDocument,
   type ExtractContext,
   type InspectPayload,
   type ReadParams,
@@ -21,8 +19,6 @@ import { OfdLimitError, OfdPackage } from "./package";
 import { extractPageText } from "./text";
 
 const PLUGIN_ID = "ofd-reader";
-const PAGE_TARGET = /^page:([1-9]\d*)$/;
-const encoder = new TextEncoder();
 
 function mapError(error: unknown): never {
   if (error instanceof AgentError || isViewerAbortError(error)) throw error;
@@ -77,35 +73,6 @@ async function pageMarkdown(doc: OfdDocument, index: number, signal: AbortSignal
   ].join("\n");
 }
 
-function documentHeader(doc: OfdDocument, fileName: string) {
-  const fields = Object.entries(doc.info).filter(([name]) => name !== "Title");
-  return [`# ${doc.info.Title ?? fileName}`, "", ...fields.map(([name, value]) => `- **${name}**: ${value.replace(/\s+/g, " ")}`)]
-    .join("\n")
-    .trim();
-}
-
-/**
- * Whole-document text: pages are parsed only until the requested window is covered, so an
- * unfiltered read never parses pages past `offset + maxBytes`.
- */
-async function documentText(doc: OfdDocument, fileName: string, needBytes: number, signal: AbortSignal) {
-  const parts = [documentHeader(doc, fileName)];
-  let bytes = encoder.encode(parts[0]).byteLength;
-  for (let index = 0; index < doc.pages.length && bytes <= needBytes; index += 1) {
-    const page = await pageMarkdown(doc, index, signal);
-    parts.push(page);
-    bytes += encoder.encode(page).byteLength + 2;
-  }
-  return parts.join("\n\n");
-}
-
-function pageText(text: string, params: ReadParams, maxBytes: number): ReadResult {
-  const needle = params.filter?.trim().toLowerCase();
-  if (!needle) return paginateText(text, params.cursor, maxBytes, "markdown", PLUGIN_ID);
-  const lines = text.split("\n").filter((line) => line.toLowerCase().includes(needle));
-  return { contentType: "markdown", ...paginateLines(lines, params.cursor, maxBytes, PLUGIN_ID), filterApplied: true };
-}
-
 const ofdExtractor: StructuredExtractor = {
   inspect(context: ExtractContext): Promise<InspectPayload> {
     return withDocument(context, async (doc) => {
@@ -130,17 +97,12 @@ const ofdExtractor: StructuredExtractor = {
 
   read(context: ExtractContext, params: ReadParams): Promise<ReadResult> {
     return withDocument(context, async (doc) => {
-      const maxBytes = Math.min(params.maxBytes, HARD_READ_MAX_BYTES);
-      if (params.target === undefined) {
-        const filtered = Boolean(params.filter?.trim());
-        const need = filtered ? Infinity : parsePositionCursor(params.cursor, "offset:", PLUGIN_ID) + maxBytes;
-        return pageText(await documentText(doc, context.file.name, need, context.signal), params, maxBytes);
-      }
-      const index = Number(PAGE_TARGET.exec(params.target)?.[1] ?? 0) - 1;
-      if (index < 0 || index >= doc.pages.length) {
-        throw new AgentError("target-not-found", `OFD target not found: "${params.target}".`, { pluginId: PLUGIN_ID });
-      }
-      return pageText(await pageMarkdown(doc, index, context.signal), params, maxBytes);
+      const { Title, ...fields } = doc.info;
+      return readPagedTextDocument({
+        pageCount: doc.pages.length,
+        header: () => markdownDocumentHeader(Title ?? context.file.name, fields),
+        page: (index) => pageMarkdown(doc, index, context.signal),
+      }, params, PLUGIN_ID);
     });
   },
 };

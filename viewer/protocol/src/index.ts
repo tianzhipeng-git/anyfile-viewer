@@ -29,12 +29,16 @@ export {
 } from "./agent";
 export {
   escapeMarkdownCell,
+  markdownDocumentHeader,
   paginateLines,
   paginateText,
+  parsePageTarget,
   parsePositionCursor,
+  readPagedTextDocument,
   renderMarkdownTablePage,
   truncateUtf8,
   type MarkdownTablePageOptions,
+  type PagedTextDocument,
 } from "./agent-format";
 
 export type {

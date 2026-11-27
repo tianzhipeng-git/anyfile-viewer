@@ -1,4 +1,4 @@
-import { AgentError, type ReadResult } from "./agent";
+import { AgentError, HARD_READ_MAX_BYTES, type ReadParams, type ReadResult } from "./agent";
 
 const encoder = new TextEncoder();
 const decoder = new TextDecoder("utf-8");
@@ -159,4 +159,52 @@ export function renderMarkdownTablePage(options: MarkdownTablePageOptions): Read
     truncated: hasMore,
     ...(hasMore && position > start ? { nextCursor: `${cursorPrefix}${position}` } : {}),
   };
+}
+
+/** A page-oriented text document (OFD, XPS, PDF...) exposed through `page:<n>` targets. */
+export interface PagedTextDocument {
+  readonly pageCount: number;
+  /** Markdown preamble for whole-document reads (title, document properties). */
+  header(): Promise<string> | string;
+  /** Markdown for one zero-based page. */
+  page(index: number): Promise<string>;
+}
+
+/** `# title` followed by `- **name**: value` bullets; whitespace in values is collapsed. */
+export function markdownDocumentHeader(title: string, fields: Readonly<Record<string, string>>): string {
+  const bullets = Object.entries(fields).map(([name, value]) => `- **${name}**: ${value.replace(/\s+/g, " ")}`);
+  return [`# ${title}`, "", ...bullets].join("\n").trim();
+}
+
+/** Parses a `page:<n>` target into a zero-based page index. */
+export function parsePageTarget(target: string, pageCount: number, pluginId?: string): number {
+  const index = Number(/^page:([1-9]\d*)$/.exec(target)?.[1] ?? 0) - 1;
+  if (index < 0 || index >= pageCount) throw new AgentError("target-not-found", `Target not found: "${target}".`, { pluginId });
+  return index;
+}
+
+/**
+ * Reads one `page:<n>` target, or the whole document when no target is given. Unfiltered whole-document
+ * reads render pages only until the `offset:` window is covered; `filter` keeps matching lines (`line:` cursors).
+ */
+export async function readPagedTextDocument(document: PagedTextDocument, params: ReadParams, pluginId?: string): Promise<ReadResult> {
+  const maxBytes = Math.min(params.maxBytes, HARD_READ_MAX_BYTES);
+  const needle = params.filter?.trim().toLowerCase();
+  let text: string;
+  if (params.target !== undefined) {
+    text = await document.page(parsePageTarget(params.target, document.pageCount, pluginId));
+  } else {
+    const need = needle ? Infinity : parsePositionCursor(params.cursor, "offset:", pluginId) + maxBytes;
+    const parts = [await document.header()];
+    let bytes = byteLength(parts[0]!);
+    for (let index = 0; index < document.pageCount && bytes <= need; index += 1) {
+      const page = await document.page(index);
+      parts.push(page);
+      bytes += byteLength(page) + 2;
+    }
+    text = parts.join("\n\n");
+  }
+  if (!needle) return paginateText(text, params.cursor, maxBytes, "markdown", pluginId);
+  const lines = text.split("\n").filter((line) => line.toLowerCase().includes(needle));
+  return { contentType: "markdown", ...paginateLines(lines, params.cursor, maxBytes, pluginId), filterApplied: true };
 }

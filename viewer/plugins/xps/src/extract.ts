@@ -1,11 +1,9 @@
 import {
   AgentError,
-  HARD_READ_MAX_BYTES,
   abortError,
   isViewerAbortError,
-  paginateLines,
-  paginateText,
-  parsePositionCursor,
+  markdownDocumentHeader,
+  readPagedTextDocument,
   type ExtractContext,
   type InspectPayload,
   type ReadParams,
@@ -20,8 +18,6 @@ import { XpsLimitError, XpsPackage } from "./package";
 import { extractPageText } from "./text";
 
 const PLUGIN_ID = "xps-reader";
-const PAGE_TARGET = /^page:([1-9]\d*)$/;
-const encoder = new TextEncoder();
 
 interface Loaded {
   readonly pkg: XpsPackage;
@@ -72,32 +68,6 @@ async function pageMarkdown({ pkg, doc }: Loaded, index: number, signal: AbortSi
   return [`## Page ${index + 1}`, "", ...(lines.length ? lines : ["(no text on this page)"])].join("\n");
 }
 
-function documentHeader(properties: Readonly<Record<string, string>>, fileName: string) {
-  const fields = Object.entries(properties).filter(([name]) => name !== "title");
-  return [`# ${properties.title ?? fileName}`, "", ...fields.map(([name, value]) => `- **${name}**: ${value.replace(/\s+/g, " ")}`)]
-    .join("\n")
-    .trim();
-}
-
-/** Whole-document text; pages past `needBytes` are not parsed. */
-async function documentText(loaded: Loaded, fileName: string, needBytes: number, signal: AbortSignal) {
-  const parts = [documentHeader(await loadXpsProperties(loaded.pkg), fileName)];
-  let bytes = encoder.encode(parts[0]).byteLength;
-  for (let index = 0; index < loaded.doc.pages.length && bytes <= needBytes; index += 1) {
-    const page = await pageMarkdown(loaded, index, signal);
-    parts.push(page);
-    bytes += encoder.encode(page).byteLength + 2;
-  }
-  return parts.join("\n\n");
-}
-
-function pageText(text: string, params: ReadParams, maxBytes: number): ReadResult {
-  const needle = params.filter?.trim().toLowerCase();
-  if (!needle) return paginateText(text, params.cursor, maxBytes, "markdown", PLUGIN_ID);
-  const lines = text.split("\n").filter((line) => line.toLowerCase().includes(needle));
-  return { contentType: "markdown", ...paginateLines(lines, params.cursor, maxBytes, PLUGIN_ID), filterApplied: true };
-}
-
 const xpsExtractor: StructuredExtractor = {
   inspect(context: ExtractContext): Promise<InspectPayload> {
     return withDocument(context, async ({ pkg, doc }) => ({
@@ -115,17 +85,14 @@ const xpsExtractor: StructuredExtractor = {
 
   read(context: ExtractContext, params: ReadParams): Promise<ReadResult> {
     return withDocument(context, async (loaded) => {
-      const maxBytes = Math.min(params.maxBytes, HARD_READ_MAX_BYTES);
-      if (params.target === undefined) {
-        const filtered = Boolean(params.filter?.trim());
-        const need = filtered ? Infinity : parsePositionCursor(params.cursor, "offset:", PLUGIN_ID) + maxBytes;
-        return pageText(await documentText(loaded, context.file.name, need, context.signal), params, maxBytes);
-      }
-      const index = Number(PAGE_TARGET.exec(params.target)?.[1] ?? 0) - 1;
-      if (index < 0 || index >= loaded.doc.pages.length) {
-        throw new AgentError("target-not-found", `XPS target not found: "${params.target}".`, { pluginId: PLUGIN_ID });
-      }
-      return pageText(await pageMarkdown(loaded, index, context.signal), params, maxBytes);
+      return readPagedTextDocument({
+        pageCount: loaded.doc.pages.length,
+        header: async () => {
+          const { title, ...fields } = await loadXpsProperties(loaded.pkg);
+          return markdownDocumentHeader(title ?? context.file.name, fields);
+        },
+        page: (index) => pageMarkdown(loaded, index, context.signal),
+      }, params, PLUGIN_ID);
     });
   },
 };
