@@ -161,9 +161,11 @@ export function renderMarkdownTablePage(options: MarkdownTablePageOptions): Read
   };
 }
 
-/** A page-oriented text document (OFD, XPS, PDF...) exposed through `page:<n>` targets. */
+/** A page- or chapter-oriented text document (OFD, XPS, PDF, EPUB...) exposed through `<prefix>:<n>` targets. */
 export interface PagedTextDocument {
   readonly pageCount: number;
+  /** Target prefix; defaults to `page` (`page:1`, `page:2`...). E-books use `chapter`. */
+  readonly targetPrefix?: string;
   /** Markdown preamble for whole-document reads (title, document properties). */
   header(): Promise<string> | string;
   /** Markdown for one zero-based page. */
@@ -176,15 +178,16 @@ export function markdownDocumentHeader(title: string, fields: Readonly<Record<st
   return [`# ${title}`, "", ...bullets].join("\n").trim();
 }
 
-/** Parses a `page:<n>` target into a zero-based page index. */
-export function parsePageTarget(target: string, pageCount: number, pluginId?: string): number {
-  const index = Number(/^page:([1-9]\d*)$/.exec(target)?.[1] ?? 0) - 1;
+/** Parses a `<prefix>:<n>` (default `page:<n>`) target into a zero-based index. */
+export function parsePageTarget(target: string, pageCount: number, pluginId?: string, prefix = "page"): number {
+  const match = target.startsWith(`${prefix}:`) ? /^([1-9]\d*)$/.exec(target.slice(prefix.length + 1)) : null;
+  const index = Number(match?.[1] ?? 0) - 1;
   if (index < 0 || index >= pageCount) throw new AgentError("target-not-found", `Target not found: "${target}".`, { pluginId });
   return index;
 }
 
 /**
- * Reads one `page:<n>` target, or the whole document when no target is given. Unfiltered whole-document
+ * Reads one `<prefix>:<n>` target, or the whole document when no target is given. Unfiltered whole-document
  * reads render pages only until the `offset:` window is covered; `filter` keeps matching lines (`line:` cursors).
  */
 export async function readPagedTextDocument(document: PagedTextDocument, params: ReadParams, pluginId?: string): Promise<ReadResult> {
@@ -192,7 +195,7 @@ export async function readPagedTextDocument(document: PagedTextDocument, params:
   const needle = params.filter?.trim().toLowerCase();
   let text: string;
   if (params.target !== undefined) {
-    text = await document.page(parsePageTarget(params.target, document.pageCount, pluginId));
+    text = await document.page(parsePageTarget(params.target, document.pageCount, pluginId, document.targetPrefix));
   } else {
     const need = needle ? Infinity : parsePositionCursor(params.cursor, "offset:", pluginId) + maxBytes;
     const parts = [await document.header()];

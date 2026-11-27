@@ -84,6 +84,9 @@ describe("readPagedTextDocument", () => {
   it("reads a page target and filters lines across the document", async () => {
     expect((await readPagedTextDocument(document([]), { target: "page:3", maxBytes: 1000 })).content).toContain("## Page 3");
     await expect(readPagedTextDocument(document([]), { target: "page:51", maxBytes: 1000 })).rejects.toMatchObject({ code: "target-not-found" });
+    const chapters = { ...document([]), targetPrefix: "chapter" };
+    expect((await readPagedTextDocument(chapters, { target: "chapter:2", maxBytes: 1000 })).content).toContain("## Page 2");
+    await expect(readPagedTextDocument(chapters, { target: "page:2", maxBytes: 1000 })).rejects.toMatchObject({ code: "target-not-found" });
     const filtered = await readPagedTextDocument(document([]), { filter: "NEEDLE", maxBytes: 1000 });
     expect(filtered).toMatchObject({ filterApplied: true, truncated: false });
     expect(filtered.content.split("\n")).toHaveLength(1);
