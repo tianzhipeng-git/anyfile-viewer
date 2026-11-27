@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
+    "./extract": "./src/extract.ts",
     "./manifest": "./src/manifest.ts",
     "./probe": "./src/probe.ts"
   },
@@ -12,5 +13,8 @@
     "@anyfile/runtime-assets": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*"
+  },
+  "devDependencies": {
+    "@anyfile/viewer-test": "workspace:*"
   }
 }
