@@ -1,6 +1,6 @@
 import dgram from "node:dgram";
 import net from "node:net";
-import { parentPort } from "node:worker_threads";
+import { parentPort, workerData } from "node:worker_threads";
 import { basename } from "node:path";
 import { viewerRegistryEntries } from "@anyfile/viewer-registry";
 import {
@@ -16,6 +16,7 @@ import {
   type ReadParams,
   type ReadResult,
   type StructuredExtractor,
+  type VendorAssets,
   type WorkspaceReader,
 } from "@anyfile/viewer-protocol";
 import { createNodeVendorAssets } from "@anyfile/runtime-assets/node";
@@ -25,6 +26,11 @@ import { extractorLoaders } from "./generated/extractors";
 import { encodePng, normalizeMaxDimension, readPngDimensions } from "./png";
 import { createDiskWorkspaceReader } from "./security";
 import { loadDefaultVendorManifest } from "./vendor-manifest";
+
+export interface WorkerInitData {
+  readonly vendorRoots?: readonly string[];
+  readonly vendorManifest?: Readonly<Record<string, string>>;
+}
 
 export interface WorkerRequest {
   readonly id: number;
@@ -39,6 +45,15 @@ export interface WorkerRequest {
   readonly queryParams?: QueryParams;
   readonly renderParams?: { readonly target?: string; readonly maxDimension?: number };
 }
+
+export interface WorkerVendorEnsureResult {
+  readonly op: "vendor-ensure-result";
+  readonly ensureId: number;
+  readonly ok: boolean;
+  readonly error?: AgentFileError;
+}
+
+export type HostToWorkerMessage = WorkerRequest | WorkerVendorEnsureResult;
 
 export interface RouteResult {
   readonly pluginId: string;
@@ -56,7 +71,56 @@ export interface WorkerResponse {
   readonly error?: AgentFileError;
 }
 
-const vendor = createNodeVendorAssets(undefined, loadDefaultVendorManifest());
+export interface WorkerVendorEnsureRequest {
+  readonly type: "vendor-ensure";
+  readonly ensureId: number;
+  readonly path: string;
+}
+
+export type WorkerOutboundMessage = WorkerResponse | WorkerVendorEnsureRequest;
+
+const initData = (workerData ?? null) as WorkerInitData | null;
+const vendorManifest = initData?.vendorManifest ?? loadDefaultVendorManifest();
+const localVendor = createNodeVendorAssets(initData?.vendorRoots, vendorManifest);
+const pendingVendorEnsures = new Map<number, { readonly resolve: () => void; readonly reject: (error: unknown) => void }>();
+const inflightVendorEnsures = new Map<string, Promise<void>>();
+let nextVendorEnsureId = 1;
+
+function requestHostVendorAsset(path: string): Promise<void> {
+  if (!parentPort || !vendorManifest[path]) {
+    return Promise.reject(new AgentError("runtime-unavailable", `Runtime asset /vendor/${path} is not available locally.`));
+  }
+  const existing = inflightVendorEnsures.get(path);
+  if (existing) return existing;
+  const ensureId = nextVendorEnsureId++;
+  const promise = new Promise<void>((resolve, reject) => {
+    pendingVendorEnsures.set(ensureId, { resolve, reject });
+    parentPort!.postMessage({ type: "vendor-ensure", ensureId, path } satisfies WorkerVendorEnsureRequest);
+  }).finally(() => {
+    inflightVendorEnsures.delete(path);
+  });
+  inflightVendorEnsures.set(path, promise);
+  return promise;
+}
+
+async function withOnDemandVendor<T>(path: string, load: () => Promise<T>): Promise<T> {
+  try {
+    return await load();
+  } catch (error) {
+    const code = (error as { code?: unknown } | null)?.code;
+    const message = error instanceof Error ? error.message : "";
+    if (code !== "runtime-unavailable" || !message.includes("not available locally") || !parentPort || !vendorManifest[path]) {
+      throw error;
+    }
+    await requestHostVendorAsset(path);
+    return load();
+  }
+}
+
+const vendor: VendorAssets = {
+  bytes: (path) => withOnDemandVendor(path, () => localVendor.bytes(path)),
+  url: (path) => withOnDemandVendor(path, () => localVendor.url(path)),
+};
 const extractorCache = new Map<string, Promise<StructuredExtractor>>();
 const activeControllers = new Map<number, AbortController>();
 
@@ -224,20 +288,37 @@ async function runExtractor(req: WorkerRequest, extractor: StructuredExtractor, 
 if (parentPort) {
   installWorkerNetworkGuard();
   const port = parentPort;
-  port.on("message", async (req: WorkerRequest) => {
-    if (req.op === "cancel") {
-      activeControllers.get(req.id)?.abort();
+  port.on("message", async (msg: HostToWorkerMessage) => {
+    if (msg.op === "vendor-ensure-result") {
+      const entry = pendingVendorEnsures.get(msg.ensureId);
+      if (!entry) return;
+      pendingVendorEnsures.delete(msg.ensureId);
+      if (msg.ok) {
+        entry.resolve();
+      } else {
+        entry.reject(
+          new AgentError(
+            msg.error?.code ?? "runtime-unavailable",
+            msg.error?.message ?? "Failed to fetch required /vendor/ runtime asset.",
+            { pluginId: msg.error?.pluginId },
+          ),
+        );
+      }
+      return;
+    }
+    if (msg.op === "cancel") {
+      activeControllers.get(msg.id)?.abort();
       return;
     }
     try {
-      const result = await handleRequest(req);
-      const response: WorkerResponse = { id: req.id, ok: true, result };
+      const result = await handleRequest(msg);
+      const response: WorkerResponse = { id: msg.id, ok: true, result };
       port.postMessage(response);
     } catch (error) {
       const response: WorkerResponse = {
-        id: req.id,
+        id: msg.id,
         ok: false,
-        error: toAgentFileError(error, req.pluginId),
+        error: toAgentFileError(error, msg.pluginId),
       };
       port.postMessage(response);
     }

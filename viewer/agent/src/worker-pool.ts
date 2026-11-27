@@ -2,9 +2,17 @@ import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { Worker } from "node:worker_threads";
 import { AgentError } from "@anyfile/viewer-protocol";
-import type { WorkerRequest, WorkerResponse } from "./worker";
+import { toAgentFileError } from "./budget";
+import { VendorAssetStore, type VendorAssetStoreOptions } from "./vendor-store";
+import type {
+  WorkerInitData,
+  WorkerOutboundMessage,
+  WorkerRequest,
+  WorkerVendorEnsureRequest,
+  WorkerVendorEnsureResult,
+} from "./worker";
 
-export interface WorkerPoolOptions {
+export interface WorkerPoolOptions extends VendorAssetStoreOptions {
   /** Keep worker alive across requests for MCP module/WASM reuse. Default: false (CLI ephemeral). */
   readonly persistent?: boolean;
   /** Default wall-clock timeout per call in ms. Default: 10_000. */
@@ -28,7 +36,10 @@ export const DEFAULT_RENDER_TIMEOUT_MS = 20_000;
 interface PendingCall {
   readonly resolve: (value: unknown) => void;
   readonly reject: (reason: unknown) => void;
-  readonly timer: ReturnType<typeof setTimeout>;
+  timer: ReturnType<typeof setTimeout> | null;
+  remainingMs: number;
+  startedAt: number;
+  readonly onTimeout: () => void;
   readonly cleanup?: () => void;
   readonly worker: Worker;
   readonly pluginId?: string;
@@ -39,6 +50,9 @@ export class ExtractWorkerPool {
   private nextId = 1;
   private readonly pending = new Map<number, PendingCall>();
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
+  private activeVendorEnsures = 0;
+  private vendorStore: VendorAssetStore | null = null;
+  private readonly vendorOptions: VendorAssetStoreOptions;
   private readonly persistent: boolean;
   private readonly defaultTimeoutMs: number;
   private readonly maxOldGenerationSizeMb: number;
@@ -49,6 +63,75 @@ export class ExtractWorkerPool {
     this.defaultTimeoutMs = options.defaultTimeoutMs ?? 10_000;
     this.maxOldGenerationSizeMb = options.maxOldGenerationSizeMb ?? 512;
     this.idleTimeoutMs = options.idleTimeoutMs ?? 5 * 60 * 1000;
+    this.vendorOptions = {
+      vendorRoots: options.vendorRoots,
+      vendorCacheRoot: options.vendorCacheRoot,
+      vendorManifest: options.vendorManifest,
+      vendorUpstreamBaseUrl: options.vendorUpstreamBaseUrl,
+    };
+  }
+
+  private getVendorStore(): VendorAssetStore {
+    this.vendorStore ??= new VendorAssetStore(this.vendorOptions);
+    return this.vendorStore;
+  }
+
+  private pausePendingTimers(): void {
+    const now = Date.now();
+    for (const entry of this.pending.values()) {
+      if (entry.timer !== null) {
+        clearTimeout(entry.timer);
+        entry.timer = null;
+        entry.remainingMs = Math.max(100, entry.remainingMs - (now - entry.startedAt));
+      }
+    }
+  }
+
+  private resumePendingTimers(): void {
+    if (this.activeVendorEnsures > 0) return;
+    const now = Date.now();
+    for (const entry of this.pending.values()) {
+      if (entry.timer === null) {
+        entry.startedAt = now;
+        entry.timer = setTimeout(entry.onTimeout, entry.remainingMs);
+      }
+    }
+  }
+
+  private handleVendorEnsure(worker: Worker, msg: WorkerVendorEnsureRequest): void {
+    this.activeVendorEnsures += 1;
+    if (this.activeVendorEnsures === 1) {
+      this.pausePendingTimers();
+    }
+    void this.getVendorStore()
+      .ensureCached(msg.path)
+      .then(
+        () => {
+          const reply: WorkerVendorEnsureResult = { op: "vendor-ensure-result", ensureId: msg.ensureId, ok: true };
+          try {
+            worker.postMessage(reply);
+          } catch {
+            // Worker already exited.
+          }
+        },
+        (error: unknown) => {
+          const reply: WorkerVendorEnsureResult = {
+            op: "vendor-ensure-result",
+            ensureId: msg.ensureId,
+            ok: false,
+            error: toAgentFileError(error),
+          };
+          try {
+            worker.postMessage(reply);
+          } catch {
+            // Worker already exited.
+          }
+        },
+      )
+      .finally(() => {
+        this.activeVendorEnsures = Math.max(0, this.activeVendorEnsures - 1);
+        this.resumePendingTimers();
+      });
   }
 
   private clearIdleTimer(): void {
@@ -69,8 +152,19 @@ export class ExtractWorkerPool {
 
   private ensureWorker(): Worker {
     if (this.worker) return this.worker;
+    const resolvedVendorRoots =
+      this.vendorOptions.vendorRoots ??
+      (this.vendorOptions.vendorCacheRoot ? [this.vendorOptions.vendorCacheRoot] : undefined);
+    const workerData: WorkerInitData | undefined =
+      resolvedVendorRoots || this.vendorOptions.vendorManifest
+        ? {
+            ...(resolvedVendorRoots ? { vendorRoots: resolvedVendorRoots } : {}),
+            ...(this.vendorOptions.vendorManifest ? { vendorManifest: this.vendorOptions.vendorManifest } : {}),
+          }
+        : undefined;
     const worker = new Worker(WORKER_URL, {
       execArgv: IS_TS_RUNTIME ? ["--import", TS_HOOKS_URL.href] : [],
+      ...(workerData ? { workerData } : {}),
       stdout: true,
       stderr: true,
       resourceLimits: {
@@ -83,11 +177,15 @@ export class ExtractWorkerPool {
     worker.stderr?.resume();
     worker.unref();
 
-    worker.on("message", (msg: WorkerResponse) => {
+    worker.on("message", (msg: WorkerOutboundMessage) => {
+      if ("type" in msg) {
+        this.handleVendorEnsure(worker, msg);
+        return;
+      }
       const entry = this.pending.get(msg.id);
       if (!entry) return;
       this.pending.delete(msg.id);
-      clearTimeout(entry.timer);
+      if (entry.timer !== null) clearTimeout(entry.timer);
       entry.cleanup?.();
       if (msg.ok) {
         entry.resolve(msg.result);
@@ -130,7 +228,7 @@ export class ExtractWorkerPool {
   private failPending(worker: Worker | null, error: AgentError): void {
     for (const [id, entry] of this.pending) {
       if (worker && entry.worker !== worker) continue;
-      clearTimeout(entry.timer);
+      if (entry.timer !== null) clearTimeout(entry.timer);
       entry.cleanup?.();
       entry.reject(error);
       this.pending.delete(id);
@@ -154,7 +252,7 @@ export class ExtractWorkerPool {
         const entry = this.pending.get(id);
         if (!entry) return;
         this.pending.delete(id);
-        clearTimeout(entry.timer);
+        if (entry.timer !== null) clearTimeout(entry.timer);
         entry.cleanup?.();
         try {
           worker.postMessage({ id, op: "cancel" } satisfies WorkerRequest);
@@ -168,7 +266,7 @@ export class ExtractWorkerPool {
         : undefined;
       options?.signal?.addEventListener("abort", onAbort, { once: true });
 
-      const timer = setTimeout(() => {
+      const onTimeout = () => {
         this.pending.delete(id);
         cleanup?.();
         if (this.worker === worker) this.worker = null;
@@ -178,12 +276,18 @@ export class ExtractWorkerPool {
             pluginId: request.pluginId,
           }),
         );
-      }, timeoutMs);
+      };
+
+      const startedAt = Date.now();
+      const timer = this.activeVendorEnsures > 0 ? null : setTimeout(onTimeout, timeoutMs);
 
       this.pending.set(id, {
         resolve: resolve as (value: unknown) => void,
         reject,
         timer,
+        remainingMs: timeoutMs,
+        startedAt,
+        onTimeout,
         cleanup,
         worker,
         pluginId: request.pluginId,

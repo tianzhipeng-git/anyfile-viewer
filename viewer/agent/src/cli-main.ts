@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { AgentError } from "@anyfile/viewer-protocol";
 import { AgentService } from "./agent-core";
 import { toAgentFileError } from "./budget";
-import { clearVendorCache, listVendorCache } from "./cache";
+import { addVendorCache, clearVendorCache, listVendorCache } from "./cache";
 import { runMcpServer } from "./mcp";
 
 const BOOLEAN_FLAGS = new Set(["help"]);
@@ -78,7 +78,7 @@ function printUsage(): void {
       "  read <path> [--target t] [--cursor c] [--filter kw] [--max-bytes n] [--out file]",
       "  query <path> --sql <sql> [--target t] [--cursor c] [--max-bytes n] [--out file]",
       "  render <path> [--target t] [--max-dim px] [--out file] Render bounded PNG image",
-      "  cache <list|clear>                                    Inspect or clear local /vendor/ asset cache",
+      "  cache <list|add <pluginIds...|all>|clear>             Manage local /vendor/ runtime asset cache",
       "  mcp [--allow-dir <dir>...]                            Start MCP stdio server",
       "",
     ].join("\n"),
@@ -110,18 +110,27 @@ export async function runCli(argv: readonly string[]): Promise<number> {
 
   if (command === "cache") {
     const sub = positionals[0] ?? "list";
-    if (sub === "list") {
-      const info = await listVendorCache();
-      process.stdout.write(`${JSON.stringify(info, null, 2)}\n`);
-      return 0;
+    try {
+      if (sub === "list") {
+        const info = await listVendorCache();
+        process.stdout.write(`${JSON.stringify(info, null, 2)}\n`);
+        return 0;
+      }
+      if (sub === "add") {
+        const info = await addVendorCache(positionals.slice(1));
+        process.stdout.write(`${JSON.stringify(info, null, 2)}\n`);
+        return 0;
+      }
+      if (sub === "clear") {
+        const info = await clearVendorCache();
+        process.stdout.write(`${JSON.stringify(info, null, 2)}\n`);
+        return 0;
+      }
+      throw new AgentError("invalid-argument", `Unsupported cache subcommand: ${sub}`);
+    } catch (error) {
+      process.stderr.write(`${JSON.stringify(toAgentFileError(error))}\n`);
+      return 1;
     }
-    if (sub === "clear") {
-      const info = await clearVendorCache();
-      process.stdout.write(`${JSON.stringify(info, null, 2)}\n`);
-      return 0;
-    }
-    process.stderr.write(`${JSON.stringify(toAgentFileError(new AgentError("invalid-argument", `Unsupported cache subcommand: ${sub}`)))}\n`);
-    return 1;
   }
 
   const targetPath = positionals[0];

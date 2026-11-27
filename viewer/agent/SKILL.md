@@ -30,6 +30,11 @@ When encountering an unfamiliar, binary, or proprietary local file (such as `.pl
    ```
    - Pure-pixel formats (e.g. `.psd`, `.exr`, `.hdr`) decode directly in Node without launching a browser.
    - Visual/layout/CAD/3D formats (e.g. `.ofd`, `.dxf`, `.dwg`, `.pdf`) render offline via a local Chromium browser.
+5. **Pre-warm `/vendor/` runtime assets** for offline environments when needed:
+   ```bash
+   anyfile cache add <pluginId...|all>
+   anyfile cache list
+   ```
 
 ## Error Handling
 

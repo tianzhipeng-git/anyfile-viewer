@@ -52,9 +52,10 @@ function collectWorkspaceAliases() {
   return aliases;
 }
 
-// 1. Regenerate auto-scanned extractor and browser loader maps.
+// 1. Regenerate auto-scanned extractor, browser loader, and vendor plugin maps.
 execFileSync(process.execPath, [join(scriptsDir, "generate-extractors.mjs")], { stdio: "inherit" });
 execFileSync(process.execPath, [join(scriptsDir, "generate-renderer-loaders.mjs")], { stdio: "inherit" });
+execFileSync(process.execPath, [join(scriptsDir, "generate-vendor-plugins.mjs")], { stdio: "inherit" });
 
 // 2. Verify full /vendor/ SHA-256 manifest exists before packaging.
 if (!existsSync(vendorManifestSrc)) {

@@ -14,6 +14,7 @@
   "scripts": {
     "generate:extractors": "node ./scripts/generate-extractors.mjs",
     "generate:renderer-loaders": "node ./scripts/generate-renderer-loaders.mjs",
+    "generate:vendor-plugins": "node ./scripts/generate-vendor-plugins.mjs",
     "build": "node ./scripts/build.mjs"
   },
   "dependencies": {

@@ -1,20 +1,16 @@
 import { randomBytes } from "node:crypto";
-import { createReadStream, existsSync, statSync } from "node:fs";
-import { mkdir, readFile, realpath, rename, stat, writeFile } from "node:fs/promises";
+import { createReadStream, existsSync } from "node:fs";
+import { realpath, stat } from "node:fs/promises";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
-import { dirname, extname, join, resolve, sep } from "node:path";
-import { assertVendorPath, defaultVendorRoots, getVendorCacheRoot, sha256Hex } from "@anyfile/runtime-assets/node";
+import { extname, resolve, sep } from "node:path";
+import { assertVendorPath } from "@anyfile/runtime-assets/node";
 import { createDiskWorkspaceReader } from "./security";
-import { loadDefaultVendorManifest } from "./vendor-manifest";
+import { DEFAULT_VENDOR_UPSTREAM_URL, VendorAssetStore, type VendorAssetStoreOptions } from "./vendor-store";
 
-export const DEFAULT_VENDOR_UPSTREAM_URL = "https://assets.anyfile.top/vendor";
+export { DEFAULT_VENDOR_UPSTREAM_URL };
 
-export interface RenderServerOptions {
+export interface RenderServerOptions extends VendorAssetStoreOptions {
   readonly rendererHostDir: string;
-  readonly vendorRoots?: readonly string[];
-  readonly vendorCacheRoot?: string;
-  readonly vendorManifest?: Readonly<Record<string, string>>;
-  readonly vendorUpstreamBaseUrl?: string;
 }
 
 export interface SessionGrant {
@@ -98,21 +94,14 @@ function isWithinDir(target: string, root: string): boolean {
  */
 export class RenderAssetServer {
   private readonly rendererHostDir: string;
-  private readonly vendorRoots: readonly string[];
-  private readonly vendorCacheRoot: string;
-  private readonly vendorManifest: Readonly<Record<string, string>>;
-  private readonly vendorUpstreamBaseUrl: string;
+  private readonly vendorStore: VendorAssetStore;
   private readonly sessions = new Map<string, ActiveSession>();
-  private readonly inflightDownloads = new Map<string, Promise<Uint8Array>>();
   private server: Server | null = null;
   private boundOrigin = "";
 
   constructor(options: RenderServerOptions) {
     this.rendererHostDir = resolve(options.rendererHostDir);
-    this.vendorRoots = options.vendorRoots ?? defaultVendorRoots();
-    this.vendorCacheRoot = options.vendorCacheRoot ?? getVendorCacheRoot();
-    this.vendorManifest = options.vendorManifest ?? loadDefaultVendorManifest();
-    this.vendorUpstreamBaseUrl = (options.vendorUpstreamBaseUrl ?? DEFAULT_VENDOR_UPSTREAM_URL).replace(/\/+$/, "");
+    this.vendorStore = new VendorAssetStore(options);
   }
 
   get origin(): string {
@@ -398,52 +387,21 @@ export class RenderAssetServer {
   }
 
   private async serveVendorAsset(vendorPath: string, method: string, res: ServerResponse): Promise<void> {
-    let segments: string[];
     try {
-      segments = assertVendorPath(vendorPath);
+      assertVendorPath(vendorPath);
     } catch {
       res.writeHead(400);
       res.end("Invalid vendor asset path");
       return;
     }
 
-    const expectedSha = this.vendorManifest[vendorPath]?.toLowerCase();
-    let localFile: string | null = null;
-    for (const root of this.vendorRoots) {
-      const candidate = join(root, ...segments);
-      try {
-        if (statSync(candidate).isFile()) {
-          localFile = candidate;
-          break;
-        }
-      } catch {
-        // Not present under this root.
-      }
-    }
-
-    if (localFile) {
-      const bytes = new Uint8Array(await readFile(localFile));
-      if (expectedSha && sha256Hex(bytes) !== expectedSha) {
-        res.writeHead(502, { "content-type": "text/plain; charset=utf-8" });
-        res.end(`SHA-256 mismatch for /vendor/${vendorPath}`);
+    try {
+      const bytes = await this.vendorStore.readOrFetch(vendorPath);
+      if (!bytes) {
+        res.writeHead(404);
+        res.end("Vendor asset not found");
         return;
       }
-      res.writeHead(200, {
-        "content-type": mimeTypeFor(localFile),
-        "content-length": String(bytes.byteLength),
-      });
-      res.end(method === "HEAD" ? undefined : bytes);
-      return;
-    }
-
-    if (!expectedSha || !this.vendorUpstreamBaseUrl) {
-      res.writeHead(404);
-      res.end("Vendor asset not found");
-      return;
-    }
-
-    try {
-      const bytes = await this.fetchAndCacheVendorAsset(vendorPath, segments, expectedSha);
       res.writeHead(200, {
         "content-type": mimeTypeFor(vendorPath),
         "content-length": String(bytes.byteLength),
@@ -453,37 +411,5 @@ export class RenderAssetServer {
       res.writeHead(502, { "content-type": "text/plain; charset=utf-8" });
       res.end(error instanceof Error ? error.message : "Failed to fetch vendor asset");
     }
-  }
-
-  private fetchAndCacheVendorAsset(
-    vendorPath: string,
-    segments: readonly string[],
-    expectedSha: string,
-  ): Promise<Uint8Array> {
-    const existing = this.inflightDownloads.get(vendorPath);
-    if (existing) return existing;
-
-    const promise = (async () => {
-      const upstreamUrl = `${this.vendorUpstreamBaseUrl}/${vendorPath}`;
-      const response = await fetch(upstreamUrl);
-      if (!response.ok) {
-        throw new Error(`Upstream vendor fetch failed (${response.status}) for ${vendorPath}`);
-      }
-      const bytes = new Uint8Array(await response.arrayBuffer());
-      if (sha256Hex(bytes) !== expectedSha) {
-        throw new Error(`SHA-256 verification failed for downloaded /vendor/${vendorPath}`);
-      }
-      const dest = join(this.vendorCacheRoot, ...segments);
-      await mkdir(dirname(dest), { recursive: true });
-      const tmp = `${dest}.${randomBytes(6).toString("hex")}.tmp`;
-      await writeFile(tmp, bytes);
-      await rename(tmp, dest);
-      return bytes;
-    })().finally(() => {
-      this.inflightDownloads.delete(vendorPath);
-    });
-
-    this.inflightDownloads.set(vendorPath, promise);
-    return promise;
   }
 }
