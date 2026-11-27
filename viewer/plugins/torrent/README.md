@@ -23,6 +23,13 @@
 
 没有第三方解析器、Worker、WASM 或网络请求，使用自研 Bencode 解码器与浏览器 DOM/WebCrypto API。
 
+## Agent extract
+
+`src/extract.ts` 复用 `readTorrent()`，只实现 `inspect` / `read`：
+
+- `summary`：名称、InfoHash、总大小、分块、创建信息、备注与 Web 种子（JSON，不支持 `filter`）。
+- `files`：`path | bytes` 表格；`trackers`：`tier | url` 表格。两者支持 `filter`，`row:<n>` 游标。
+
 ## 已知限制
 
 - 仅展示元数据，不下载内容、不连接 Tracker 或节点。
