@@ -3,6 +3,7 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "nod
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { writeArrayBuffer } from "geotiff";
 
 const pluginRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const examples = join(pluginRoot, "examples");
@@ -48,6 +49,14 @@ try {
   writeFileSync(join(examples, "corrupt.tga"), "not a tga");
   writeFileSync(join(examples, "corrupt.ppm"), "P6\n96 nope\n255\n");
   writeFileSync(join(examples, "corrupt.tiff"), "II*\0\b\0\0\0");
+
+  const geoPixels = [];
+  for (let y = 0; y < 16; y += 1) for (let x = 0; x < 32; x += 1) geoPixels.push(x * 8, y * 16, 128);
+  writeFileSync(join(examples, "sample-geotiff.tiff"), new Uint8Array(writeArrayBuffer(geoPixels, {
+    width: 32, height: 16, SamplesPerPixel: 3, BitsPerSample: [8, 8, 8], PhotometricInterpretation: 2,
+    ModelPixelScale: [0.5, 0.5, 0], ModelTiepoint: [0, 0, 0, 116, 40, 0],
+    GTModelTypeGeoKey: 2, GTRasterTypeGeoKey: 1, GeographicTypeGeoKey: 4326, GeogCitationGeoKey: "WGS 84",
+  })));
 } finally {
   rmSync(temporary, { recursive: true, force: true });
 }

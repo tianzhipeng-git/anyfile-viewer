@@ -1,4 +1,4 @@
-import { parseDicom, type DataSet } from "dicom-parser";
+import { parseDicom, type DataSet } from "./dicom-parser";
 import { ViewerError } from "@anyfile/viewer-protocol";
 import { readFileMeta } from "./file-meta";
 import { isPart10 } from "./signature";
@@ -7,6 +7,9 @@ import { MAX_FRAME_PIXELS, MAX_HEADER_BYTES, type DicomInfo, type WindowSettings
 const NATIVE_SYNTAXES = ["1.2.840.10008.1.2", "1.2.840.10008.1.2.1", "1.2.840.10008.1.2.2"];
 const invalid = () => new ViewerError("invalid-file", "Invalid DICOM data.");
 const limit = () => new ViewerError("resource-limit", "DICOM resource limit exceeded.");
+// Deflated/unknown data sets must never reach the parser's unbounded inflater.
+export const isParseableSyntax = (syntax: string) =>
+  NATIVE_SYNTAXES.includes(syntax) || /^1\.2\.840\.10008\.1\.2\.(?:4\.\d+|5)$/.test(syntax);
 
 export interface DicomSource {
   info: DicomInfo;
@@ -32,9 +35,7 @@ export function inspectDicom(bytes: Uint8Array, fileSize: number): DicomSource {
     info: { syntax, sopClass: meta.sopClass, modality: "", date: "", width: 0, height: 0, frames: 1, bits: 0, photometric: "" },
     offset: 0, frameBytes: 0, stored: 0, highBit: 0, signed: false, planar: false, slope: 1, intercept: 0, voi: "LINEAR",
   };
-  // Deflated/unknown data sets must never reach the parser's unbounded inflater.
-  const explicitCompressed = /^1\.2\.840\.10008\.1\.2\.(?:4\.\d+|5)$/.test(syntax);
-  if (!NATIVE_SYNTAXES.includes(syntax) && !explicitCompressed) {
+  if (!isParseableSyntax(syntax)) {
     source.info.reason = "syntax";
     return source;
   }

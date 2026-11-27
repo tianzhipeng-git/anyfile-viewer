@@ -4,6 +4,7 @@ export interface FixtureOptions {
   signed?: boolean; photometric?: string; samples?: number; planar?: number;
   width?: number; height?: number; frames?: number; slope?: number; intercept?: number;
   center?: number; window?: number; voi?: string; padding?: number; lut?: boolean;
+  extra?: [group: number, tag: number, vr: string, value: string][];
 }
 export function dicomFixture(options: FixtureOptions = {}) {
   const syntax = options.syntax ?? "1.2.840.10008.1.2.1";
@@ -41,6 +42,7 @@ export function dicomFixture(options: FixtureOptions = {}) {
   element(8, 0x16, "UI", sop);
   element(8, 0x20, "DA", "20261004");
   element(8, 0x60, "CS", "OT");
+  for (const [group, tag, vr, value] of options.extra ?? []) element(group, tag, vr, value);
   element(0x28, 2, "US", [options.samples ?? 1]);
   element(0x28, 4, "CS", options.photometric ?? "MONOCHROME2");
   if (options.planar !== undefined) element(0x28, 6, "US", [options.planar]);

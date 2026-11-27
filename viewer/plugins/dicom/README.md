@@ -29,6 +29,16 @@
 - 取消和 dispose 终止 Worker、拒绝未完成请求、释放视口/Canvas/监听器并移除根节点。帧请求期间禁用相关输入，局部失败保留上一帧并标明失败。
 - `dicom-parser@1.8.21`（MIT）只进入延迟的 probe/Worker 代码，不进入页面外壳。许可随 prepare 发布到 `/vendor/licenses/dicom-parser/1.8.21/LICENSE`。
 
+## Agent extract
+
+`src/extract.ts` 在 Node 中复用 `inspectDicom()` / `renderFrame()`（与 Worker 相同的解析与窗宽窗位逻辑），实现 `inspect` / `read` / `renderImage`：
+
+- `inspect`：传输语法、SOP Class、Modality、检查日期、检查/序列描述等描述性标签，Rows/Columns、帧数、位深、光度解释、默认窗宽窗位和是否可渲染。
+- `tags`：`Tag | Keyword | VR | Value` 表格，支持 `filter`，`row:<n>` 游标；Pixel Data 和二进制值只显示长度，序列只显示条目数、不展开。
+- `frame:<n>`：`read` 返回该帧摘要；`renderImage` 用文件默认窗宽窗位（缺省时按像素范围自动）输出 RGBA，并按 `maxDimension` 缩小。
+- **默认屏蔽身份信息**：患者组 (0010,xxxx) 除性别、年龄、身高、体重外全部显示为 `<masked>`（姓名、ID、出生日期、地址等），所有 PN 人名、私有标签、机构/科室/工作站名称、Accession Number、Study ID 同样屏蔽；`inspect` 不输出任何患者标签。
+- 压缩传输语法（JPEG/JPEG-LS/JPEG 2000/RLE）、deflated 数据集及其他“仅元数据”影像，`renderImage` 返回 `unsupported-capability`；deflated/未知语法只解析文件元信息组。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
