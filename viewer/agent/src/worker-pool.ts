@@ -164,7 +164,8 @@ export class ExtractWorkerPool {
         : undefined;
     const worker = new Worker(WORKER_URL, {
       execArgv: IS_TS_RUNTIME ? ["--import", TS_HOOKS_URL.href] : [],
-      ...(workerData ? { workerData } : {}),
+      // Always an object: some libraries (geotiff's `web-worker`) read `workerData` fields at import time.
+      workerData: workerData ?? {},
       stdout: true,
       stderr: true,
       resourceLimits: {

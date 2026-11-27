@@ -18,6 +18,7 @@ const SQLITE_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/sqlite/examples/sample.
 const PST_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/pst/examples/dist-list.pst");
 const SAV_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/stat-data/examples/iris.sav");
 const HDR_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/hdr-image/examples/studio-gradient.hdr");
+const GEOTIFF_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/general-raster/examples/sample-geotiff.tiff");
 const PSD_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/photoshop/examples/sample_640×426.psd");
 
 async function runCli(args: readonly string[], env?: Record<string, string | undefined>) {
@@ -91,6 +92,11 @@ describe("@anyfile/agent CLI & MCP end-to-end", { timeout: 60_000 }, () => {
     const readSav = await runCli(["read", SAV_SAMPLE, "--max-bytes", "2048"]);
     expect(readSav.exitCode).toBe(0);
     expect(readSav.stdout.length).toBeGreaterThan(0);
+
+    // geotiff's `web-worker` dependency reads `workerData` at import time inside the worker thread.
+    const inspectTiff = await runCli(["inspect", GEOTIFF_SAMPLE]);
+    expect(inspectTiff.exitCode).toBe(0);
+    expect(JSON.parse(inspectTiff.stdout).pluginId).toBe("general-raster");
 
     // SQL comment starting with -- and explicitly passed symlink target.
     const commentedSql = await runCli(["query", SQLITE_SAMPLE, "--sql", "-- leading comment\nSELECT name FROM users ORDER BY id"]);
