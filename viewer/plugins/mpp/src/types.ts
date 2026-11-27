@@ -1,5 +1,6 @@
 export const INPUT_LIMIT = 128 * 1024 * 1024;
 export const RUNTIME_BASE = "/vendor/mppgo/0.0.0-0483da3-anyfile.1/";
+export const RUNTIME_FILES = { glue: "wasm_exec.js", wasm: "mpp.wasm" } as const;
 export interface Duration { amount: number; unit: string }
 export interface Task {
   id: number; uid: number; name: string; wbs: string; level: number;

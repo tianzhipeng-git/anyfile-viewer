@@ -9,13 +9,27 @@ objects and proprietary effects can differ from Microsoft Visio.
 The manifest and bounded container probe are separate lazy entries. The full
 plugin starts a dedicated module Worker, loads the same-origin locked runtime,
 transfers the input buffer, and displays only the selected page as a static SVG
-image. Original file contents never leave the browser. The engine validates
+image. Original file contents never leave the browser. The Worker is a thin
+message wrapper over [src/engine.ts](src/engine.ts). The engine validates
 Visio structure independently of the ZIP/OLE header probe.
 
 See [runtime recipe](../../../tools/libvisio-build/README.md) for input, memory,
 page, output and time budgets, corresponding source distribution, dependencies
 and rebuild instructions. Sample provenance is in
 [examples](examples/README.md).
+
+## Agent extract
+
+[src/extract.ts](src/extract.ts) loads the same libvisio assets through
+`context.vendor` in a Node worker and summarizes each page's SVG output:
+
+- `inspect`: format (`vsd`/`vsdx`), page count, distinct page sizes (inches),
+  totals of groups, drawing elements and text blocks; one `page:<n>` target per
+  page.
+- `read`: Markdown per page (size, counts, then one bullet per text block);
+  default reads all pages. `filter` keeps matching text blocks; `line:` cursors.
+- Not available: page names, master names and shape properties (the WASM
+  adapter only exposes per-page SVG), and `render`.
 
 ## Development and verification
 

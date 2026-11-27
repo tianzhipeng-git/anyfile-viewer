@@ -1,30 +1,23 @@
 import { importRuntime } from "@anyfile/runtime-assets";
-import { INPUT_LIMIT, type Request, type Response } from "./types";
-type Engine = { setIcuData(bytes: Uint8Array): void; openVisio(bytes: Uint8Array): number; pageSvg(index: number): string };
-let engine: Engine;
+import { EngineError, openDrawing, pageSvg, type VisioModule } from "./engine";
+import type { Request, Response } from "./types";
+let engine: VisioModule;
 const send = (response: Response) => self.postMessage(response);
 self.onmessage = async ({ data }: MessageEvent<Request>) => {
   try {
     if (data.type === "init") {
-      const { default: create } = await importRuntime<{ default(opts: Record<string, unknown>): Promise<Engine> }>(`${data.baseUrl}visio.mjs`);
+      const { default: create } = await importRuntime<{ default(opts: Record<string, unknown>): Promise<VisioModule> }>(`${data.baseUrl}visio.mjs`);
       engine = await create({ locateFile: (name: string) => `${data.baseUrl}${name}`, print: () => {}, printErr: () => {} });
       const response = await fetch(`${data.baseUrl}converters.dat`);
       if (!response.ok) throw new Error("ICU data fetch failed");
       engine.setIcuData(new Uint8Array(await response.arrayBuffer()));
       send({ type: "ready" });
     } else if (data.type === "open") {
-      if (data.bytes.byteLength > INPUT_LIMIT) { send({ type: "error", code: "resource-limit" }); return; }
-      const pages = engine.openVisio(new Uint8Array(data.bytes));
-      if (!pages) send({ type: "error", code: "invalid-file" });
-      else if (pages < 0 || pages > 512) send({ type: "error", code: "resource-limit" });
-      else send({ type: "opened", pages });
+      send({ type: "opened", pages: openDrawing(engine, new Uint8Array(data.bytes)) });
     } else {
-      const svg = engine.pageSvg(data.index);
-      if (svg.length > 16 * 1024 * 1024) send({ type: "error", code: "resource-limit" });
-      else if (!svg) send({ type: "error", code: "invalid-file" });
-      else send({ type: "page", svg });
+      send({ type: "page", svg: pageSvg(engine, data.index) });
     }
-  } catch {
-    send({ type: "error", code: data.type === "init" ? "unsupported-environment" : "invalid-file" });
+  } catch (error) {
+    send({ type: "error", code: data.type === "init" ? "unsupported-environment" : error instanceof EngineError ? error.code : "invalid-file" });
   }
 };
