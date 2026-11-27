@@ -1,5 +1,6 @@
 import { browserImageManifest } from "@anyfile/browser-image-viewer/manifest";
 import { cameraRawManifest } from "@anyfile/camera-raw-viewer/manifest";
+import { designSourceManifest } from "@anyfile/design-source-viewer/manifest";
 import { dicomManifest } from "@anyfile/dicom-viewer/manifest";
 import { fontManifest } from "@anyfile/font-viewer/manifest";
 import { generalRasterManifest } from "@anyfile/general-raster-viewer/manifest";
@@ -50,5 +51,9 @@ export const imageRegistryEntries: readonly ViewerRegistryEntry[] = [
   {
     manifest: photoshopManifest,
     async probe(context) { return (await import("@anyfile/photoshop-viewer/probe")).probePhotoshop(context); },
+  },
+  {
+    manifest: designSourceManifest,
+    async probe(context) { return (await import("@anyfile/design-source-viewer/probe")).probeDesignSource(context); },
   },
 ];

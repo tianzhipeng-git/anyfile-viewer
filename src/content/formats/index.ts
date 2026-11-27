@@ -59,6 +59,7 @@ import { gifFormat } from "./gif";
 import { gzFormat } from "./gz";
 import { harFormat } from "./har";
 import { exrFormat, hdrFormat } from "./hdr-image";
+import { figFormat, sketchFormat } from "./design-source";
 import { torrentFormat } from "./torrent";
 import { plistFormat } from "./plist";
 import { safetensorsFormat } from "./safetensors";
@@ -203,6 +204,7 @@ export const formatContents: readonly FormatContent[] = [
   xpsFormat,
   ofdFormat,
   etFormat,
+  figFormat,
   flacFormat,
   fodsFormat,
   geotiffFormat,
@@ -282,6 +284,7 @@ export const formatContents: readonly FormatContent[] = [
   rtfFormat,
   rwlFormat,
   rw2Format,
+  sketchFormat,
   slkFormat,
   snupkgFormat,
   sqliteFormat,

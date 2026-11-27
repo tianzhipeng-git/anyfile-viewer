@@ -4,7 +4,7 @@
 
 ## 1. 架构与渲染约定
 
-- **插件分族**：`browser-image`（原生栅格与可控动画）、`safe-svg`（安全清理 SVG/SVGZ）、`general-raster`（TGA/Netpbm/TIFF/BigTIFF/OME-TIFF）、`hdr-image`（OpenEXR/Radiance HDR 高动态范围与 360° HDRI）、`modern-raster`（JPEG XL/HEIC）、`camera-raw`（LibRaw RAW）、`photoshop`（PSD/PSB 合成图）、`pixelmator-pxd`、`dicom`（医学影像）、全景照片（`dji-osmo`、`gopro-max`、`insta360`）。
+- **插件分族**：`browser-image`（原生栅格与可控动画）、`safe-svg`（安全清理 SVG/SVGZ）、`general-raster`（TGA/Netpbm/TIFF/BigTIFF/OME-TIFF）、`hdr-image`（OpenEXR/Radiance HDR 高动态范围与 360° HDRI）、`modern-raster`（JPEG XL/HEIC）、`camera-raw`（LibRaw RAW）、`photoshop`（PSD/PSB 合成图）、`pixelmator-pxd`、`design-source`（Figma `.fig` 与 Sketch `.sketch` 设计源文件）、`dicom`（医学影像）、全景照片（`dji-osmo`、`gopro-max`、`insta360`）。
 - **像素契约**：不建设统一 `ImageDocument`；所有自解码路径必须明确位深、通道排列、alpha 预乘状态、方向与色彩空间，严禁重复应用 EXIF orientation、ICC 转换、alpha 预乘或 tone mapping。
 - **渲染器选型**：原生格式直接用 `<img>` + Object URL（避免 JS 复制整文件与额外 RGBA 缓冲，支持 ImageDecoder 的动画按需启用帧控制）；自解码栅格用 Worker 解码 + `Transferable` RGBA8 交给 `@anyfile/viewer-rendering`（`InteractiveViewport` / `CanvasSurface`）；全景与科学影像使用专用 WebGL/Canvas 渲染。
 - **安全与隐私**：`safe-svg` 拒绝 DOCTYPE 并移除脚本、`foreignObject`、SMIL 动画、事件属性、`<style>` 与非本地 URL 后以新 `image/svg+xml` Blob 交给 `<img>`；所有图片插件不请求文件内远程 URL。
@@ -25,6 +25,7 @@
 | HEVC HEIF / HEIC | `.heic` `.heif` `.heifs` `.hif` | `modern-raster` | 3 | implemented | 原生优先，失败回退自建 `libheif 1.23.2-anyfile.1` Worker（见第 3 节）；仅主图，无辅助项/序列导航 |
 | 相机 RAW | `.dng` `.cr2` `.cr3` `.nef` `.arw` `.raf` `.orf` `.pef` `.rw2` 等 | `camera-raw` | 2 | verified | `libraw-wasm@1.6.0`（需 COOP/COEP），内嵌缩略图与基础显影；256 MiB / 64 Mi 像素；型号级自动回归待补 |
 | PSD / PSB | `.psd` `.psb` | `photoshop` | 3 | implemented | `ag-psd@31.0.2` Worker 解码已保存合成图与图层计数；256 MiB 输入 / 64 Mi 像素 / 256 MiB 解码预算；不支持图层切换或重合成 |
+| Figma / Sketch | `.fig` `.sketch` | `design-source` | 2–3 | implemented | 纯 TS Kiwi（Deflate/Zstd）与 Sketch 43+ JSON 解析器；支持多页面/画板切换、交互式 2D 画布、可搜索图层树、尺寸/文字/色值/CSS 检查与内置缩略图切换；≤128 MiB / ≤60,000 节点 |
 | Pixelmator PXD | `.pxd` | `pixelmator-pxd` | 2 | implemented | 查看包内合成预览与元数据 |
 | DICOM | `.dcm` `.dicom` | `dicom` | 1 / 3 | implemented | Part 10 原生 8/16-bit 灰度、8-bit RGB、多帧与窗宽窗位；压缩传输语法/LUT 仅元数据 |
 | 全景照片 | DJI OQ001 `.jpg` / GoPro MAX `.jpg` / Insta360 `.insp` `.dng` | `dji-osmo` / `gopro-max` / `insta360` | 3–5 | verified / implemented | 按机型与元数据精确 probe，WebGL 球面查看 |

@@ -20,6 +20,7 @@
     "@anyfile/chm-reader": "workspace:*",
     "@anyfile/code-viewer": "workspace:*",
     "@anyfile/comic-book-reader": "workspace:*",
+    "@anyfile/design-source-viewer": "workspace:*",
     "@anyfile/dev-array-viewer": "workspace:*",
     "@anyfile/dev-native-binary-viewer": "workspace:*",
     "@anyfile/dev-source-map-viewer": "workspace:*",

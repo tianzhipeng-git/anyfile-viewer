@@ -45,6 +45,7 @@ import { nonNativeAudioManifest } from "@anyfile/non-native-audio-viewer/manifes
 import { nonNativeVideoManifest } from "@anyfile/non-native-video-viewer/manifest";
 import { pdfManifest } from "@anyfile/pdf-viewer/manifest";
 import { photoshopManifest } from "@anyfile/photoshop-viewer/manifest";
+import { designSourceManifest } from "@anyfile/design-source-viewer/manifest";
 import { iworkManifest } from "@anyfile/iwork-viewer/manifest";
 import { pixelmatorPxdManifest } from "@anyfile/pixelmator-pxd-viewer/manifest";
 import { postscriptManifest } from "@anyfile/postscript-viewer/manifest";
@@ -66,7 +67,7 @@ export const viewerManifests: readonly ViewerPluginManifest[] = [
   mindMapManifest,
   visioManifest, djiOsmoManifest, goProMaxManifest, insta360Manifest, browserVideoManifest, nonNativeVideoManifest, browserAudioManifest, nonNativeAudioManifest,
   browserImageManifest, modernRasterManifest, cameraRawManifest, generalRasterManifest, hdrImageManifest, pixelmatorPxdManifest,
-  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, fontManifest, photoshopManifest, cad2dManifest, pdfManifest, postscriptManifest, xpsManifest, ofdManifest, wordManifest, excelManifest, powerpointManifest, iworkManifest, legacyOfficeManifest, mppManifest, harManifest, bittorrentManifest, mlWeightsManifest, certificateManifest, calendarContactsManifest, pstManifest, plistManifest,
+  dwgManifest, cadExchangeManifest, pointCloudManifest, print3dManifest, mesh3dManifest, safeSvgManifest, fontManifest, photoshopManifest, designSourceManifest, cad2dManifest, pdfManifest, postscriptManifest, xpsManifest, ofdManifest, wordManifest, excelManifest, powerpointManifest, iworkManifest, legacyOfficeManifest, mppManifest, harManifest, bittorrentManifest, mlWeightsManifest, certificateManifest, calendarContactsManifest, pstManifest, plistManifest,
   codeManifest, sqliteManifest, statDataManifest, scientificDataManifest, devArrayManifest, devWasmManifest, devSourceMapManifest, devNativeBinaryManifest,
   comicBookManifest, mobiManifest, fictionBookManifest, epubManifest, chmManifest, djvuManifest, duckdbManifest, archiveMetadataManifest, hexManifest,
 ];

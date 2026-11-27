@@ -59,6 +59,10 @@ describe("image and font routing", () => {
       .toEqual(["hdr-image", "hex-viewer"]);
     expect(findViewerRegistrations("sky.rgbe", viewerRegistrations).map(({ manifest }) => manifest.id))
       .toEqual(["hdr-image", "hex-viewer"]);
+    expect(findViewerRegistrations("handoff.fig", viewerRegistrations).map(({ manifest }) => manifest.id))
+      .toEqual(["design-source", "hex-viewer"]);
+    expect(findViewerRegistrations("screens.sketch", viewerRegistrations).map(({ manifest }) => manifest.id))
+      .toEqual(["design-source", "hex-viewer"]);
   });
 
   it("routes valid OpenEXR and Radiance HDR files to hdr-image and falls back to hex when disguised", async () => {
@@ -74,5 +78,20 @@ describe("image and font routing", () => {
 
     const bad = await resolveViewerRegistrations(new File(["not an exr"], "disguised.exr"), viewerRegistrations, { signal: new AbortController().signal });
     expect(bad.map(({ registration }) => registration.manifest.id)).toEqual(["hex-viewer"]);
+  });
+
+  it("routes valid Figma .fig and Sketch .sketch files to design-source and falls back to hex when disguised", async () => {
+    const fig = new File([readFileSync(join(process.cwd(), "viewer/plugins/design-source/examples/OpenFigs.fig"))], "handoff.fig");
+    const figResolved = await resolveViewerRegistrations(fig, viewerRegistrations, { signal: new AbortController().signal });
+    expect(figResolved.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["design-source", 3], ["hex-viewer", 1]]);
+
+    const sketch = new File([readFileSync(join(process.cwd(), "viewer/plugins/design-source/examples/artboard-backgrounds.sketch"))], "screens.sketch");
+    const sketchResolved = await resolveViewerRegistrations(sketch, viewerRegistrations, { signal: new AbortController().signal });
+    expect(sketchResolved.map(({ registration, supportLevel }) => [registration.manifest.id, supportLevel]))
+      .toEqual([["design-source", 3], ["hex-viewer", 1]]);
+
+    const badFig = await resolveViewerRegistrations(new File(["not a fig"], "disguised.fig"), viewerRegistrations, { signal: new AbortController().signal });
+    expect(badFig.map(({ registration }) => registration.manifest.id)).toEqual(["hex-viewer"]);
   });
 });
