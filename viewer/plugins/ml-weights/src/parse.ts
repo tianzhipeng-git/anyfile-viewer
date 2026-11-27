@@ -40,14 +40,20 @@ function parseCopy(locale: Locale) {
   });
 }
 
-async function readHead(file: File, signal: AbortSignal, length: number): Promise<Uint8Array> {
+/** Size plus a bounded read of the first `length` bytes; the parsers never read tensor data. */
+export type ModelHeadSource = {
+  readonly size: number;
+  readHead(length: number, signal: AbortSignal): Promise<Uint8Array>;
+};
+
+async function readHead(file: ModelHeadSource, signal: AbortSignal, length: number): Promise<Uint8Array> {
   if (signal.aborted) throw abortError();
-  const buffer = await file.slice(0, length).arrayBuffer();
+  const bytes = await file.readHead(length, signal);
   if (signal.aborted) throw abortError();
-  return new Uint8Array(buffer);
+  return bytes;
 }
 
-async function readSafetensors(file: File, signal: AbortSignal, locale: Locale): Promise<ModelDocument> {
+async function readSafetensors(file: ModelHeadSource, signal: AbortSignal, locale: Locale): Promise<ModelDocument> {
   const copy = parseCopy(locale);
   const head = await readHead(file, signal, Math.min(8, file.size));
   if (head.length < 8) throw new ViewerError("invalid-file", copy.safetensorsTooShort);
@@ -62,7 +68,7 @@ async function readSafetensors(file: File, signal: AbortSignal, locale: Locale):
   return parseSafetensorsHeader(file.size, headerLength, headerBytes.subarray(8), locale);
 }
 
-async function readGguf(file: File, signal: AbortSignal, locale: Locale): Promise<ModelDocument> {
+async function readGguf(file: ModelHeadSource, signal: AbortSignal, locale: Locale): Promise<ModelDocument> {
   const copy = parseCopy(locale);
   if (file.size < 24) throw new ViewerError("invalid-file", copy.ggufTooShort);
 
@@ -99,6 +105,10 @@ export async function readModel(
   locale: Locale = "en",
 ): Promise<ModelDocument> {
   reportProgress({ stage: "reading", loaded: 0, total: file.size });
+  return parseModel({ size: file.size, readHead: async (length) => new Uint8Array(await file.slice(0, length).arrayBuffer()) }, signal, locale);
+}
+
+export async function parseModel(file: ModelHeadSource, signal: AbortSignal, locale: Locale = "en"): Promise<ModelDocument> {
   const head = await readHead(file, signal, Math.min(4, file.size));
   const isGguf = head.length >= 4 && detectEndianness(new DataView(head.buffer, head.byteOffset, 4)) !== undefined;
   const document = isGguf ? await readGguf(file, signal, locale) : await readSafetensors(file, signal, locale);

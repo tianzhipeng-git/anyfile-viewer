@@ -34,6 +34,15 @@
 - 单个分组最多展示前 5,000 项，单节点属性最多 512 项，单次表格切片最多 100,000 单元格，2D 热力图降采样上限为 256×256。
 - MATLAB Level 5 单个压缩变量解压上限为 64 MiB，嵌套深度上限 32；NetCDF Classic 头部上限 32 MiB。
 
+## Agent extract
+
+[src/extract.ts](src/extract.ts)（`./extract`）在 Node 中复用同一套 `ScientificDataSource`：HDF5 / NetCDF-4 / MATLAB v7.3 经 [src/hdf5-node.ts](src/hdf5-node.ts) 从 `context.vendor` 加载同一份 h5wasm，并把 `BinarySource.readSync` 挂成只读 Emscripten 文件节点（Node 版 `WORKERFS`），`libhdf5` 只按需随机读取，不整体载入；NetCDF Classic 与 MATLAB Level 4/5 走原有纯 TS 解析器。
+
+- `inspect`：格式、分组/数据集计数、NetCDF 维度、根属性；targets 为 `summary`、`group:<path>`、`dataset:<path>`（深度优先，最多 1,000 个节点、展开 200 个分组）。
+- `read summary`（默认）：根属性、维度与缩进树大纲；`read group:<path>`：子节点与属性。均按行分页并支持 `filter`。
+- `read dataset:<path>`：首页为 dtype、shape、分块/过滤器、维度名与属性，随后接数值 Markdown 表；N 维按 2D 切片成行（C 序取最后两轴、F 序取前两轴，其余轴逐索引展开，行首列为坐标如 `[0, 3, :]`），`row:` 游标翻页，每行最多 64 列。
+- 不支持：`query` / `renderImage`；超过 64 列的列窗口、2D 热力图。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)；真实样例见 [examples/](examples/README.md)。
