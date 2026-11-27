@@ -1,10 +1,10 @@
 import { ViewerError } from "@anyfile/viewer-protocol";
-import { fromBlob } from "geotiff";
+import { fromBlob, type GeoTIFF } from "geotiff";
 
 import { checkedPixelCount, MAX_TIFF_PAGES } from "./limits";
 import type { DecodedRaster } from "./types";
 
-const compressionNames: Record<number, string> = {
+export const compressionNames: Record<number, string> = {
   1: "none",
   5: "LZW",
   7: "JPEG",
@@ -53,6 +53,12 @@ function applyOrientation(source: Uint8ClampedArray, width: number, height: numb
 
 export async function decodeTiff(file: File, pageIndex: number, signal: AbortSignal): Promise<DecodedRaster> {
   const tiff = await fromBlob(file, signal);
+  const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
+  return decodeTiffDocument(tiff, pageIndex, signal, header[0] === 0x49 ? header[2] === 43 : header[3] === 43);
+}
+
+/** Decodes one TIFF page from an opened document; shared by the browser Worker and the Node `./extract`. */
+export async function decodeTiffDocument(tiff: GeoTIFF, pageIndex: number, signal: AbortSignal, big: boolean): Promise<DecodedRaster> {
   const pageCount = await tiff.getImageCount();
   if (pageCount < 1 || pageCount > MAX_TIFF_PAGES) {
     throw new ViewerError("resource-limit", `TIFF 页数超过 ${MAX_TIFF_PAGES} 页上限。`);
@@ -101,8 +107,6 @@ export async function decodeTiff(file: File, pageIndex: number, signal: AbortSig
   const oriented = applyOrientation(rgba, width, height, orientation);
   const hasIcc = directory.hasTag("ICCProfile");
   const compression = Number(await directory.loadValue("Compression") ?? 1);
-  const header = new Uint8Array(await file.slice(0, 4).arrayBuffer());
-  const big = header[0] === 0x49 ? header[2] === 43 : header[3] === 43;
   return {
     width: oriented.width,
     height: oriented.height,

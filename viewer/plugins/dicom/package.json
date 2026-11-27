@@ -6,11 +6,15 @@
   "exports": {
     ".": "./src/index.ts",
     "./manifest": "./src/manifest.ts",
-    "./probe": "./src/probe.ts"
+    "./probe": "./src/probe.ts",
+    "./extract": "./src/extract.ts"
   },
   "dependencies": {
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-rendering": "workspace:*",
     "dicom-parser": "1.8.21"
+  },
+  "devDependencies": {
+    "@anyfile/viewer-test": "workspace:*"
   }
 }
