@@ -7,6 +7,7 @@ import {
   type LibRawNodeModule,
 } from "@anyfile/raw-decoder";
 import {
+  downscaleRgba,
   AgentError,
   HARD_READ_MAX_BYTES,
   ViewerError,
@@ -128,34 +129,6 @@ function summarize(md: Record<string, unknown>, format: string): Record<string, 
   return Object.fromEntries(Object.entries(entries).filter((entry): entry is [string, JsonValue] => entry[1] !== undefined));
 }
 
-function downscaleRgba(src: Uint8ClampedArray, width: number, height: number, maxDimension: number): RgbaImage {
-  const bound = Math.floor(maxDimension);
-  if (width <= bound && height <= bound) return { width, height, data: src };
-  const scale = bound / Math.max(width, height);
-  const dstWidth = Math.max(1, Math.min(bound, Math.round(width * scale)));
-  const dstHeight = Math.max(1, Math.min(bound, Math.round(height * scale)));
-  const dst = new Uint8ClampedArray(dstWidth * dstHeight * 4);
-  // Box filter: average every source pixel that falls inside each destination cell.
-  for (let y = 0; y < dstHeight; y++) {
-    const sy0 = Math.floor((y * height) / dstHeight);
-    const sy1 = Math.max(sy0 + 1, Math.floor(((y + 1) * height) / dstHeight));
-    for (let x = 0; x < dstWidth; x++) {
-      const sx0 = Math.floor((x * width) / dstWidth);
-      const sx1 = Math.max(sx0 + 1, Math.floor(((x + 1) * width) / dstWidth));
-      const sum = [0, 0, 0, 0];
-      for (let sy = sy0; sy < sy1; sy++) {
-        for (let sx = sx0; sx < sx1; sx++) {
-          const i = (sy * width + sx) * 4;
-          sum[0] += src[i]; sum[1] += src[i + 1]; sum[2] += src[i + 2]; sum[3] += src[i + 3];
-        }
-      }
-      const count = (sy1 - sy0) * (sx1 - sx0);
-      dst.set(sum.map((value) => Math.round(value / count)), (y * dstWidth + x) * 4);
-    }
-  }
-  return { width: dstWidth, height: dstHeight, data: dst };
-}
-
 function checkTarget(target: string | undefined) {
   if (target !== undefined && target !== "metadata") fail("target-not-found", `RAW target not found: "${target}".`);
 }
@@ -206,7 +179,7 @@ const cameraRawExtractor: StructuredExtractor = {
         rgba[to + 2] = image.data[from + 2];
         rgba[to + 3] = image.colors === 4 ? image.data[from + 3] : 255;
       }
-      return downscaleRgba(rgba, image.width, image.height, params.maxDimension);
+      return downscaleRgba({ width: image.width, height: image.height, data: rgba }, params.maxDimension, PLUGIN_ID);
     });
   },
 };

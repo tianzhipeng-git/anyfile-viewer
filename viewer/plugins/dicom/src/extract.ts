@@ -1,5 +1,6 @@
 import { parseDicom, readPart10Header, type DataSet } from "./dicom-parser";
 import {
+  downscaleRgba,
   AgentError,
   HARD_READ_MAX_BYTES,
   ViewerError,
@@ -20,7 +21,6 @@ import {
 } from "@anyfile/viewer-protocol";
 
 import { renderFrame } from "./decoder";
-import { downscaleRgba } from "./downscale";
 import { inspectDicom, isParseableSyntax, type DicomSource } from "./header";
 import { dicomTagRows, type TagRow } from "./tag-table";
 import { MAX_HEADER_BYTES } from "./types";

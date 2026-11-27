@@ -28,6 +28,7 @@ export {
   HARD_READ_MAX_BYTES,
 } from "./agent";
 export {
+  downscaleRgba,
   escapeMarkdownCell,
   markdownDocumentHeader,
   paginateLines,

@@ -1,4 +1,5 @@
 import {
+  downscaleRgba,
   AgentError,
   HARD_READ_MAX_BYTES,
   ViewerError,
@@ -18,7 +19,7 @@ import { parseExifPayload, type ExifSummary } from "./exif";
 import { readHeifMetadata } from "./heif-meta";
 import { classifyHeifError } from "./heif-runtime";
 import { MAX_HEIF_SOURCE_BYTES, MAX_JXL_FRAMES, MAX_MODERN_RASTER_SOURCE_BYTES, PROBE_BYTES, checkDimensions } from "./limits";
-import { downscaleRgba, loadHeifDecoder, openJxl, renderJxlFrame, type JxlSession } from "./node-decode";
+import { loadHeifDecoder, openJxl, renderJxlFrame, type JxlSession } from "./node-decode";
 import { inspectModernHeader, type ModernFormat } from "./probe-format";
 
 const PLUGIN_ID = "modern-raster";
@@ -207,7 +208,7 @@ const modernRasterExtractor: StructuredExtractor = {
     if (format === "JXL") {
       return withJxl(context, (session) => {
         const frame = renderJxlFrame(session, resolveFrame(params.target, session.frameCount));
-        return downscaleRgba(frame.rgba, frame.width, frame.height, params.maxDimension);
+        return downscaleRgba({ width: frame.width, height: frame.height, data: frame.rgba }, params.maxDimension, PLUGIN_ID);
       });
     }
     resolveFrame(params.target, 1);
@@ -222,7 +223,7 @@ const modernRasterExtractor: StructuredExtractor = {
     try {
       const decoded = decoder.decodePrimary(bytes);
       checkDimensions(decoded.width, decoded.height);
-      return downscaleRgba(new Uint8ClampedArray(decoded.rgba), decoded.width, decoded.height, params.maxDimension);
+      return downscaleRgba({ width: decoded.width, height: decoded.height, data: new Uint8ClampedArray(decoded.rgba) }, params.maxDimension, PLUGIN_ID);
     } catch (error) {
       return mapError(error, "HEIF primary image could not be decoded.");
     }

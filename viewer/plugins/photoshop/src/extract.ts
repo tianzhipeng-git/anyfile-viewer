@@ -1,4 +1,5 @@
 import {
+  downscaleRgba,
   AgentError,
   HARD_READ_MAX_BYTES,
   abortError,
@@ -53,59 +54,6 @@ async function readPsdBuffer(context: ExtractContext): Promise<{
   }
   const buffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
   return { header, buffer };
-}
-
-function downscaleRgba(
-  src: Uint8ClampedArray,
-  srcWidth: number,
-  srcHeight: number,
-  maxDimension: number,
-): RgbaImage {
-  if (!Number.isFinite(maxDimension) || maxDimension < 1) {
-    throw new AgentError("invalid-argument", `maxDimension must be a positive number, received ${maxDimension}.`, {
-      pluginId: PLUGIN_ID,
-    });
-  }
-  const bound = Math.floor(maxDimension);
-  if (srcWidth <= bound && srcHeight <= bound) {
-    return { width: srcWidth, height: srcHeight, data: src };
-  }
-  const scale = bound / Math.max(srcWidth, srcHeight);
-  const dstWidth = Math.max(1, Math.min(bound, Math.round(srcWidth * scale)));
-  const dstHeight = Math.max(1, Math.min(bound, Math.round(srcHeight * scale)));
-  const dst = new Uint8ClampedArray(dstWidth * dstHeight * 4);
-  const xRatio = srcWidth / dstWidth;
-  const yRatio = srcHeight / dstHeight;
-
-  for (let y = 0; y < dstHeight; y += 1) {
-    const sy0 = Math.floor(y * yRatio);
-    const sy1 = Math.max(sy0 + 1, Math.min(srcHeight, Math.ceil((y + 1) * yRatio)));
-    for (let x = 0; x < dstWidth; x += 1) {
-      const sx0 = Math.floor(x * xRatio);
-      const sx1 = Math.max(sx0 + 1, Math.min(srcWidth, Math.ceil((x + 1) * xRatio)));
-      let r = 0;
-      let g = 0;
-      let b = 0;
-      let a = 0;
-      const count = (sy1 - sy0) * (sx1 - sx0);
-      for (let sy = sy0; sy < sy1; sy += 1) {
-        const row = sy * srcWidth;
-        for (let sx = sx0; sx < sx1; sx += 1) {
-          const i = (row + sx) * 4;
-          r += src[i];
-          g += src[i + 1];
-          b += src[i + 2];
-          a += src[i + 3];
-        }
-      }
-      const out = (y * dstWidth + x) * 4;
-      dst[out] = Math.round(r / count);
-      dst[out + 1] = Math.round(g / count);
-      dst[out + 2] = Math.round(b / count);
-      dst[out + 3] = Math.round(a / count);
-    }
-  }
-  return { width: dstWidth, height: dstHeight, data: dst };
 }
 
 function formatLayerLine(layer: PhotoshopLayerSummary): string {
@@ -257,7 +205,7 @@ const photoshopExtractor: StructuredExtractor = {
       mapError(error);
     }
 
-    return downscaleRgba(decoded.rgba, decoded.info.width, decoded.info.height, params.maxDimension);
+    return downscaleRgba({ width: decoded.info.width, height: decoded.info.height, data: decoded.rgba }, params.maxDimension, PLUGIN_ID);
   },
 };
 

@@ -1,4 +1,5 @@
 import {
+  downscaleRgba,
   AgentError,
   ViewerError,
   abortError,
@@ -20,7 +21,6 @@ import type { GeoTIFF } from "geotiff";
 
 import { decodePnm } from "./decode-pnm";
 import { decodeTga } from "./decode-tga";
-import { downscaleRgba } from "./downscale";
 import { MAX_SOURCE_BYTES, MAX_TIFF_PAGES, PROBE_BYTES } from "./limits";
 import { inspectRasterHeader } from "./probe-format";
 import type { DecodedRaster } from "./types";
