@@ -30,9 +30,9 @@ export function summarizeRawMetadata(metadata: RawMetadataSource): RawMetadataSu
   };
 }
 
+const LIBRAW_MODULE_URL = "/vendor/libraw/1.6.0/index.js";
 /** `<pkg>/<version>` under `/vendor/`; Node hosts load `libraw.js` + `libraw.wasm` from the same directory. */
-export const LIBRAW_VENDOR_DIR = "libraw/1.6.0";
-const LIBRAW_MODULE_URL = `/vendor/${LIBRAW_VENDOR_DIR}/index.js`;
+export const LIBRAW_VENDOR_DIR = LIBRAW_MODULE_URL.slice("/vendor/".length, -"/index.js".length);
 
 /** 8-bit sRGB development with camera white balance, camera matrix and file orientation. */
 export const LIBRAW_DEVELOP_SETTINGS = {
