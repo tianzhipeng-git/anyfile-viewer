@@ -30,6 +30,14 @@
 - GGUF 量化张量的体积是按块大小估算（用于概览），非逐元素校验。
 - 张量表最多渲染前 5000 行，可按名称筛选与按体积排序。
 
+## Agent extract
+
+[src/extract.ts](src/extract.ts)（`./extract`）复用 `parseModel()`，经 `BinarySource.read` 只读取文件头（与浏览器同样的窗口与上限），不读张量数据。
+
+- `inspect`：格式、版本、架构、张量数、参数量、权重体积、元数据条目数与 dtype 分布；targets 为 `metadata`、`tensors`。
+- `read metadata`（默认）：头部元数据键值表；`read tensors`：名称、dtype、形状、参数量、字节数。均为 `row:` 游标分页的 Markdown 表并支持 `filter`。
+- 不支持：张量数值预览、`query` / `renderImage`。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
