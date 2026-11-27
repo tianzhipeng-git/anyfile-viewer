@@ -31,7 +31,7 @@ export const mesh3dViewer: FileViewerPlugin = {
         if (!disposed && !signal.aborted) context.reportPreview?.({ outcome: "success", kind: "static" });
       });
       signal.addEventListener("abort", dispose, { once: true });
-      return { dispose };
+      return { dispose, captureImage: (options) => viewer!.captureImage(options) };
     } catch (error) {
       dispose();
       if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;

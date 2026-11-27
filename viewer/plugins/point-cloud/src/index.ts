@@ -30,7 +30,7 @@ export const pointCloudViewer: FileViewerPlugin = {
           if (!viewer) { viewer = create3dViewer(container, { root, up: "z", description: copy.sample }, locale, file.name); viewer.root.append(status); }
           else viewer.refresh();
           status.textContent = `${data.count.toLocaleString(locale)} ${copy.progress} · ${Math.min(data.count, 200_000).toLocaleString(locale)}`;
-          if (!opened) { opened = true; resolve({ dispose }); }
+          if (!opened) { opened = true; resolve({ dispose, captureImage: (options) => viewer!.captureImage(options) }); }
           if (data.done) worker.terminate();
         } catch (error) { fail(error); }
       };

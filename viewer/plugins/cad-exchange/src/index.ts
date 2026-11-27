@@ -21,6 +21,6 @@ export const cadExchangeViewer: FileViewerPlugin = {
     if (signal.aborted) throw new DOMException("Aborted","AbortError");
     const viewer = create3dViewer(container,cadExchangeDocument(data,format === "brep"),locale,file.name);
     const dispose = () => { signal.removeEventListener("abort",dispose); viewer.dispose(); };
-    signal.addEventListener("abort",dispose,{once:true}); return {dispose};
+    signal.addEventListener("abort",dispose,{once:true}); return { dispose, captureImage: viewer.captureImage };
   },
 };

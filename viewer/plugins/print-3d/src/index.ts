@@ -21,7 +21,7 @@ export const print3dViewer: FileViewerPlugin = {
       if (signal.aborted) throw new DOMException("Aborted", "AbortError");
       viewer = create3dViewer(context.container, document, locale, file.name);
       signal.addEventListener("abort", dispose, { once: true });
-      return { dispose };
+      return { dispose, captureImage: (options) => viewer!.captureImage(options) };
     } catch (error) {
       dispose();
       if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) throw error;

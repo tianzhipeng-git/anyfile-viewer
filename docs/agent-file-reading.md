@@ -232,6 +232,8 @@ export interface ViewerController {
 }
 ```
 
+基于 `@anyfile/rendering-3d` 的插件直接透传 `create3dViewer()` 返回的 `captureImage`：离屏正交相机拟合整个模型输出方形 PNG，`target` 取 `top` / `front` / `right` / `iso`（默认 `iso`，平面图纸默认 `top`），与交互相机和视口尺寸无关。
+
 ---
 
 ## 4. Node 运行时与执行池

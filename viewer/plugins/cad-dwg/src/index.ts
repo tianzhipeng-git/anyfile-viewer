@@ -34,6 +34,6 @@ export const dwgViewer: FileViewerPlugin = {
     root.append(source);
     const dispose = () => { signal.removeEventListener("abort",dispose); viewer.dispose(); root.remove(); };
     signal.addEventListener("abort",dispose,{once:true});
-    return { dispose };
+    return { dispose, captureImage: viewer.captureImage };
   },
 };

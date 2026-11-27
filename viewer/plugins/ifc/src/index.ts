@@ -24,6 +24,6 @@ export const ifcViewer: FileViewerPlugin = {
     const dispose = () => { signal.removeEventListener("abort", dispose); viewer.dispose(); };
     signal.addEventListener("abort", dispose, { once: true });
     reportPreview?.({ outcome: "success", kind: "static" });
-    return { dispose };
+    return { dispose, captureImage: viewer.captureImage };
   },
 };

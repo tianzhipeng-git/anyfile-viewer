@@ -1,6 +1,7 @@
 import { AmbientLight, AnimationMixer, type AnimationClip, DirectionalLight, Group, Mesh, Object3D, OrthographicCamera, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
-import { ViewerError, selectMessages, type Locale } from "@anyfile/viewer-protocol";
+import { ViewerError, selectMessages, type CaptureImageOptions, type Locale } from "@anyfile/viewer-protocol";
+import { captureSceneImage } from "./capture";
 import { createNavigation } from "./navigation";
 import { create3dUi } from "./ui";
 import { disposeObject, inspectObject } from "./resources";
@@ -153,6 +154,11 @@ export function create3dViewer(container: HTMLElement, doc: Rendering3dDocument,
   resize(); fit(new Vector3(...directions[doc.planar ? 0 : 3]));
   return {
     root: ui.root,
+    /** Off-screen PNG of the whole model; `target` picks a named view (top, front, right, iso). */
+    captureImage(options: CaptureImageOptions): Promise<Blob> {
+      if (disposed || lost) return Promise.reject(new ViewerError("open-failed", "The 3D viewer is no longer available."));
+      return captureSceneImage({ renderer, scene, radius, up: doc.up ?? "y", planar: Boolean(doc.planar) }, options);
+    },
     refresh() {
       if (disposed) return;
       const previous = pivot.position.clone();
