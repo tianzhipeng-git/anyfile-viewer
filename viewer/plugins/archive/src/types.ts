@@ -25,6 +25,8 @@ export type ArchiveEntry = {
   readonly encrypted?: boolean;
   readonly suspiciousCompression?: boolean;
   readonly dangerousPath: boolean;
+  /** TAR only: byte offset of the member body within the (decompressed) TAR stream. */
+  readonly dataOffset?: number;
 };
 
 export type ArchiveMetadata = {

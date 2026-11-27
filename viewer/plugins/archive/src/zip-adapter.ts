@@ -43,7 +43,7 @@ const METHODS: Readonly<Record<number, string>> = {
   12: "Bzip2", 14: "LZMA", 93: "Zstandard", 95: "XZ", 98: "PPMd", 99: "AES",
 };
 
-function decodeZipText(value: Uint8Array, encoding: string): string | undefined {
+export function decodeZipText(value: Uint8Array, encoding: string): string | undefined {
   if (encoding.toLowerCase() !== "cp437") return undefined;
   try {
     return utf8Decoder.decode(value);

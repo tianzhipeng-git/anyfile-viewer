@@ -47,6 +47,14 @@
 
 TAR 与各压缩包装格式的解析为项目内自研；gzip TAR 扫描使用浏览器 `DecompressionStream`。此外，本包向电子书插件导出受限的归档读取工具，这些工具的解压用途与本插件元数据界面分开。
 
+## Agent extract
+
+[src/extract.ts](src/extract.ts) 在 Node worker 内复用 [src/parse.ts](src/parse.ts) 的同一套解析器，经 `File` 区间读取，不整包载入：
+
+- `inspect`：格式、条目/文件/目录数、总大小与压缩后大小、压缩方法、加密与不安全路径计数、容器字段。
+- `read` 目标：`entries`（路径、类型、大小、压缩后大小、时间、方法、备注的 Markdown 表格，`row:` 游标，支持 `filter`）；`fields`（容器字段列表）；`entry:<path>`（单个成员正文，最多解压前 1 MiB，`offset:` 游标分页；二进制成员只报告大小）。默认读 `entries`，无条目时读 `fields`。
+- 成员正文只支持 ZIP 派生/JMOD 的 Stored/Deflate 条目、TAR 与 gzip TAR；`inspect` 最多列出 50 个成员目标。RAR 成员与加密 ZIP 成员分别返回 `unsupported-capability` / `encrypted-file`。不支持 `render`。
+
 ## 已知限制
 
 - **不展示条目内容**：归档查看界面只展示元数据，不提供提取或内部文件预览；gzip TAR 为扫描目录会流式解压，解压出的文件数据不保留。

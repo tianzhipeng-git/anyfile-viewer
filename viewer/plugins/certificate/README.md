@@ -23,6 +23,14 @@
 
 没有第三方解析器、Worker、WASM 或网络请求。
 
+## Agent extract
+
+[src/extract.ts](src/extract.ts) 在 Node worker 内复用 `certificate.ts` 的 DER/PEM 解析：
+
+- `inspect`：编码（PEM/DER）、证书数、PEM 块类型、是否含私钥及其类型、首张证书的使用者/颁发者/到期时间。
+- `read` 目标：`all`（默认）、`cert:<n>`（版本、序列号、使用者、颁发者、有效期与当前状态、签名算法、公钥类型与位数/曲线、CA、密钥用途、SAN、密钥标识、策略、CRL/OCSP/CA Issuers、SHA-256/SHA-1 指纹、全部扩展）、`keys`（非证书 PEM 块）；`line:` 游标分页，支持 `filter`。
+- 私钥只报告 PEM 标签、算法（PKCS#8 读取 AlgorithmIdentifier）与是否加密，从不输出密钥材料。不支持 `render`。
+
 ## 已知限制
 
 - 只做只读结构检查：不验证签名、信任链、吊销状态，也不评估证书策略。

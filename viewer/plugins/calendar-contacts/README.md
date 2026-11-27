@@ -22,6 +22,13 @@
 
 没有第三方解析器、Worker、WASM 或网络请求。
 
+## Agent extract
+
+[src/extract.ts](src/extract.ts) 在 Node worker 内复用 [src/document.ts](src/document.ts) 的同一解析：
+
+- `inspect`：日历名、时区、PRODID、事件/待办数、最早与最晚开始时间、组件计数；vCard 返回版本与联系人数。
+- `read` 目标：`events`、`tasks`（日历）或 `contacts`（vCard），每项一个 Markdown 小节；`line:` 游标按项分页，支持 `filter`。内嵌照片只标注存在，不输出数据。不支持 `render`。
+
 ## 已知限制
 
 - 重复日程只展示规则，不展开实例；时区按文件中的写法展示，不换算成本地时间。
