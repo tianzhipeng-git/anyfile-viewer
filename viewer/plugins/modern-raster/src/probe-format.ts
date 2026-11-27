@@ -6,7 +6,7 @@ const MAX_DEPTH = 8;
 const MAX_ITEMS = 256;
 const MAX_DERIVED_DEPTH = 8;
 
-interface Box {
+export interface Box {
   readonly type: string;
   readonly contentStart: number;
   readonly end: number;
@@ -59,22 +59,22 @@ function parseIprp(bytes: Uint8Array, box: Box, items: HeifItems, budget: { coun
   return true;
 }
 
-function ascii(bytes: Uint8Array, offset: number, length: number) {
+export function ascii(bytes: Uint8Array, offset: number, length: number) {
   if (offset < 0 || length < 0 || offset + length > bytes.length) return undefined;
   return String.fromCharCode(...bytes.subarray(offset, offset + length));
 }
 
-function u16be(bytes: Uint8Array, offset: number) {
+export function u16be(bytes: Uint8Array, offset: number) {
   if (offset < 0 || offset + 2 > bytes.length) return undefined;
   return (bytes[offset] << 8) | bytes[offset + 1];
 }
 
-function u32be(bytes: Uint8Array, offset: number) {
+export function u32be(bytes: Uint8Array, offset: number) {
   if (offset < 0 || offset + 4 > bytes.length) return undefined;
   return (((bytes[offset] << 24) >>> 0) + (bytes[offset + 1] << 16) + (bytes[offset + 2] << 8) + bytes[offset + 3]) >>> 0;
 }
 
-function u64be(bytes: Uint8Array, offset: number) {
+export function u64be(bytes: Uint8Array, offset: number) {
   const high = u32be(bytes, offset);
   const low = u32be(bytes, offset + 4);
   if (high === undefined || low === undefined) return undefined;
@@ -82,7 +82,7 @@ function u64be(bytes: Uint8Array, offset: number) {
   return Number.isSafeInteger(value) ? value : undefined;
 }
 
-function readBoxes(bytes: Uint8Array, start: number, end: number, depth: number, budget: { count: number }, fileSize = bytes.length) {
+export function readBoxes(bytes: Uint8Array, start: number, end: number, depth: number, budget: { count: number }, fileSize = bytes.length) {
   if (depth > MAX_DEPTH || start < 0 || end > bytes.length || start > end) return undefined;
   const boxes: Box[] = [];
   let offset = start;

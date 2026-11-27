@@ -1,19 +1,10 @@
 /// <reference lib="webworker" />
 
 import { MAX_HEIF_SOURCE_BYTES } from "./limits";
-import { loadHeifRuntime } from "./heif-runtime";
+import { classifyHeifError, loadHeifRuntime } from "./heif-runtime";
 import type { HeifWorkerRequest, HeifWorkerResponse } from "./types";
 
 const worker = self as unknown as DedicatedWorkerGlobalScope;
-
-function classify(error: unknown): Extract<HeifWorkerResponse, { type: "error" }>["code"] {
-  const message = error instanceof Error ? error.message : String(error);
-  if (message.startsWith("resource-limit:")) return "resource-limit";
-  if (error instanceof RangeError || /(?:out of memory|memory access out of bounds|allocation failed|bad_alloc)/i.test(message)) return "resource-limit";
-  if (message.startsWith("unsupported-environment:")) return "unsupported-environment";
-  if (message.startsWith("runtime:")) return "open-failed";
-  return "invalid-file";
-}
 
 worker.addEventListener("message", async (event: MessageEvent<HeifWorkerRequest>) => {
   const request = event.data;
@@ -32,7 +23,7 @@ worker.addEventListener("message", async (event: MessageEvent<HeifWorkerRequest>
     const response: HeifWorkerResponse = {
       type: "error",
       id: request.id,
-      code: classify(error),
+      code: classifyHeifError(error),
       message: error instanceof Error ? error.message.replace(/^[^:]+:\s*/, "") : "HEIF 解码失败。",
     };
     worker.postMessage(response);

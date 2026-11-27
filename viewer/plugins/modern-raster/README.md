@@ -28,6 +28,15 @@
 - HEIC WASM 回退输出变换后的 straight-alpha RGBA8：NCLX/无 profile 图片转为 sRGB，ICC 只报告未应用，高位深/HDR 内容仅生成 SDR 预览。
 - 原生解码能力和输出可能因浏览器而异；JXL probe 返回完整查看等级 4，HEIC 因上述语义缺失返回主要内容等级 3。
 
+## Agent 提取（`./extract`）
+
+[src/extract.ts](src/extract.ts) 在 Node 中运行，不经过浏览器 Worker：JXL 由 [node-decode.ts](src/node-decode.ts) 直接加载 `jxl-oxide-wasm`（wasm 字节从包内 `module.wasm` 读取），其 PNG 输出经 [png-decode.ts](src/png-decode.ts) 转为 RGBA；HEIC 通过 `context.vendor` 加载同一份 `libheif/1.23.2-anyfile.1` 产物。
+
+- `inspect`：格式、尺寸（HEIF 按 `irot` 换算）、位深、alpha、动画帧数/循环；HEIF 另有 brands、主图编码、顶层图像/缩略图/条目数、深度图、旋转/镜像、`colr` 类型。EXIF 摘要（相机、镜头、ISO、光圈、快门、焦距、拍摄/修改时间、方向、GPS 是否存在）取自 HEIF `Exif` 条目（[heif-meta.ts](src/heif-meta.ts)）或 JXL 容器 `Exif` 盒（[exif.ts](src/exif.ts)）。
+- 目标：`metadata`；JXL 动画另有 `frame:<n>`（最多列 64 个）。`read` 输出分页 Markdown，支持 `filter`。
+- `renderImage`：JXL 指定帧或首帧；HEIC 仅主图像（libheif 适配层只导出 `decodePrimary`，不支持多图/辅助图选择）。沿用上文输入与像素上限，box 滤波缩到 `maxDimension`。
+- 不支持：AVIF（不属于本插件）、JXL `brob` 压缩的 EXIF 盒、XMP。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
