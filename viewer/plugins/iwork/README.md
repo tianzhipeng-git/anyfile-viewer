@@ -38,6 +38,14 @@
 - 最多 20,000 个 ZIP 条目、5,000 张幻灯片；单条目 128 MiB，IWA/XML 解压总量 256 MiB，缩略图与预览总计 64 MiB（超出部分仅不显示图片）。
 - 幻灯片文字按其所在 `Slide-*.iwa` 归属；多张幻灯片共用一个流时（实际文件中未见）不提取这些幻灯片的文字。
 
+## Agent 提取（`./extract`）
+
+[src/extract.ts](src/extract.ts) 在 Node 中复用 [src/load.ts](src/load.ts) 的同一文本模型（不含图片），只读文本：
+
+- `inspect`：`app`（pages / keynote）、`generation`、幻灯片数、段落与备注数、是否有保存的预览；目标为 Keynote 的 `slide:<n>`，Pages 的 `body`（正文）与 `text-boxes`（文本框）。
+- `read`：Markdown；省略 `target` 读全文。无 `filter` 按字节偏移分页（`offset:`），有 `filter` 只返回包含关键字的行（`line:`）。
+- 密码保护文档返回 `encrypted-file`；不提供表格、图表与版式（文本模型不含）；`.numbers` 由 `excel` 插件处理。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。

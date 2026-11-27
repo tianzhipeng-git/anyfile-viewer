@@ -36,6 +36,14 @@
 - 只读取首个 `DocBody` 文档；页面尺寸未解析前先用文档 `PageArea`，渲染后修正。
 - 输入 ≤512 MiB（惰性读取）、≤50,000 ZIP 条目、≤10,000 页；单个 XML ≤64 MiB、字体 ≤32 MiB、图片 ≤64 MiB / 64 MP、签名值 ≤16 MiB；单页 ≤20 万图元、50 万字形、嵌套深度 32。
 
+## Agent 提取（`./extract`）
+
+[src/extract.ts](src/extract.ts) 在 Node 中复用 `document.ts` / `model.ts` / `text.ts` 的同一页面模型，只读文本与结构（出图走浏览器 `captureImage()`）：
+
+- `inspect`：`documentInfo`（`DocInfo` 字段，`CustomData` 记为 `Custom:<Name>`）、页数、`PageArea`、签名数与签章数、大纲条目数；目标为 `page:<n>`（标题注明本页签章数）。
+- `read`：Markdown；`page:<n>` 为该页文本，按行（自上而下、行内自左向右）排列并注明签章；省略 `target` 时为文档信息 + 全部页面，只解析到当前分页窗口所需的页面。无 `filter` 按字节偏移分页（`offset:`），有 `filter` 只返回包含关键字的行（`line:`）。
+- 不做签名验证，不输出图片、印章图像与版式坐标。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
