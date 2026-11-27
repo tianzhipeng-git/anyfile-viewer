@@ -108,6 +108,7 @@ export const PLUGIN_FILE_KINDS: readonly PluginFileKind[] = [
   { id: "visio", kind: "design" },
   { id: "pixelmator-pxd", kind: "design" },
   { id: "photoshop-document", kind: "design" },
+  { id: "design-source", kind: "design" },
   { id: "cad-2d", kind: "design" },
   { id: "cad-dwg", kind: "design" },
 

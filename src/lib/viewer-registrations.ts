@@ -33,6 +33,7 @@ const browserViewerLoaders: Readonly<Record<string, () => Promise<FileViewerPlug
   "pixelmator-pxd": async () => (await import("@anyfile/pixelmator-pxd-viewer")).pixelmatorPxdViewer,
   "safe-svg": async () => (await import("@anyfile/safe-svg-viewer")).safeSvgViewer,
   "photoshop-document": async () => (await import("@anyfile/photoshop-viewer")).photoshopViewer,
+  "design-source": async () => (await import("@anyfile/design-source-viewer")).designSourceViewer,
   "microsoft-project": async () => (await import("@anyfile/mpp-viewer")).mppViewer,
   "pdfjs-pdf": async () => (await import("@anyfile/pdf-viewer")).pdfViewer,
   "postscript-document": async () => (await import("@anyfile/postscript-viewer")).postscriptViewer,

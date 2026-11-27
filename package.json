@@ -132,7 +132,8 @@
     "@anyfile/plist-viewer": "workspace:*",
     "@anyfile/pst-viewer": "workspace:*",
     "@anyfile/scientific-data-viewer": "workspace:*",
-    "@anyfile/hdr-image-viewer": "workspace:*"
+    "@anyfile/hdr-image-viewer": "workspace:*",
+    "@anyfile/design-source-viewer": "workspace:*"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -119,6 +119,8 @@ export const PWA_FILE_HANDLER_GROUPS: readonly PwaFileHandlerGroup[] = [
       "image/x-portable-anymap": [".pnm", ".pbm", ".pgm", ".ppm", ".pam"],
       "image/vnd.adobe.photoshop": [".psd", ".psb"],
       "application/x-pixelmator": [".pxd"],
+      "application/x-figma": [".fig"],
+      "application/x-sketch": [".sketch"],
       "font/ttf": [".ttf"],
       "font/otf": [".otf"],
       "font/woff": [".woff"],
