@@ -3,7 +3,26 @@ import { ProtectedBookError, type BookZip } from "@anyfile/archive-metadata-view
 
 import { MARKUP_LIMITS as EPUB_LIMITS, elements, parseXml, localReference, type Publication, type PublicationItem, type TocItem } from "@anyfile/rendering-publication/markup";
 export { MARKUP_LIMITS as EPUB_LIMITS, elements, parseXml, localReference, type Publication } from "@anyfile/rendering-publication/markup";
-export async function parsePublication(zip: BookZip, signal: AbortSignal): Promise<Publication> {
+const DC_NAMESPACE = "http://purl.org/dc/elements/1.1/";
+export interface EpubPublication extends Publication {
+  /** Package metadata: Dublin Core elements by local name, plus EPUB 3 `meta[property]` / EPUB 2 `meta[name]` values. */
+  metadata: Record<string, string[]>;
+}
+function packageMetadata(opf: Document): Record<string, string[]> {
+  const metadata: Record<string, string[]> = {};
+  const add = (name: string, value: string | null | undefined) => {
+    const text = value?.replace(/\s+/g, " ").trim();
+    if (name && text) (metadata[name] ??= []).push(text);
+  };
+  const root = elements(opf, "metadata")[0];
+  for (const node of root ? Array.from(root.querySelectorAll("*")) : []) {
+    if (node.namespaceURI === DC_NAMESPACE) add(node.localName, node.textContent);
+    else if (node.localName === "meta" && node.getAttribute("property")) add(node.getAttribute("property")!, node.textContent);
+    else if (node.localName === "meta" && node.getAttribute("name")) add(node.getAttribute("name")!, node.getAttribute("content"));
+  }
+  return metadata;
+}
+export async function parsePublication(zip: BookZip, signal: AbortSignal): Promise<EpubPublication> {
   const text = new TextDecoder().decode(await zip.read("mimetype", 64, signal));
   if (text !== "application/epub+zip")
     throw new ViewerError("invalid-file", "Invalid EPUB media type.");
@@ -104,5 +123,6 @@ export async function parsePublication(zip: BookZip, signal: AbortSignal): Promi
     items,
     spine,
     toc,
+    metadata: packageMetadata(opf),
   };
 }

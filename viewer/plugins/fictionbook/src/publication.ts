@@ -8,6 +8,8 @@ export interface Fb2Book extends PublicationSource {
   sections: Map<string, Element[]>;
   anchors: Map<string, string>;
   binaries: Map<string, Element>;
+  /** `<description>` (title-info, publish-info, document-info), when present. */
+  description?: Element;
 }
 export function children(node: Element, name: string) {
   return Array.from(node.children).filter((child) => child.localName === name && child.namespaceURI === FB2_NAMESPACE);
@@ -50,7 +52,7 @@ export function parseFictionBook(bytes: Uint8Array, signal: AbortSignal): Fb2Boo
   const text = (name: string) => info ? children(info, name)[0]?.textContent?.trim() ?? "" : "";
   const book: Fb2Book = {
     title: text("book-title"), author: info ? children(info, "author").map((author) => Array.from(author.children).filter((node) => ["first-name", "middle-name", "last-name", "nickname"].includes(node.localName)).map((node) => node.textContent).join(" ")).join(", ") : "",
-    spine: [], toc: [], sections: new Map(), anchors: new Map(), binaries: new Map(),
+    spine: [], toc: [], sections: new Map(), anchors: new Map(), binaries: new Map(), description,
     loadSection: (path, sectionSignal) => prepareFb2Section(book, path, sectionSignal),
   };
   for (const binary of children(root, "binary")) {
