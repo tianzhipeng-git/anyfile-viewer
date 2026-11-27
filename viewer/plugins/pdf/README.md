@@ -7,7 +7,7 @@
 - **插件 ID**：`pdfjs-pdf`
 - **支持格式**：`.pdf`（`application/pdf`）及兼容 PDF 的 `.ai`（通过 PDF 签名识别）
 - **能力**：分页浏览与页码跳转、缩放、适合宽度/适合页面、大纲目录与缩略图侧栏、密码保护 PDF 解锁
-- **示例文件**：`examples/demo.pdf`
+- **示例文件**：见 [examples/](examples/README.md)
 
 ## 实现原理
 
@@ -46,11 +46,20 @@
 - 加密 PDF 仅支持打开密码，不支持证书签名验证
 - 插件通过 Blob URL 交给 PDF.js 加载，不在主线程主动整文件复制；解析器、字体及页面缓存仍会占用内存，超大 PDF 受浏览器资源约束
 
+## Agent 提取（`./extract`）
+
+[src/extract.ts](src/extract.ts) 在 Node 中使用 `pdfjs-dist` 的 legacy 构建（预加载 `pdf.worker.mjs` 作为同线程 fake worker，不起 Worker 线程），通过 `PDFDataRangeTransport` 按需从 `BinarySource` 区间读取（关闭自动预取），CMap / 标准字体经 `context.vendor` 从 `pdfjs/<version>/` 读取，全程不联网、不解码图片：
+
+- `inspect`：页数、PDF 版本、是否加密、`documentInfo`（Title / Author / Subject / Keywords / Creator / Producer / 日期）、大纲标题（最多 200 条，缩进表示层级）、前 20 页的页面尺寸与含文本页数；目标为 `page:<n>`。
+- `read`：Markdown；`page:<n>` 为该页 `getTextContent()` 文本，同一基线的文本片段合为一行（自上而下、行内自左向右）；省略 `target` 时为文档信息 + 全部页面，只解析到当前分页窗口所需的页面。无 `filter` 按字节偏移分页（`offset:`），有 `filter` 只返回包含关键字的行（`line:`）。
+- 需要打开密码的 PDF 返回 `encrypted-file`；文件上限 2 GiB（`resource-limit`）。
+- 浏览器 `captureImage({ target, maxDimension })`：`target` 为 `page:<n>` 或页码（默认第 1 页），离屏 Canvas 按 2 倍 CSS 尺寸渲染单页，受 `maxDimension` 与 1,600 万像素上限约束，不含工具栏；未知页返回 `target-not-found`，等待密码时返回 `encrypted-file`。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
 - 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
-- [样例目录](examples/)：用于本地打开检查。
+- [样例目录](examples/README.md)：真实样例与 `./extract` 测试输入。
 
 在仓库根目录运行插件测试：
 

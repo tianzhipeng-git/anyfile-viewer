@@ -15,10 +15,10 @@ import type {
 
 const MIN_SCALE = 0.375;
 const MAX_SCALE = 3;
-const MAX_CANVAS_PIXELS = 16_000_000;
+export const MAX_CANVAS_PIXELS = 16_000_000;
 const MAX_ACTIVE_CANVAS_PAGES = 8;
 const MAX_OUTLINE_ITEMS = 500;
-const PDF_CSS_UNITS = 96 / 72;
+export const PDF_CSS_UNITS = 96 / 72;
 
 export interface PdfCopy {
   readonly loading: string;
