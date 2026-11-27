@@ -16,6 +16,14 @@ Read-only local Microsoft Compiled HTML Help (`.chm`) viewer plugin implementing
 - Maximum directory chunks: 4,096; maximum entries: 20,000; maximum uncompressed section: 128 MiB; maximum topics: 2,000; maximum topic size: 2 MiB; maximum cached reset intervals: 8.
 - Scripts, `<object>`/ActiveX controls, `<embed>`, `<applet>`, `<iframe>`, `<form>`, event handlers, `javascript:` URLs, cross-CHM `ms-its:` links, and remote subresources are stripped or replaced with localized notices.
 
+## Agent Extract (`./extract`)
+
+[src/extract.ts](src/extract.ts) reuses the ITSF/LZX readers, `chm-metadata.ts`, and the topic order of `createChmPublication` in Node; topic HTML is decoded with the CHM encoding and converted to Markdown by `@anyfile/rendering-publication/text`.
+
+- `inspect`: title, compiled name, encoding, LCID, default topic, topic and index-entry counts, and the flattened contents tree (first 1,000 entries); targets are `chapter:<n>` topics in reading order (contents → index → `#TOPICS` → remaining HTML).
+- `read`: Markdown; `chapter:<n>` is one topic's text (headings, paragraphs, lists, quotes, table rows, preformatted blocks); without `target` it returns the header plus all topics, decoding only those the current page window needs; `filter` is supported.
+- Images, stylesheets, scripts, and ActiveX objects are dropped.
+
 ## Verification
 
 ```sh

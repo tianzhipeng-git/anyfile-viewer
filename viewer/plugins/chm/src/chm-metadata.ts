@@ -1,3 +1,4 @@
+import { parseHtmlText } from "@anyfile/rendering-publication/text";
 import { decodeChmText, encodingFromLcid } from "./encoding";
 import type { ChmDirectory, ChmEntry } from "./itsf";
 import { CHM_LIMITS } from "./limits";
@@ -177,8 +178,7 @@ function parseSitemapHtml(
   directory: ChmDirectory,
   sitemapPath: string,
 ): { tree: ChmTocNode[]; flatCount: number } {
-  const template = document.createElement("template");
-  template.innerHTML = htmlText;
+  const doc = parseHtmlText(htmlText);
   let flatCount = 0;
 
   function extractObject(li: Element): { label: string; path: string; fragment: string } | null {
@@ -243,7 +243,7 @@ function parseSitemapHtml(
     return nodes;
   }
 
-  const rootLists = Array.from(template.content.querySelectorAll("ul")).filter(
+  const rootLists = Array.from(doc.querySelectorAll("ul")).filter(
     (ul) => !ul.parentElement || ul.parentElement.localName !== "li",
   );
   // Only walk top-level ULs whose ancestors contain no UL.

@@ -32,6 +32,14 @@
 - 单图最多 8 MiB、1600 万像素；活动资源数量与总字节数受限。
 - 不支持加密 ZIP，也不将任意多文件 ZIP 当作书库；不执行 XML 实体或书内脚本。
 
+## Agent 提取（`./extract`）
+
+[src/extract.ts](src/extract.ts) 在 Node 中复用 `publication.ts` 的编码识别、XML 解析与章节划分（`.fb2` 及单书 ZIP），正文经 `@anyfile/rendering-publication/text` 转为 Markdown：
+
+- `inspect`：书名、作者、语言、出版者、ISBN，以及 `title-info` / `publish-info` / `document-info` 全部字段；章节数、内嵌 binary 数与目录；目标为 `chapter:<n>`。
+- `read`：Markdown；`chapter:<n>` 为该章正文（标题、段落、诗歌/引用、表格行），省略 `target` 时为元数据头 + 全书，只转换到当前分页窗口所需的章节；支持 `filter`。
+- 不输出封面、插图或任何 base64 binary。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。

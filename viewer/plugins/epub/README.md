@@ -32,6 +32,14 @@ ZIP 能力来自归档插件；章节清理、排版和导航复用 `@anyfile/re
 - 仅接受单个 package document，正文 spine 需为 XHTML；脚本和外部主动内容不会执行。
 - 最多 2000 章，XML/单章最多 2 MiB，结构节点、深度、字体和资源均有限额；不承诺完整出版级排版。
 
+## Agent 提取（`./extract`）
+
+[src/extract.ts](src/extract.ts) 在 Node 中复用 `publication.ts` 的 OPF/spine/目录解析，章节 XHTML 经 `@anyfile/runtime-assets/xml` 解析后由 `@anyfile/rendering-publication/text` 转为 Markdown：
+
+- `inspect`：书名、作者、语言、出版者、标识符、全部 OPF 元数据（`packageMetadata`）、阅读方向、章节数与目录；目标为 spine 顺序的 `chapter:<n>`（标题取目录项）。
+- `read`：Markdown；`chapter:<n>` 为该章正文（标题、段落、列表、引用、表格行、预格式文本），省略 `target` 时为元数据头 + 全书，只解析到当前分页窗口所需的章节；支持 `filter`。
+- 不输出图片、样式与链接目标；DRM/混淆返回 `encrypted-file`，固定布局返回 `unsupported-capability`。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
