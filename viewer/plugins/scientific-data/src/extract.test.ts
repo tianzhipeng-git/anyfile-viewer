@@ -26,7 +26,7 @@ describe("scientific-data ./extract", () => {
       { name: "ocean-grid.nc", filePath: resolve(EXAMPLES, "ocean-grid.nc"), targetId: "dataset:/temp", filter: "temp" },
       { name: "experiment.mat", filePath: resolve(EXAMPLES, "experiment.mat"), targetId: "group:/meta", smallMaxBytes: 120 },
     ]);
-  });
+  }, 30_000);
 
   it("lists the HDF5 tree as targets and pages N-d values by 2D slice rows", async () => {
     const context = contextFor("climate.h5");

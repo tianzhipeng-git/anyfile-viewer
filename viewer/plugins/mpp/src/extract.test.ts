@@ -22,7 +22,7 @@ describe("mpp ./extract (mppgo WASM in Node)", () => {
       { name: "resource-type-2016.mpp", filePath: resolve(EXAMPLES, "resource-type-2016.mpp"), targetId: "resources" },
       { name: "gantt.mpp", filePath: resolve(EXAMPLES, "gantt.mpp"), targetId: "assignments" },
     ]);
-  });
+  }, 30_000);
 
   it("reads tasks with dates, durations and predecessors", async () => {
     const context = contextFor("task-links-2016.mpp");

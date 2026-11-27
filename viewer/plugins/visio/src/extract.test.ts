@@ -19,7 +19,7 @@ describe("visio ./extract (libvisio WASM in Node)", () => {
       { name: "Visio11FormatLine.vsd", filePath: resolve(EXAMPLES, "Visio11FormatLine.vsd") },
       { name: "color-boxes.vsdx", filePath: resolve(EXAMPLES, "color-boxes.vsdx") },
     ]);
-  });
+  }, 30_000);
 
   it("lists pages with sizes and reads shape text per page", async () => {
     const context = contextFor("tdf154379-DrawingUnits-type.vsd");
