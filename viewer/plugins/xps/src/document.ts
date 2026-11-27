@@ -1,6 +1,7 @@
 import type { PagedOutlineItem } from "@anyfile/viewer-rendering/paged";
 
 import { XPS_LIMITS } from "./limits";
+import { buildPage, dictionarySources, type XpsPage } from "./model";
 import { XpsFormatError, XpsLimitError, partKey, resolvePart, uriFragment, type XpsPackage } from "./package";
 import { attrLocal, childNamed, childrenNamed, descendantsNamed, elementChildren, parseXml } from "./xml";
 
@@ -15,10 +16,14 @@ export interface XpsDocumentModel {
   readonly pages: readonly XpsPageRef[];
   readonly outline: readonly PagedOutlineItem[];
   readonly openXps: boolean;
+  /** FixedDocument part names in sequence order. */
+  readonly documents: readonly string[];
 }
 
 const FIXED_REPRESENTATION = /\/fixedrepresentation$/i;
 const DOCUMENT_STRUCTURE = /\/documentstructure$/i;
+const CORE_PROPERTIES = /\/core-properties$/i;
+const MAX_PROPERTIES = 64;
 
 function positive(value: string | null) {
   const number = value === null ? Number.NaN : Number.parseFloat(value);
@@ -116,5 +121,37 @@ export async function loadXpsDocument(pkg: XpsPackage): Promise<XpsDocumentModel
   if (pages.length === 0) throw new XpsFormatError("The package has no fixed pages.");
   // Outline indices refer to the unfiltered list; only drop it when pages went missing.
   const outline = pages.length === out.pages.length ? await readOutline(pkg, documents, out.targets) : [];
-  return { pages, outline, openXps };
+  return { pages, outline, openXps, documents };
+}
+
+/** Parses one FixedPage part (plus any remote resource dictionaries it references). */
+export async function loadXpsPage(pkg: XpsPackage, part: string): Promise<XpsPage> {
+  const root = parseXml(await pkg.text(part));
+  if (root.localName !== "FixedPage") throw new XpsFormatError("Not a FixedPage.");
+  const dictionaries = new Map<string, Element>();
+  for (const source of dictionarySources(root, part)) {
+    if (!pkg.has(source)) continue;
+    const dictionary = parseXml(await pkg.text(source));
+    if (dictionary.localName === "ResourceDictionary") dictionaries.set(source, dictionary);
+  }
+  return buildPage(root, part, dictionaries);
+}
+
+/** OPC core properties (`dc:title`, `dc:creator`, `dcterms:created`…) keyed by local name. */
+export async function loadXpsProperties(pkg: XpsPackage): Promise<Record<string, string>> {
+  const rel = (await pkg.relationships("")).find((item) => CORE_PROPERTIES.test(item.type) && pkg.has(item.target));
+  const properties: Record<string, string> = {};
+  if (!rel) return properties;
+  let root: Element;
+  try {
+    root = parseXml(await pkg.text(rel.target));
+  } catch (error) {
+    if (error instanceof XpsFormatError) return properties; // Optional part; never blocks the pages.
+    throw error;
+  }
+  for (const node of elementChildren(root).slice(0, MAX_PROPERTIES)) {
+    const value = node.textContent?.trim();
+    if (value && !node.children.length) properties[node.localName] = value;
+  }
+  return properties;
 }

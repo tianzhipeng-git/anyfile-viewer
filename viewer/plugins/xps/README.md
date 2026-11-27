@@ -37,6 +37,14 @@
 - 页面尺寸优先取 `PageContent` 的 Width/Height，缺失时先用首页尺寸，渲染后修正。
 - 输入 ≤512 MiB（惰性读取，不整体缓冲）、≤50,000 ZIP 条目、≤10,000 页；单个 XML 部件 ≤64 MiB、字体 ≤32 MiB、图片 ≤64 MiB / 64 MP；单页 ≤20 万元素、50 万字形、嵌套深度 64。
 
+## Agent 提取（`./extract`）
+
+[src/extract.ts](src/extract.ts) 在 Node 中复用 `document.ts` / `model.ts` / `text.ts` 的同一页面模型，只读文本与结构：
+
+- `inspect`：`format`（XPS / OpenXPS）、`properties`（OPC core properties，如 `title`、`creator`、`created`）、FixedDocument 数、页数、目录条目数；目标为 `page:<n>`。
+- `read`：Markdown；`page:<n>` 为该页 `Glyphs` 的 `UnicodeString`，按文档顺序排列，同一基线的相邻文字合为一行；省略 `target` 时为文档属性 + 全部页面，只解析到当前分页窗口所需的页面。无 `filter` 按字节偏移分页（`offset:`），有 `filter` 只返回包含关键字的行（`line:`）。
+- 无 `UnicodeString` 的字形（如 Ghostscript 路径化文字）无法取回文本；不输出图片与版式坐标。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。

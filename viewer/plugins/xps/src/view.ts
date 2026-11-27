@@ -6,30 +6,16 @@ import {
   type PagedTextLayer,
 } from "@anyfile/viewer-rendering/paged";
 
-import type { XpsDocumentModel } from "./document";
+import { loadXpsPage, type XpsDocumentModel } from "./document";
 import { XPS_LIMITS } from "./limits";
-import { buildPage, dictionarySources, type XpsPage } from "./model";
+import type { XpsPage } from "./model";
 import { XpsFormatError, type XpsPackage } from "./package";
 import { paintPage } from "./painter";
 import type { XpsResources } from "./resources";
 import { extractPageText } from "./text";
 import type { XpsCopy } from "./ui";
-import { parseXml } from "./xml";
 
 const PARSED_PAGE_CACHE = 8;
-
-/** Parses one FixedPage part (plus any remote resource dictionaries it references). */
-export async function loadXpsPage(pkg: XpsPackage, part: string): Promise<XpsPage> {
-  const root = parseXml(await pkg.text(part));
-  if (root.localName !== "FixedPage") throw new XpsFormatError("Not a FixedPage.");
-  const dictionaries = new Map<string, Element>();
-  for (const source of dictionarySources(root, part)) {
-    if (!pkg.has(source)) continue;
-    const dictionary = parseXml(await pkg.text(source));
-    if (dictionary.localName === "ResourceDictionary") dictionaries.set(source, dictionary);
-  }
-  return buildPage(root, part, dictionaries);
-}
 
 export function createXpsView(
   fileName: string,

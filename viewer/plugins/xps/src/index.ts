@@ -7,13 +7,13 @@ import {
   abortError,
 } from "@anyfile/viewer-protocol";
 
-import { loadXpsDocument } from "./document";
+import { loadXpsDocument, loadXpsPage } from "./document";
 import { XPS_LIMITS } from "./limits";
 import { xpsManifest } from "./manifest";
 import { XpsFormatError, XpsLimitError, XpsPackage } from "./package";
 import { XpsResources } from "./resources";
 import { xpsCopy } from "./ui";
-import { createXpsView, loadXpsPage } from "./view";
+import { createXpsView } from "./view";
 
 async function openXps(context: OpenViewerContext): Promise<ViewerController> {
   const { file, signal, reportProgress } = context;

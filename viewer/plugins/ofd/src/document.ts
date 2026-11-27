@@ -32,9 +32,14 @@ export interface OfdDocument {
   readonly annotations: ReadonlyMap<string, readonly string[]>;
   /** Electronic seal stamps by page ID. */
   readonly stamps: ReadonlyMap<string, readonly StampRef[]>;
+  /** `Signature` entries listed by the signature list (with or without a stamp). */
+  readonly signatureCount: number;
+  /** `DocInfo` fields (`Title`, `Author`, `CreationDate`…; custom data as `Custom:<Name>`). */
+  readonly info: Readonly<Record<string, string>>;
 }
 
 const A4: Box = { x: 0, y: 0, width: 210, height: 297 };
+const MAX_INFO_FIELDS = 64;
 
 async function optionalXml(pkg: OfdPackage, path: string | undefined) {
   if (!path) return undefined;
@@ -84,8 +89,9 @@ async function readAnnotations(pkg: OfdPackage, path: string | undefined) {
 async function readSignatures(pkg: OfdPackage, path: string | undefined) {
   const result = new Map<string, StampRef[]>();
   const list = await optionalXml(pkg, path);
-  if (!list || !path) return result;
-  for (const entry of children(list, "Signature")) {
+  if (!list || !path) return { stamps: result, count: 0 };
+  const entries = children(list, "Signature");
+  for (const entry of entries) {
     const signaturePath = pkg.resolve(dirOf(path), entry.getAttribute("BaseLoc"));
     const signature = await optionalXml(pkg, signaturePath);
     if (!signature || !signaturePath) continue;
@@ -101,7 +107,27 @@ async function readSignatures(pkg: OfdPackage, path: string | undefined) {
       if (boundary && page) push(result, page, { boundary, sources });
     }
   }
-  return result;
+  return { stamps: result, count: entries.length };
+}
+
+function readDocInfo(docInfo: Element | undefined) {
+  const info: Record<string, string> = {};
+  for (const field of docInfo ? Array.from(docInfo.children).slice(0, MAX_INFO_FIELDS) : []) {
+    if (field.localName === "Keywords") {
+      const keywords = children(field, "Keyword").map((keyword) => keyword.textContent?.trim()).filter(Boolean);
+      if (keywords.length) info.Keywords = keywords.join(", ");
+    } else if (field.localName === "CustomDatas") {
+      for (const data of children(field, "CustomData").slice(0, MAX_INFO_FIELDS)) {
+        const name = data.getAttribute("Name")?.trim();
+        const value = data.textContent?.trim();
+        if (name && value) info[`Custom:${name}`] = value;
+      }
+    } else if (!field.children.length) {
+      const value = field.textContent?.trim();
+      if (value) info[field.localName] = value;
+    }
+  }
+  return info;
 }
 
 /** Follows `OFD.xml` → `DocRoot` (first document) and reads the page list and shared parts. */
@@ -143,6 +169,7 @@ export async function loadOfdDocument(pkg: OfdPackage): Promise<OfdDocument> {
   }
 
   const pageIndex = new Map(pages.map((page, index) => [page.id, index]));
+  const signatures = await readSignatures(pkg, pkg.resolve("", childText(body, "Signatures")));
   return {
     pkg,
     pages,
@@ -151,6 +178,8 @@ export async function loadOfdDocument(pkg: OfdPackage): Promise<OfdDocument> {
     resources,
     outline: readOutline(child(doc, "Outlines"), pageIndex),
     annotations: await readAnnotations(pkg, pkg.resolve(docDir, childText(doc, "Annotations"))),
-    stamps: await readSignatures(pkg, pkg.resolve("", childText(body, "Signatures"))),
+    stamps: signatures.stamps,
+    signatureCount: signatures.count,
+    info: readDocInfo(child(body, "DocInfo")),
   };
 }

@@ -4,13 +4,12 @@ import { describe, expect, it } from "vitest";
 import { parseTrueType } from "@anyfile/viewer-rendering/fixed-layout";
 
 import { parseColor } from "./color";
-import { loadXpsDocument } from "./document";
+import { loadXpsDocument, loadXpsPage } from "./document";
 import { deobfuscateFont } from "./font";
 import { parseAbbreviatedGeometry } from "./geometry";
 import { parseGlyphRun, type XpsNode } from "./model";
 import { XpsPackage } from "./package";
 import { extractPageText } from "./text";
-import { loadXpsPage } from "./view";
 import { buildXps } from "./test-fixtures";
 
 const signal = new AbortController().signal;

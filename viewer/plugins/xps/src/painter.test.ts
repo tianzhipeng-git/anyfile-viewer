@@ -3,13 +3,12 @@ import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parseTrueType } from "@anyfile/viewer-rendering/fixed-layout";
 
-import { loadXpsDocument } from "./document";
+import { loadXpsDocument, loadXpsPage } from "./document";
 import { deobfuscateFont } from "./font";
 import { XpsPackage } from "./package";
 import { paintPage } from "./painter";
 import type { XpsImage } from "./resources";
 import { buildXps } from "./test-fixtures";
-import { loadXpsPage } from "./view";
 
 const signal = new AbortController().signal;
 
