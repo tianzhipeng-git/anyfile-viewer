@@ -28,6 +28,8 @@ export interface ExtractorComplianceFixture {
   readonly smallMaxBytes?: number;
   /** Optional keyword for a filtered pagination walk over the target. */
   readonly filter?: string;
+  /** Optional target id that does not support `filter` (verifies `filterApplied: false`). */
+  readonly unsupportedFilterTargetId?: string;
 }
 
 const MAX_WALK_PAGES = 500;
@@ -95,10 +97,19 @@ function assertInspectPayload(payload: InspectPayload, fixtureName: string): voi
   // Ensure metadata is JSON-serializable.
   JSON.stringify(payload.metadata);
   assert(Array.isArray(payload.targets), `[${fixtureName}] inspect().targets must be an array.`);
+  if (payload.targetsTruncated !== undefined) {
+    assert(
+      typeof payload.targetsTruncated === "boolean",
+      `[${fixtureName}] inspect().targetsTruncated must be a boolean when present.`,
+    );
+  }
   const seenIds = new Set<string>();
   for (const target of payload.targets) {
     assert(typeof target.id === "string" && target.id.length > 0, `[${fixtureName}] target.id must be a non-empty string.`);
     assert(typeof target.title === "string" && target.title.length > 0, `[${fixtureName}] target.title must be a non-empty string.`);
+    if (target.kind !== undefined) {
+      assert(typeof target.kind === "string" && target.kind.length > 0, `[${fixtureName}] target.kind must be a non-empty string when present.`);
+    }
     assert(!seenIds.has(target.id), `[${fixtureName}] duplicate target.id "${target.id}".`);
     seenIds.add(target.id);
     if (target.size !== undefined) {
@@ -120,6 +131,7 @@ function assertReadResult(result: ReadResult, maxBytes: number, label: string): 
   );
   if (result.nextCursor !== undefined) {
     assert(typeof result.nextCursor === "string" && result.nextCursor.length > 0, `${label}: nextCursor must be a non-empty string.`);
+    assert(result.truncated === true, `${label}: truncated must be true whenever nextCursor is set.`);
   }
 }
 
@@ -169,9 +181,11 @@ export async function assertExtractorCompliance(
       const inspected = await extractor.inspect(context);
       assertInspectPayload(inspected, fixture.name);
 
-      // 2. read() default target with default budget (48 KiB)
+      // 2. read() default target with default budget (48 KiB) and hard cap (> 256 KiB)
       const defaultRead = await extractor.read(context, { maxBytes: DEFAULT_READ_MAX_BYTES });
       assertReadResult(defaultRead, DEFAULT_READ_MAX_BYTES, `[${fixture.name}] default read`);
+      const hardCapRead = await extractor.read(context, { maxBytes: HARD_READ_MAX_BYTES + 1024 });
+      assertReadResult(hardCapRead, HARD_READ_MAX_BYTES, `[${fixture.name}] hard cap read`);
 
       // 3. read() explicit target
       const targetId = fixture.targetId ?? inspected.targets[0]?.id;
@@ -198,6 +212,32 @@ export async function assertExtractorCompliance(
             cursor = result.nextCursor;
           }
         }
+
+        // 4b. Malformed cursor must fail with target-not-found
+        let badCursorErr: unknown;
+        try {
+          await extractor.read(context, {
+            target: targetId,
+            cursor: "__anyfile_invalid_cursor__",
+            maxBytes: DEFAULT_READ_MAX_BYTES,
+          });
+        } catch (error) {
+          badCursorErr = error;
+        }
+        assertStandardAgentError(badCursorErr, ["target-not-found"], `[${fixture.name}] invalid cursor`);
+      }
+
+      if (fixture.unsupportedFilterTargetId) {
+        const unfiltered = await extractor.read(context, {
+          target: fixture.unsupportedFilterTargetId,
+          filter: "a",
+          maxBytes: DEFAULT_READ_MAX_BYTES,
+        });
+        assertReadResult(unfiltered, DEFAULT_READ_MAX_BYTES, `[${fixture.name}] unsupported filter target`);
+        assert(
+          unfiltered.filterApplied === false,
+          `[${fixture.name}] target "${fixture.unsupportedFilterTargetId}" must set filterApplied: false when filter is unsupported.`,
+        );
       }
 
       // 5. Unknown target must fail with target-not-found
@@ -221,22 +261,30 @@ export async function assertExtractorCompliance(
           });
           assertReadResult(queryRes, DEFAULT_READ_MAX_BYTES, `[${fixture.name}] sample query`);
         }
-        const writeSql = fixture.writeQuery ?? "CREATE TABLE __anyfile_forbidden_write (id INTEGER)";
-        let writeErr: unknown;
-        try {
-          await extractor.query(context, {
-            sql: writeSql,
-            maxBytes: DEFAULT_READ_MAX_BYTES,
-          });
-        } catch (error) {
-          writeErr = error;
+        const writeQueries = [
+          fixture.writeQuery ?? "CREATE TABLE __anyfile_forbidden_write (id INTEGER)",
+          "PRAGMA query_only(0)",
+          "ATTACH DATABASE ':memory:' AS __anyfile_attached",
+          "SELECT 1; CREATE TABLE __anyfile_multi (id INTEGER)",
+          "WITH __c AS (SELECT 1) DELETE FROM sqlite_master",
+        ];
+        for (const writeSql of writeQueries) {
+          let writeErr: unknown;
+          try {
+            await extractor.query(context, {
+              sql: writeSql,
+              maxBytes: DEFAULT_READ_MAX_BYTES,
+            });
+          } catch (error) {
+            writeErr = error;
+          }
+          assert(writeErr !== undefined, `[${fixture.name}] query() must reject write statement: ${writeSql}`);
+          assertStandardAgentError(
+            writeErr,
+            ["unsupported-capability", "access-denied"],
+            `[${fixture.name}] write query rejection (${writeSql})`,
+          );
         }
-        assert(writeErr !== undefined, `[${fixture.name}] query() must reject write statement: ${writeSql}`);
-        assertStandardAgentError(
-          writeErr,
-          ["unsupported-capability", "access-denied", "invalid-file"],
-          `[${fixture.name}] write query rejection`,
-        );
       }
 
       // 7. Optional renderImage() dimension bounds
@@ -246,28 +294,45 @@ export async function assertExtractorCompliance(
           target: targetId,
           maxDimension,
         });
-        assert(image.width > 0 && image.width <= maxDimension, `[${fixture.name}] renderImage width out of bounds: ${image.width}`);
-        assert(image.height > 0 && image.height <= maxDimension, `[${fixture.name}] renderImage height out of bounds: ${image.height}`);
+        assert(
+          Number.isInteger(image.width) && image.width > 0 && image.width <= maxDimension,
+          `[${fixture.name}] renderImage width out of bounds: ${image.width}`,
+        );
+        assert(
+          Number.isInteger(image.height) && image.height > 0 && image.height <= maxDimension,
+          `[${fixture.name}] renderImage height out of bounds: ${image.height}`,
+        );
         assert(
           image.data instanceof Uint8ClampedArray && image.data.byteLength === image.width * image.height * 4,
           `[${fixture.name}] renderImage data length must equal width * height * 4`,
         );
       }
 
-      // 8. AbortSignal cancellation
+      // 8. AbortSignal cancellation across all implemented methods
       const aborted = new AbortController();
       aborted.abort();
       const abortedContext = await createContextFromFixture(fixture, aborted.signal);
-      let abortErr: unknown;
-      try {
-        await extractor.inspect(abortedContext);
-      } catch (error) {
-        abortErr = error;
+      for (const [opName, run] of [
+        ["inspect()", () => extractor.inspect(abortedContext)],
+        ["read()", () => extractor.read(abortedContext, { maxBytes: DEFAULT_READ_MAX_BYTES })],
+        ...(extractor.query
+          ? [["query()", () => extractor.query!(abortedContext, { sql: fixture.sampleQuery ?? "SELECT 1", maxBytes: DEFAULT_READ_MAX_BYTES })] as const]
+          : []),
+        ...(extractor.renderImage
+          ? [["renderImage()", () => extractor.renderImage!(abortedContext, { target: targetId, maxDimension: 128 })] as const]
+          : []),
+      ] as const) {
+        let abortErr: unknown;
+        try {
+          await run();
+        } catch (error) {
+          abortErr = error;
+        }
+        assert(
+          isViewerAbortError(abortErr),
+          `[${fixture.name}] pre-aborted ${opName} must reject with AbortError, received ${String(abortErr)}`,
+        );
       }
-      assert(
-        isViewerAbortError(abortErr),
-        `[${fixture.name}] pre-aborted inspect() must reject with AbortError, received ${String(abortErr)}`,
-      );
 
       // 9. Invalid bytes error code check
       if (fixture.invalidBytes) {

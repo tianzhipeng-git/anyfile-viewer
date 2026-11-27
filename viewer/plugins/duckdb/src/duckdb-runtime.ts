@@ -16,22 +16,28 @@ const R2_BUNDLES: duckdb.DuckDBBundles = {
 
 const LOCAL_ASSET_ROOT = "/vendor/duckdb/1.32.0";
 
-const LOCAL_BUNDLES: duckdb.DuckDBBundles = {
+function localAssetUrl(fileName: string): string {
+  const path = `${LOCAL_ASSET_ROOT}/${fileName}`;
+  const origin = globalThis.location?.origin;
+  return origin && origin !== "null" ? `${origin}${path}` : path;
+}
+
+const LOCAL_BUNDLES = (): duckdb.DuckDBBundles => ({
   mvp: {
-    mainModule: `${LOCAL_ASSET_ROOT}/duckdb-mvp.wasm`,
-    mainWorker: `${LOCAL_ASSET_ROOT}/duckdb-browser-mvp.worker.js`,
+    mainModule: localAssetUrl("duckdb-mvp.wasm"),
+    mainWorker: localAssetUrl("duckdb-browser-mvp.worker.js"),
   },
   eh: {
-    mainModule: `${LOCAL_ASSET_ROOT}/duckdb-eh.wasm`,
-    mainWorker: `${LOCAL_ASSET_ROOT}/duckdb-browser-eh.worker.js`,
+    mainModule: localAssetUrl("duckdb-eh.wasm"),
+    mainWorker: localAssetUrl("duckdb-browser-eh.worker.js"),
   },
-};
+});
 
 export async function createDuckDBRuntime(signal: AbortSignal) {
   const sources: RuntimeSource<duckdb.DuckDBBundles>[] = [
     { name: "jsDelivr", value: duckdb.getJsDelivrBundles() },
     { name: "R2", value: R2_BUNDLES },
-    { name: "local", value: LOCAL_BUNDLES },
+    { name: "local", value: LOCAL_BUNDLES() },
   ];
   return initializeRuntimeFromSources({
     signal,

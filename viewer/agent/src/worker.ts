@@ -1,3 +1,5 @@
+import dgram from "node:dgram";
+import net from "node:net";
 import { parentPort } from "node:worker_threads";
 import { basename } from "node:path";
 import { viewerRegistryEntries } from "@anyfile/viewer-registry";
@@ -24,7 +26,7 @@ import { createDiskWorkspaceReader } from "./security";
 
 export interface WorkerRequest {
   readonly id: number;
-  readonly op: "route" | "inspect" | "read" | "query";
+  readonly op: "route" | "inspect" | "read" | "query" | "cancel";
   readonly pluginId?: string;
   readonly filePath?: string;
   readonly size?: number;
@@ -53,6 +55,31 @@ export interface WorkerResponse {
 
 const vendor = createNodeVendorAssets();
 const extractorCache = new Map<string, Promise<StructuredExtractor>>();
+const activeControllers = new Map<number, AbortController>();
+
+function blockedNetworkError(): AgentError {
+  return new AgentError("runtime-unavailable", "Network access is disabled inside the extraction worker.");
+}
+
+/** Blocks outbound network APIs inside the worker thread so untrusted files cannot trigger network I/O. */
+export function installWorkerNetworkGuard(): void {
+  globalThis.fetch = async () => {
+    throw blockedNetworkError();
+  };
+  if ("WebSocket" in globalThis) {
+    (globalThis as Record<string, unknown>).WebSocket = class BlockedWebSocket {
+      constructor() {
+        throw blockedNetworkError();
+      }
+    };
+  }
+  net.Socket.prototype.connect = function blockedConnect() {
+    throw blockedNetworkError();
+  };
+  dgram.createSocket = (() => {
+    throw blockedNetworkError();
+  }) as typeof dgram.createSocket;
+}
 
 async function loadExtractor(pluginId: string): Promise<StructuredExtractor> {
   const loader = extractorLoaders[pluginId];
@@ -65,7 +92,10 @@ async function loadExtractor(pluginId: string): Promise<StructuredExtractor> {
   }
   let cached = extractorCache.get(pluginId);
   if (!cached) {
-    cached = loader();
+    cached = loader().catch((error: unknown) => {
+      extractorCache.delete(pluginId);
+      throw error;
+    });
     extractorCache.set(pluginId, cached);
   }
   return cached;
@@ -104,27 +134,32 @@ async function route(file: File, workspace: WorkspaceReader | undefined, signal:
 async function handleRequest(req: WorkerRequest): Promise<unknown> {
   const pluginId = req.pluginId ?? "";
   if (!req.filePath || typeof req.size !== "number" || typeof req.mtimeMs !== "number") {
-    throw new AgentError("invalid-file", "Missing file metadata for worker request.", { pluginId });
+    throw new AgentError("invalid-argument", "Missing file metadata for worker request.", { pluginId });
   }
 
   const controller = new AbortController();
-  const name = basename(req.filePath);
-  const file = await openDiskFile(req.filePath, name, req.mtimeMs);
-  const workspace = workspaceOf(req);
-  if (req.op === "route") return route(file, workspace, controller.signal);
-
-  const extractor = await loadExtractor(pluginId);
-  const source = new DiskBinarySource(req.filePath, req.size, name);
+  activeControllers.set(req.id, controller);
   try {
-    return await runExtractor(req, extractor, {
-      source,
-      file,
-      vendor,
-      ...(workspace ? { workspace, relativePath: name } : {}),
-      signal: controller.signal,
-    });
+    const name = basename(req.filePath);
+    const file = await openDiskFile(req.filePath, name, req.mtimeMs);
+    const workspace = workspaceOf(req);
+    if (req.op === "route") return await route(file, workspace, controller.signal);
+
+    const extractor = await loadExtractor(pluginId);
+    const source = new DiskBinarySource(req.filePath, req.size, name);
+    try {
+      return await runExtractor(req, extractor, {
+        source,
+        file,
+        vendor,
+        ...(workspace ? { workspace, relativePath: name } : {}),
+        signal: controller.signal,
+      });
+    } finally {
+      source.close();
+    }
   } finally {
-    source.close();
+    activeControllers.delete(req.id);
   }
 }
 
@@ -166,8 +201,13 @@ async function runExtractor(req: WorkerRequest, extractor: StructuredExtractor, 
 }
 
 if (parentPort) {
+  installWorkerNetworkGuard();
   const port = parentPort;
   port.on("message", async (req: WorkerRequest) => {
+    if (req.op === "cancel") {
+      activeControllers.get(req.id)?.abort();
+      return;
+    }
     try {
       const result = await handleRequest(req);
       const response: WorkerResponse = { id: req.id, ok: true, result };

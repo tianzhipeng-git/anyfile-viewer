@@ -5,7 +5,10 @@ const mocks = vi.hoisted(() => ({
     mvp: { mainModule: "https://cdn.example/duckdb.wasm", mainWorker: "https://cdn.example/worker.js" },
   },
   createWorker: vi.fn(async (url: string) => ({ url } as unknown as Worker)),
-  instantiate: vi.fn(async () => undefined),
+  instantiate: vi.fn(async (mainModule: string, pthreadWorker: string | null) => {
+    void mainModule;
+    void pthreadWorker;
+  }),
   terminate: vi.fn(async () => undefined),
 }));
 
@@ -58,8 +61,8 @@ describe("DuckDB runtime loading", () => {
     await createDuckDBRuntime(new AbortController().signal);
 
     expect(mocks.createWorker).toHaveBeenCalledTimes(3);
-    expect(mocks.createWorker.mock.calls[2]?.[0]).not.toContain("cdn.example");
-    expect(mocks.createWorker.mock.calls[2]?.[0]).not.toContain("assets.anyfile.top");
+    expect(mocks.createWorker.mock.calls[2]?.[0]).toMatch(/^https?:\/\/.+\/vendor\/duckdb\/1\.32\.0\/duckdb-browser-mvp\.worker\.js$/);
+    expect(mocks.instantiate.mock.calls[2]?.[0]).toMatch(/^https?:\/\/.+\/vendor\/duckdb\/1\.32\.0\/duckdb-mvp\.wasm$/);
     expect(mocks.terminate).toHaveBeenCalledTimes(2);
   });
 });

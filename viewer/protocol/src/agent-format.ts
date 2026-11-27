@@ -23,9 +23,18 @@ export function escapeMarkdownCell(value: unknown): string {
 /** Parses a `<prefix><non-negative integer>` cursor; a missing cursor means position 0. */
 export function parsePositionCursor(cursor: string | undefined, prefix: string, pluginId?: string): number {
   if (!cursor) return 0;
-  const match = new RegExp(`^${prefix}(\\d+)$`).exec(cursor);
-  if (!match) throw new AgentError("target-not-found", `Invalid pagination cursor: "${cursor}".`, { pluginId });
-  return Number(match[1]);
+  if (!cursor.startsWith(prefix)) {
+    throw new AgentError("target-not-found", `Invalid pagination cursor: "${cursor}".`, { pluginId });
+  }
+  const rest = cursor.slice(prefix.length);
+  if (!/^\d+$/.test(rest)) {
+    throw new AgentError("target-not-found", `Invalid pagination cursor: "${cursor}".`, { pluginId });
+  }
+  const value = Number(rest);
+  if (!Number.isSafeInteger(value)) {
+    throw new AgentError("target-not-found", `Invalid pagination cursor: "${cursor}".`, { pluginId });
+  }
+  return value;
 }
 
 /** Pages a long text by UTF-8 byte offset (`offset:<n>` cursors). */

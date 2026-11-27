@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync } from "node:fs";
+import { statSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join, resolve } from "node:path";
@@ -48,23 +48,29 @@ export function createNodeVendorAssets(
     const segments = assertVendorPath(path);
     for (const root of roots) {
       const candidate = join(root, ...segments);
-      if (existsSync(candidate)) return candidate;
+      try {
+        if (statSync(candidate).isFile()) return candidate;
+      } catch {
+        // Not present under this root.
+      }
     }
     throw Object.assign(new Error(`Runtime asset /vendor/${path} is not available locally.`), { code: "runtime-unavailable" });
   };
-  const read = async (path: string) => {
-    const bytes = new Uint8Array(await readFile(locate(path)));
+  const readVerified = async (path: string) => {
+    const filePath = locate(path);
+    const bytes = new Uint8Array(await readFile(filePath));
     const expected = manifest[path];
     if (expected && sha256Hex(bytes) !== expected.toLowerCase()) {
       throw Object.assign(new Error(`SHA-256 mismatch for /vendor/${path}.`), { code: "runtime-unavailable" });
     }
-    return bytes;
+    return { filePath, bytes };
   };
   return {
-    bytes: read,
+    async bytes(path) {
+      return (await readVerified(path)).bytes;
+    },
     async url(path) {
-      await read(path);
-      return pathToFileURL(locate(path)).href;
+      return pathToFileURL((await readVerified(path)).filePath).href;
     },
   };
 }

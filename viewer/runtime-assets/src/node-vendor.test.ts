@@ -33,9 +33,11 @@ describe("Node vendor assets", () => {
     await expect(vendor.bytes("pkg/1.0.0/missing.wasm")).rejects.toMatchObject({ code: "runtime-unavailable" });
   });
 
-  it("rejects traversal in vendor paths", async () => {
-    const vendor = createNodeVendorAssets([await root({})]);
+  it("rejects traversal and directory paths", async () => {
+    const dir = await root({ "pkg/1.0.0/subdir/file.txt": "x" });
+    const vendor = createNodeVendorAssets([dir]);
     await expect(vendor.bytes("../etc/1/passwd")).rejects.toThrow(/Invalid vendor asset path/);
     await expect(vendor.bytes("pkg/1.0.0/../../secret")).rejects.toThrow(/Invalid vendor asset path/);
+    await expect(vendor.bytes("pkg/1.0.0/subdir")).rejects.toMatchObject({ code: "runtime-unavailable" });
   });
 });

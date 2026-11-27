@@ -1,3 +1,4 @@
+import { importRuntime } from "@anyfile/runtime-assets";
 import { ViewerError } from "@anyfile/viewer-protocol";
 import type LibRaw from "libraw-wasm";
 import type { Metadata } from "libraw-wasm";
@@ -57,7 +58,7 @@ export class RawDecoder {
 
   async open(bytes: Uint8Array<ArrayBuffer>, options: { halfSize?: boolean } = {}) {
     if (this.disposed || this.signal.aborted) throw abortError();
-    const libRawPackage = await import(/* webpackIgnore: true */ LIBRAW_MODULE_URL) as LibRawPackage;
+    const libRawPackage = await importRuntime<LibRawPackage>(LIBRAW_MODULE_URL);
     if (this.disposed || this.signal.aborted) throw abortError();
     this.decoder = new libRawPackage.default();
     let timeout: ReturnType<typeof setTimeout> | undefined;

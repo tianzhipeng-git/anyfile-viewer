@@ -1,13 +1,14 @@
 import { dirname } from "node:path";
 import {
   AgentError,
+  DEFAULT_INSPECT_MAX_BYTES,
   type InspectPayload,
   type InspectResult,
   type QueryParams,
   type ReadParams,
   type ReadResult,
 } from "@anyfile/viewer-protocol";
-import { normalizeMaxBytes } from "./budget";
+import { normalizeMaxBytes, trimInspectPayload } from "./budget";
 import { isWithinAllowedRoots, resolveAllowedFile } from "./security";
 import type { RouteResult, WorkerRequest } from "./worker";
 import { ExtractWorkerPool, type WorkerPoolOptions } from "./worker-pool";
@@ -55,7 +56,9 @@ export class AgentService {
     const payload: InspectPayload = route.capabilities.length
       ? await this.pool.call<InspectPayload>({ op: "inspect", pluginId: route.pluginId, ...file })
       : { metadata: { sizeBytes: file.size ?? 0 }, targets: [] };
-    return { ...route, ...payload };
+    const routeOverhead = Buffer.byteLength(JSON.stringify(route), "utf8");
+    const bounded = trimInspectPayload(payload, Math.max(64, DEFAULT_INSPECT_MAX_BYTES - routeOverhead));
+    return { ...route, ...bounded };
   }
 
   async readFile(inputPath: string, params: Partial<ReadParams> = {}): Promise<ReadResult & { readonly pluginId: string }> {

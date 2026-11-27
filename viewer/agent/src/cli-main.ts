@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { realpath, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { AgentError } from "@anyfile/viewer-protocol";
 import { AgentService } from "./agent-core";
@@ -6,15 +6,22 @@ import { toAgentFileError } from "./budget";
 import { clearVendorCache, listVendorCache } from "./cache";
 import { runMcpServer } from "./mcp";
 
-function parseFlags(args: readonly string[]): {
+const BOOLEAN_FLAGS = new Set(["help"]);
+
+export function parseFlags(args: readonly string[]): {
   readonly positionals: string[];
   readonly flags: Map<string, string[]>;
 } {
   const positionals: string[] = [];
   const flags = new Map<string, string[]>();
+  let endOfOptions = false;
   for (let i = 0; i < args.length; i += 1) {
     const token = args[i];
-    if (token.startsWith("--")) {
+    if (!endOfOptions && token === "--") {
+      endOfOptions = true;
+      continue;
+    }
+    if (!endOfOptions && token.startsWith("--")) {
       const eq = token.indexOf("=");
       let key: string;
       let value: string;
@@ -23,13 +30,19 @@ function parseFlags(args: readonly string[]): {
         value = token.slice(eq + 1);
       } else {
         key = token.slice(2);
-        const next = args[i + 1];
-        if (next !== undefined && !next.startsWith("--")) {
+        if (BOOLEAN_FLAGS.has(key)) {
+          value = "true";
+        } else {
+          const next = args[i + 1];
+          if (next === undefined) {
+            throw new AgentError("invalid-argument", `Missing value for option: --${key}`);
+          }
           value = next;
           i += 1;
-        } else {
-          value = "true";
         }
+      }
+      if (!key) {
+        throw new AgentError("invalid-argument", "Invalid empty option name.");
       }
       const list = flags.get(key) ?? [];
       list.push(value);
@@ -44,6 +57,15 @@ function parseFlags(args: readonly string[]): {
 function getFlag(flags: Map<string, string[]>, key: string): string | undefined {
   const values = flags.get(key);
   return values?.[values.length - 1];
+}
+
+function parseMaxBytesFlag(raw: string | undefined): number | undefined {
+  if (raw === undefined) return undefined;
+  const parsed = Number(raw);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new AgentError("invalid-argument", `Invalid --max-bytes value: ${raw}`);
+  }
+  return parsed;
 }
 
 function printUsage(): void {
@@ -69,7 +91,14 @@ export async function runCli(argv: readonly string[]): Promise<number> {
     return 0;
   }
 
-  const { positionals, flags } = parseFlags(rest);
+  let positionals: string[];
+  let flags: Map<string, string[]>;
+  try {
+    ({ positionals, flags } = parseFlags(rest));
+  } catch (error) {
+    process.stderr.write(`${JSON.stringify(toAgentFileError(error))}\n`);
+    return 1;
+  }
 
   if (command === "mcp") {
     const allowDirs = flags.get("allow-dir") ?? [];
@@ -100,7 +129,13 @@ export async function runCli(argv: readonly string[]): Promise<number> {
     return 1;
   }
 
-  const resolvedParent = dirname(resolve(targetPath));
+  const resolvedTarget = resolve(targetPath);
+  let resolvedParent = dirname(resolvedTarget);
+  try {
+    resolvedParent = dirname(await realpath(resolvedTarget));
+  } catch {
+    // Let resolveAllowedFile report access-denied for non-existent paths.
+  }
   const service = new AgentService({
     allowedRoots: [resolvedParent],
     persistent: false,
@@ -114,8 +149,7 @@ export async function runCli(argv: readonly string[]): Promise<number> {
     }
 
     if (command === "read") {
-      const maxBytesRaw = getFlag(flags, "max-bytes");
-      const maxBytes = maxBytesRaw ? Number(maxBytesRaw) : undefined;
+      const maxBytes = parseMaxBytesFlag(getFlag(flags, "max-bytes"));
       const result = await service.readFile(targetPath, {
         target: getFlag(flags, "target"),
         cursor: getFlag(flags, "cursor"),
@@ -148,8 +182,7 @@ export async function runCli(argv: readonly string[]): Promise<number> {
       if (!sql) {
         throw new AgentError("invalid-argument", "Missing required --sql option.");
       }
-      const maxBytesRaw = getFlag(flags, "max-bytes");
-      const maxBytes = maxBytesRaw ? Number(maxBytesRaw) : undefined;
+      const maxBytes = parseMaxBytesFlag(getFlag(flags, "max-bytes"));
       const result = await service.queryFile(targetPath, {
         sql,
         target: getFlag(flags, "target"),

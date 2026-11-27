@@ -17,7 +17,8 @@ When encountering an unfamiliar, binary, or proprietary local file (such as `.pl
    ```bash
    anyfile read <path> --target <target-id> [--cursor <nextCursor>] [--filter <keyword>] [--max-bytes 49152]
    ```
-   - Use `--out <file>` when you need to save a chunk to disk without flooding stdout.
+   - When more pages exist and `--out` is omitted, `nextCursor: <cursor>` is printed to `stderr` so `stdout` stays pure content.
+   - Use `--out <file>` when you need to save a chunk to disk without flooding stdout (summary JSON including `nextCursor` is printed to `stdout`).
 3. **Run read-only SQL** when `capabilities` includes `"query"` (e.g. SQLite / DuckDB):
    ```bash
    anyfile query <path> --sql "SELECT * FROM <table> LIMIT 50"

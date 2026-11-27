@@ -2,6 +2,7 @@ import { importRuntime } from "@anyfile/runtime-assets";
 import {
   AgentError,
   abortError,
+  isViewerAbortError,
   paginateText,
   parsePositionCursor,
   renderMarkdownTablePage,
@@ -48,10 +49,13 @@ function loadRuntime(context: ExtractContext): Promise<Runtime> {
 }
 
 function engineError(error: unknown): never {
+  if (error instanceof AgentError) throw error;
+  if (isViewerAbortError(error)) throw error;
   if (error instanceof EngineError) {
     throw new AgentError(error.code === "resource-limit" ? "resource-limit" : "invalid-file", `ReadStat could not read this file (${error.code}).`, { pluginId: PLUGIN_ID, cause: error });
   }
-  throw error;
+  runtime = undefined;
+  throw new AgentError("invalid-file", `ReadStat failed: ${error instanceof Error ? error.message : String(error)}`, { pluginId: PLUGIN_ID, cause: error });
 }
 
 async function openTable(context: ExtractContext) {
@@ -59,11 +63,12 @@ async function openTable(context: ExtractContext) {
   const format = detectStatFormat(await readHeader(context.file, context.signal));
   if (!format) throw new AgentError("invalid-file", "Not an SPSS, Stata, SAS or SAS transport file.", { pluginId: PLUGIN_ID });
   const { readstat, setReader } = await loadRuntime(context);
+  if (context.signal.aborted) throw abortError();
   const engine = createStatEngine(readstat, format, context.source.size);
-  // ReadStat runs synchronously; re-point the reader before every engine call.
+  // ReadStat runs synchronously; re-point the reader before every engine call and clear afterwards.
   const withSource = <T>(run: () => T): T => {
     setReader((position, target) => context.source.readSync(position, target));
-    try { return run(); } catch (error) { engineError(error); }
+    try { return run(); } catch (error) { engineError(error); } finally { setReader(() => 0); }
   };
   const schema = withSource(() => engine.schema());
   return { format, schema, rows: (offset: number, limit: number) => withSource(() => engine.rows(offset, limit, 0, schema.variables.length)) };
@@ -93,7 +98,12 @@ function staticTable(columns: string[], rows: string[][], params: ReadParams): R
   return needle ? { ...result, filterApplied: true } : result;
 }
 
-function readData(table: Awaited<ReturnType<typeof openTable>>, format: StatFormat, params: ReadParams): ReadResult {
+function readData(
+  table: Awaited<ReturnType<typeof openTable>>,
+  format: StatFormat,
+  params: ReadParams,
+  signal: AbortSignal,
+): ReadResult {
   const { schema } = table;
   const formatter = createValueFormatter(format, schema);
   const start = parsePositionCursor(params.cursor, "row:", PLUGIN_ID);
@@ -101,6 +111,7 @@ function readData(table: Awaited<ReturnType<typeof openTable>>, format: StatForm
   let exhausted = false;
   function* rows() {
     for (let offset = start; offset < start + MAX_SCAN_ROWS; offset += ROW_CHUNK) {
+      if (signal.aborted) throw abortError();
       const chunk = table.rows(offset, Math.min(ROW_CHUNK, start + MAX_SCAN_ROWS - offset));
       for (const values of chunk) {
         const cells = values.map((value, index) => formatter.cell(schema.variables[index], value));
@@ -147,7 +158,7 @@ const statDataExtractor: StructuredExtractor = {
     const table = await openTable(context);
     const { format, schema } = table;
     const target = params.target ?? "data";
-    if (target === "data") return readData(table, format, params);
+    if (target === "data") return readData(table, format, params, context.signal);
     if (target === "variables") {
       return staticTable(
         ["Name", "Label", "Format", "Type", "Value labels"],
@@ -164,7 +175,8 @@ const statDataExtractor: StructuredExtractor = {
       );
     }
     if (target === "notes" && schema.notes.length) {
-      return paginateText(schema.notes.join("\n\n"), params.cursor, params.maxBytes, "text", PLUGIN_ID);
+      const result = paginateText(schema.notes.join("\n\n"), params.cursor, params.maxBytes, "text", PLUGIN_ID);
+      return params.filter?.trim() ? { ...result, filterApplied: false } : result;
     }
     throw new AgentError("target-not-found", `Unknown statistical data target: "${target}".`, { pluginId: PLUGIN_ID });
   },

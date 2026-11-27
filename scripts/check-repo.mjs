@@ -2,7 +2,7 @@
 import { execFileSync } from "node:child_process";
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, normalize } from "node:path";
-import { extractManifestId, loadGlobalPluginPolicy, readPluginPolicyFile, readRegistrationSource } from "./plugin-policies.mjs";
+import { extractManifestId, loadGlobalPluginPolicy, readPluginPolicyFile } from "./plugin-policies.mjs";
 
 const MAX_LINES = 1000;
 const MAX_FILE_BYTES = 2 * 1024 * 1024;
@@ -70,18 +70,19 @@ for (const [index, line] of read("ROADMAP.md").split("\n").entries()) {
 // Plugin wiring.
 try { loadGlobalPluginPolicy("."); } catch (error) { fail(error.message); }
 const rootDependencies = readJson("package.json").dependencies;
-const registrations = readRegistrationSource(".");
+const browserRegistrations = read("src/lib/viewer-registrations.ts");
 const registryDir = "viewer/registry/src";
 const registrySource = existsSync(registryDir)
   ? walk(registryDir).filter((path) => path.endsWith(".ts") && !path.endsWith(".test.ts")).map(read).join("\n")
   : "";
-if (!existsSync(registryDir) || !read("src/lib/viewer-registrations.ts").includes("@anyfile/viewer-registry")) {
+if (!existsSync(registryDir) || !browserRegistrations.includes("@anyfile/viewer-registry")) {
   fail("shared routing registry missing: move manifest+probe registrations to @anyfile/viewer-registry and import it from src/lib/viewer-registrations.ts");
 }
 const contentManifests = read("src/content/manifests.ts");
 const pluginDirectories = readdirSync("viewer/plugins").filter((name) => statSync(join("viewer/plugins", name)).isDirectory());
 const pluginPackages = new Map(pluginDirectories.map((name) => [readJson(join("viewer/plugins", name, "package.json")).name, name]));
 const seenManifestIds = new Map();
+const extractPluginIds = new Map();
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -102,9 +103,10 @@ for (const name of pluginDirectories) {
   else seenManifestIds.set(manifestId, name);
   if (pkg.exports?.["./manifest"] !== "./src/manifest.ts") fail(`${where}: package.json must export ./manifest from ./src/manifest.ts`);
   if (rootDependencies[pkg.name] !== "workspace:*") fail(`${where}: root package.json must depend on ${pkg.name}`);
-  if (!registrations.includes(`"${pkg.name}"`) && !registrations.includes(`"${pkg.name}/manifest"`)) fail(`${where}: no browser loader in src/lib/viewer-registrations.ts`);
+  if (!browserRegistrations.includes(`"${pkg.name}"`)) fail(`${where}: no browser loader in src/lib/viewer-registrations.ts`);
   if (!registrySource.includes(`"${pkg.name}/manifest"`)) fail(`${where}: not registered in @anyfile/viewer-registry (viewer/registry/src/)`);
   if (pkg.exports?.["./probe"] && !registrySource.includes(`"${pkg.name}/probe"`)) fail(`${where}: probe not registered in @anyfile/viewer-registry`);
+  if (pkg.exports?.["./browser-probe"] && !registrySource.includes(`"${pkg.name}/browser-probe"`)) fail(`${where}: browser-probe not registered in @anyfile/viewer-registry`);
   if (contentManifests.includes(`"${pkg.name}/manifest"`) === UNPUBLISHED_PLUGINS.has(name)) fail(`${where}: add it to src/content/manifests.ts (site pages) or UNPUBLISHED_PLUGINS`);
   if (!existsSync(join(root, "README.md"))) fail(`${where}: missing README.md`);
 
@@ -112,6 +114,7 @@ for (const name of pluginDirectories) {
   if (!sources.some((path) => /\.test\.ts$/.test(path))) fail(`${where}: has no *.test.ts`);
 
   if (pkg.exports?.["./extract"]) {
+    if (manifestId) extractPluginIds.set(manifestId, { dir: name, packageName: pkg.name });
     if (pkg.exports["./extract"] !== "./src/extract.ts") {
       fail(`${where}: package.json must export ./extract from ./src/extract.ts`);
     }
@@ -168,19 +171,32 @@ for (const name of pluginDirectories) {
   }
 }
 
-// Shared publication package must also use the shared XML interface.
-for (const path of walk("viewer/rendering-publication/src")) {
-  if (/\.test\.tsx?$/.test(path)) continue;
-  if (RAW_DOM_PARSER.test(stripComments(read(path)))) {
-    fail(`${path}: do not call new DOMParser() directly; use @anyfile/runtime-assets/xml`);
+// Shared viewer/* packages (except @anyfile/runtime-assets) follow the same runtime/XML boundaries.
+for (const entry of readdirSync("viewer", { withFileTypes: true })) {
+  if (!entry.isDirectory() || entry.name === "plugins" || entry.name === "runtime-assets") continue;
+  const sharedSrc = join("viewer", entry.name, "src");
+  if (!existsSync(sharedSrc)) continue;
+  for (const path of walk(sharedSrc)) {
+    if (!/\.[cm]?[jt]sx?$/.test(path)) continue;
+    const source = read(path);
+    const isTest = /\.test\.tsx?$/.test(path);
+    if (BUNDLER_IGNORE_COMMENT.test(source)) {
+      fail(`${path}: do not write bundler ignore comments directly; use importRuntime() from @anyfile/runtime-assets`);
+    }
+    if (!isTest && INLINE_WASM_URL.test(source)) {
+      fail(`${path}: do not inline .wasm via new URL(..., import.meta.url); load from /vendor/<pkg>/<version>/`);
+    }
+    if (!isTest && RAW_DOM_PARSER.test(stripComments(source))) {
+      fail(`${path}: do not call new DOMParser() directly; use @anyfile/runtime-assets/xml`);
+    }
   }
 }
 
-// Dual-host isolation: src/ must never import agent or plugin ./extract; viewer/agent/ must never import src/ or next.
+// Dual-host isolation: src/ must never import agent, plugin ./extract, or Node-only runtime/XML helpers; viewer/agent/ must never import src/ or next.
 for (const path of walk("src")) {
   if (!/\.[cm]?[jt]sx?$/.test(path)) continue;
   const source = read(path);
-  if (/(?:from|import\()\s*["'](?:@anyfile\/agent|@anyfile\/[^"']+\/extract|[^"']*viewer\/agent|@anyfile\/runtime-assets\/node)/.test(source)) {
+  if (/(?:from|import\()\s*["'](?:@anyfile\/agent|@anyfile\/[^"']+\/extract|[^"']*viewer\/agent|@anyfile\/runtime-assets\/node|[^"']*xml\.node\b)/.test(source)) {
     fail(`${path}: Web host (src/) must not import @anyfile/agent, plugin ./extract, or Node-only runtime helpers`);
   }
 }
@@ -190,6 +206,28 @@ if (existsSync("viewer/agent/src")) {
     const source = read(path);
     if (/(?:from|import\()\s*["'](?:next(?:\/|$)|@\/|(?:\.\.\/)+src\/)/.test(source)) {
       fail(`${path}: Agent host (viewer/agent/) must not import Next.js or Web host (src/)`);
+    }
+  }
+  const generatedExtractorsPath = "viewer/agent/src/generated/extractors.ts";
+  if (!existsSync(generatedExtractorsPath)) {
+    fail(`${generatedExtractorsPath} is missing; run pnpm --filter @anyfile/agent generate:extractors`);
+  } else {
+    const generated = read(generatedExtractorsPath);
+    const listedIds = new Set([...generated.matchAll(/^\s*"([a-z0-9-]+)":\s*async\s*\(\)\s*=>/gm)].map((m) => m[1]));
+    for (const [pluginId, { dir, packageName }] of extractPluginIds) {
+      if (!listedIds.has(pluginId)) {
+        fail(`${generatedExtractorsPath}: missing extractor "${pluginId}" (${dir}); run pnpm --filter @anyfile/agent generate:extractors`);
+      } else if (
+        !generated.includes(`"${packageName}/extract"`) &&
+        !generated.includes(`"../../../plugins/${dir}/src/extract"`)
+      ) {
+        fail(`${generatedExtractorsPath}: extractor "${pluginId}" does not point to viewer/plugins/${dir}/src/extract`);
+      }
+    }
+    for (const listedId of listedIds) {
+      if (!extractPluginIds.has(listedId)) {
+        fail(`${generatedExtractorsPath}: stale extractor "${listedId}"; run pnpm --filter @anyfile/agent generate:extractors`);
+      }
     }
   }
 }

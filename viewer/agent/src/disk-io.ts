@@ -21,13 +21,14 @@ export class DiskBinarySource implements BinarySource {
 
   private ensureFd(): number {
     if (this.fd === null) {
-      this.fd = openSync(this.filePath, "r");
+      throw new Error("DiskBinarySource has been closed.");
     }
     return this.fd;
   }
 
   async read(offset: number, length: number, signal?: AbortSignal): Promise<Uint8Array> {
     if (signal?.aborted) throw abortError();
+    this.ensureFd();
     const start = Math.max(0, Math.min(offset, this.size));
     const count = Math.max(0, Math.min(length, this.size - start));
     if (count === 0) return new Uint8Array(0);

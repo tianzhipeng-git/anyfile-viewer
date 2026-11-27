@@ -60,6 +60,12 @@ for (const [id, plugin] of Object.entries(policy.plugins)) {
   if (probe && probe.bytes > probeLimit) {
     throw new Error(`${id} probe entry is ${(probe.bytes / 1024).toFixed(1)} KiB gzip; maximum is ${policy.budgets.probeGzipKiB} KiB`);
   }
+  const browserProbe = packageJson.exports["./browser-probe"]
+    ? await entryGzipBytes(`${plugin.package}/browser-probe`)
+    : undefined;
+  if (browserProbe && browserProbe.bytes > probeLimit) {
+    throw new Error(`${id} browser-probe entry is ${(browserProbe.bytes / 1024).toFixed(1)} KiB gzip; maximum is ${policy.budgets.probeGzipKiB} KiB`);
+  }
 
   report.plugins[id] = {
     manifestSourceGzipBytes: manifestBytes,

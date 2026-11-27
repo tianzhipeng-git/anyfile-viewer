@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { paginateLines, paginateText, renderMarkdownTablePage } from "./agent-format";
+import { paginateLines, paginateText, parsePositionCursor, renderMarkdownTablePage } from "./agent-format";
 
 const ids = (content: string) => content.split("\n").slice(2).map((line) => Number(line.split("|")[1]));
 
@@ -56,5 +56,8 @@ describe("agent pagination helpers", () => {
     const lines = paginateLines(["a", "b", "c"], "line:1", 3);
     expect(lines).toEqual({ content: "b\nc", truncated: false });
     expect(() => paginateLines(["a"], "bogus", 10)).toThrow(/Invalid pagination cursor/);
+    expect(parsePositionCursor("row.+42", "row.+")).toBe(42);
+    expect(() => parsePositionCursor("rowX42", "row.")).toThrow(/Invalid pagination cursor/);
+    expect(() => parsePositionCursor("line:99999999999999999999", "line:")).toThrow(/Invalid pagination cursor/);
   });
 });

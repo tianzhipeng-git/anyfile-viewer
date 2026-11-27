@@ -3,6 +3,7 @@ import { pathToFileURL } from "node:url";
 import {
   AgentError,
   abortError,
+  isViewerAbortError,
   paginateText,
   parsePositionCursor,
   renderMarkdownTablePage,
@@ -24,6 +25,37 @@ const MAX_ROW_COUNT_BYTES = 256 * 1024 * 1024;
 /** Source rows scanned per filtered page before handing back a cursor. */
 const FILTER_SCAN_ROWS = 10_000;
 
+const ARG_READ_ONLY_PRAGMAS = new Set([
+  "table_info",
+  "table_xinfo",
+  "table_list",
+  "index_list",
+  "index_info",
+  "index_xinfo",
+  "foreign_key_list",
+]);
+
+const NO_ARG_READ_ONLY_PRAGMAS = new Set([
+  "database_list",
+  "collation_list",
+  "compile_options",
+  "function_list",
+  "module_list",
+  "pragma_list",
+  "encoding",
+  "page_size",
+  "page_count",
+  "freelist_count",
+  "schema_version",
+  "user_version",
+  "application_id",
+  "journal_mode",
+  "data_version",
+]);
+
+const WRITE_SQL_PATTERN =
+  /\b(INSERT|UPDATE|DELETE|CREATE|DROP|ALTER|ATTACH|DETACH|VACUUM|REINDEX)\b|\bREPLACE\s+INTO\b/i;
+
 function quoteIdent(name: string): string {
   return `"${name.replaceAll('"', '""')}"`;
 }
@@ -39,23 +71,28 @@ async function openReadOnlyDb(context: ExtractContext): Promise<DatabaseSync> {
     throw new AgentError("invalid-file", "File does not start with the SQLite 3 magic header.", { pluginId: PLUGIN_ID });
   }
 
-  let db: DatabaseSync;
+  let db: DatabaseSync | undefined;
   try {
     if (context.source.filePath) {
       // immutable=1: no locks, no -wal/-shm files, never writes next to the user's file.
       const url = pathToFileURL(context.source.filePath);
       url.searchParams.set("immutable", "1");
-      db = new DatabaseSync(url, { readOnly: true, allowExtension: false });
+      db = new DatabaseSync(url, { readOnly: true, allowExtension: false, readBigInts: true });
     } else {
       if (context.source.size > MAX_IN_MEMORY_BYTES) {
         throw new AgentError("resource-limit", "In-memory SQLite buffer exceeds size limit.", { pluginId: PLUGIN_ID });
       }
       const bytes = await context.source.read(0, context.source.size, context.signal);
-      db = new DatabaseSync(":memory:", { allowExtension: false });
+      db = new DatabaseSync(":memory:", { allowExtension: false, readBigInts: true });
       db.deserialize(bytes);
     }
     db.exec("PRAGMA query_only = ON");
   } catch (error) {
+    try {
+      db?.close();
+    } catch {
+      // Ignore close errors while handling an initialization failure.
+    }
     if (error instanceof AgentError) throw error;
     throw new AgentError(
       "invalid-file",
@@ -81,21 +118,59 @@ function listTables(db: DatabaseSync): { readonly name: string; readonly type: s
   }));
 }
 
-function stripLeadingSqlComments(sql: string): string {
-  let rest = sql.trimStart();
-  while (true) {
-    if (rest.startsWith("--")) {
-      const nl = rest.indexOf("\n");
-      rest = nl === -1 ? "" : rest.slice(nl + 1).trimStart();
-    } else if (rest.startsWith("/*")) {
-      const end = rest.indexOf("*/");
-      if (end === -1) return "";
-      rest = rest.slice(end + 2).trimStart();
-    } else {
-      break;
+/**
+ * Strips SQL comments and string/identifier literal bodies into spaces while
+ * rejecting multi-statement batches (semicolons outside literals/comments).
+ */
+function sanitizeSqlForInspection(sql: string): string {
+  let out = "";
+  for (let i = 0; i < sql.length; i += 1) {
+    const ch = sql[i];
+    const next = sql[i + 1];
+    if (ch === "-" && next === "-") {
+      const nl = sql.indexOf("\n", i + 2);
+      out += " ";
+      if (nl === -1) break;
+      i = nl;
+      continue;
     }
+    if (ch === "/" && next === "*") {
+      const end = sql.indexOf("*/", i + 2);
+      out += " ";
+      if (end === -1) break;
+      i = end + 1;
+      continue;
+    }
+    if (ch === "'" || ch === '"' || ch === "`") {
+      out += " ";
+      i += 1;
+      while (i < sql.length) {
+        if (sql[i] === ch) {
+          if (sql[i + 1] === ch) {
+            i += 2;
+            continue;
+          }
+          break;
+        }
+        i += 1;
+      }
+      continue;
+    }
+    if (ch === "[") {
+      const end = sql.indexOf("]", i + 1);
+      out += " ";
+      if (end === -1) break;
+      i = end;
+      continue;
+    }
+    if (ch === ";") {
+      throw new AgentError("unsupported-capability", "Multiple SQL statements are not allowed.", {
+        pluginId: PLUGIN_ID,
+      });
+    }
+    out += ch;
   }
-  return rest;
+  return out.trim();
 }
 
 function assertReadOnlySql(rawSql: string): string {
@@ -103,29 +178,28 @@ function assertReadOnlySql(rawSql: string): string {
   if (!trimmed) {
     throw new AgentError("invalid-argument", "SQL query cannot be empty.", { pluginId: PLUGIN_ID });
   }
-  // Reject multi-statement batches (semicolon outside quotes).
-  let inSingle = false;
-  let inDouble = false;
-  for (let i = 0; i < trimmed.length; i += 1) {
-    const ch = trimmed[i];
-    if (ch === "'" && !inDouble) inSingle = !inSingle;
-    else if (ch === '"' && !inSingle) inDouble = !inDouble;
-    else if (ch === ";" && !inSingle && !inDouble) {
-      throw new AgentError("unsupported-capability", "Multiple SQL statements are not allowed.", {
-        pluginId: PLUGIN_ID,
-      });
-    }
-  }
-
-  const body = stripLeadingSqlComments(trimmed);
-  const firstWord = /^([A-Za-z]+)/.exec(body)?.[1]?.toUpperCase() ?? "";
+  const codeOnly = sanitizeSqlForInspection(trimmed);
+  const firstWord = /^([A-Za-z]+)/.exec(codeOnly)?.[1]?.toUpperCase() ?? "";
   if (firstWord === "PRAGMA") {
-    if (body.includes("=")) {
+    const match = /^PRAGMA\s+(?:[A-Za-z_][A-Za-z0-9_]*\.)?([A-Za-z_][A-Za-z0-9_]*)([\s\S]*)$/i.exec(codeOnly);
+    const pragmaName = match?.[1]?.toLowerCase() ?? "";
+    const rest = match?.[2]?.trim() ?? "";
+    if (rest.includes("=")) {
       throw new AgentError("unsupported-capability", "Write PRAGMA statements are not allowed.", {
         pluginId: PLUGIN_ID,
       });
     }
-    return trimmed;
+    if (NO_ARG_READ_ONLY_PRAGMAS.has(pragmaName) && rest === "") {
+      return trimmed;
+    }
+    if (ARG_READ_ONLY_PRAGMAS.has(pragmaName) && (rest === "" || /^\([^()]*\)$/.test(rest))) {
+      return trimmed;
+    }
+    throw new AgentError(
+      "unsupported-capability",
+      `PRAGMA "${pragmaName || "unknown"}" is not permitted in read-only mode.`,
+      { pluginId: PLUGIN_ID },
+    );
   }
   if (!["SELECT", "WITH", "EXPLAIN", "VALUES"].includes(firstWord)) {
     throw new AgentError(
@@ -133,6 +207,11 @@ function assertReadOnlySql(rawSql: string): string {
       `Only read-only SQL queries are permitted (rejected "${firstWord || "unknown"}").`,
       { pluginId: PLUGIN_ID },
     );
+  }
+  if (firstWord !== "EXPLAIN" && WRITE_SQL_PATTERN.test(codeOnly)) {
+    throw new AgentError("unsupported-capability", "Write SQL statements are not allowed.", {
+      pluginId: PLUGIN_ID,
+    });
   }
   return trimmed;
 }
@@ -198,7 +277,8 @@ const sqliteExtractor: StructuredExtractor = {
 
       if (target === "schema") {
         const schemaMd = tables.map((t) => `## ${t.name} (${t.type})\n\n\`\`\`sql\n${t.sql};\n\`\`\``).join("\n\n");
-        return paginateText(schemaMd, params.cursor, params.maxBytes, "markdown", PLUGIN_ID);
+        const result = paginateText(schemaMd, params.cursor, params.maxBytes, "markdown", PLUGIN_ID);
+        return params.filter?.trim() ? { ...result, filterApplied: false } : result;
       }
 
       if (!target.startsWith("table:")) {
@@ -211,15 +291,16 @@ const sqliteExtractor: StructuredExtractor = {
 
       const start = parsePositionCursor(params.cursor, "row:", PLUGIN_ID);
       const statement = db.prepare(`SELECT * FROM ${quoteIdent(tableName)} LIMIT ? OFFSET ?`);
+      statement.setReturnArrays(true);
       const columns = statement.columns().map((column) => column.name);
       const needle = params.filter?.trim().toLowerCase();
       let scanned = 0;
       let sourceExhausted = false;
       function* rows() {
-        for (const row of statement.iterate(FILTER_SCAN_ROWS + 1, start) as Iterable<Record<string, unknown>>) {
+        for (const cells of statement.iterate(FILTER_SCAN_ROWS + 1, start) as Iterable<unknown[]>) {
+          if (context.signal.aborted) throw abortError();
           if (scanned === FILTER_SCAN_ROWS) return;
           scanned += 1;
-          const cells = columns.map((column) => row[column]);
           yield !needle || cells.some((cell) => String(cell ?? "").toLowerCase().includes(needle)) ? cells : null;
         }
         sourceExhausted = true;
@@ -239,6 +320,7 @@ const sqliteExtractor: StructuredExtractor = {
   },
 
   async query(context: ExtractContext, params: QueryParams): Promise<ReadResult> {
+    if (context.signal.aborted) throw abortError();
     const sql = assertReadOnlySql(params.sql);
     const db = await openReadOnlyDb(context);
     try {
@@ -247,24 +329,29 @@ const sqliteExtractor: StructuredExtractor = {
       try {
         statement = db.prepare(sql);
       } catch (error) {
-        throw new AgentError("invalid-argument", error instanceof Error ? error.message : "Invalid SQL query.", {
-          pluginId: PLUGIN_ID,
-          cause: error,
-        });
+        const message = error instanceof Error ? error.message : "Invalid SQL query.";
+        const code = /readonly|attempt to write|not authorized/i.test(message)
+          ? "unsupported-capability"
+          : "invalid-argument";
+        throw new AgentError(code, message, { pluginId: PLUGIN_ID, cause: error });
       }
+      statement.setReturnArrays(true);
       const columns = statement.columns().map((column) => column.name);
       function* rows() {
         let index = 0;
         try {
-          for (const row of statement.iterate() as Iterable<Record<string, unknown>>) {
+          for (const cells of statement.iterate() as Iterable<unknown[]>) {
+            if (context.signal.aborted) throw abortError();
             if (index++ < start) continue;
-            yield columns.map((column) => row[column]);
+            yield cells;
           }
         } catch (error) {
-          throw new AgentError("invalid-file", error instanceof Error ? error.message : "SQL query execution failed.", {
-            pluginId: PLUGIN_ID,
-            cause: error,
-          });
+          if (isViewerAbortError(error)) throw error;
+          const message = error instanceof Error ? error.message : "SQL query execution failed.";
+          const code = /readonly|attempt to write|not authorized/i.test(message)
+            ? "unsupported-capability"
+            : "invalid-file";
+          throw new AgentError(code, message, { pluginId: PLUGIN_ID, cause: error });
         }
       }
       if (columns.length === 0) {

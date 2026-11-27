@@ -4,7 +4,8 @@ import { AgentError, abortError, type WorkspaceEntry, type WorkspaceReader } fro
 import { openDiskFile } from "./disk-io";
 
 function isWithinRoot(targetPath: string, rootPath: string): boolean {
-  return targetPath === rootPath || targetPath.startsWith(`${rootPath}${sep}`);
+  const prefix = rootPath.endsWith(sep) ? rootPath : `${rootPath}${sep}`;
+  return targetPath === rootPath || targetPath.startsWith(prefix);
 }
 
 export async function normalizeAllowedRoots(roots: readonly string[]): Promise<string[]> {
@@ -115,7 +116,12 @@ export function createDiskWorkspaceReader(rootDir: string): WorkspaceReader {
       }
       if (!isWithinRoot(realTargetDir, realRoot)) return;
 
-      const entries = await readdir(realTargetDir, { withFileTypes: true });
+      let entries;
+      try {
+        entries = await readdir(realTargetDir, { withFileTypes: true });
+      } catch {
+        return;
+      }
       for (const entry of entries) {
         if (options?.signal?.aborted) throw abortError();
         const entryFull = join(realTargetDir, entry.name);

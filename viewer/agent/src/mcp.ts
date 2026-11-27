@@ -112,6 +112,9 @@ export async function runMcpServer(options: McpServerOptions): Promise<void> {
 
       if (name === "query_file") {
         const sql = typeof args.sql === "string" ? args.sql : "";
+        if (!sql.trim()) {
+          throw new AgentError("invalid-argument", "Missing required parameter: sql.");
+        }
         const result = await service.queryFile(path, {
           sql,
           target: typeof args.target === "string" ? args.target : undefined,
@@ -146,13 +149,18 @@ export async function runMcpServer(options: McpServerOptions): Promise<void> {
       const line = rawLine.trim();
       if (!line) continue;
 
-      let req: JsonRpcRequest;
+      let parsed: unknown;
       try {
-        req = JSON.parse(line) as JsonRpcRequest;
+        parsed = JSON.parse(line);
       } catch {
         send({ id: null, error: { code: -32700, message: "Parse error" } });
         continue;
       }
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+        send({ id: null, error: { code: -32600, message: "Invalid Request" } });
+        continue;
+      }
+      const req = parsed as JsonRpcRequest;
 
       // Notifications have no id and expect no response.
       if (req.id === undefined) continue;
@@ -174,7 +182,7 @@ export async function runMcpServer(options: McpServerOptions): Promise<void> {
         const params = req.params ?? {};
         const name = typeof params.name === "string" ? params.name : "";
         const args =
-          params.arguments && typeof params.arguments === "object"
+          params.arguments && typeof params.arguments === "object" && !Array.isArray(params.arguments)
             ? (params.arguments as Record<string, unknown>)
             : {};
         const result = await handleToolCall(name, args);

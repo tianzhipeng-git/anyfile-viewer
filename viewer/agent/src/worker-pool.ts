@@ -3,7 +3,7 @@ import { AgentError } from "@anyfile/viewer-protocol";
 import type { WorkerRequest, WorkerResponse } from "./worker";
 
 export interface WorkerPoolOptions {
-  /** Keep worker alive across requests for MCP LRU session caching. Default: false (CLI ephemeral). */
+  /** Keep worker alive across requests for MCP module/WASM reuse. Default: false (CLI ephemeral). */
   readonly persistent?: boolean;
   /** Default wall-clock timeout per call in ms. Default: 10_000. */
   readonly defaultTimeoutMs?: number;
@@ -20,6 +20,7 @@ interface PendingCall {
   readonly resolve: (value: unknown) => void;
   readonly reject: (reason: unknown) => void;
   readonly timer: ReturnType<typeof setTimeout>;
+  readonly cleanup?: () => void;
   readonly worker: Worker;
   readonly pluginId?: string;
 }
@@ -61,11 +62,16 @@ export class ExtractWorkerPool {
     if (this.worker) return this.worker;
     const worker = new Worker(WORKER_URL, {
       execArgv: ["--import", TS_HOOKS_URL.href],
+      stdout: true,
+      stderr: true,
       resourceLimits: {
         maxOldGenerationSizeMb: this.maxOldGenerationSizeMb,
         maxYoungGenerationSizeMb: 128,
       },
     });
+    // Drain captured worker stdio so chatty WASM/extractors never backpressure or corrupt parent stdout (MCP/CLI).
+    worker.stdout?.resume();
+    worker.stderr?.resume();
     worker.unref();
 
     worker.on("message", (msg: WorkerResponse) => {
@@ -73,6 +79,7 @@ export class ExtractWorkerPool {
       if (!entry) return;
       this.pending.delete(msg.id);
       clearTimeout(entry.timer);
+      entry.cleanup?.();
       if (msg.ok) {
         entry.resolve(msg.result);
       } else {
@@ -115,6 +122,7 @@ export class ExtractWorkerPool {
     for (const [id, entry] of this.pending) {
       if (worker && entry.worker !== worker) continue;
       clearTimeout(entry.timer);
+      entry.cleanup?.();
       entry.reject(error);
       this.pending.delete(id);
     }
@@ -122,16 +130,38 @@ export class ExtractWorkerPool {
 
   async call<T>(
     request: Omit<WorkerRequest, "id">,
-    options?: { readonly timeoutMs?: number },
+    options?: { readonly timeoutMs?: number; readonly signal?: AbortSignal },
   ): Promise<T> {
+    if (options?.signal?.aborted) {
+      throw new AgentError("timeout", "Operation was cancelled.", { pluginId: request.pluginId });
+    }
     this.clearIdleTimer();
     const worker = this.ensureWorker();
     const id = this.nextId++;
     const timeoutMs = options?.timeoutMs ?? this.defaultTimeoutMs;
 
     return new Promise<T>((resolve, reject) => {
+      const onAbort = () => {
+        const entry = this.pending.get(id);
+        if (!entry) return;
+        this.pending.delete(id);
+        clearTimeout(entry.timer);
+        entry.cleanup?.();
+        try {
+          worker.postMessage({ id, op: "cancel" } satisfies WorkerRequest);
+        } catch {
+          // Worker may already be terminating.
+        }
+        reject(new AgentError("timeout", "Operation was cancelled.", { pluginId: request.pluginId }));
+      };
+      const cleanup = options?.signal
+        ? () => options.signal?.removeEventListener("abort", onAbort)
+        : undefined;
+      options?.signal?.addEventListener("abort", onAbort, { once: true });
+
       const timer = setTimeout(() => {
         this.pending.delete(id);
+        cleanup?.();
         if (this.worker === worker) this.worker = null;
         void worker.terminate();
         reject(
@@ -145,6 +175,7 @@ export class ExtractWorkerPool {
         resolve: resolve as (value: unknown) => void,
         reject,
         timer,
+        cleanup,
         worker,
         pluginId: request.pluginId,
       });

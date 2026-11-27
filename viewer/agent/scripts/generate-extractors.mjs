@@ -25,7 +25,7 @@ for (const dir of readdirSync(pluginsDir).sort()) {
   if (!pluginId) {
     throw new Error(`Plugin ${dir} exports ./extract but has no literal id in src/manifest.ts`);
   }
-  entries.push({ pluginId, packageName: pkg.name });
+  entries.push({ pluginId, dir });
 }
 
 entries.sort((a, b) => a.pluginId.localeCompare(b.pluginId));
@@ -36,8 +36,8 @@ const lines = [
   "",
   "export const extractorLoaders: Readonly<Record<string, () => Promise<StructuredExtractor>>> = {",
   ...entries.map(
-    ({ pluginId, packageName }) =>
-      `  ${JSON.stringify(pluginId)}: async () => (await import(${JSON.stringify(`${packageName}/extract`)})).default,`,
+    ({ pluginId, dir }) =>
+      `  ${JSON.stringify(pluginId)}: async () => (await import(${JSON.stringify(`../../../plugins/${dir}/src/extract`)})).default,`,
   ),
   "};",
   "",

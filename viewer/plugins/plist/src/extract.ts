@@ -1,6 +1,7 @@
 import {
   AgentError,
   abortError,
+  isViewerAbortError,
   paginateLines,
   type ExtractContext,
   type InspectPayload,
@@ -28,7 +29,7 @@ function toJsonValue(value: PlistValue): JsonValue {
     case "uid":
       return `CF$UID(${value.value.toString()})`;
     case "date":
-      return value.value.toISOString();
+      return Number.isNaN(value.value.getTime()) ? "Invalid Date" : value.value.toISOString();
     case "data":
       return `<binary ${value.value.byteLength} bytes>`;
     case "array":
@@ -45,7 +46,7 @@ function toJsonValue(value: PlistValue): JsonValue {
 
 function mapError(error: unknown): never {
   if (error instanceof AgentError) throw error;
-  if (error instanceof DOMException && error.name === "AbortError") throw error;
+  if (isViewerAbortError(error)) throw error;
   if (error instanceof PlistError) {
     throw new AgentError(error.code === "resource-limit" ? "resource-limit" : "invalid-file", error.message, {
       pluginId: "apple-plist",
@@ -84,7 +85,10 @@ const plistExtractor: StructuredExtractor = {
     ];
 
     if (root.kind === "dict") {
+      const seenKeys = new Set<string>();
       for (const entry of root.entries) {
+        if (seenKeys.has(entry.key)) continue;
+        seenKeys.add(entry.key);
         targets.push({
           id: `key:${encodeURIComponent(entry.key)}`,
           title: entry.key,
@@ -125,7 +129,12 @@ const plistExtractor: StructuredExtractor = {
     if (target === "root") {
       selectedValue = root;
     } else if (target.startsWith("key:") && root.kind === "dict") {
-      const key = decodeURIComponent(target.slice(4));
+      let key: string;
+      try {
+        key = decodeURIComponent(target.slice(4));
+      } catch {
+        throw new AgentError("target-not-found", `Malformed plist key target: "${target}".`, { pluginId: "apple-plist" });
+      }
       selectedValue = root.entries.find((entry) => entry.key === key)?.value;
     }
 

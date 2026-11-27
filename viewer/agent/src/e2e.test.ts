@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { execFile, spawn } from "node:child_process";
-import { copyFile, mkdtemp, readFile, rm } from "node:fs/promises";
+import { copyFile, mkdtemp, readFile, rm, symlink } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,6 +15,7 @@ const CLI_ENTRY = resolve(AGENT_ROOT, "src/cli.ts");
 const PLIST_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/plist/examples/app-config.binary.plist");
 const SQLITE_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/sqlite/examples/sample.sqlite");
 const PST_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/pst/examples/dist-list.pst");
+const SAV_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/stat-data/examples/iris.sav");
 
 async function runCli(args: readonly string[], env?: NodeJS.ProcessEnv) {
   try {
@@ -77,6 +78,31 @@ describe("@anyfile/agent CLI & MCP end-to-end", { timeout: 60_000 }, () => {
     const pstInfo = JSON.parse(inspectPst.stdout);
     expect(pstInfo.pluginId).toBe("outlook-pst");
     expect(pstInfo.targets.length).toBeGreaterThan(0);
+
+    const inspectSav = await runCli(["inspect", SAV_SAMPLE]);
+    expect(inspectSav.exitCode).toBe(0);
+    const savInfo = JSON.parse(inspectSav.stdout);
+    expect(savInfo.pluginId).toBe("statistical-data");
+    expect(savInfo.capabilities).toContain("read");
+
+    const readSav = await runCli(["read", SAV_SAMPLE, "--max-bytes", "2048"]);
+    expect(readSav.exitCode).toBe(0);
+    expect(readSav.stdout.length).toBeGreaterThan(0);
+
+    // SQL comment starting with -- and explicitly passed symlink target.
+    const commentedSql = await runCli(["query", SQLITE_SAMPLE, "--sql", "-- leading comment\nSELECT name FROM users ORDER BY id"]);
+    expect(commentedSql.exitCode).toBe(0);
+    expect(commentedSql.stdout).toContain("Alice");
+
+    const badMaxBytes = await runCli(["read", PLIST_SAMPLE, "--max-bytes", "abc"]);
+    expect(badMaxBytes.exitCode).toBe(1);
+    expect(JSON.parse(badMaxBytes.stderr).code).toBe("invalid-argument");
+
+    const linkPath = join(tempDir, "linked.plist");
+    await symlink(PLIST_SAMPLE, linkPath);
+    const inspectLink = await runCli(["inspect", linkPath]);
+    expect(inspectLink.exitCode).toBe(0);
+    expect(JSON.parse(inspectLink.stdout).pluginId).toBe("apple-plist");
   });
 
   it("falls back to magic bytes when file has no extension and writes --out file", async () => {
@@ -104,6 +130,7 @@ describe("@anyfile/agent CLI & MCP end-to-end", { timeout: 60_000 }, () => {
     });
 
     const responses = new Map<number, (msg: Record<string, unknown>) => void>();
+    const errorResponses: Record<string, unknown>[] = [];
     let buffer = "";
     child.stdout.setEncoding("utf8");
     child.stdout.on("data", (chunk: string) => {
@@ -119,6 +146,8 @@ describe("@anyfile/agent CLI & MCP end-to-end", { timeout: 60_000 }, () => {
             const resolveFn = responses.get(id)!;
             responses.delete(id);
             resolveFn(parsed);
+          } else {
+            errorResponses.push(parsed);
           }
         }
         newlineIdx = buffer.indexOf("\n");
@@ -163,6 +192,30 @@ describe("@anyfile/agent CLI & MCP end-to-end", { timeout: 60_000 }, () => {
       });
       const queryText = ((queried.result as { content: { text: string }[] }).content[0]).text;
       expect(queryText).toContain("Alice");
+
+      const readRes = await rpc("tools/call", {
+        name: "read_file",
+        arguments: { path: SQLITE_SAMPLE, maxBytes: 2048 },
+      });
+      const readResult = readRes.result as { isError?: boolean; content: { text: string }[] };
+      expect(readResult.isError).toBeUndefined();
+      expect(readResult.content[0].text).toContain("login");
+      expect(readResult.content[0].text).toContain('"pluginId":"sqlite-database"');
+
+      // Missing sql must fail upfront with invalid-argument.
+      const missingSql = await rpc("tools/call", {
+        name: "query_file",
+        arguments: { path: SQLITE_SAMPLE },
+      });
+      const missingSqlResult = missingSql.result as { isError?: boolean; content: { text: string }[] };
+      expect(missingSqlResult.isError).toBe(true);
+      expect(missingSqlResult.content[0].text).toContain("invalid-argument");
+
+      // Valid non-object JSON (null) must return -32600 without crashing the server.
+      child.stdin.write("null\n");
+      const pingAfterNull = await rpc("ping", {});
+      expect(pingAfterNull.result).toEqual({});
+      expect(errorResponses.some((msg) => (msg.error as { code?: number } | undefined)?.code === -32600)).toBe(true);
 
       // Path outside allowedDir & cwd must return access-denied.
       const denied = await rpc("tools/call", {

@@ -1457,6 +1457,9 @@ importers:
 
   viewer/raw-decoder:
     dependencies:
+      '@anyfile/runtime-assets':
+        specifier: workspace:*
+        version: link:../runtime-assets
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../protocol
