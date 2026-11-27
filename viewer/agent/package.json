@@ -12,17 +12,10 @@
     "./mcp": "./src/mcp.ts"
   },
   "scripts": {
-    "generate:extractors": "node ./scripts/generate-extractors.mjs",
-    "generate:renderer-loaders": "node ./scripts/generate-renderer-loaders.mjs",
-    "generate:vendor-plugins": "node ./scripts/generate-vendor-plugins.mjs",
     "build": "node ./scripts/build.mjs"
   },
   "dependencies": {
-    "@anyfile/plist-viewer": "workspace:*",
-    "@anyfile/pst-viewer": "workspace:*",
     "@anyfile/runtime-assets": "workspace:*",
-    "@anyfile/sqlite-viewer": "workspace:*",
-    "@anyfile/stat-data-viewer": "workspace:*",
     "@anyfile/viewer-protocol": "workspace:*",
     "@anyfile/viewer-registry": "workspace:*"
   },

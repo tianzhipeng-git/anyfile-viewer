@@ -159,6 +159,11 @@ export interface HeadlessBrowserHandle {
   close(): Promise<void>;
 }
 
+/** Extra Chromium flags from `ANYFILE_BROWSER_ARGS` (whitespace-separated), appended after the defaults. */
+export function extraBrowserArgs(env: string | undefined = process.env.ANYFILE_BROWSER_ARGS): string[] {
+  return (env ?? "").split(/\s+/).filter(Boolean);
+}
+
 /** Launches a headless Chromium process with a temporary profile and returns a connected CDP client. */
 export async function launchHeadlessBrowser(timeoutMs = 15_000): Promise<HeadlessBrowserHandle> {
   const executable = discoverBrowserExecutable();
@@ -182,6 +187,7 @@ export async function launchHeadlessBrowser(timeoutMs = 15_000): Promise<Headles
     "--use-angle=swiftshader",
     "--enable-unsafe-swiftshader",
     "--window-size=1600,1200",
+    ...extraBrowserArgs(),
     "about:blank",
   ];
 
@@ -221,7 +227,10 @@ export async function launchHeadlessBrowser(timeoutMs = 15_000): Promise<Headles
         rejectUrl(
           new AgentError(
             "runtime-unavailable",
-            `Browser exited before DevTools became ready (code ${String(code)}).`,
+            `Browser exited before DevTools became ready (code ${String(code)}).` +
+              (/No usable sandbox/.test(stderrBuf)
+                ? " The OS blocks Chromium's sandbox; set ANYFILE_BROWSER_ARGS=--no-sandbox or use a system-installed browser."
+                : ""),
           ),
         );
       });

@@ -308,21 +308,9 @@ importers:
 
   viewer/agent:
     dependencies:
-      '@anyfile/plist-viewer':
-        specifier: workspace:*
-        version: link:../plugins/plist
-      '@anyfile/pst-viewer':
-        specifier: workspace:*
-        version: link:../plugins/pst
       '@anyfile/runtime-assets':
         specifier: workspace:*
         version: link:../runtime-assets
-      '@anyfile/sqlite-viewer':
-        specifier: workspace:*
-        version: link:../plugins/sqlite
-      '@anyfile/stat-data-viewer':
-        specifier: workspace:*
-        version: link:../plugins/stat-data
       '@anyfile/viewer-protocol':
         specifier: workspace:*
         version: link:../protocol

@@ -265,7 +265,7 @@ export interface ViewerController {
 
 ### 5.2 CDP 驱动与本地离线服务
 
-- **浏览器发现（不捆绑、不自动下载浏览器）**：优先读取 `ANYFILE_BROWSER_PATH`，否则自动探测本机已安装的 Chrome / Edge / Brave / Chromium；未找到时仅 `render_file` 返回 `runtime-unavailable` 及明确指引，不影响其余工具。
+- **浏览器发现（不捆绑、不自动下载浏览器）**：优先读取 `ANYFILE_BROWSER_PATH`（`ANYFILE_BROWSER_ARGS` 追加额外启动参数，如系统禁用沙箱时的 `--no-sandbox`），否则自动探测本机已安装的 Chrome / Edge / Brave / Chromium；未找到时仅 `render_file` 返回 `runtime-unavailable` 及明确指引，不影响其余工具。
 - **零重型依赖驱动**：使用 Node 24 原生 `WebSocket` 直连 `--headless=new --remote-debugging-port=0`，仅调用页面导航、生命周期等待与截图等少量 CDP 命令，不引入 Playwright 或 Puppeteer 运行时依赖。
 - **本地 `127.0.0.1` 隔离服务与 `/vendor/` 透明缓存映射**：
   - 仅绑定 `127.0.0.1` 随机端口，响应头附带 `Cross-Origin-Opener-Policy: same-origin` 与 `Cross-Origin-Embedder-Policy: require-corp`。

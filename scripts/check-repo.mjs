@@ -82,7 +82,6 @@ const contentManifests = read("src/content/manifests.ts");
 const pluginDirectories = readdirSync("viewer/plugins").filter((name) => statSync(join("viewer/plugins", name)).isDirectory());
 const pluginPackages = new Map(pluginDirectories.map((name) => [readJson(join("viewer/plugins", name, "package.json")).name, name]));
 const seenManifestIds = new Map();
-const extractPluginIds = new Map();
 
 function walk(directory) {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -114,7 +113,6 @@ for (const name of pluginDirectories) {
   if (!sources.some((path) => /\.test\.ts$/.test(path))) fail(`${where}: has no *.test.ts`);
 
   if (pkg.exports?.["./extract"]) {
-    if (manifestId) extractPluginIds.set(manifestId, { dir: name, packageName: pkg.name });
     if (pkg.exports["./extract"] !== "./src/extract.ts") {
       fail(`${where}: package.json must export ./extract from ./src/extract.ts`);
     }
@@ -206,28 +204,6 @@ if (existsSync("viewer/agent/src")) {
     const source = read(path);
     if (/(?:from|import\()\s*["'](?:next(?:\/|$)|@\/|(?:\.\.\/)+src\/)/.test(source)) {
       fail(`${path}: Agent host (viewer/agent/) must not import Next.js or Web host (src/)`);
-    }
-  }
-  const generatedExtractorsPath = "viewer/agent/src/generated/extractors.ts";
-  if (!existsSync(generatedExtractorsPath)) {
-    fail(`${generatedExtractorsPath} is missing; run pnpm --filter @anyfile/agent generate:extractors`);
-  } else {
-    const generated = read(generatedExtractorsPath);
-    const listedIds = new Set([...generated.matchAll(/^\s*"([a-z0-9-]+)":\s*async\s*\(\)\s*=>/gm)].map((m) => m[1]));
-    for (const [pluginId, { dir, packageName }] of extractPluginIds) {
-      if (!listedIds.has(pluginId)) {
-        fail(`${generatedExtractorsPath}: missing extractor "${pluginId}" (${dir}); run pnpm --filter @anyfile/agent generate:extractors`);
-      } else if (
-        !generated.includes(`"${packageName}/extract"`) &&
-        !generated.includes(`"../../../plugins/${dir}/src/extract"`)
-      ) {
-        fail(`${generatedExtractorsPath}: extractor "${pluginId}" does not point to viewer/plugins/${dir}/src/extract`);
-      }
-    }
-    for (const listedId of listedIds) {
-      if (!extractPluginIds.has(listedId)) {
-        fail(`${generatedExtractorsPath}: stale extractor "${listedId}"; run pnpm --filter @anyfile/agent generate:extractors`);
-      }
     }
   }
 }

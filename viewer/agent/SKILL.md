@@ -44,5 +44,5 @@ Errors are returned as structured JSON with a stable `code`:
 - `invalid-file` / `encrypted-file`: File is corrupted, unsupported, or password-protected.
 - `target-not-found`: Pass a target `id` directly from `anyfile inspect`.
 - `unsupported-capability`: Check `capabilities` from `anyfile inspect` before calling `read` or `query`.
-- `runtime-unavailable`: Required local browser (Chrome/Edge/Brave/Chromium or `ANYFILE_BROWSER_PATH`), WebGL, or `/vendor/` runtime asset is unavailable.
+- `runtime-unavailable`: Required local browser (Chrome/Edge/Brave/Chromium or `ANYFILE_BROWSER_PATH`; extra flags such as `--no-sandbox` via `ANYFILE_BROWSER_ARGS`), WebGL, or `/vendor/` runtime asset is unavailable.
 - `timeout` / `resource-limit`: Narrow the target, lower `--max-bytes` / `--max-dim`, or add a `LIMIT` clause.

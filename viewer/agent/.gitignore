@@ -1,2 +1,3 @@
 dist/
+src/generated/
 renderer-host/src/generated/
