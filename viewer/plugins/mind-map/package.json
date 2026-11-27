@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./manifest": "./src/manifest.ts",
-    "./probe": "./src/probe.ts"
+    "./probe": "./src/probe.ts",
+    "./extract": "./src/extract.ts"
   },
   "dependencies": {
     "@anyfile/archive-metadata-viewer": "workspace:*",

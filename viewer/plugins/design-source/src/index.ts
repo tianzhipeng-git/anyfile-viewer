@@ -6,22 +6,11 @@ import {
   type OpenViewerContext,
   type ViewerController,
 } from "@anyfile/viewer-protocol";
-import { parseFigmaDocument } from "./figma-parser";
+import { MAX_FILE_BYTES, parseDesignDocument } from "./document";
 import { getMessages } from "./i18n";
 import { designSourceManifest } from "./manifest";
 import type { DesignDocument } from "./model";
-import { isRawFigHeader } from "./probe";
-import { parseSketchDocument } from "./sketch-parser";
 import { mountDesignSourceViewer } from "./viewer-ui";
-
-const MAX_FILE_BYTES = 128 * 1024 * 1024;
-
-function detectFormat(fileName: string, bytes: Uint8Array): "figma" | "sketch" {
-  const lower = fileName.toLowerCase();
-  if (lower.endsWith(".fig") || isRawFigHeader(bytes)) return "figma";
-  if (lower.endsWith(".sketch")) return "sketch";
-  throw new ViewerError("invalid-file", "Unsupported design file extension");
-}
 
 export const designSourceViewer: FileViewerPlugin = {
   manifest: designSourceManifest,
@@ -56,11 +45,7 @@ export const designSourceViewer: FileViewerPlugin = {
 
     let doc: DesignDocument;
     try {
-      const format = detectFormat(file.name, bytes);
-      doc =
-        format === "figma"
-          ? parseFigmaDocument(bytes, file.name)
-          : parseSketchDocument(bytes, file.name);
+      doc = parseDesignDocument(bytes, file.name);
     } catch (error) {
       if (error instanceof ViewerError) {
         if (error.code === "resource-limit") {

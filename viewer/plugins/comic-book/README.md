@@ -31,10 +31,19 @@ CBR/CB7 额外使用源码构建的 libarchive Worker/WASM；ZIP 和图片能力
 - 不支持加密归档；图片解码取决于浏览器，不包含 OCR 或文本提取。
 - CBR/CB7 压缩输入最大 128 MiB，需要部署 `/vendor/comic-archive/3.8.9-anyfile.1/` 下的 libarchive WASM 资产；不提供归档提取或编辑。
 
+## Agent 提取（`./extract`）
+
+[src/extract.ts](src/extract.ts) 在 Node 中复用同一归档读取（ZIP / TAR 按需随机读取；CBR/CB7 用 [src/compressed-archive.ts](src/compressed-archive.ts) 与浏览器 Worker 共用的 libarchive WASM，从本地 vendor 缓存加载）与 `parseComic()`，不解码图片：
+
+- `inspect`：归档格式、页数、图片总字节与类型统计、阅读方向、ComicInfo.xml 的简单字段（Series、Title、Number、Writer、Summary…）；目标为 `info`、`pages`。
+- `read`：省略 `target` 时为元数据 + 页面表（`line:` 游标）；`info` 只读元数据；`pages` 为 Markdown 表（序号、图片路径、字节数、ComicInfo 页面类型、跨页），`row:` 游标。均支持 `filter`。
+- 加密归档返回 `encrypted-file`；不输出图片像素、尺寸或 OCR 文本。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。
 - 扩展名用于收集候选，实际选择按探测等级及同级注册顺序确定；MIME 仅作说明，详见[插件协议](../../../docs/viewer-plugin-protocol.md)。
+- 真实样例见 [examples/](examples/README.md)；CBR/CB7/CBT 与异常归档用例在 `docs/ebooks/fixtures/`。
 
 在仓库根目录运行插件测试：
 

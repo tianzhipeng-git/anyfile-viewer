@@ -37,6 +37,8 @@ export async function parseComic(zip: BookSource, signal: AbortSignal) {
   if (pages.length > COMIC_LIMITS.pages)
     throw new ViewerError("resource-limit", "Comic page count exceeded.");
   let rtl = false;
+  /** Simple ComicInfo fields (Series, Title, Number, Writer, Summary...) by element name. */
+  const info: Record<string, string> = {};
   if (zip.entries.has("ComicInfo.xml")) {
     const xml = new TextDecoder("utf-8", { fatal: true }).decode(
       await zip.read("ComicInfo.xml", 256 * 1024, signal),
@@ -50,6 +52,10 @@ export async function parseComic(zip: BookSource, signal: AbortSignal) {
       doc.querySelectorAll("*").length > 10_000
     )
       throw new ViewerError("invalid-file", "Invalid ComicInfo XML.");
+    for (const node of Array.from(doc.documentElement.children)) {
+      const value = node.children.length ? "" : node.textContent?.trim();
+      if (value) info[node.localName] = value;
+    }
     rtl = doc.querySelector("Manga")?.textContent?.trim() === "YesAndRightToLeft";
     const seen = new Set<number>();
     for (const node of Array.from(doc.querySelectorAll("Pages > Page"))) {
@@ -63,7 +69,7 @@ export async function parseComic(zip: BookSource, signal: AbortSignal) {
     }
   }
   if (!pages.some((page) => page.type === "FrontCover")) pages[0].type = "FrontCover";
-  return { pages, rtl };
+  return { pages, rtl, info };
 }
 export function comicSpreads(pages: ComicPage[]): number[][] {
   const result: number[][] = [];

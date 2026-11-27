@@ -178,12 +178,13 @@ async function readText(file: File, signal: AbortSignal): Promise<string> {
   }
 }
 
-export async function readMindMap(file: File, signal: AbortSignal, workspace?: WorkspaceReader): Promise<Sheet[]> {
+/** `assets: false` skips images and attachments (text-only consumers such as the Agent extractor). */
+export async function readMindMap(file: File, signal: AbortSignal, workspace?: WorkspaceReader, { assets = true } = {}): Promise<Sheet[]> {
   checkAbort(signal);
   if (file.size > LIMITS.file) throw limit();
   if (/\.mm$/i.test(file.name)) {
     const sheets = parseContent(await readText(file, signal), "mm", signal);
-    await loadAssets(sheets, signal, undefined, workspace);
+    if (assets) await loadAssets(sheets, signal, undefined, workspace);
     return sheets;
   }
   if (!/\.(xmind|mmap)$/i.test(file.name)) throw invalid();
@@ -200,7 +201,7 @@ export async function readMindMap(file: File, signal: AbortSignal, workspace?: W
       xml(styles);
       applyLegacyStyles(sheets, styles);
     }
-    await loadAssets(sheets, signal, zip);
+    if (assets) await loadAssets(sheets, signal, zip);
     return sheets;
   } finally {
     await zip.dispose();

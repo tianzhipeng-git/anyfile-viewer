@@ -30,6 +30,13 @@
 - 脚本、事件处理及不允许的资源引用会被清理，因此依赖这些特性的图稿可能与原稿不同。
 - 以图片方式只读预览，不提供 SVG DOM 编辑或源码编辑；实际图形表现受浏览器 SVG 支持影响。
 
+## Agent 提取（`./extract`）
+
+[src/extract.ts](src/extract.ts) 在 Node 中复用 `readSvgBytes()`（含 SVGZ 解压）与共享 XML 接口，不渲染、不清理：
+
+- `inspect`：SVG / SVGZ、`width` / `height` / `viewBox`、根级 `title` / `desc`、元素总数及按标签计数、文本行数、内嵌（data URI）与外链图片数、内嵌字体、`<script>` 与事件属性数、`foreignObject` 数；目标为 `text`、`source`。
+- `read`：`text`（默认）按文档顺序输出 `<text>`（带定位的多个 `<tspan>` 各占一行）、`<title>`、`<desc>`、`foreignObject` 文本，`line:` 游标；`source` 为原始源码，超过 128 字符的 data URI 折叠为 `<binary N bytes>`，按字节偏移分页。均支持 `filter`。
+
 ## 开发与验证
 
 - [格式声明](src/manifest.ts)、[内容探测](src/probe.ts)、[打开入口](src/index.ts)。

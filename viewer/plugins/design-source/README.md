@@ -27,6 +27,14 @@ Local browser viewer for Figma (`.fig`) and Sketch (`.sketch`) design source fil
 - Legacy pre-Sketch-43 SQLite `.sketch` files are rejected during probe.
 - Read-only inspection; no editing or exporting back to `.fig` / `.sketch`.
 
+## Agent extract (`./extract`)
+
+[src/extract.ts](src/extract.ts) reuses the same `parseDesignDocument()` ([src/document.ts](src/document.ts)) in Node:
+
+- `inspect`: format, title, Kiwi / Sketch version, export time, page / artboard / layer / text-layer / image counts, fonts, thumbnail presence and per-page artboard and layer counts; targets are `page:<n>`.
+- `read`: Markdown; each page is an indented layer tree `[kind] name (W×H)` with hidden / image-fill flags and text-layer contents quoted below. Without `target` all pages are paged by byte offset; `filter` keeps matching lines.
+- Image bytes, thumbnails, fills, strokes and vector paths are not exported; preview-only `.fig` files have no pages.
+
 ## Verification
 
 ```bash
