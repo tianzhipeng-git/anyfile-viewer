@@ -23,7 +23,7 @@
 - [x] 高 | 新增 Outlook 邮件归档查看器（`.pst` / `.ost`） | 高频搜 `open pst without outlook` 与 Mac 打开 `.pst`，离职交接、老电脑备份与法务审计常见数百 MB 至数 GB 邮件库，全量隐私绝对不敢上传；需按需随机读取目录树、分页列表与附件；新插件 `outlook-pst` 自研 MS-PST NDB/LTP/消息层经 `Blob.slice` 随机读取，支持 ANSI/Unicode/2013+ 4K 压缩 OST、HTML 沙箱正文（拦截远程引用）、LZFu RTF 与附件保存，待人工浏览器验收 2026-11-23 6aefce5
 - [x] 高 | 新增科学多维数据容器查看器（`.h5` / `.hdf5` / `.nc` / `.nc4` / `.mat`） | AI/科研/气象/遥感/工程高频搜 `hdf5 viewer online` 与 `open mat without matlab`，文件常达数百 MB 且涉密不愿上传；需按需浏览分组树、属性元数据、大数组切片表与 2D 切片预览；新插件 `scientific-data` 使用 `h5wasm` Worker+`WORKERFS` 按需读取 HDF5/NetCDF-4/MATLAB v7.3，纯 TS 按需读取 NetCDF Classic/64-bit/CDF-5 与 MATLAB Level 4/5，含分组树、属性表、N 维切片表与 2D Canvas 热力图预览，待人工浏览器验收 2026-11-25 7146bcf
 - [x] 高 | 新增 OpenEXR / HDR 高动态范围图像查看器（`.exr` / `.hdr`） | 影视后期、3D 渲染与游戏开发高频搜 `exr viewer online`，浏览器原生打不开且在线工具常压成 8-bit；需支持多通道（AOV）切换、曝光/Gamma/色调映射调节与 360° HDRI 环境球预览；新插件 `hdr-image` 纯 TS Worker 解码线性 Float32（OpenEXR 扫描线/分块/多 Part、None/RLE/ZIPS/ZIP/PIZ/PXR24/B44、多通道 AOV 与 Radiance RGBE/XYZE），支持实时曝光/Gamma/ACES 等色调映射、悬停线性像素读数与 360° WebGL 环境球预览，待人工浏览器验收 2026-11-25 fd5f98f
-- [ ] 高 | 新增设计源文件查看器（`.fig` / `.sketch`） | 研发/产品/Windows 用户高频搜 `open sketch on windows` 与 `fig file viewer`，无 Mac 或付费账号打不开客户/离职设计师发来的涉密稿件；需支持画板浏览、图层树与文字/尺寸检查
+- [x] 高 | 新增设计源文件查看器（`.fig` / `.sketch`） | 研发/产品/Windows 用户高频搜 `open sketch on windows` 与 `fig file viewer`，无 Mac 或付费账号打不开客户/离职设计师发来的涉密稿件；需支持画板浏览、图层树与文字/尺寸检查；新插件 `design-source` 自研 CSP 安全纯 TS Kiwi（Deflate/Zstd）与 Sketch 43+ JSON 解析器，支持多页面/画板切换、交互式 2D 画布、可搜索图层树、尺寸/文字/色值/CSS 检查与内置缩略图切换，待人工浏览器验收 2026-11-27 9ad20f4
 - [ ] 高 | 新增通用 3D 场景与高斯泼溅查看器（`.usdz` / `.usd` / `.usdc` / `.splat` / `.spz`） | Windows/Android 原生打不开 Apple AR `.usdz`（当前仅 `archive` 列 ZIP 目录），3D Gaussian Splatting 正成空间计算与 3D 扫描主流；需支持 3D 场景交互渲染与高斯泼溅实时浏览
 - [ ] 高 | 新增 GB 级超大日志与结构化文本流式查看器 | 排查故障时打开数 GB `.log`/`.jsonl`/`.csv` 极易卡死浏览器与普通编辑器，且日志含敏感业务数据不能上传；需秒开、虚拟滚动、流式正则搜索过滤与日志级别高亮
 - [ ] 高 | 实现本地分屏文件对比（Side-by-Side Diff） | 法务/财务/研发/设计师高频需免上传对比两份敏感文件（PDF/DOCX 文档、表格、图片/PSD 卷帘与像素差值、代码/JSON）；跨插件复用现有渲染器，打造强差异化平台能力
@@ -51,3 +51,4 @@
 
 ## 待处理建议
 在每日开发 Agent的执行过程中发现的问题, 更新在这个下方, 每周会经过评估和确认后加入需求池.
+- `scripts/check-repo.mjs` 中的 `PROBE_BROWSER_GLOBALS` 正则目前会误匹配字符串字面量（例如 `probe.ts` 中检查 ZIP 条目名 `"document.json"` 时触发 `document` 全局变量告警），建议剥离字符串字面量或改用 AST/词法检查以减少误报。
