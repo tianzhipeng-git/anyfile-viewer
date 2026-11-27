@@ -2,11 +2,29 @@ import { getCompositeImageData, initializeCanvas, readPsd, type Layer, type Pixe
 
 import type { PhotoshopDocumentInfo } from "./types";
 
+export interface PhotoshopLayerSummary {
+  readonly name: string;
+  readonly depth: number;
+  readonly visible: boolean;
+  readonly isGroup: boolean;
+  readonly opacity: number;
+  readonly blendMode?: string;
+  readonly left?: number;
+  readonly top?: number;
+  readonly right?: number;
+  readonly bottom?: number;
+  readonly text?: string;
+}
+
 const MAX_DECODED_BYTES = 256 * 1024 * 1024;
 
 initializeCanvas(
   () => { throw new Error("Canvas creation is disabled in the Photoshop decoder."); },
-  (width, height) => new ImageData(width, height),
+  (width, height) => (
+    typeof ImageData === "function"
+      ? new ImageData(width, height)
+      : ({ width, height, data: new Uint8ClampedArray(width * height * 4) } as ImageData)
+  ),
 );
 
 const COLOR_MODES: Readonly<Record<number, string>> = {
@@ -50,6 +68,60 @@ function toEightBitRgba(data: PixelArray, pixelCount: number) {
   if (data instanceof Uint8ClampedArray) rgba.set(data);
   else for (let index = 0; index < data.length; index += 1) rgba[index] = byteValue(data, index);
   return rgba;
+}
+
+function collectLayerSummaries(
+  layers: readonly Layer[] | undefined,
+  depth = 0,
+  out: PhotoshopLayerSummary[] = [],
+): PhotoshopLayerSummary[] {
+  for (const layer of layers ?? []) {
+    const isGroup = Array.isArray(layer.children);
+    const text = typeof layer.text?.text === "string" ? layer.text.text.trim() : undefined;
+    out.push({
+      name: layer.name ?? "(unnamed)",
+      depth,
+      visible: !layer.hidden,
+      isGroup,
+      opacity: layer.opacity ?? 1,
+      ...(layer.blendMode ? { blendMode: layer.blendMode } : {}),
+      ...(layer.left !== undefined ? { left: layer.left } : {}),
+      ...(layer.top !== undefined ? { top: layer.top } : {}),
+      ...(layer.right !== undefined ? { right: layer.right } : {}),
+      ...(layer.bottom !== undefined ? { bottom: layer.bottom } : {}),
+      ...(text ? { text } : {}),
+    });
+    if (layer.children) collectLayerSummaries(layer.children, depth + 1, out);
+  }
+  return out;
+}
+
+export function inspectPhotoshopDocument(buffer: ArrayBuffer): {
+  readonly info: PhotoshopDocumentInfo;
+  readonly channels: number;
+  readonly layers: readonly PhotoshopLayerSummary[];
+} {
+  const psd = readPsd(buffer, {
+    skipCompositeImageData: true,
+    skipLayerImageData: true,
+    skipThumbnail: true,
+    skipLinkedFilesData: true,
+    totalMemoryLimit: MAX_DECODED_BYTES,
+  });
+  const layerCounts = countLayers(psd.children);
+  const info: PhotoshopDocumentInfo = {
+    width: psd.width,
+    height: psd.height,
+    depth: psd.bitsPerChannel ?? 8,
+    colorMode: COLOR_MODES[psd.colorMode ?? 3] ?? `Mode ${psd.colorMode}`,
+    layerCount: layerCounts.total,
+    visibleLayerCount: layerCounts.visible,
+  };
+  return {
+    info,
+    channels: psd.channels ?? 3,
+    layers: collectLayerSummaries(psd.children),
+  };
 }
 
 export function decodePhotoshop(buffer: ArrayBuffer) {

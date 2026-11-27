@@ -12,7 +12,9 @@
     "./mcp": "./src/mcp.ts"
   },
   "scripts": {
-    "generate:extractors": "node ./scripts/generate-extractors.mjs"
+    "generate:extractors": "node ./scripts/generate-extractors.mjs",
+    "generate:renderer-loaders": "node ./scripts/generate-renderer-loaders.mjs",
+    "build": "node ./scripts/build.mjs"
   },
   "dependencies": {
     "@anyfile/plist-viewer": "workspace:*",

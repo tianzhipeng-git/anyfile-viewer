@@ -6,6 +6,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { readPngDimensions } from "./png";
 
 const execFileAsync = promisify(execFile);
 const AGENT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -16,8 +17,10 @@ const PLIST_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/plist/examples/app-confi
 const SQLITE_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/sqlite/examples/sample.sqlite");
 const PST_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/pst/examples/dist-list.pst");
 const SAV_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/stat-data/examples/iris.sav");
+const HDR_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/hdr-image/examples/studio-gradient.hdr");
+const PSD_SAMPLE = resolve(REPO_ROOT, "viewer/plugins/photoshop/examples/sample_640×426.psd");
 
-async function runCli(args: readonly string[], env?: NodeJS.ProcessEnv) {
+async function runCli(args: readonly string[], env?: Record<string, string | undefined>) {
   try {
     const { stdout, stderr } = await execFileAsync(process.execPath, [CLI_ENTRY, ...args], {
       cwd: REPO_ROOT,
@@ -122,9 +125,40 @@ describe("@anyfile/agent CLI & MCP end-to-end", { timeout: 60_000 }, () => {
     expect(written).toContain("Alice");
   });
 
-  it("serves inspect_file, read_file, query_file over MCP stdio and enforces --allow-dir", async () => {
+  it("renders pure-pixel HDR and Photoshop files to bounded PNG via CLI without launching a browser", async () => {
+    const hdrOut = join(tempDir, "hdr.png");
+    const hdrRes = await runCli(["render", HDR_SAMPLE, "--max-dim", "128", "--out", hdrOut], {
+      ANYFILE_BROWSER_PATH: "/nonexistent/browser-must-not-run",
+    });
+    expect(hdrRes.exitCode).toBe(0);
+    const hdrMeta = JSON.parse(hdrRes.stdout);
+    expect(hdrMeta.pluginId).toBe("hdr-image");
+    expect(hdrMeta.engine).toBe("node-pixel");
+    const hdrPng = new Uint8Array(await readFile(hdrOut));
+    const hdrDims = readPngDimensions(hdrPng);
+    expect(Math.max(hdrDims.width, hdrDims.height)).toBeLessThanOrEqual(128);
+    expect(hdrDims.width).toBeGreaterThan(0);
+    expect(hdrDims.height).toBeGreaterThan(0);
+
+    const psdOut = join(tempDir, "psd.png");
+    const psdRes = await runCli(["render", PSD_SAMPLE, "--max-dim", "200", "--out", psdOut], {
+      ANYFILE_BROWSER_PATH: "/nonexistent/browser-must-not-run",
+    });
+    expect(psdRes.exitCode).toBe(0);
+    const psdMeta = JSON.parse(psdRes.stdout);
+    expect(psdMeta.pluginId).toBe("photoshop-document");
+    expect(psdMeta.engine).toBe("node-pixel");
+    const psdPng = new Uint8Array(await readFile(psdOut));
+    const psdDims = readPngDimensions(psdPng);
+    expect(Math.max(psdDims.width, psdDims.height)).toBeLessThanOrEqual(200);
+    expect(psdDims.width).toBeGreaterThan(0);
+    expect(psdDims.height).toBeGreaterThan(0);
+  });
+
+  it("serves inspect_file, read_file, query_file, render_file over MCP stdio and enforces --allow-dir", async () => {
     const allowedDir = resolve(REPO_ROOT, "viewer/plugins/sqlite/examples");
-    const child = spawn(process.execPath, [CLI_ENTRY, "mcp", "--allow-dir", allowedDir], {
+    const psdAllowedDir = resolve(REPO_ROOT, "viewer/plugins/photoshop/examples");
+    const child = spawn(process.execPath, [CLI_ENTRY, "mcp", "--allow-dir", allowedDir, "--allow-dir", psdAllowedDir], {
       cwd: tempDir,
       stdio: ["pipe", "pipe", "pipe"],
     });
@@ -177,7 +211,21 @@ describe("@anyfile/agent CLI & MCP end-to-end", { timeout: 60_000 }, () => {
 
       const tools = await rpc("tools/list", {});
       const toolNames = ((tools.result as { tools: { name: string }[] }).tools).map((t) => t.name);
-      expect(toolNames).toEqual(["inspect_file", "read_file", "query_file"]);
+      expect(toolNames).toEqual(["inspect_file", "read_file", "query_file", "render_file"]);
+
+      const rendered = await rpc("tools/call", {
+        name: "render_file",
+        arguments: { path: PSD_SAMPLE, maxDimension: 160 },
+      });
+      const renderResult = rendered.result as {
+        isError?: boolean;
+        content: ({ type: "image"; data: string; mimeType: string } | { type: "text"; text: string })[];
+      };
+      expect(renderResult.isError).toBeUndefined();
+      expect(renderResult.content[0]).toMatchObject({ type: "image", mimeType: "image/png" });
+      const mcpPng = new Uint8Array(Buffer.from((renderResult.content[0] as { data: string }).data, "base64"));
+      const mcpDims = readPngDimensions(mcpPng);
+      expect(Math.max(mcpDims.width, mcpDims.height)).toBeLessThanOrEqual(160);
 
       const inspected = await rpc("tools/call", {
         name: "inspect_file",

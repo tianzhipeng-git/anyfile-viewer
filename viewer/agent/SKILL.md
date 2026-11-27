@@ -1,15 +1,15 @@
 ---
 name: anyfile
-description: Read-only inspection, structured extraction, and SQL querying for unfamiliar or proprietary local binary files via the `anyfile` CLI.
+description: Read-only inspection, structured extraction, SQL querying, and bounded PNG rendering for unfamiliar or proprietary local binary files via the `anyfile` CLI.
 ---
 
 # Using `anyfile` to Read Local Files
 
-When encountering an unfamiliar, binary, or proprietary local file (such as `.plist`, `.sqlite`, `.pst`, `.h5`, `.ofd`, `.dwg`, `.sav`, `.psd`, or extensionless blobs), always inspect first before reading.
+When encountering an unfamiliar, binary, or proprietary local file (such as `.plist`, `.sqlite`, `.pst`, `.h5`, `.ofd`, `.dwg`, `.sav`, `.psd`, `.exr`, or extensionless blobs), always inspect first before reading or rendering.
 
 ## Recommended Workflow
 
-1. **Inspect first** to identify the format, capabilities (`read`, `query`), metadata, and target IDs:
+1. **Inspect first** to identify the format, capabilities (`read`, `query`, `render`), metadata, and target IDs:
    ```bash
    anyfile inspect <path>
    ```
@@ -24,13 +24,20 @@ When encountering an unfamiliar, binary, or proprietary local file (such as `.pl
    anyfile query <path> --sql "SELECT * FROM <table> LIMIT 50"
    ```
    - Only read-only queries (`SELECT`, `WITH`, `EXPLAIN`, read-only `PRAGMA`) are permitted.
+4. **Render a visual preview** as a bounded PNG (max dimension defaults to `1600px`, hard cap `4096px`):
+   ```bash
+   anyfile render <path> [--target <target-id>] [--max-dim 1600] --out preview.png
+   ```
+   - Pure-pixel formats (e.g. `.psd`, `.exr`, `.hdr`) decode directly in Node without launching a browser.
+   - Visual/layout/CAD/3D formats (e.g. `.ofd`, `.dxf`, `.dwg`, `.pdf`) render offline via a local Chromium browser.
 
 ## Error Handling
 
 Errors are returned as structured JSON with a stable `code`:
-- `invalid-argument`: Fix the command or parameters (missing path, missing `--sql`, SQL syntax error).
+- `invalid-argument`: Fix the command or parameters (missing path, missing `--sql`, invalid `--max-dim`, SQL syntax error).
 - `access-denied`: Path does not exist or is outside allowed directories.
 - `invalid-file` / `encrypted-file`: File is corrupted, unsupported, or password-protected.
 - `target-not-found`: Pass a target `id` directly from `anyfile inspect`.
-- `unsupported-capability`: Check `capabilities` from `anyfile inspect` before calling `query`.
-- `timeout` / `resource-limit`: Narrow the target, lower `--max-bytes`, or add a `LIMIT` clause.
+- `unsupported-capability`: Check `capabilities` from `anyfile inspect` before calling `read` or `query`.
+- `runtime-unavailable`: Required local browser (Chrome/Edge/Brave/Chromium or `ANYFILE_BROWSER_PATH`), WebGL, or `/vendor/` runtime asset is unavailable.
+- `timeout` / `resource-limit`: Narrow the target, lower `--max-bytes` / `--max-dim`, or add a `LIMIT` clause.

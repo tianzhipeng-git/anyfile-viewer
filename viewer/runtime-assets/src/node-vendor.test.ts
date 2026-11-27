@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
-import { createNodeVendorAssets, sha256Hex } from "./node-vendor";
+import { createNodeVendorAssets, loadVendorManifest, parseVendorManifest, sha256Hex } from "./node-vendor";
 
 const tempDirs: string[] = [];
 afterEach(async () => {
@@ -39,5 +39,42 @@ describe("Node vendor assets", () => {
     await expect(vendor.bytes("../etc/1/passwd")).rejects.toThrow(/Invalid vendor asset path/);
     await expect(vendor.bytes("pkg/1.0.0/../../secret")).rejects.toThrow(/Invalid vendor asset path/);
     await expect(vendor.bytes("pkg/1.0.0/subdir")).rejects.toMatchObject({ code: "runtime-unavailable" });
+  });
+
+  it("parses, loads, and verifies structured VendorManifest files", async () => {
+    const content = "wasm-binary-data";
+    const hash = sha256Hex(new TextEncoder().encode(content));
+    const manifestJson = JSON.stringify({
+      schemaVersion: 1,
+      assets: {
+        "pkg/1.0.0/engine.wasm": { sha256: hash, bytes: content.length },
+      },
+    });
+    const dir = await root({
+      "pkg/1.0.0/engine.wasm": content,
+      "manifest.json": manifestJson,
+    });
+
+    const loaded = await loadVendorManifest(join(dir, "manifest.json"));
+    expect(loaded).toBeDefined();
+    expect(loaded?.assets["pkg/1.0.0/engine.wasm"]).toEqual({ sha256: hash, bytes: content.length });
+
+    const vendor = createNodeVendorAssets([dir], loaded);
+    expect(new TextDecoder().decode(await vendor.bytes("pkg/1.0.0/engine.wasm"))).toBe(content);
+
+    const badManifest = parseVendorManifest({
+      schemaVersion: 1,
+      assets: {
+        "pkg/1.0.0/engine.wasm": { sha256: "f".repeat(64), bytes: content.length },
+      },
+    });
+    const tamperedVendor = createNodeVendorAssets([dir], badManifest);
+    await expect(tamperedVendor.bytes("pkg/1.0.0/engine.wasm")).rejects.toMatchObject({ code: "runtime-unavailable" });
+
+    expect(() => parseVendorManifest({ schemaVersion: 2, assets: {} })).toThrow(/schemaVersion/i);
+    expect(() => parseVendorManifest({
+      schemaVersion: 1,
+      assets: { "pkg/1.0.0/engine.wasm": { sha256: "not-hex", bytes: 1 } },
+    })).toThrow(/sha256/i);
   });
 });

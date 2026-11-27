@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AnyFile Renderer Host</title>
+    <script>
+      globalThis.__ANYFILE_LOCAL_ORIGIN_FIRST__ = true;
+    </script>
+    <style>
+      :root {
+        --font-system: "SF Pro Text", "SF Pro Display", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        --font-monospace: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+        --background: oklch(1 0 0);
+        --foreground: oklch(0.225 0 0);
+        --card: oklch(1 0 0);
+        --card-foreground: oklch(0.145 0 0);
+        --popover: oklch(1 0 0);
+        --popover-foreground: oklch(0.145 0 0);
+        --primary: oklch(0.52 0.19 255);
+        --primary-foreground: oklch(0.985 0 0);
+        --secondary: oklch(0.97 0 0);
+        --secondary-foreground: oklch(0.205 0 0);
+        --muted: oklch(0.97 0 0);
+        --muted-foreground: oklch(0.556 0 0);
+        --accent: oklch(0.97 0 0);
+        --accent-foreground: oklch(0.205 0 0);
+        --destructive: oklch(0.577 0.245 27.325);
+        --support-partial: oklch(0.58 0.14 75);
+        --support-strong: oklch(0.5 0.15 150);
+        --border: oklch(0.922 0 0);
+        --input: oklch(0.922 0 0);
+        --ring: oklch(0.58 0.2 255);
+        --radius: 0.75rem;
+        --sidebar: oklch(0.985 0 0);
+        --sidebar-foreground: oklch(0.145 0 0);
+      }
+
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+
+      html, body, #viewer-root {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-system);
+      }
+
+      #viewer-root {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="viewer-root"></div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

@@ -55,6 +55,20 @@ const MCP_TOOLS = [
       required: ["path", "sql"],
     },
   },
+  {
+    name: "render_file",
+    description:
+      "Render a local file (image, document, CAD, 3D, etc.) to a bounded PNG image.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        path: { type: "string", description: "Path to the local file." },
+        target: { type: "string", description: "Optional target id (e.g. page or view) from inspect_file." },
+        maxDimension: { type: "number", description: "Max width or height in pixels (default 1600, max 4096)." },
+      },
+      required: ["path"],
+    },
+  },
 ] as const;
 
 export interface McpServerOptions {
@@ -130,6 +144,26 @@ export async function runMcpServer(options: McpServerOptions): Promise<void> {
         return {
           content: [
             { type: "text", text: `${result.content}\n\n---\n${JSON.stringify(meta)}` },
+          ],
+        };
+      }
+
+      if (name === "render_file") {
+        const result = await service.renderFile(path, {
+          target: typeof args.target === "string" ? args.target : undefined,
+          maxDimension: typeof args.maxDimension === "number" ? args.maxDimension : undefined,
+        });
+        const meta = {
+          pluginId: result.pluginId,
+          engine: result.engine,
+          width: result.width,
+          height: result.height,
+          ...(result.targetIgnored ? { targetIgnored: true } : {}),
+        };
+        return {
+          content: [
+            { type: "image", data: Buffer.from(result.png).toString("base64"), mimeType: "image/png" },
+            { type: "text", text: JSON.stringify(meta) },
           ],
         };
       }

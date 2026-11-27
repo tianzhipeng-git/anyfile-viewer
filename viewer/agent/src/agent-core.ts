@@ -9,13 +9,31 @@ import {
   type ReadResult,
 } from "@anyfile/viewer-protocol";
 import { normalizeMaxBytes, trimInspectPayload } from "./budget";
+import { ChromiumRenderer } from "./chromium-renderer";
+import { normalizeMaxDimension } from "./png";
 import { isWithinAllowedRoots, resolveAllowedFile } from "./security";
 import type { RouteResult, WorkerRequest } from "./worker";
-import { ExtractWorkerPool, type WorkerPoolOptions } from "./worker-pool";
+import { DEFAULT_RENDER_TIMEOUT_MS, ExtractWorkerPool, type WorkerPoolOptions } from "./worker-pool";
 
 export interface AgentServiceOptions extends WorkerPoolOptions {
   /** Whitelisted directories; all accessed paths must resolve inside one of these roots. */
   readonly allowedRoots: readonly string[];
+  /** Optional override for the built renderer-host static directory. */
+  readonly rendererHostDir?: string;
+}
+
+export interface RenderParams {
+  readonly target?: string;
+  readonly maxDimension?: number;
+}
+
+export interface RenderResult {
+  readonly png: Uint8Array;
+  readonly width: number;
+  readonly height: number;
+  readonly pluginId: string;
+  readonly engine: "node-pixel" | "chromium";
+  readonly targetIgnored?: boolean;
 }
 
 type FileRequest = Pick<WorkerRequest, "filePath" | "size" | "mtimeMs" | "workspaceRoot">;
@@ -23,10 +41,16 @@ type FileRequest = Pick<WorkerRequest, "filePath" | "size" | "mtimeMs" | "worksp
 export class AgentService {
   private readonly allowedRoots: readonly string[];
   private readonly pool: ExtractWorkerPool;
+  private readonly chromium: ChromiumRenderer;
 
   constructor(options: AgentServiceOptions) {
     this.allowedRoots = options.allowedRoots;
     this.pool = new ExtractWorkerPool(options);
+    this.chromium = new ChromiumRenderer({
+      persistent: options.persistent,
+      idleTimeoutMs: options.idleTimeoutMs,
+      rendererHostDir: options.rendererHostDir,
+    });
   }
 
   /** Checks the path against the allow-list, then routes it inside the worker. */
@@ -78,7 +102,46 @@ export class AgentService {
     return { ...result, pluginId: route.pluginId };
   }
 
+  async renderFile(inputPath: string, params: RenderParams = {}): Promise<RenderResult> {
+    const { file, route } = await this.open(inputPath);
+    const maxDimension = normalizeMaxDimension(params.maxDimension);
+
+    if (route.capabilities.includes("render")) {
+      const rendered = await this.pool.call<{ readonly png: Uint8Array; readonly width: number; readonly height: number }>(
+        {
+          op: "render",
+          pluginId: route.pluginId,
+          ...file,
+          renderParams: { target: params.target, maxDimension },
+        },
+        { timeoutMs: DEFAULT_RENDER_TIMEOUT_MS },
+      );
+      return {
+        png: rendered.png instanceof Uint8Array ? rendered.png : new Uint8Array(rendered.png),
+        width: rendered.width,
+        height: rendered.height,
+        pluginId: route.pluginId,
+        engine: "node-pixel",
+      };
+    }
+
+    const rendered = await this.chromium.render({
+      pluginId: route.pluginId,
+      filePath: file.filePath!,
+      size: file.size ?? 0,
+      mtimeMs: file.mtimeMs ?? 0,
+      workspaceRoot: file.workspaceRoot,
+      target: params.target,
+      maxDimension,
+    });
+    return {
+      ...rendered,
+      pluginId: route.pluginId,
+      engine: "chromium",
+    };
+  }
+
   async dispose(): Promise<void> {
-    await this.pool.dispose();
+    await Promise.all([this.pool.dispose(), this.chromium.dispose()]);
   }
 }

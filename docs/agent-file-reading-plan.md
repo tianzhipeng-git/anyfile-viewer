@@ -105,7 +105,7 @@ pnpm check && pnpm test viewer/agent
 
 ### 验收门禁与人工介入点
 - 自动门禁：`pnpm check && pnpm build`
-- **人工介入**：
+- **人工介入** 或直接用cloudflare的skill/cli完成
   1. 将 Web 侧原同源分发的 WASM（如 `h5wasm`、`readstat`、`mppgo` 等）补传至 `https://assets.anyfile.top/vendor/` 不可变路径；
   2. 在本机开启环境变量跑一次真实 Chromium / WebGL `render_file` 冒烟测试。
 

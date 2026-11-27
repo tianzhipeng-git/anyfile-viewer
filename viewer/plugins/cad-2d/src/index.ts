@@ -1,6 +1,7 @@
 import {
   ViewerError,
   selectMessages,
+  type CaptureImageOptions,
   type FileViewerPlugin,
   type OpenViewerContext,
   type ViewerController,
@@ -12,6 +13,7 @@ import { CAD_INPUT_LIMIT, readDxfText } from "./read";
 import { readCadScene } from "./parse";
 import { create3dViewer } from "@anyfile/rendering-3d";
 import { cadDocument } from "./adapter-3d";
+import { captureCadSceneImage } from "./capture";
 
 function copyFor(locale: OpenViewerContext["locale"]) {
   return selectMessages(locale, {
@@ -65,11 +67,22 @@ async function openCad2d(context: OpenViewerContext): Promise<ViewerController> 
     if (signal.aborted) throw abortError();
 
     reportProgress({ stage: "rendering", message: copy.rendering });
-    viewport = create3dViewer(container, cadDocument(scene), locale, file.name);
+    viewport = create3dViewer(container, cadDocument(scene), locale, file.name, () => {
+      if (!disposed && !signal.aborted) {
+        context.reportPreview?.({ outcome: "success", kind: "static" });
+      }
+    });
     root = viewport.root;
     signal.addEventListener("abort", dispose, { once: true });
     reportProgress({ stage: "ready", message: copy.ready });
-    return { dispose };
+    const captureImage = (options: CaptureImageOptions) => {
+      if (options.signal?.aborted) return Promise.reject(abortError());
+      if (disposed || signal.aborted) {
+        return Promise.reject(new ViewerError("open-failed", "CAD viewer has been disposed."));
+      }
+      return captureCadSceneImage(scene, options);
+    };
+    return { dispose, captureImage };
   } catch (error) {
     dispose();
     if (error instanceof ViewerError || (error instanceof DOMException && error.name === "AbortError")) {

@@ -3,6 +3,8 @@ import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { assertDualHostBundleIsolation } from "./check-dual-host-bundle.mjs";
+import { verifyVendorManifest } from "./vendor-manifest.mjs";
 
 const projectRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const rootPackage = JSON.parse(await readFile(join(projectRoot, "package.json"), "utf8"));
@@ -459,3 +461,10 @@ console.log(
 console.log(`DuckDB ${duckdbPackage.version}: jsDelivr, R2 and same-origin bundles remain version-aligned and deferred`);
 console.log(`LibRaw ${librawPackage.version}: same-origin Worker, pthread and WASM assets prepared; runtime remains deferred`);
 console.log(`libheif ${heifRuntimeVersion}: verified same-origin JS/WASM and license assets; runtime remains deferred`);
+
+const dualHostCheck = await assertDualHostBundleIsolation(projectRoot, archiveChunkContents);
+console.log(
+  `Dual-host bundle isolation: verified ${dualHostCheck.chunkCount} client chunks (0 @anyfile/agent, ${dualHostCheck.extractPackageCount} ./extract packages, or Node XML leaks)`,
+);
+const vendorManifestCheck = await verifyVendorManifest(join(projectRoot, "public/vendor"));
+console.log(`Vendor SHA-256 manifest: verified ${vendorManifestCheck.assetCount} assets under public/vendor/`);

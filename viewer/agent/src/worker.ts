@@ -22,11 +22,13 @@ import { createNodeVendorAssets } from "@anyfile/runtime-assets/node";
 import { normalizeMaxBytes, toAgentFileError, trimInspectPayload, trimReadResult } from "./budget";
 import { DiskBinarySource, openDiskFile } from "./disk-io";
 import { extractorLoaders } from "./generated/extractors";
+import { encodePng, normalizeMaxDimension, readPngDimensions } from "./png";
 import { createDiskWorkspaceReader } from "./security";
+import { loadDefaultVendorManifest } from "./vendor-manifest";
 
 export interface WorkerRequest {
   readonly id: number;
-  readonly op: "route" | "inspect" | "read" | "query" | "cancel";
+  readonly op: "route" | "inspect" | "read" | "query" | "render" | "cancel";
   readonly pluginId?: string;
   readonly filePath?: string;
   readonly size?: number;
@@ -35,6 +37,7 @@ export interface WorkerRequest {
   readonly workspaceRoot?: string;
   readonly readParams?: ReadParams;
   readonly queryParams?: QueryParams;
+  readonly renderParams?: { readonly target?: string; readonly maxDimension?: number };
 }
 
 export interface RouteResult {
@@ -53,7 +56,7 @@ export interface WorkerResponse {
   readonly error?: AgentFileError;
 }
 
-const vendor = createNodeVendorAssets();
+const vendor = createNodeVendorAssets(undefined, loadDefaultVendorManifest());
 const extractorCache = new Map<string, Promise<StructuredExtractor>>();
 const activeControllers = new Map<number, AbortController>();
 
@@ -195,6 +198,24 @@ async function runExtractor(req: WorkerRequest, extractor: StructuredExtractor, 
       maxBytes,
     });
     return trimReadResult(result, maxBytes);
+  }
+
+  if (req.op === "render") {
+    if (typeof extractor.renderImage !== "function") {
+      throw new AgentError(
+        "unsupported-capability",
+        `Plugin "${pluginId}" does not support pure-pixel rendering.`,
+        { pluginId },
+      );
+    }
+    const maxDimension = normalizeMaxDimension(req.renderParams?.maxDimension);
+    const rgba = await extractor.renderImage(context, {
+      target: req.renderParams?.target,
+      maxDimension,
+    });
+    const png = encodePng(rgba, maxDimension);
+    const { width, height } = readPngDimensions(png);
+    return { png, width, height };
   }
 
   throw new AgentError("unsupported-capability", `Unknown worker operation: ${String(req.op)}`, { pluginId });

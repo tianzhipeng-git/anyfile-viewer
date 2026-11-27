@@ -55,7 +55,7 @@ async function openOfd(context: OpenViewerContext): Promise<ViewerController> {
     context.container.append(view.root);
     reportProgress({ stage: "ready", message: copy.ready });
     context.reportPreview?.({ outcome: "success", kind: "static" });
-    return { dispose };
+    return { dispose, captureImage: view.captureImage };
   } catch (error) {
     dispose();
     if (signal.aborted || isViewerAbortError(error)) throw abortError();

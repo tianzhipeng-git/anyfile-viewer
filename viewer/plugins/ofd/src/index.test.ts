@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { ViewerError } from "@anyfile/viewer-protocol";
+import { AgentError, ViewerError } from "@anyfile/viewer-protocol";
 import { createViewerTestContext, truncated, type ViewerTestContext } from "@anyfile/viewer-test";
 
 import { ofdViewer } from "./index";
@@ -108,5 +108,112 @@ describe("OFD viewer", () => {
     await ofdViewer.open(active.context);
     active.abortController.abort();
     expect(active.container.childElementCount).toBe(0);
+  });
+
+  it("captures pure page PNGs respecting maxDimension, target page switching, and AbortSignal", async () => {
+    const captures: { width: number; height: number; texts: string[] }[] = [];
+    const getContextSpy = vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockImplementation(function (
+      this: HTMLCanvasElement,
+      kind: string,
+    ) {
+      if (kind !== "2d") return null;
+      const texts: string[] = [];
+      (this as HTMLCanvasElement & { __capturedTexts?: string[] }).__capturedTexts = texts;
+      const noop = () => {};
+      const gradient = { addColorStop: noop };
+      return {
+        save: noop,
+        restore: noop,
+        beginPath: noop,
+        rect: noop,
+        clip: noop,
+        fillRect: noop,
+        fill: noop,
+        stroke: noop,
+        translate: noop,
+        rotate: noop,
+        scale: noop,
+        transform: noop,
+        setTransform: noop,
+        getTransform: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0, multiply: () => ({ a: 1, b: 0, c: 0, d: 1, e: 0, f: 0 }) }),
+        setLineDash: noop,
+        createLinearGradient: () => gradient,
+        createRadialGradient: () => gradient,
+        createPattern: () => ({ setTransform: noop }),
+        drawImage: noop,
+        fillText: (text: string) => { texts.push(text); },
+        strokeText: noop,
+      } as unknown as CanvasRenderingContext2D;
+    });
+    const toBlobSpy = vi.spyOn(HTMLCanvasElement.prototype, "toBlob").mockImplementation(function (
+      this: HTMLCanvasElement,
+      cb: BlobCallback,
+      type?: string,
+    ) {
+      const texts = (this as HTMLCanvasElement & { __capturedTexts?: string[] }).__capturedTexts ?? [];
+      captures.push({ width: this.width, height: this.height, texts });
+      cb(new Blob([new Uint8Array([0x89, 0x50, 0x4e, 0x47])], { type: type ?? "image/png" }));
+    });
+
+    try {
+      // 1. Real invoice sample (210x140 mm, 3:2 aspect ratio) scaled down to maxDimension = 420.
+      const invoiceCtx = context(new File([sampleBytes("invoice-sample.ofd")], "invoice.ofd"));
+      const invoiceController = await ofdViewer.open(invoiceCtx.context);
+      expect(typeof invoiceController.captureImage).toBe("function");
+
+      const invoiceBlob = await invoiceController.captureImage!({ maxDimension: 420 });
+      expect(invoiceBlob).toBeInstanceOf(Blob);
+      expect(invoiceBlob.type).toBe("image/png");
+      expect(invoiceBlob.size).toBeGreaterThan(0);
+      expect(captures.at(-1)!.width).toBe(420);
+      expect(captures.at(-1)!.height).toBe(280);
+      await invoiceController.dispose();
+
+      // 2. Multi-page synthetic OFD: page 1 is 100x50 mm (2:1), page 2 is 210x297 mm (portrait).
+      const multiCtx = context(buildOfd());
+      const multiController = await ofdViewer.open(multiCtx.context);
+
+      const page1Blob = await multiController.captureImage!({ maxDimension: 400 });
+      expect(page1Blob.type).toBe("image/png");
+      expect(captures.at(-1)!.width).toBe(400);
+      expect(captures.at(-1)!.height).toBe(200);
+
+      const page2Blob = await multiController.captureImage!({ target: "page:2", maxDimension: 400 });
+      expect(page2Blob.type).toBe("image/png");
+      expect(captures.at(-1)!.height).toBe(400);
+      expect(captures.at(-1)!.width).toBeCloseTo(Math.round(400 * (210 / 297)), 0);
+      expect(captures.at(-1)!.texts.join("")).toContain("Secondpage");
+
+      // Plain 1-based page number target also works.
+      const page2Numeric = await multiController.captureImage!({ target: "2", maxDimension: 300 });
+      expect(page2Numeric.type).toBe("image/png");
+      expect(captures.at(-1)!.height).toBe(300);
+
+      // Invalid targets reject cleanly with target-not-found.
+      for (const badTarget of ["page:0", "page:3", "page:abc", "sheet:1"]) {
+        const error = await multiController.captureImage!({ target: badTarget, maxDimension: 400 }).catch((e: unknown) => e);
+        expect(error).toBeInstanceOf(AgentError);
+        expect((error as AgentError).code).toBe("target-not-found");
+      }
+
+      // Invalid maxDimension rejects cleanly.
+      const badDim = await multiController.captureImage!({ maxDimension: 0 }).catch((e: unknown) => e);
+      expect(badDim).toBeInstanceOf(AgentError);
+      expect((badDim as AgentError).code).toBe("invalid-argument");
+
+      // Pre-aborted signal rejects with AbortError.
+      const aborted = new AbortController();
+      aborted.abort();
+      await expect(
+        multiController.captureImage!({ maxDimension: 400, signal: aborted.signal }),
+      ).rejects.toMatchObject({ name: "AbortError" });
+
+      // Calling after dispose rejects cleanly.
+      await multiController.dispose();
+      await expect(multiController.captureImage!({ maxDimension: 400 })).rejects.toBeInstanceOf(ViewerError);
+    } finally {
+      getContextSpy.mockRestore();
+      toBlobSpy.mockRestore();
+    }
   });
 });

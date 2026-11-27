@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 import { Worker } from "node:worker_threads";
 import { AgentError } from "@anyfile/viewer-protocol";
 import type { WorkerRequest, WorkerResponse } from "./worker";
@@ -13,8 +15,15 @@ export interface WorkerPoolOptions {
   readonly idleTimeoutMs?: number;
 }
 
-const WORKER_URL = new URL("./worker.ts", import.meta.url);
+const IS_TS_RUNTIME = import.meta.url.endsWith(".ts");
+const WORKER_URL = (() => {
+  if (IS_TS_RUNTIME) return new URL("./worker.ts", import.meta.url);
+  const sibling = new URL("./worker.mjs", import.meta.url);
+  if (existsSync(fileURLToPath(sibling))) return sibling;
+  return new URL("../worker.mjs", import.meta.url);
+})();
 const TS_HOOKS_URL = new URL("./ts-hooks.mjs", import.meta.url);
+export const DEFAULT_RENDER_TIMEOUT_MS = 20_000;
 
 interface PendingCall {
   readonly resolve: (value: unknown) => void;
@@ -61,7 +70,7 @@ export class ExtractWorkerPool {
   private ensureWorker(): Worker {
     if (this.worker) return this.worker;
     const worker = new Worker(WORKER_URL, {
-      execArgv: ["--import", TS_HOOKS_URL.href],
+      execArgv: IS_TS_RUNTIME ? ["--import", TS_HOOKS_URL.href] : [],
       stdout: true,
       stderr: true,
       resourceLimits: {

@@ -3,7 +3,9 @@ import type { StructuredExtractor } from "@anyfile/viewer-protocol";
 
 export const extractorLoaders: Readonly<Record<string, () => Promise<StructuredExtractor>>> = {
   "apple-plist": async () => (await import("../../../plugins/plist/src/extract")).default,
+  "hdr-image": async () => (await import("../../../plugins/hdr-image/src/extract")).default,
   "outlook-pst": async () => (await import("../../../plugins/pst/src/extract")).default,
+  "photoshop-document": async () => (await import("../../../plugins/photoshop/src/extract")).default,
   "sqlite-database": async () => (await import("../../../plugins/sqlite/src/extract")).default,
   "statistical-data": async () => (await import("../../../plugins/stat-data/src/extract")).default,
 };

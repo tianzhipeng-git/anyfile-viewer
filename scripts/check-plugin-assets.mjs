@@ -52,7 +52,9 @@ async function walk(root) {
 }
 
 const runtimeFiles = [
-  ...(await walk(join(projectRoot, "public/vendor"))).filter((path) => !path.startsWith("public/vendor/licenses/")),
+  ...(await walk(join(projectRoot, "public/vendor"))).filter((path) => (
+    !path.startsWith("public/vendor/licenses/") && path !== "public/vendor/manifest.json"
+  )),
   ...(await walk(join(projectRoot, ".next/static/media"))).filter((path) => /\.wasm$|worker.*\.(?:js|mjs)$|pdf\.worker.*\.mjs$/i.test(path)),
 ];
 const gzipSizes = new Map();

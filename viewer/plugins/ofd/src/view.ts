@@ -1,4 +1,10 @@
-import type { Locale } from "@anyfile/viewer-protocol";
+import {
+  AgentError,
+  ViewerError,
+  abortError,
+  type CaptureImageOptions,
+  type Locale,
+} from "@anyfile/viewer-protocol";
 import {
   createPagedDocumentViewport,
   type PageSize,
@@ -133,8 +139,79 @@ export function createOfdView(fileName: string, locale: Locale, doc: OfdDocument
     copy: { noOutline: copy.noOutline, renderFailed: copy.renderFailed },
   });
 
+  const parsePageTarget = (target: string | undefined): number => {
+    const trimmed = target?.trim() ?? "";
+    if (!trimmed) return 0;
+    const match = /^(?:page:)?([1-9]\d*)$/.exec(trimmed);
+    const pageNumber = match ? Number(match[1]) : Number.NaN;
+    if (!Number.isInteger(pageNumber) || pageNumber < 1 || pageNumber > doc.pages.length) {
+      throw new AgentError("target-not-found", `OFD page target "${target}" is out of range (1..${doc.pages.length}).`);
+    }
+    return pageNumber - 1;
+  };
+
+  const captureImage = async (options: CaptureImageOptions): Promise<Blob> => {
+    if (options.signal?.aborted) throw abortError();
+    if (disposed || signal.aborted) {
+      throw new ViewerError("open-failed", "OFD viewer has been disposed.");
+    }
+    if (!Number.isFinite(options.maxDimension) || options.maxDimension < 1) {
+      throw new AgentError("invalid-argument", "maxDimension must be a positive number.");
+    }
+
+    const pageIndex = parsePageTarget(options.target);
+    const drawSignal =
+      options.signal && typeof AbortSignal.any === "function"
+        ? AbortSignal.any([signal, options.signal])
+        : (options.signal ?? signal);
+
+    const model = await page(pageIndex);
+    if (options.signal?.aborted) throw abortError();
+    if (disposed || signal.aborted) {
+      throw new ViewerError("open-failed", "OFD viewer has been disposed.");
+    }
+
+    const maxDim = Math.round(options.maxDimension);
+    const naturalWidth = Math.max(1, model.width * PX_PER_MM * 2);
+    const naturalHeight = Math.max(1, model.height * PX_PER_MM * 2);
+    const maxSide = Math.max(naturalWidth, naturalHeight);
+    let scale = maxSide > maxDim ? maxDim / maxSide : 1;
+    const pixels = naturalWidth * scale * naturalHeight * scale;
+    if (pixels > OFD_LIMITS.maxRenderPixels) {
+      scale *= Math.sqrt(OFD_LIMITS.maxRenderPixels / pixels);
+    }
+    const width = Math.max(1, Math.min(maxDim, Math.round(naturalWidth * scale)));
+    const height = Math.max(1, Math.min(maxDim, Math.round(naturalHeight * scale)));
+
+    const canvas = document.createElement("canvas");
+    try {
+      const rendered = await draw(pageIndex, canvas, width, height, drawSignal);
+      if (options.signal?.aborted) throw abortError();
+      if (disposed || signal.aborted) {
+        throw new ViewerError("open-failed", "OFD viewer has been disposed.");
+      }
+      if (!rendered) {
+        throw new ViewerError("open-failed", "Failed to render OFD page to canvas.");
+      }
+      return await new Promise<Blob>((resolve, reject) => {
+        if (typeof canvas.toBlob !== "function") {
+          reject(new ViewerError("unsupported-environment", "Canvas PNG export is unavailable."));
+          return;
+        }
+        canvas.toBlob((blob) => {
+          if (blob) resolve(blob);
+          else reject(new ViewerError("open-failed", "Failed to encode rendered OFD page as PNG."));
+        }, "image/png");
+      });
+    } finally {
+      canvas.width = 0;
+      canvas.height = 0;
+    }
+  };
+
   return {
     root: viewport.root,
+    captureImage,
     dispose() {
       viewport.dispose();
       disposed = true;

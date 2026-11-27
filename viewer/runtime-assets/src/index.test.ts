@@ -1,6 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { initializeRuntimeFromSources } from "./index";
+import {
+  initializeRuntimeFromSources,
+  isLocalOriginFirst,
+  setLocalOriginFirst,
+} from "./index";
+
+afterEach(() => {
+  setLocalOriginFirst(false);
+});
 
 describe("initializeRuntimeFromSources", () => {
   it("disposes a failed attempt before trying the next source", async () => {
@@ -58,5 +66,60 @@ describe("initializeRuntimeFromSources", () => {
       },
     })).rejects.toMatchObject({ name: "AbortError" });
     expect(dispose).toHaveBeenCalledOnce();
+  });
+
+  it("skips external CDN/R2 sources when local-origin-first mode is enabled", async () => {
+    expect(isLocalOriginFirst()).toBe(false);
+    setLocalOriginFirst(true);
+    expect(isLocalOriginFirst()).toBe(true);
+    expect((globalThis as { __ANYFILE_LOCAL_ORIGIN_FIRST__?: boolean }).__ANYFILE_LOCAL_ORIGIN_FIRST__).toBe(true);
+
+    const attempted: string[] = [];
+    const result = await initializeRuntimeFromSources({
+      signal: new AbortController().signal,
+      sources: [
+        { name: "jsDelivr", value: "https://cdn.jsdelivr.net/npm/pkg@1.0.0/index.js" },
+        { name: "R2", value: "https://assets.anyfile.top/vendor/pkg/1.0.0/index.js" },
+        { name: "local", value: "/vendor/pkg/1.0.0/index.js" },
+      ],
+      errorMessage: "unavailable",
+      async createAttempt(source) {
+        attempted.push(source.name);
+        return {
+          async initialize() {
+            return source.value;
+          },
+          dispose() {},
+        };
+      },
+    });
+
+    expect(result).toBe("/vendor/pkg/1.0.0/index.js");
+    expect(attempted).toEqual(["local"]);
+  });
+
+  it("recognizes relative URL sources in local-origin-first mode and does not fall back to external sources on failure", async () => {
+    (globalThis as { __ANYFILE_LOCAL_ORIGIN_FIRST__?: boolean }).__ANYFILE_LOCAL_ORIGIN_FIRST__ = true;
+    const attempted: string[] = [];
+
+    await expect(initializeRuntimeFromSources({
+      signal: new AbortController().signal,
+      sources: [
+        { name: "R2", value: "https://assets.anyfile.top/vendor/pkg/1.0.0/index.js" },
+        { name: "same-origin", value: "/vendor/pkg/1.0.0/index.js" },
+      ],
+      errorMessage: "local failed",
+      async createAttempt(source) {
+        attempted.push(source.name);
+        return {
+          async initialize(): Promise<never> {
+            throw new Error(`failed ${source.name}`);
+          },
+          dispose() {},
+        };
+      },
+    })).rejects.toMatchObject({ message: "local failed" });
+
+    expect(attempted).toEqual(["same-origin"]);
   });
 });

@@ -59,11 +59,11 @@ function getFlag(flags: Map<string, string[]>, key: string): string | undefined 
   return values?.[values.length - 1];
 }
 
-function parseMaxBytesFlag(raw: string | undefined): number | undefined {
+function parsePositiveIntFlag(raw: string | undefined, flagName: string): number | undefined {
   if (raw === undefined) return undefined;
   const parsed = Number(raw);
   if (!Number.isFinite(parsed) || parsed <= 0) {
-    throw new AgentError("invalid-argument", `Invalid --max-bytes value: ${raw}`);
+    throw new AgentError("invalid-argument", `Invalid --${flagName} value: ${raw}`);
   }
   return parsed;
 }
@@ -77,6 +77,7 @@ function printUsage(): void {
       "  inspect <path>                                        Identify format, capabilities, and targets",
       "  read <path> [--target t] [--cursor c] [--filter kw] [--max-bytes n] [--out file]",
       "  query <path> --sql <sql> [--target t] [--cursor c] [--max-bytes n] [--out file]",
+      "  render <path> [--target t] [--max-dim px] [--out file] Render bounded PNG image",
       "  cache <list|clear>                                    Inspect or clear local /vendor/ asset cache",
       "  mcp [--allow-dir <dir>...]                            Start MCP stdio server",
       "",
@@ -149,7 +150,7 @@ export async function runCli(argv: readonly string[]): Promise<number> {
     }
 
     if (command === "read") {
-      const maxBytes = parseMaxBytesFlag(getFlag(flags, "max-bytes"));
+      const maxBytes = parsePositiveIntFlag(getFlag(flags, "max-bytes"), "max-bytes");
       const result = await service.readFile(targetPath, {
         target: getFlag(flags, "target"),
         cursor: getFlag(flags, "cursor"),
@@ -182,7 +183,7 @@ export async function runCli(argv: readonly string[]): Promise<number> {
       if (!sql) {
         throw new AgentError("invalid-argument", "Missing required --sql option.");
       }
-      const maxBytes = parseMaxBytesFlag(getFlag(flags, "max-bytes"));
+      const maxBytes = parsePositiveIntFlag(getFlag(flags, "max-bytes"), "max-bytes");
       const result = await service.queryFile(targetPath, {
         sql,
         target: getFlag(flags, "target"),
@@ -205,6 +206,34 @@ export async function runCli(argv: readonly string[]): Promise<number> {
         process.stdout.write(result.content.endsWith("\n") ? result.content : `${result.content}\n`);
         if (result.nextCursor) {
           process.stderr.write(`nextCursor: ${result.nextCursor}\n`);
+        }
+      }
+      return 0;
+    }
+
+    if (command === "render") {
+      const maxDimension = parsePositiveIntFlag(getFlag(flags, "max-dim"), "max-dim");
+      const result = await service.renderFile(targetPath, {
+        target: getFlag(flags, "target"),
+        maxDimension,
+      });
+      const outPath = getFlag(flags, "out");
+      if (outPath) {
+        await writeFile(resolve(outPath), result.png);
+        const summary = {
+          out: resolve(outPath),
+          pluginId: result.pluginId,
+          engine: result.engine,
+          width: result.width,
+          height: result.height,
+          bytesWritten: result.png.byteLength,
+          ...(result.targetIgnored ? { targetIgnored: true } : {}),
+        };
+        process.stdout.write(`${JSON.stringify(summary, null, 2)}\n`);
+      } else {
+        process.stdout.write(result.png);
+        if (result.targetIgnored) {
+          process.stderr.write("Note: target selection is not supported by this plugin; rendered default view.\n");
         }
       }
       return 0;

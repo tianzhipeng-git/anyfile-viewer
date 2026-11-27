@@ -45,6 +45,7 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     "services/feedback/dist/**",
     "services/feedback/worker-configuration.d.ts",
+    "viewer/agent/dist/**",
     "**/.wrangler/**",
   ]),
 ]);
